@@ -1,0 +1,354 @@
+[
+  {
+    "id": "00_fool",
+    "name": "The Fool",
+    "persian_name": "احمق",
+    "category": "major",
+    "number": 0,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/00_Fool.jpg",
+    "meaning": {
+      "general": "شروع جدید، بی‌خبری، ماجراجویی، امید، خوش‌بینی",
+      "daily": "امروز روز خوبی برای شروع پروژه‌های جدید است. با امید و خوش‌بینی پیش بروید.",
+      "love": "عشق جدید در راه است، احساسات صادقانه و بی‌ریا",
+      "career": "فرصت‌های جدید شغلی، ریسک‌پذیری مثبت",
+      "health": "انرژی مثبت و سلامتی، روحیه شاد"
+    },
+    "keywords": ["شروع", "ماجراجویی", "بی‌خبری", "امید", "خوش‌بینی", "معصومیت"]
+  },
+  {
+    "id": "01_magician",
+    "name": "The Magician",
+    "persian_name": "جادوگر",
+    "category": "major",
+    "number": 1,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/01_Magician.jpg",
+    "meaning": {
+      "general": "قدرت، مهارت، اراده، خلاقیت، کنترل",
+      "daily": "امروز می‌توانید با مهارت خود مشکلات را حل کنید. از قدرت اراده خود استفاده کنید.",
+      "love": "عشق فعال و پرشور، کنترل احساسات",
+      "career": "استفاده از مهارت‌ها، موفقیت، خلاقیت",
+      "health": "انرژی مثبت و قدرت بدنی، کنترل سلامتی"
+    },
+    "keywords": ["قدرت", "مهارت", "اراده", "خلاقیت", "کنترل", "تمرکز"]
+  },
+  {
+    "id": "02_high_priestess",
+    "name": "The High Priestess",
+    "persian_name": "کاهنه بزرگ",
+    "category": "major",
+    "number": 2,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/02_High_Priestess.jpg",
+    "meaning": {
+      "general": "دانش درونی، شهود، اسرار، عقل، تعادل",
+      "daily": "به ندای درون خود گوش دهید. از دانش درونی خود استفاده کنید.",
+      "love": "عشق عمیق و معنوی، درک احساسات",
+      "career": "تصمیم‌گیری بر اساس شهود، دانش عمیق",
+      "health": "تعادل روحی و جسمی، آرامش درونی"
+    },
+    "keywords": ["دانش", "شهود", "اسرار", "عقل", "تعادل", "آرامش"]
+  },
+  {
+    "id": "03_empress",
+    "name": "The Empress",
+    "persian_name": "ملکه",
+    "category": "major",
+    "number": 3,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/03_Empress.jpg",
+    "meaning": {
+      "general": "مادری، باروری، خلاقیت، ثروت، زیبایی",
+      "daily": "امروز روز خلاقیت و باروری است. از مواهب زندگی لذت ببرید.",
+      "love": "عشق مادرانه، محبت، باروری",
+      "career": "خلاقیت در کار، موفقیت مادی",
+      "health": "سلامتی خوب، باروری، انرژی مثبت"
+    },
+    "keywords": ["مادری", "باروری", "خلاقیت", "ثروت", "زیبایی", "محبت"]
+  },
+  {
+    "id": "04_emperor",
+    "name": "The Emperor",
+    "persian_name": "امپراتور",
+    "category": "major",
+    "number": 4,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/04_Emperor.jpg",
+    "meaning": {
+      "general": "قدرت، اقتدار، کنترل، ساختار، پدری",
+      "daily": "امروز با اقتدار و قدرت تصمیم بگیرید. ساختار و نظم ایجاد کنید.",
+      "love": "عشق محکم و پایدار، مسئولیت",
+      "career": "رهبری، قدرت، موفقیت",
+      "health": "قدرت بدنی، کنترل سلامتی"
+    },
+    "keywords": ["قدرت", "اقتدار", "کنترل", "ساختار", "پدری", "رهبری"]
+  },
+  {
+    "id": "05_hierophant",
+    "name": "The Hierophant",
+    "persian_name": "کاهن",
+    "category": "major",
+    "number": 5,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/05_Hierophant.jpg",
+    "meaning": {
+      "general": "آموزش، سنت، مذهب، اخلاق، راهنمایی",
+      "daily": "امروز از تجربیات دیگران بیاموزید. به سنت‌ها احترام بگذارید.",
+      "love": "عشق سنتی و محترم، ازدواج",
+      "career": "آموزش، مشاوره، کار گروهی",
+      "health": "سلامتی روحی، تعادل معنوی"
+    },
+    "keywords": ["آموزش", "سنت", "مذهب", "اخلاق", "راهنمایی", "مشاوره"]
+  },
+  {
+    "id": "06_lovers",
+    "name": "The Lovers",
+    "persian_name": "عشاق",
+    "category": "major",
+    "number": 6,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/06_Lovers.jpg",
+    "meaning": {
+      "general": "عشق، انتخاب، هماهنگی، اتحاد، تصمیم",
+      "daily": "امروز روز انتخاب‌های مهم است. بین عقل و احساس تعادل برقرار کنید.",
+      "love": "عشق واقعی، اتحاد، هماهنگی",
+      "career": "همکاری، انتخاب شغل، تعادل",
+      "health": "تعادل روحی و جسمی، عشق به خود"
+    },
+    "keywords": ["عشق", "انتخاب", "هماهنگی", "اتحاد", "تصمیم", "تعادل"]
+  },
+  {
+    "id": "07_chariot",
+    "name": "The Chariot",
+    "persian_name": "ارابه",
+    "category": "major",
+    "number": 7,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/07_Chariot.jpg",
+    "meaning": {
+      "general": "پیروزی، اراده، کنترل، پیشرفت، سفر",
+      "daily": "امروز با اراده قوی به سوی هدف خود حرکت کنید. پیروزی در انتظار است.",
+      "love": "عشق پرانرژی، پیشرفت در رابطه",
+      "career": "پیروزی در کار، پیشرفت شغلی",
+      "health": "انرژی بالا، کنترل سلامتی"
+    },
+    "keywords": ["پیروزی", "اراده", "کنترل", "پیشرفت", "سفر", "انرژی"]
+  },
+  {
+    "id": "08_strength",
+    "name": "Strength",
+    "persian_name": "قدرت",
+    "category": "major",
+    "number": 8,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/08_Strength.jpg",
+    "meaning": {
+      "general": "قدرت درونی، شجاعت، صبر، کنترل احساسات",
+      "daily": "امروز از قدرت درونی خود استفاده کنید. با صبر و شجاعت عمل کنید.",
+      "love": "عشق قوی و پایدار، صبر در عشق",
+      "career": "قدرت در کار، کنترل موقعیت",
+      "health": "قدرت بدنی، کنترل ذهنی"
+    },
+    "keywords": ["قدرت", "شجاعت", "صبر", "کنترل", "احساسات", "درونی"]
+  },
+  {
+    "id": "09_hermit",
+    "name": "The Hermit",
+    "persian_name": "عابد",
+    "category": "major",
+    "number": 9,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/09_Hermit.jpg",
+    "meaning": {
+      "general": "تنهایی، جستجو، خرد، راهنمایی، تأمل",
+      "daily": "امروز وقت تنهایی و تأمل است. به دنبال حقیقت باشید.",
+      "love": "عشق معنوی، جستجوی عشق واقعی",
+      "career": "مشاوره، راهنمایی، کار مستقل",
+      "health": "سلامتی روحی، آرامش درونی"
+    },
+    "keywords": ["تنهایی", "جستجو", "خرد", "راهنمایی", "تأمل", "معنوی"]
+  },
+  {
+    "id": "10_wheel_of_fortune",
+    "name": "Wheel of Fortune",
+    "persian_name": "چرخ تقدیر",
+    "category": "major",
+    "number": 10,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/10_Wheel_of_Fortune.jpg",
+    "meaning": {
+      "general": "تغییر، شانس، چرخه زندگی، تقدیر",
+      "daily": "امروز روز تغییرات است. شانس با شماست.",
+      "love": "تغییر در عشق، شانس عاشقانه",
+      "career": "تغییر شغل، شانس کاری",
+      "health": "تغییر در سلامتی، بهبود"
+    },
+    "keywords": ["تغییر", "شانس", "چرخه", "تقدیر", "فرصت", "دگرگونی"]
+  },
+  {
+    "id": "11_justice",
+    "name": "Justice",
+    "persian_name": "عدالت",
+    "category": "major",
+    "number": 11,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/11_Justice.jpg",
+    "meaning": {
+      "general": "عدالت، تعادل، حقیقت، تصمیم عادلانه",
+      "daily": "امروز با عدالت و انصاف عمل کنید. تصمیمات عادلانه بگیرید.",
+      "love": "عشق عادلانه، تعادل در رابطه",
+      "career": "عدالت در کار، تصمیمات منصفانه",
+      "health": "تعادل در سلامتی، عدالت"
+    },
+    "keywords": ["عدالت", "تعادل", "حقیقت", "انصاف", "تصمیم", "منصفانه"]
+  },
+  {
+    "id": "12_hanged_man",
+    "name": "The Hanged Man",
+    "persian_name": "مرد آویزان",
+    "category": "major",
+    "number": 12,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/12_Hanged_Man.jpg",
+    "meaning": {
+      "general": "فداکاری، تغییر دیدگاه، انتظار، تعلیق",
+      "daily": "امروز دیدگاه خود را تغییر دهید. صبر کنید و فداکاری کنید.",
+      "love": "فداکاری در عشق، تغییر نگرش",
+      "career": "تغییر دیدگاه شغلی، انتظار",
+      "health": "صبر در درمان، تغییر روش"
+    },
+    "keywords": ["فداکاری", "تغییر", "دیدگاه", "انتظار", "تعلیق", "نگرش"]
+  },
+  {
+    "id": "13_death",
+    "name": "Death",
+    "persian_name": "مرگ",
+    "category": "major",
+    "number": 13,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/13_Death.jpg",
+    "meaning": {
+      "general": "پایان، تغییر، دگرگونی، تولد دوباره",
+      "daily": "امروز پایان چیزی و شروع چیز جدیدی است. تغییرات مثبت در راه است.",
+      "love": "پایان رابطه قدیمی، شروع عشق جدید",
+      "career": "تغییر شغل، پایان دوره کاری",
+      "health": "تغییر در سلامتی، بهبود"
+    },
+    "keywords": ["پایان", "تغییر", "دگرگونی", "تولد", "دوباره", "تحول"]
+  },
+  {
+    "id": "14_temperance",
+    "name": "Temperance",
+    "persian_name": "اعتدال",
+    "category": "major",
+    "number": 14,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/14_Temperance.jpg",
+    "meaning": {
+      "general": "تعادل، اعتدال، صبر، هماهنگی، شفا",
+      "daily": "امروز تعادل و اعتدال را رعایت کنید. صبر داشته باشید.",
+      "love": "تعادل در عشق، هماهنگی",
+      "career": "تعادل در کار، هماهنگی",
+      "health": "تعادل در سلامتی، شفا"
+    },
+    "keywords": ["تعادل", "اعتدال", "صبر", "هماهنگی", "شفا", "آرامش"]
+  },
+  {
+    "id": "15_devil",
+    "name": "The Devil",
+    "persian_name": "شیطان",
+    "category": "major",
+    "number": 15,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/15_Devil.jpg",
+    "meaning": {
+      "general": "وسوسه، وابستگی، مادیات، آزادی",
+      "daily": "امروز مراقب وسوسه‌ها باشید. از وابستگی‌های منفی رها شوید.",
+      "love": "عشق وسوسه‌انگیز، وابستگی",
+      "career": "وسوسه در کار، وابستگی شغلی",
+      "health": "وسوسه‌های ناسالم، وابستگی"
+    },
+    "keywords": ["وسوسه", "وابستگی", "مادیات", "آزادی", "منفی", "رها"]
+  },
+  {
+    "id": "16_tower",
+    "name": "The Tower",
+    "persian_name": "برج",
+    "category": "major",
+    "number": 16,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/16_Tower.jpg",
+    "meaning": {
+      "general": "فاجعه، تغییر ناگهانی، آزادی، روشنگری",
+      "daily": "امروز تغییرات ناگهانی ممکن است رخ دهد. از این تغییرات درس بگیرید.",
+      "love": "فاجعه در عشق، تغییر ناگهانی",
+      "career": "فاجعه کاری، تغییر شغل ناگهانی",
+      "health": "بحران سلامتی، بهبود ناگهانی"
+    },
+    "keywords": ["فاجعه", "تغییر", "ناگهانی", "آزادی", "روشنگری", "بحران"]
+  },
+  {
+    "id": "17_star",
+    "name": "The Star",
+    "persian_name": "ستاره",
+    "category": "major",
+    "number": 17,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/17_Star.jpg",
+    "meaning": {
+      "general": "امید، الهام، آرامش، شفا، راهنمایی",
+      "daily": "امروز روز امید و الهام است. به ستاره‌ها نگاه کنید.",
+      "love": "امید در عشق، الهام عاشقانه",
+      "career": "امید در کار، الهام کاری",
+      "health": "شفا، امید در سلامتی"
+    },
+    "keywords": ["امید", "الهام", "آرامش", "شفا", "راهنمایی", "ستاره"]
+  },
+  {
+    "id": "18_moon",
+    "name": "The Moon",
+    "persian_name": "ماه",
+    "category": "major",
+    "number": 18,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/18_Moon.jpg",
+    "meaning": {
+      "general": "شهود، رویا، توهم، اسرار، احساسات",
+      "daily": "امروز به شهود خود اعتماد کنید. مراقب توهمات باشید.",
+      "love": "عشق رویایی، احساسات عمیق",
+      "career": "شهود در کار، رویاهای شغلی",
+      "health": "سلامتی روحی، رویاها"
+    },
+    "keywords": ["شهود", "رویا", "توهم", "اسرار", "احساسات", "ماه"]
+  },
+  {
+    "id": "19_sun",
+    "name": "The Sun",
+    "persian_name": "خورشید",
+    "category": "major",
+    "number": 19,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/19_Sun.jpg",
+    "meaning": {
+      "general": "شادی، موفقیت، انرژی، خوش‌بختی، روشنایی",
+      "daily": "امروز روز شادی و موفقیت است. انرژی مثبت دارید.",
+      "love": "عشق شاد، خوش‌بختی عاشقانه",
+      "career": "موفقیت کاری، شادی در کار",
+      "health": "سلامتی عالی، انرژی مثبت"
+    },
+    "keywords": ["شادی", "موفقیت", "انرژی", "خوش‌بختی", "روشنایی", "خورشید"]
+  },
+  {
+    "id": "20_judgement",
+    "name": "Judgement",
+    "persian_name": "داوری",
+    "category": "major",
+    "number": 20,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/20_Judgement.jpg",
+    "meaning": {
+      "general": "داوری، بیداری، احیا، فراخوانی، تغییر",
+      "daily": "امروز وقت داوری و بیداری است. به ندای درون گوش دهید.",
+      "love": "داوری در عشق، بیداری عاشقانه",
+      "career": "داوری کاری، بیداری شغلی",
+      "health": "بیداری سلامتی، احیا"
+    },
+    "keywords": ["داوری", "بیداری", "احیا", "فراخوانی", "تغییر", "ندای"]
+  },
+  {
+    "id": "21_world",
+    "name": "The World",
+    "persian_name": "دنیا",
+    "category": "major",
+    "number": 21,
+    "image_url": "/images/entertainment/fortune-telling/tarot/images/deck/21_World.jpg",
+    "meaning": {
+      "general": "کمال، موفقیت، سفر، اتحاد، پایان",
+      "daily": "امروز روز کمال و موفقیت است. به هدف خود رسیده‌اید.",
+      "love": "کمال در عشق، موفقیت عاشقانه",
+      "career": "کمال کاری، موفقیت شغلی",
+      "health": "کمال سلامتی، موفقیت"
+    },
+    "keywords": ["کمال", "موفقیت", "سفر", "اتحاد", "پایان", "دنیا"]
+  }
+] 

@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://zareoon.ir/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /tmp/
+Disallow: /logs/
+
+# Allow important pages
+Allow: /
+Disallow: /news/
+Disallow: /categories/
+Allow: /tags/
+Allow: /agencies/
+Allow: /about/
+Allow: /contact/ 
