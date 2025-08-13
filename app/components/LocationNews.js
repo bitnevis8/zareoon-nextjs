@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { API_ENDPOINTS } from '../config/api';
 
 // تابع محاسبه زمان نسبی
@@ -131,13 +132,13 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
             <div className="flex items-start space-x-4 space-x-reverse">
               {article.imageUrl && (
                 <div className="flex-shrink-0">
-                  <img
+                  <Image
                     src={article.imageUrl}
                     alt={article.title}
+                    width={96}
+                    height={96}
+                    unoptimized
                     className="w-24 h-24 object-cover rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-300"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
                   />
                 </div>
               )}

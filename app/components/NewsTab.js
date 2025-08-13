@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const NewsTab = ({ locationName, locationId, locationDisplayName }) => {
   const [articles, setArticles] = useState([]);
@@ -148,9 +149,12 @@ const NewsTab = ({ locationName, locationId, locationDisplayName }) => {
             {articles.slice(0, 6).map((article) => (
               <div key={article.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                 {article.imageUrl && (
-                  <img 
+                  <Image 
                     src={article.imageUrl} 
                     alt={article.title}
+                    width={800}
+                    height={320}
+                    unoptimized
                     className="w-full h-32 object-cover rounded mb-3"
                   />
                 )}

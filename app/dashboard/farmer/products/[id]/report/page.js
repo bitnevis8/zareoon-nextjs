@@ -42,7 +42,7 @@ export default function ProductReportPage({ params }) {
   }, [productId]);
 
   // ثابت‌ها و نرمال‌سازی درجه‌ها برای گزارش‌دهی دقیق
-  const GRADE_COLUMNS = ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"];
+  const GRADE_COLUMNS = useMemo(() => ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"], []);
   const normalizeGrade = (gradeValue) => {
     const value = (gradeValue || "").toString().trim();
     if (["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"].includes(value)) return value;
@@ -117,7 +117,7 @@ export default function ProductReportPage({ params }) {
       available: r.total - r.reserved,
       name: userIdToName.get(r.farmerId) || `#${r.farmerId}`,
     }));
-  }, [filteredLots, userIdToName]);
+  }, [filteredLots, userIdToName, GRADE_COLUMNS]);
 
   return (
     <div className="p-4 space-y-4">

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AsyncSelect from "react-select/async";
 import { API_ENDPOINTS } from "@/app/config/api";
@@ -13,7 +13,7 @@ export default function AttributeEditPage() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ scope: "category", categoryId: "", productId: "", name: "", type: "text", options: [], optionsInput: "" });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const [ri, rc, rp] = await Promise.all([
       fetch(API_ENDPOINTS.farmer.attributeDefinitions.getById(id), { cache: "no-store" }),
       fetch(API_ENDPOINTS.farmer.products.getAll + '?isOrderable=false', { cache: "no-store" }),
@@ -37,9 +37,9 @@ export default function AttributeEditPage() {
         optionsInput: "",
       });
     }
-  };
+  }, [id]);
 
-  useEffect(() => { if (Number.isFinite(id)) load(); }, [id]);
+  useEffect(() => { if (Number.isFinite(id)) load(); }, [load]);
 
   const save = async (e) => {
     e.preventDefault();

@@ -46,7 +46,7 @@ export default function CatalogItemPage({ params }) {
 
   // Inventory summary for this product (no farmer names)
   const productIdNum = Number(id);
-  const GRADE_COLUMNS = ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"];
+  const GRADE_COLUMNS = useMemo(() => ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"], []);
   const normalizeGrade = (val) => {
     const v = (val || "").toString().trim();
     if (["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"].includes(v)) return v;
@@ -74,7 +74,7 @@ export default function CatalogItemPage({ params }) {
     const arr = GRADE_COLUMNS.filter(g => map.has(g)).map(g => ({ ...map.get(g), available: map.get(g).total - map.get(g).reserved }));
     for (const [k, v] of map.entries()) if (!GRADE_COLUMNS.includes(k)) arr.push({ ...v, available: v.total - v.reserved });
     return arr;
-  }, [filteredLots]);
+  }, [filteredLots, GRADE_COLUMNS]);
   const availableGrades = useMemo(() => byGrade.map(g => g.grade), [byGrade]);
   // set default selected grade when list changes
   useEffect(() => {

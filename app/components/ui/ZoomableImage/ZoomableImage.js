@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 export default function ZoomableImage({ src, alt, className, thumbnailClassName }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,9 +33,12 @@ export default function ZoomableImage({ src, alt, className, thumbnailClassName 
     <>
       {/* Thumbnail Image */}
       <div className="relative cursor-zoom-in" onClick={openModal}>
-        <img 
+        <Image 
           src={src} 
           alt={alt}
+          width={800}
+          height={600}
+          unoptimized
           className={`${thumbnailClassName || className} transition-transform hover:scale-105`}
         />
         {/* Zoom Icon Overlay */}
@@ -67,11 +71,13 @@ export default function ZoomableImage({ src, alt, className, thumbnailClassName 
           </div>
 
           {/* Full Size Image */}
-          <div className="relative max-w-full max-h-full animate-in fade-in duration-300">
-            <img 
+          <div className="relative w-[90vw] h-[80vh] animate-in fade-in duration-300">
+            <Image 
               src={src} 
               alt={alt}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              fill
+              unoptimized
+              className="object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
           </div>

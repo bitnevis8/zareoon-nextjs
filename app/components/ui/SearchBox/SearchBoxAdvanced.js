@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export default function SearchBoxAdvanced() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,7 +207,7 @@ export default function SearchBoxAdvanced() {
 
       {/* Simple Categories Link */}
       <div className="mt-4 flex justify-center">
-        <a
+        <Link
           href="/"
           className=" w-44 flex justify-center items-center px-4 py-2 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:text-green-700 transition-colors duration-200"
         >
@@ -215,7 +216,7 @@ export default function SearchBoxAdvanced() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
           </svg>
            دسته‌بندی ساده
-        </a>
+        </Link>
       </div>
 
       {/* Filtered Articles Results */}
@@ -237,7 +238,7 @@ export default function SearchBoxAdvanced() {
               <ul className="space-y-2 text-right">
                 {filteredArticles.map((article) => (
                   <li key={article.id}>
-                <a
+                <Link
                   href={`/`}
                       className="flex items-center gap-3 hover:bg-blue-50 rounded p-2 transition-colors"
                     >
@@ -247,7 +248,7 @@ export default function SearchBoxAdvanced() {
                           <span className="text-gray-500 font-normal ml-2">| {article.agency.name}</span>
                         )}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { API_ENDPOINTS } from '../../config/api';
 // Removed LocationNews box
@@ -42,7 +42,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
   };
 
   // تابع دریافت اطلاعات ویکی‌پدیا و Wikidata
-  const fetchWikiData = async () => {
+  const fetchWikiData = useCallback(async () => {
     if (!locationData) return;
     
     setWikiLoading(true);
@@ -63,7 +63,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
     } finally {
       setWikiLoading(false);
     }
-  };
+  }, [locationData]);
 
   useEffect(() => {
     const fetchChildren = async () => {
@@ -83,7 +83,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
 
     fetchChildren();
     fetchWikiData();
-  }, [locationData]);
+  }, [locationData, fetchWikiData]);
 
   if (!locationData) {
     return (

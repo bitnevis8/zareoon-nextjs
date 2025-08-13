@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import MobileMenu from '../../MobileMenu';
 import AuthButtons from '../../AuthButtons';
 
@@ -12,10 +13,13 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3" prefetch={true}>
-              <img 
+              <Image 
                 src="/images/logo.png" 
                 alt="لوگو تگانه" 
+                width={48}
+                height={48}
                 className="w-12 h-12 object-contain border border-slate-200 rounded"
+                priority
               />
               <div className="block">
                 <h1 className="text-lg sm:text-2xl font-bold text-slate-800 bg-clip-text">

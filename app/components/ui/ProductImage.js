@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import Image from "next/image";
 
 const DEFAULT_EXTS = [".webp", ".jpg", ".jpeg", ".png", ".svg"];
 
@@ -18,8 +19,7 @@ export default function ProductImage({ slug, imageUrl, alt = "", width = 96, hei
   const src = candidates[idx] || "/file.svg";
 
   return (
-    // Using <img> to allow dynamic fallback without Next Image domain config
-    <img
+    <Image
       src={src}
       alt={alt}
       width={width}
@@ -28,7 +28,7 @@ export default function ProductImage({ slug, imageUrl, alt = "", width = 96, hei
       onError={() => {
         if (idx < candidates.length - 1) setIdx(idx + 1);
       }}
-      loading="lazy"
+      unoptimized
     />
   );
 }

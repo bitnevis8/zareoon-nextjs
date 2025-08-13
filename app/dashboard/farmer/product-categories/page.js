@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function ProductCategoriesPage() {
@@ -9,13 +9,13 @@ export default function ProductCategoriesPage() {
   const [sortBy, setSortBy] = useState('displayOrder');
   const [sortOrder, setSortOrder] = useState('ASC');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const url = `${API_ENDPOINTS.farmer.productCategories.getAll}?sortBy=${encodeURIComponent(sortBy)}&sortOrder=${encodeURIComponent(sortOrder)}`;
     const res = await fetch(url, { cache: "no-store" });
     const data = await res.json();
     setItems(data.data || []);
-  };
-  useEffect(() => { load(); }, [sortBy, sortOrder]);
+  }, [sortBy, sortOrder]);
+  useEffect(() => { load(); }, [load]);
 
   const create = async (e) => {
     e.preventDefault();
