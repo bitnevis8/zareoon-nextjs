@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/app/config/api';
 
 export default function EditRolePage({ params }) {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function EditRolePage({ params }) {
   const fetchRole = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_ENDPOINTS.roles.getOne}/${id}`, {
+      const response = await fetch(API_ENDPOINTS.roles.getById(id), {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
@@ -68,7 +68,7 @@ export default function EditRolePage({ params }) {
     
     try {
       setSaving(true);
-      const response = await fetch(`${API_ENDPOINTS.roles.update}/${id}`, {
+      const response = await fetch(API_ENDPOINTS.roles.update(id), {
         method: 'PUT',
         credentials: 'include',
         headers: {
