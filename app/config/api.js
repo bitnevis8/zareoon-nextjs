@@ -75,6 +75,21 @@ export const API_ENDPOINTS = {
     resendEmailCode: `${API_BASE_URL}/user/auth/resend-code/email`,
     me: `${API_BASE_URL}/user/auth/me`,
     logout: `${API_BASE_URL}/user/auth/logout`,
+    clearSessions: `${API_BASE_URL}/user/auth/clear-sessions`,
+  },
+  // File Upload endpoints
+  fileUpload: {
+    base: `${API_BASE_URL}/file-upload`,
+    upload: `${API_BASE_URL}/file-upload/upload`,
+    uploadAvatar: `${API_BASE_URL}/file-upload/upload/avatar`,
+    uploadUserDocument: `${API_BASE_URL}/file-upload/upload/user-document`,
+    getFile: (id) => `${API_BASE_URL}/file-upload/file/${id}`,
+    deleteFile: (id) => `${API_BASE_URL}/file-upload/file/${id}`,
+    deleteFileByUrl: `${API_BASE_URL}/file-upload/file`,
+    getUserFiles: `${API_BASE_URL}/file-upload/user-files`,
+    getUserFilesByType: (fileType) => `${API_BASE_URL}/file-upload/user-files/${fileType}`,
+    getFilesByModule: (module) => `${API_BASE_URL}/file-upload/module/${module}`,
+    initializeDirectories: `${API_BASE_URL}/file-upload/init-directories`,
   },
   // مقالات - حذف شده: برای سازگاری موقت، مسیرهای خنثی
   articles: {

@@ -3,17 +3,21 @@ import { useEffect, useMemo, useState, use as usePromise } from "react";
 import ProductImage from "@/app/components/ui/ProductImage";
 import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { useCallback } from "react";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function CatalogItemPage({ params }) {
   // Next.js 15: params is a Promise; unwrap with React.use()
   const { id } = usePromise(params);
+  const auth = useAuth();
+  const userPhone = auth?.user?.mobile || auth?.user?.phone || null;
   const [item, setItem] = useState(null);
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lots, setLots] = useState([]);
-  const [orderQty, setOrderQty] = useState("");
-  const [orderGrade, setOrderGrade] = useState("");
-  const [placing, setPlacing] = useState(false);
+  // سفارش‌دهی به‌ازای هر بار در ردیف‌ها انجام می‌شود
+  const [lotQtyById, setLotQtyById] = useState({});
+  const [placingLotId, setPlacingLotId] = useState(null);
   const [orderMsg, setOrderMsg] = useState("");
   const [orderMsgType, setOrderMsgType] = useState("info"); // 'success' | 'error' | 'info'
   const statusToFa = {
@@ -21,6 +25,87 @@ export default function CatalogItemPage({ params }) {
     harvested: "برداشت‌شده",
     reserved: "رزرو شده",
     sold: "فروخته شده",
+  };
+
+  // Media state for lots
+  const [lotMediaCounts, setLotMediaCounts] = useState(new Map()); // lotId -> { images, videos }
+  const [productMediaCounts, setProductMediaCounts] = useState({ images: 0, videos: 0 });
+  const [productMediaPreview, setProductMediaPreview] = useState([]); // first two media items
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const [mediaLot, setMediaLot] = useState(null); // if null and context is product
+  const [mediaTab, setMediaTab] = useState('images'); // 'images' | 'videos'
+  const [mediaItems, setMediaItems] = useState([]);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [mediaContext, setMediaContext] = useState({ module: 'inventory', entityId: null });
+  const [lotMediaPreview, setLotMediaPreview] = useState(new Map()); // lotId -> first two media items
+
+  // Cart info for this product
+  const [cartTotalQty, setCartTotalQty] = useState(0);
+  const [cartUnit, setCartUnit] = useState('');
+  const fetchCart = useCallback(async () => {
+    try {
+      const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store', credentials: 'include' });
+      const j = await r.json();
+      const items = j?.data?.items || [];
+      let sum = 0; let unit = cartUnit;
+      for (const it of items) {
+        if (Number(it.productId) === Number(id)) {
+          const q = parseFloat(it.quantity || 0);
+          if (Number.isFinite(q)) sum += q;
+          if (!unit && it.unit) unit = it.unit;
+        }
+      }
+      setCartTotalQty(sum);
+      setCartUnit(unit || item?.unit || '');
+    } catch {}
+  }, [API_ENDPOINTS?.farmer?.cart?.base, id, cartUnit, item?.unit]);
+
+  const loadLotMediaCounts = useCallback(async (lotId) => {
+    try {
+      const r = await fetch(`${API_ENDPOINTS.fileUpload.getFilesByModule('inventory')}?entityId=${encodeURIComponent(lotId)}`, { cache: 'no-store' });
+      const j = await r.json();
+      if (j?.success) {
+        const arr = Array.isArray(j.data) ? j.data : [];
+        const images = arr.filter(it => String(it.mimeType||'').startsWith('image/')).length;
+        const videos = arr.filter(it => String(it.mimeType||'').startsWith('video/')).length;
+        setLotMediaCounts(prev => new Map(prev).set(lotId, { images, videos }));
+        // pick first two for preview (prefer images first)
+        const sorted = [...arr].sort((a,b)=>{
+          const ai = String(a.mimeType||'').startsWith('image/') ? 0 : 1;
+          const bi = String(b.mimeType||'').startsWith('image/') ? 0 : 1;
+          return ai - bi;
+        }).slice(0,2);
+        setLotMediaPreview(prev => new Map(prev).set(lotId, sorted));
+      }
+    } catch {}
+  }, []);
+
+  const openMediaModal = async ({ module, entityId, lot = null, tab }) => {
+    setMediaLot(lot);
+    setMediaContext({ module, entityId });
+    setMediaTab(tab);
+    setMediaItems([]);
+    setMediaLoading(true);
+    setMediaOpen(true);
+    try {
+      const r = await fetch(`${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?entityId=${encodeURIComponent(entityId)}`, { cache: 'no-store', credentials: 'include' });
+      const j = await r.json();
+      const all = (j?.success && Array.isArray(j.data)) ? j.data : [];
+      const list = all.filter(it => tab === 'images' ? String(it.mimeType||'').startsWith('image/') : String(it.mimeType||'').startsWith('video/'));
+      setMediaItems(list);
+      // refresh counts cache
+      const images = all.filter(it => String(it.mimeType||'').startsWith('image/')).length;
+      const videos = all.filter(it => String(it.mimeType||'').startsWith('video/')).length;
+      if (module === 'inventory' && lot) {
+        setLotMediaCounts(prev => new Map(prev).set(lot.id, { images, videos }));
+      } else if (module === 'products') {
+        setProductMediaCounts({ images, videos });
+      }
+    } catch {
+      setMediaItems([]);
+    } finally {
+      setMediaLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -38,11 +123,13 @@ export default function CatalogItemPage({ params }) {
         setItem(di.data || null);
         setChildren(dc.data || []);
         setLots(dl.data || []);
+        // After loading product data, fetch cart info to display user's existing amount for this product
+        fetchCart();
       } finally {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [id, fetchCart]);
 
   // Inventory summary for this product (no farmer names)
   const productIdNum = Number(id);
@@ -75,42 +162,47 @@ export default function CatalogItemPage({ params }) {
     for (const [k, v] of map.entries()) if (!GRADE_COLUMNS.includes(k)) arr.push({ ...v, available: v.total - v.reserved });
     return arr;
   }, [filteredLots, GRADE_COLUMNS]);
-  const availableGrades = useMemo(() => byGrade.map(g => g.grade), [byGrade]);
-  // set default selected grade when list changes
-  useEffect(() => {
-    if (availableGrades.length && !orderGrade) setOrderGrade(availableGrades[0]);
-  }, [availableGrades, orderGrade]);
+  // نمایش خلاصه بر اساس درجه حفظ می‌شود
 
-  // Estimate price for selected quantity and grade by allocating from available lots sorted by price
-  const priceEstimation = useMemo(() => {
-    const reqQty = parseFloat(orderQty || 0);
-    if (!orderGrade || !Number.isFinite(reqQty) || reqQty <= 0) return { total: null, unit: null, coverage: 0 };
-    const lotsOfGrade = filteredLots
-      .filter(l => l.qualityGrade && l.qualityGrade.toString() && l.qualityGrade === orderGrade)
-      .map(l => ({
-        price: l.price != null ? parseFloat(l.price) : null,
-        available: Math.max(0, parseFloat(l.totalQuantity || 0) - parseFloat(l.reservedQuantity || 0)),
-        unit: l.unit || item?.unit || ''
-      }))
-      .filter(x => x.available > 0 && x.price != null && Number.isFinite(x.price));
-    if (lotsOfGrade.length === 0) return { total: null, unit: null, coverage: 0 };
-    lotsOfGrade.sort((a,b) => a.price - b.price);
-    let remaining = reqQty;
-    let sum = 0;
-    let taken = 0;
-    for (const l of lotsOfGrade) {
-      if (remaining <= 0) break;
-      const take = Math.min(remaining, l.available);
-      sum += take * l.price;
-      taken += take;
-      remaining -= take;
-    }
-    if (taken <= 0) return { total: null, unit: lotsOfGrade[0]?.unit || item?.unit || '', coverage: 0 };
-    return { total: sum, unit: lotsOfGrade[0]?.unit || item?.unit || '', coverage: Math.min(1, taken / reqQty), unitAvg: sum / taken };
-  }, [filteredLots, orderGrade, orderQty, item]);
+  // Prefetch media counts for the visible lots
+  useEffect(() => {
+    (async () => {
+      const ids = filteredLots.map(l => l.id);
+      for (const id of ids) {
+        if (!lotMediaCounts.has(id)) {
+          loadLotMediaCounts(id);
+        }
+      }
+    })();
+  }, [filteredLots, lotMediaCounts, loadLotMediaCounts]);
+
+  // Load product-level media counts
+  useEffect(() => {
+    if (!productIdNum) return;
+    (async () => {
+      try {
+        const r = await fetch(`${API_ENDPOINTS.fileUpload.getFilesByModule('products')}?entityId=${encodeURIComponent(productIdNum)}`, { cache: 'no-store', credentials: 'include' });
+        const j = await r.json();
+        if (j?.success) {
+          const arr = Array.isArray(j.data) ? j.data : [];
+          const images = arr.filter(it => String(it.mimeType||'').startsWith('image/')).length;
+          const videos = arr.filter(it => String(it.mimeType||'').startsWith('video/')).length;
+          setProductMediaCounts({ images, videos });
+          const sorted = [...arr].sort((a,b)=>{
+            const ai = String(a.mimeType||'').startsWith('image/') ? 0 : 1;
+            const bi = String(b.mimeType||'').startsWith('image/') ? 0 : 1;
+            return ai - bi;
+          }).slice(0,2);
+          setProductMediaPreview(sorted);
+        }
+      } catch {}
+    })();
+  }, [productIdNum]);
+
+  // محاسبه قیمت تقریبی حذف شد چون سفارش در سطح بار انجام می‌شود
 
   return (
-    <main className="max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-8">
+    <main className="max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-8">
       <div className="text-sm text-slate-500"><Link href="/">صفحه اصلی</Link> / {item?.name || "..."}</div>
 
       {/* Header: image on the right, title on the left of the image (RTL-friendly) */}
@@ -127,6 +219,37 @@ export default function CatalogItemPage({ params }) {
             ) : (
               <div className="text-slate-500 text-xs mt-2">غیرقابل سفارش (نقش دسته)</div>
             )}
+            <div className="flex items-center gap-3 mt-3">
+              {productMediaPreview && productMediaPreview.length > 0 ? (
+                <div className="flex items-center gap-2">
+                  {productMediaPreview.map(m => (
+                    <div
+                      key={m.id}
+                      className="w-24 h-16 rounded overflow-hidden bg-slate-100 cursor-pointer"
+                      onClick={() => openMediaModal({ module: 'products', entityId: productIdNum, lot: null, tab: String(m.mimeType||'').startsWith('video/') ? 'videos' : 'images' })}
+                      title="مشاهده در اندازه بزرگ"
+                    >
+                      {String(m.mimeType||'').startsWith('video/') ? (
+                        <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
+                      ) : (
+                        <img src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                  ))}
+                  {(productMediaCounts.images + productMediaCounts.videos) > productMediaPreview.length ? (
+                    <button className="text-indigo-600 text-sm" onClick={()=> openMediaModal({ module: 'products', entityId: productIdNum, lot: null, tab: 'images' })}>
+                      مشاهده سایر رسانه‌ها ({(productMediaCounts.images + productMediaCounts.videos) - productMediaPreview.length})
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              {cartTotalQty > 0 ? (
+                <div className="text-[13px] sm:text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded px-3 py-2">
+                  شما هم‌اکنون <span className="font-semibold">{cartTotalQty.toFixed(3)} {cartUnit || ''}</span> از این محصول را در سبد دارید.
+                  <Link href="/cart" className="underline mx-1 text-amber-800">مشاهده سبد خرید</Link>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
@@ -140,75 +263,7 @@ export default function CatalogItemPage({ params }) {
             <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">رزرو شده</div><div className="text-lg font-semibold">{summary.reservedQuantity.toFixed(3)}</div></div>
             <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">قابل عرضه</div><div className="text-lg font-semibold">{summary.availableQuantity.toFixed(3)}</div></div>
           </div>
-          {/* Quick order box */}
-          <div className="border rounded-lg p-3 space-y-2">
-            <div className="text-xs text-slate-600">
-              {orderGrade ? (
-                (()=>{
-                  const row = byGrade.find(g => g.grade === orderGrade);
-                  const a = row ? (row.total - row.reserved) : 0;
-                  return <span>حداکثر قابل سفارش برای «{orderGrade}»: <span className="font-semibold">{a.toFixed(3)}</span> {item?.unit || ''}</span>;
-                })()
-              ) : (
-                <span>لطفاً درجه و مقدار موردنظر را انتخاب کنید.</span>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-            <select
-              className="border rounded px-3 py-2"
-              value={orderGrade}
-              onChange={(e)=>setOrderGrade(e.target.value)}
-            >
-              {availableGrades.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-            <input
-              type="number"
-              min="0"
-              step="0.001"
-              className="border rounded px-3 py-2 flex-1"
-              placeholder="مقدار درخواستی از درجه انتخاب‌شده"
-              value={orderQty}
-              onChange={(e)=>setOrderQty(e.target.value)}
-            />
-            <button
-              disabled={placing}
-              onClick={async ()=>{
-                setOrderMsg("");
-                const req = parseFloat(orderQty || 0);
-                if (!orderGrade) { setOrderMsgType('error'); setOrderMsg("درجه انتخاب نشده است"); return; }
-                if (!req || !Number.isFinite(req) || req <= 0) { setOrderMsgType('error'); setOrderMsg("مقدار نامعتبر است"); return; }
-                const row = byGrade.find(g => g.grade === orderGrade);
-                const available = row ? (row.total - row.reserved) : 0;
-                if (req > available + 1e-9) { setOrderMsgType('error'); setOrderMsg(`مقدار درخواستی بیشتر از مقدار قابل عرضه است (${available.toFixed(3)} ${item?.unit||''}).`); return; }
-                // افزودن به سبد: آیتم سطح محصول/درجه
-                setPlacing(true);
-                try {
-                  const payload = { productId: productIdNum, qualityGrade: orderGrade, quantity: Number(req.toFixed(3)), unit: item?.unit || null };
-                  const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                  const j = await res.json();
-                  if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به سبد');
-                  setOrderMsgType('success'); setOrderMsg('به سبد خرید اضافه شد.');
-                } catch (e) {
-                  setOrderMsgType('error'); setOrderMsg(e.message || 'خطا در افزودن به سبد');
-                } finally { setPlacing(false); }
-              }}
-              className="bg-blue-600 text-white rounded px-4 py-2"
-            >{placing ? '...' : 'افزودن به سبد'}</button>
-            </div>
-            <div className="text-xs sm:text-sm text-slate-700 border-t pt-2">
-              {priceEstimation.total != null ? (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                  <span>قیمت تقریبی: <span className="font-semibold">{priceEstimation.total.toLocaleString('fa-IR')}</span></span>
-                  <span>میانگین واحد: {priceEstimation.unitAvg?.toLocaleString('fa-IR')} {item?.unit || ''}</span>
-                  {priceEstimation.coverage < 1 ? (
-                    <span className="text-amber-600">برای کل مقدار قیمت مشخص نیست (پوشش {Math.round(priceEstimation.coverage*100)}%)</span>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="text-slate-400">قیمت نامشخص</div>
-              )}
-            </div>
-          </div>
+          {/* جعبه سفارش سریع حذف شد؛ سفارش در ردیف هر بار انجام می‌شود */}
           {orderMsg ? (
             <div
               className={
@@ -236,7 +291,7 @@ export default function CatalogItemPage({ params }) {
                   <th className="p-2">کل</th>
                   <th className="p-2">رزرو</th>
                   <th className="p-2">قابل عرضه</th>
-                  <th className="p-2">تعداد بچ</th>
+                  <th className="p-2">تعداد بار</th>
                 </tr>
               </thead>
               <tbody>
@@ -258,7 +313,7 @@ export default function CatalogItemPage({ params }) {
       {/* Available lots with attributes */}
       {filteredLots.length > 0 && (
         <section className="bg-white rounded-xl shadow border p-4">
-          <h2 className="text-lg font-semibold mb-3">بچ‌های موجود</h2>
+          <h2 className="text-lg font-semibold mb-3">محصولات موجود</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
@@ -270,6 +325,8 @@ export default function CatalogItemPage({ params }) {
                   <th className="p-2">قیمت</th>
                   <th className="p-2">وضعیت</th>
                   <th className="p-2">ویژگی‌ها</th>
+                  <th className="p-2">رسانه</th>
+                  <th className="p-2">درخواست</th>
                 </tr>
               </thead>
               <tbody>
@@ -292,6 +349,76 @@ export default function CatalogItemPage({ params }) {
                         </div>
                       ) : '—'}
                     </td>
+                    <td className="p-2">
+                      {(() => {
+                        const c = lotMediaCounts.get(l.id);
+                        const preview = lotMediaPreview.get(l.id) || [];
+                        if (!c || (c.images + c.videos) === 0) return '—';
+                        return (
+                          <div className="flex items-center gap-2">
+                            {preview.map(m => (
+                              <div
+                                key={m.id}
+                                className="w-16 h-12 rounded overflow-hidden bg-slate-100 cursor-pointer"
+                                onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: String(m.mimeType||'').startsWith('video/') ? 'videos' : 'images' })}
+                                title="مشاهده در اندازه بزرگ"
+                              >
+                                {String(m.mimeType||'').startsWith('video/') ? (
+                                  <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
+                                ) : (
+                                  <img src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" />
+                                )}
+                              </div>
+                            ))}
+                            {(c.images + c.videos) > preview.length ? (
+                              <button className="text-indigo-600 text-xs" onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: 'images' })}>
+                                مشاهده سایر رسانه‌ها ({(c.images + c.videos) - preview.length})
+                              </button>
+                            ) : null}
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="p-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.001"
+                          className="border rounded px-2 py-1 w-44 sm:w-56 md:w-64"
+                          placeholder={`حداکثر ${(Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0)))||0).toFixed(3)}`}
+                          value={lotQtyById[l.id] ?? ''}
+                          onChange={(e)=> setLotQtyById(prev => ({ ...prev, [l.id]: e.target.value }))}
+                        />
+                        <button
+                          className="bg-blue-600 text-white rounded px-3 py-1"
+                          disabled={placingLotId === l.id}
+                          onClick={async ()=>{
+                            setOrderMsg('');
+                            const v = parseFloat(lotQtyById[l.id] || 0);
+                            if (!Number.isFinite(v) || v <= 0) { setOrderMsgType('error'); setOrderMsg('مقدار نامعتبر است'); return; }
+                            const available = Math.max(0, parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0));
+                            if (v > available + 1e-9) { setOrderMsgType('error'); setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${l.unit||''}`); return; }
+                            setPlacingLotId(l.id);
+                            try {
+                              const payload = { productId: productIdNum, qualityGrade: l.qualityGrade, quantity: Number(v.toFixed(3)), unit: l.unit || item?.unit || null };
+                              const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
+                              const j = await res.json();
+                              if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به سبد');
+                              setOrderMsgType('success');
+                              const contactNote = userPhone ? ` (${userPhone})` : '';
+                              setOrderMsg(`به سبد خرید اضافه شد. رزرو توسط مدیریت انجام می‌شود و برای تایید نهایی با شما تماس می‌گیریم${contactNote}.`);
+                              // refresh cart badge for this product
+                              fetchCart();
+                            } catch (e) {
+                              setOrderMsgType('error'); setOrderMsg(e.message || 'خطا در افزودن به سبد');
+                            } finally {
+                              setPlacingLotId(null);
+                            }
+                          }}
+                        >{placingLotId === l.id ? '...' : 'افزودن به سبد'}</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -300,12 +427,46 @@ export default function CatalogItemPage({ params }) {
         </section>
       )}
 
-      {/* Products list */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">محصولات</h2>
-        {loading ? (
-          <div className="text-slate-500 text-sm">در حال بارگذاری...</div>
-        ) : children.length > 0 ? (
+      {/* Media modal */}
+      {mediaOpen ? (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow border p-4 w-full max-w-4xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">{mediaContext.module === 'inventory' && mediaLot ? `رسانه‌های محصول #${mediaLot.id}` : 'رسانه‌های محصول'}</div>
+              <button className="text-slate-500" onClick={()=>{ setMediaOpen(false); setMediaLot(null); setMediaItems([]); }}>✕</button>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button className={`px-3 py-1 rounded ${mediaTab==='images'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'images' })}>تصاویر</button>
+              <button className={`px-3 py-1 rounded ${mediaTab==='videos'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'videos' })}>ویدیوها</button>
+            </div>
+            {mediaLoading ? (
+              <div className="text-slate-500">در حال بارگذاری...</div>
+            ) : mediaItems.length === 0 ? (
+              <div className="text-slate-500">موردی برای نمایش وجود ندارد.</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {mediaItems.map(m => (
+                  <div key={m.id} className="border rounded-md overflow-hidden bg-white">
+                    <div className="aspect-video bg-slate-100 flex items-center justify-center overflow-hidden">
+                      {String(m.mimeType||'').startsWith('video/') ? (
+                        <video src={m.downloadUrl} className="w-full h-full object-cover" controls />
+                      ) : (
+                        <img src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="p-2 text-xs truncate" title={m.originalName}>{m.originalName}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Products list (only show when there are sub-products) */}
+      {!loading && children.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold mb-3">محصولات</h2>
           <div className="space-y-2">
             {children.map((ch) => (
               <Link key={ch.id} href={`/catalog/${ch.id}`} className="flex items-center justify-between bg-white rounded-lg shadow p-3 border hover:bg-slate-50">
@@ -314,10 +475,8 @@ export default function CatalogItemPage({ params }) {
               </Link>
             ))}
           </div>
-        ) : (
-          <div className="text-slate-500 text-sm">محصولی برای نمایش وجود ندارد.</div>
-        )}
-      </section>
+        </section>
+      )}
     </main>
   );
 }

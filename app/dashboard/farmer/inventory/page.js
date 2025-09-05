@@ -2,15 +2,22 @@
 import { useEffect, useMemo, useState } from "react";
 import AsyncSelect from "react-select/async";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { useAuth } from "@/app/context/AuthContext";
+import MediaUpload from "@/app/components/ui/MediaUpload";
 
 export default function InventoryLotsPage() {
+  const { user, loading: authLoading } = useAuth() || {};
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ productId: "", farmerId: "", farmerLabel: "", unit: "kg", qualityGrade: "درجه 1", totalQuantity: "", price: "", status: "harvested" });
   const [attributeDefs, setAttributeDefs] = useState([]);
   const [attributeValues, setAttributeValues] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [farmerNameMap, setFarmerNameMap] = useState(new Map());
+  const [editOpen, setEditOpen] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const [selectedLot, setSelectedLot] = useState(null);
+  const [editForm, setEditForm] = useState({ unit: "", qualityGrade: "", totalQuantity: "", price: "", status: "harvested" });
 
   const statusToFa = {
     on_field: "در مزرعه",
@@ -31,7 +38,10 @@ export default function InventoryLotsPage() {
       ...l,
       attributes: Array.isArray(l.attributes) ? l.attributes : []
     }));
-    setItems(lots);
+    const roles = (user?.roles || []).map(r => (r.name || r.nameEn || '').toLowerCase());
+    const isFarmer = roles.includes('farmer') || roles.includes('loader');
+    const currentUserId = user?.userId;
+    setItems(isFarmer && currentUserId ? lots.filter(l => Number(l.farmerId) === Number(currentUserId)) : lots);
     const prods = d2.data || [];
     setProducts(prods);
     // Load supplier names for display
@@ -54,7 +64,7 @@ export default function InventoryLotsPage() {
       setFarmerNameMap(new Map());
     }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [user]);
 
   // Load attribute definitions when product changes (merge product-level + category-level)
   useEffect(() => {
@@ -124,14 +134,18 @@ export default function InventoryLotsPage() {
 
   const create = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     // 1) Create inventory lot
     const lotRes = await fetch(API_ENDPOINTS.farmer.inventoryLots.create, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         productId: Number(form.productId),
-        farmerId: Number(form.farmerId) || 1,
+        farmerId: (()=>{
+          const roles = (user?.roles || []).map(r => (r.name || r.nameEn || '').toLowerCase());
+          const isFarmer = roles.includes('farmer') || roles.includes('loader');
+          return isFarmer ? Number(user?.userId) : (Number(form.farmerId) || 1);
+        })(),
         unit: form.unit,
         qualityGrade: form.qualityGrade,
         totalQuantity: Number(form.totalQuantity),
@@ -160,13 +174,50 @@ export default function InventoryLotsPage() {
     setForm({ productId: "", farmerId: "", farmerLabel: "", unit: "kg", qualityGrade: "درجه 1", totalQuantity: "", price: "", status: "harvested" });
     setAttributeDefs([]);
     setAttributeValues({});
-    setLoading(false);
+    setSaving(false);
     load();
   };
 
   const remove = async (id) => {
     await fetch(API_ENDPOINTS.farmer.inventoryLots.delete(id), { method: "DELETE" });
     load();
+  };
+
+  const openEdit = (lot) => {
+    setSelectedLot(lot);
+    setEditForm({
+      unit: lot.unit || "",
+      qualityGrade: lot.qualityGrade || "",
+      totalQuantity: String(lot.totalQuantity ?? ""),
+      price: lot.price == null ? "" : String(lot.price),
+      status: lot.status || "harvested",
+    });
+    setEditOpen(true);
+  };
+
+  const saveEdit = async () => {
+    if (!selectedLot) return;
+    const payload = {
+      unit: editForm.unit || null,
+      qualityGrade: editForm.qualityGrade || null,
+      totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
+      price: editForm.price !== "" ? Number(editForm.price) : null,
+      status: editForm.status || null,
+    };
+    await fetch(API_ENDPOINTS.farmer.inventoryLots.update(selectedLot.id), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+    setEditOpen(false);
+    setSelectedLot(null);
+    load();
+  };
+
+  const openMedia = (lot) => {
+    setSelectedLot(lot);
+    setMediaOpen(true);
   };
 
   return (
@@ -184,17 +235,24 @@ export default function InventoryLotsPage() {
             value={form.productId ? { value: form.productId, label: products.find(p=>p.id===Number(form.productId))?.name || `#${form.productId}` } : null}
           />
         </div>
-        <div className="md:col-span-2">
-          <AsyncSelect
-            cacheOptions
-            defaultOptions
-            loadOptions={loadFarmerOptions}
-            placeholder="انتخاب تامین‌کننده"
-            noOptionsMessage={()=>"موردی یافت نشد"}
-            onChange={(opt)=> setForm({ ...form, farmerId: opt?.value || "", farmerLabel: opt?.label || "" })}
-            value={form.farmerId ? { value: form.farmerId, label: form.farmerLabel || farmerNameMap.get(Number(form.farmerId)) || `#${form.farmerId}` } : null}
-          />
-        </div>
+        {(() => {
+          const roles = (user?.roles || []).map(r => (r.name || r.nameEn || '').toLowerCase());
+          const isFarmer = roles.includes('farmer') || roles.includes('loader');
+          if (isFarmer) return null;
+          return (
+            <div className="md:col-span-2">
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                loadOptions={loadFarmerOptions}
+                placeholder="انتخاب تامین‌کننده"
+                noOptionsMessage={()=>"موردی یافت نشد"}
+                onChange={(opt)=> setForm({ ...form, farmerId: opt?.value || "", farmerLabel: opt?.label || "" })}
+                value={form.farmerId ? { value: form.farmerId, label: form.farmerLabel || farmerNameMap.get(Number(form.farmerId)) || `#${form.farmerId}` } : null}
+              />
+            </div>
+          );
+        })()}
         <input className="border p-2 rounded" placeholder="واحد" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
         <select
           className="border p-2 rounded"
@@ -249,7 +307,7 @@ export default function InventoryLotsPage() {
           </div>
         )}
 
-        <button disabled={loading} className="bg-blue-600 text-white rounded px-4">{loading?"...":"افزودن"}</button>
+        <button disabled={saving} className="bg-blue-600 text-white rounded px-4">{saving?"...":"افزودن"}</button>
       </form>
 
       <div className="bg-white rounded-md shadow overflow-x-auto">
@@ -295,13 +353,67 @@ export default function InventoryLotsPage() {
                   ) : '—'}
                 </td>
                 <td className="p-2">
-                  <button onClick={()=>remove(x.id)} className="text-red-600">حذف</button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={()=>openEdit(x)} className="text-blue-600">ویرایش</button>
+                    <button onClick={()=>openMedia(x)} className="text-indigo-600">رسانه</button>
+                    <button onClick={()=>remove(x.id)} className="text-red-600">حذف</button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Edit modal */}
+      {editOpen && selectedLot ? (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-md shadow p-4 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">ویرایش موجودی #{selectedLot.id}</div>
+              <button className="text-slate-500" onClick={()=>{setEditOpen(false); setSelectedLot(null);}}>✕</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <input className="border p-2 rounded" placeholder="واحد" value={editForm.unit} onChange={(e)=>setEditForm({...editForm, unit:e.target.value})} />
+              <input className="border p-2 rounded" placeholder="کیفیت" value={editForm.qualityGrade} onChange={(e)=>setEditForm({...editForm, qualityGrade:e.target.value})} />
+              <input className="border p-2 rounded" placeholder="مقدار کل" value={editForm.totalQuantity} onChange={(e)=>setEditForm({...editForm, totalQuantity:e.target.value})} />
+              <input className="border p-2 rounded" placeholder="قیمت (اختیاری)" value={editForm.price} onChange={(e)=>setEditForm({...editForm, price:e.target.value})} />
+              <select className="border p-2 rounded" value={editForm.status} onChange={(e)=>setEditForm({...editForm, status:e.target.value})}>
+                <option value="harvested">برداشت‌شده</option>
+                <option value="on_field">در مزرعه</option>
+                <option value="reserved">رزرو شده</option>
+                <option value="sold">فروخته شده</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-end gap-2 mt-3">
+              <button className="border rounded px-3 py-1" onClick={()=>{setEditOpen(false); setSelectedLot(null);}}>انصراف</button>
+              <button className="bg-emerald-600 text-white rounded px-3 py-1" onClick={saveEdit}>ذخیره</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Media modal */}
+      {mediaOpen && selectedLot ? (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-md shadow p-4 w-full max-w-3xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">رسانه‌های موجودی #{selectedLot.id}</div>
+              <button className="text-slate-500" onClick={()=>{setMediaOpen(false); setSelectedLot(null);}}>✕</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-slate-600 mb-1">تصاویر</div>
+                <MediaUpload module="inventory" entityId={selectedLot.id} fileType="images" accept="image/*" buttonLabel="آپلود تصویر" />
+              </div>
+              <div>
+                <div className="text-xs text-slate-600 mb-1">ویدیوها</div>
+                <MediaUpload module="inventory" entityId={selectedLot.id} fileType="videos" accept="video/*" buttonLabel="آپلود ویدیو" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

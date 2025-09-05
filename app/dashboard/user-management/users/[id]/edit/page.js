@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
+import AvatarUpload from "@/app/components/ui/AvatarUpload";
 
 const EditUserPage = () => {
   const router = useRouter();
@@ -19,7 +20,8 @@ const EditUserPage = () => {
     phone: "",
     businessName: "",
     businessContactInfo: "",
-    roleIds: []
+    roleIds: [],
+    avatar: ""
   });
   const [roles, setRoles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -31,6 +33,9 @@ const EditUserPage = () => {
         const userResponse = await fetch(API_ENDPOINTS.users.getById(id));
         const userData = await userResponse.json();
         if (userData.success) {
+          const roleIds = userData.data.roles ? userData.data.roles.map(role => role.id) : [];
+          console.log('User roles:', userData.data.roles);
+          console.log('Role IDs:', roleIds);
           setFormData({
             firstName: userData.data.firstName || "",
             lastName: userData.data.lastName || "",
@@ -40,38 +45,43 @@ const EditUserPage = () => {
             phone: userData.data.phone || "",
             businessName: userData.data.businessName || "",
             businessContactInfo: userData.data.businessContactInfo || "",
-            roleIds: userData.data.roles ? userData.data.roles.map(role => role.id) : [],
+            roleIds: roleIds,
+            avatar: userData.data.avatar || "",
           });
         } else {
           setError(userData.message || "خطا در دریافت اطلاعات کاربر");
         }
       } catch (err) {
-        setError(err.message || "خطا در ارتباط با سرور هنگام دریافت کاربر");
-        console.error("Error fetching user:", err);
+        setError("خطا در دریافت اطلاعات کاربر");
       } finally {
         setLoadingUser(false);
       }
 
       try {
-        // Fetch roles data
-        const rolesResponse = await fetch(API_ENDPOINTS.roles.getAll);
+        // Fetch roles
+        console.log('Fetching roles from:', API_ENDPOINTS.roles.getAll);
+        const rolesResponse = await fetch(API_ENDPOINTS.roles.getAll, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
         const rolesData = await rolesResponse.json();
+        console.log('Roles response:', rolesData);
         if (rolesData.success) {
-          setRoles(rolesData.data || []);
+          setRoles(rolesData.data);
         } else {
-          setError(rolesData.message || "خطا در دریافت لیست نقش‌ها");
+          console.error('Roles fetch failed:', rolesData.message);
         }
       } catch (err) {
-        setError(err.message || "خطا در ارتباط با سرور هنگام دریافت نقش‌ها");
         console.error("Error fetching roles:", err);
       } finally {
         setLoadingRoles(false);
       }
     };
 
-    if (id) {
-      fetchData();
-    }
+    fetchData();
   }, [id]);
 
   const handleChange = (e) => {
@@ -80,11 +90,18 @@ const EditUserPage = () => {
   };
 
   const handleRoleChange = (e) => {
-    const { options } = e.target;
-    const selectedRoleIds = Array.from(options)
+    const selectedRoleIds = Array.from(e.target.selectedOptions)
       .filter((option) => option.selected)
       .map((option) => parseInt(option.value, 10));
     setFormData({ ...formData, roleIds: selectedRoleIds });
+  };
+
+  const handleAvatarUpload = (fileData) => {
+    // به‌روزرسانی آواتار در فرم
+    setFormData(prev => ({
+      ...prev,
+      avatar: fileData.downloadUrl
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -100,171 +117,223 @@ const EditUserPage = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        alert("کاربر با موفقیت بروزرسانی شد.");
+      const result = await response.json();
+      if (result.success) {
+        alert("کاربر با موفقیت به‌روزرسانی شد");
         router.push("/dashboard/user-management/users");
       } else {
-        setError(data.message || "خطا در بروزرسانی کاربر");
+        setError(result.message || "خطا در به‌روزرسانی کاربر");
       }
     } catch (err) {
-      setError(err.message || "خطا در ارتباط با سرور");
-      console.error("Error updating user:", err);
+      setError("خطا در به‌روزرسانی کاربر");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-4 md:p-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">ویرایش کاربر</h1>
-
-        {loadingUser || loadingRoles ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
-        ) : error ? (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-            <span className="block sm:inline">{error}</span>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">نام:</label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">نام خانوادگی:</label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">نام کاربری:</label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">ایمیل:</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-1">موبایل:</label>
-                <input
-                  type="tel"
-                  id="mobile"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">تلفن:</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">نام کسب و کار (اختیاری):</label>
-                <input
-                  type="text"
-                  id="businessName"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label htmlFor="businessContactInfo" className="block text-sm font-medium text-gray-700 mb-1">اطلاعات تماس کسب و کار (اختیاری):</label>
-                <input
-                  type="text"
-                  id="businessContactInfo"
-                  name="businessContactInfo"
-                  value={formData.businessContactInfo}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label htmlFor="roleIds" className="block text-sm font-medium text-gray-700 mb-1">نقش‌ها:</label>
-                <select
-                  id="roleIds"
-                  name="roleIds"
-                  multiple
-                  value={formData.roleIds}
-                  onChange={handleRoleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm h-32"
-                >
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.nameFa}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-gray-500">برای انتخاب چندگانه، Ctrl (یا Cmd) را نگه دارید و کلیک کنید.</p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 space-y-4 sm:space-y-0">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">ویرایش کاربر</h1>
+              <p className="text-gray-600">اطلاعات کاربر را ویرایش کنید</p>
             </div>
+            <button
+              onClick={() => router.back()}
+              className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>بازگشت</span>
+              </div>
+            </button>
+          </div>
 
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/user-management/users")}
-                className="w-full sm:w-auto px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                بازگشت
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full sm:w-auto px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                {submitting ? "در حال ذخیره..." : "ذخیره تغییرات"}
-              </button>
+          {loadingUser || loadingRoles ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
-          </form>
-        )}
+          ) : error ? (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* بخش آپلود آواتار */}
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100 shadow-sm">
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">آواتار کاربر</h3>
+                    <p className="text-sm text-gray-600">تصویر پروفایل کاربر را انتخاب کنید</p>
+                  </div>
+                  <AvatarUpload
+                    currentAvatar={formData.avatar}
+                    onUploadSuccess={handleAvatarUpload}
+                    userId={id}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">نام</label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">نام خانوادگی</label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">نام کاربری</label>
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">ایمیل</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">موبایل</label>
+                    <input
+                      type="tel"
+                      id="mobile"
+                      name="mobile"
+                      value={formData.mobile}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">تلفن</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">نام کسب‌وکار</label>
+                    <input
+                      type="text"
+                      id="businessName"
+                      name="businessName"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="businessContactInfo" className="block text-sm font-medium text-gray-700 mb-2">اطلاعات تماس کسب‌وکار</label>
+                    <input
+                      type="text"
+                      id="businessContactInfo"
+                      name="businessContactInfo"
+                      value={formData.businessContactInfo}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="roleIds" className="block text-sm font-medium text-gray-700 mb-2">نقش‌ها</label>
+                  <select
+                    id="roleIds"
+                    name="roleIds"
+                    multiple
+                    value={formData.roleIds}
+                    onChange={handleRoleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 h-32"
+                  >
+                    {roles.map((role) => (
+                      <option 
+                        key={role.id} 
+                        value={role.id}
+                      >
+                        {role.nameFa}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">برای انتخاب چندگانه، Ctrl (یا Cmd) را نگه دارید و کلیک کنید.</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard/user-management/users")}
+                    className="w-full sm:w-auto px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    بازگشت
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full sm:w-auto px-8 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    {submitting ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>در حال ذخیره...</span>
+                      </div>
+                    ) : (
+                      'ذخیره تغییرات'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default EditUserPage; 
+export default EditUserPage;

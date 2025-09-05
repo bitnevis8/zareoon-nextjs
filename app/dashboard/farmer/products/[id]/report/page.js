@@ -132,7 +132,7 @@ export default function ProductReportPage({ params }) {
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">رزرو شده</div><div className="text-lg font-semibold">{summary.reservedQuantity?.toFixed(3)}</div></div>
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">قابل عرضه</div><div className="text-lg font-semibold">{summary.availableQuantity?.toFixed(3)}</div></div>
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد کشاورزان</div><div className="text-lg font-semibold">{summary.uniqueFarmers}</div></div>
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد بچ‌ها</div><div className="text-lg font-semibold">{summary.lotsCount}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد بارها</div><div className="text-lg font-semibold">{summary.lotsCount}</div></div>
       </div>
 
       {/* By grade */}
@@ -145,7 +145,7 @@ export default function ProductReportPage({ params }) {
               <th className="p-2">کل</th>
               <th className="p-2">رزرو</th>
               <th className="p-2">قابل عرضه</th>
-              <th className="p-2">تعداد بچ</th>
+              <th className="p-2">تعداد بار</th>
               <th className="p-2">تعداد کشاورز</th>
             </tr>
           </thead>
@@ -177,7 +177,7 @@ export default function ProductReportPage({ params }) {
               <th className="p-2">کل</th>
               <th className="p-2">رزرو</th>
               <th className="p-2">قابل عرضه</th>
-              <th className="p-2">تعداد بچ</th>
+              <th className="p-2">تعداد بار</th>
               {GRADE_COLUMNS.map((gc) => (
                 <th key={gc} className="p-2">{gc}</th>
               ))}

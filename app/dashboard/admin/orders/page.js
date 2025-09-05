@@ -2,8 +2,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import AsyncSelect from "react-select/async";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminOrdersPage() {
+  const auth = useAuth();
+  const router = useRouter();
+  const roles = (auth?.user?.roles || []).map(r => (r.name || r.nameEn || '')).map(n => (n||'').toLowerCase());
+  const isAdmin = roles.includes('admin');
+  useEffect(() => {
+    if (auth && !auth.loading && !isAdmin) {
+      router.replace('/dashboard');
+    }
+  }, [auth, isAdmin, router]);
   const [orders, setOrders] = useState([]);
   const [lots, setLots] = useState([]);
   const [products, setProducts] = useState([]);
@@ -23,7 +34,7 @@ export default function AdminOrdersPage() {
     setLots(dll.data || []);
     setProducts(dpp.data || []);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
   const productIdToName = useMemo(() => {
     const map = new Map();
@@ -49,6 +60,8 @@ export default function AdminOrdersPage() {
     else alert(j?.message || 'خطا در تخصیص');
   };
 
+  if (auth?.loading) return <div className="p-6">در حال بررسی دسترسی...</div>;
+  if (!isAdmin) return null;
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">سفارش‌ها (مدیریت)</h1>

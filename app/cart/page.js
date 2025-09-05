@@ -8,26 +8,37 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("info");
+  const [supportPhone, setSupportPhone] = useState("");
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store' });
+      const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store', credentials: 'include' });
       const d = await res.json();
       setCart(d.data || { items: [] });
     } finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    (async () => {
+      try {
+        const r = await fetch(API_ENDPOINTS.users.getById(2), { cache: 'no-store', credentials: 'include' });
+        const j = await r.json();
+        const u = j?.data || j;
+        if (u && (u.mobile || u.phone)) setSupportPhone(u.mobile || u.phone);
+      } catch {}
+    })();
+  }, []);
 
   const totalItems = useMemo(() => (cart.items||[]).length, [cart]);
 
   const remove = async (id) => {
-    await fetch(`${API_ENDPOINTS.farmer.cart.base}/item/${id}`, { method: 'DELETE' });
+    await fetch(`${API_ENDPOINTS.farmer.cart.base}/item/${id}`, { method: 'DELETE', credentials: 'include' });
     load();
   };
   const updateQty = async (id, quantity) => {
     await fetch(`${API_ENDPOINTS.farmer.cart.base}/item/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quantity: Number(quantity) })
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ quantity: Number(quantity) })
     });
     load();
   };
@@ -35,13 +46,14 @@ export default function CartPage() {
   const checkout = async () => {
     setMsg("");
     try {
-      const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/checkout`, { method: 'POST' });
+      const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/checkout`, { method: 'POST', credentials: 'include' });
       const j = await r.json();
-      if (!r.ok || !j?.success) throw new Error(j?.message || 'خطا در نهایی‌سازی سبد');
-      setMsgType('success'); setMsg('رزرو سفارش انجام شد. می‌توانید پرداخت را ادامه دهید.');
+      if (!r.ok || !j?.success) throw new Error(j?.message || 'خطا در ثبت سفارش');
+      setMsgType('success');
+      setMsg(`سفارش شما ثبت شد. برای تایید نهایی با شما تماس می‌گیریم.${supportPhone?` شماره پشتیبانی: ${supportPhone}`:''}`);
       load();
     } catch (e) {
-      setMsgType('error'); setMsg(e.message || 'خطای غیرمنتظره در نهایی‌سازی');
+      setMsgType('error'); setMsg(e.message || 'خطای غیرمنتظره در ثبت سفارش');
     }
   };
 
@@ -69,7 +81,7 @@ export default function CartPage() {
               ))}
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-slate-600">تعداد آیتم: {totalItems}</div>
-                <button className="bg-emerald-600 text-white rounded px-4 py-2" onClick={checkout}>نهایی‌سازی و رزرو</button>
+                <button className="bg-emerald-600 text-white rounded px-4 py-2" onClick={checkout}>ثبت سفارش</button>
               </div>
             </div>
           )}

@@ -2,8 +2,19 @@
 import { useEffect, useMemo, useState, Fragment } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 // Supplier view does not need selects
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function OrdersPage() {
+  const auth = useAuth();
+  const router = useRouter();
+  const roles = (auth?.user?.roles || []).map(r => (r.name || r.nameEn || '')).map(n => (n||'').toLowerCase());
+  const isSupplier = roles.includes('farmer') || roles.includes('loader');
+  useEffect(() => {
+    if (auth && !auth.loading && !isSupplier) {
+      router.replace('/dashboard');
+    }
+  }, [auth, isSupplier, router]);
   const [orders, setOrders] = useState([]);
   const [lots, setLots] = useState([]);
   const [products, setProducts] = useState([]);
@@ -32,7 +43,7 @@ export default function OrdersPage() {
     setLots(dll.data || []);
     setProducts(dpp.data || []);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (isSupplier) load(); }, [isSupplier]);
 
   // Supplier should not access customer cart; disable cart section
   const loadCart = async () => setCart(null);
@@ -72,6 +83,8 @@ export default function OrdersPage() {
     if (expandedOrderId) await loadOrderItems(expandedOrderId);
   };
 
+  if (auth?.loading) return <div className="p-6">در حال بررسی دسترسی...</div>;
+  if (!isSupplier) return null;
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">سفارش‌ها (تامین‌کننده)</h1>

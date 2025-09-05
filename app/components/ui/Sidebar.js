@@ -18,6 +18,11 @@ const baseMenuItems = [
     icon: '🏠',
   },
   {
+    title: 'تنظیمات',
+    path: '/dashboard/settings',
+    icon: '⚙️',
+  },
+  {
     title: 'مدیریت کاربران',
     icon: '👤',
     submenu: [
@@ -42,9 +47,10 @@ export default function Sidebar({ onLinkClick }) {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState(null);
   const auth = useAuth();
-  const roles = (auth?.user?.roles || []).map(r => r.name).map(n => (n||'').toLowerCase());
+  const roles = (auth?.user?.roles || []).map(r => (r.name || r.nameEn || '')).map(n => (n||'').toLowerCase());
   const isAdmin = roles.includes('admin');
   const isFarmer = roles.includes('farmer');
+  const isLoader = roles.includes('loader');
   const isCustomer = roles.includes('customer');
 
   const menuItems = (() => {
@@ -58,7 +64,20 @@ export default function Sidebar({ onLinkClick }) {
       }
       return cloned;
     }
-    if (isFarmer) return baseMenuItems.filter(mi => mi.path === '/dashboard' || mi.title === 'مدیریت تامین');
+    if (isFarmer || isLoader) {
+      // Supplier: minimal menu tailored to own operations
+      return [
+        { title: 'داشبورد', path: '/dashboard', icon: '🏠' },
+        {
+          title: 'مدیریت تامین',
+          icon: '🌾',
+          submenu: [
+            { title: 'موجودی‌های من', path: '/dashboard/farmer/inventory', icon: '📦' },
+            { title: 'سفارش‌ها', path: '/dashboard/farmer/orders', icon: '🧾' },
+          ]
+        }
+      ];
+    }
     if (isCustomer) return [
       { title: 'داشبورد', path: '/dashboard', icon: '🏠' },
       { title: 'سبد خرید', path: '/cart', icon: '🧺' },
@@ -75,7 +94,7 @@ export default function Sidebar({ onLinkClick }) {
   };
 
   return (
-    <aside className="w-64 h-screen bg-gray-800 text-white p-4 block">
+    <aside className="w-64 h-screen bg-white text-slate-800 p-4 block border-l border-gray-200">
 
       
       <nav className="space-y-2">
@@ -85,15 +104,15 @@ export default function Sidebar({ onLinkClick }) {
               <div>
                 <button
                   onClick={() => toggleMenu(item.title)}
-                  className={`w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-700 transition-colors ${
-                    openMenu === item.title ? 'bg-gray-700' : ''
+                  className={`w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 transition-colors ${
+                    openMenu === item.title ? 'bg-gray-100' : ''
                   }`}
                 >
                   <div className="flex items-center">
                     <span className="ml-2">{item.icon}</span>
                     <span>{item.title}</span>
                   </div>
-                  <span className="text-lg">
+                  <span className="text-lg text-slate-500">
                     {openMenu === item.title ? '▼' : '▶'}
                   </span>
                 </button>
@@ -105,12 +124,12 @@ export default function Sidebar({ onLinkClick }) {
                         key={subItem.path}
                         href={subItem.path}
                         onClick={onLinkClick}
-                        className={`flex items-center p-2 rounded-lg hover:bg-gray-700 transition-colors ${
-                          isActive(subItem.path) ? 'bg-gray-700' : ''
+                        className={`flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors ${
+                          isActive(subItem.path) ? 'bg-gray-100' : ''
                         }`}
                       >
-                        <span className="ml-2">{subItem.icon}</span>
-                        <span>{subItem.title}</span>
+                        <span className="ml-2 text-slate-500">{subItem.icon}</span>
+                        <span className="text-slate-800">{subItem.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -120,12 +139,12 @@ export default function Sidebar({ onLinkClick }) {
               <Link
                 href={item.path}
                 onClick={onLinkClick}
-                className={`flex items-center p-2 rounded-lg hover:bg-gray-700 transition-colors ${
-                  isActive(item.path) ? 'bg-gray-700' : ''
+                className={`flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors ${
+                  isActive(item.path) ? 'bg-gray-100' : ''
                 }`}
               >
-                <span className="ml-2">{item.icon}</span>
-                <span>{item.title}</span>
+                <span className="ml-2 text-slate-500">{item.icon}</span>
+                <span className="text-slate-800">{item.title}</span>
               </Link>
             )}
           </div>
