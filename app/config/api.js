@@ -1,16 +1,28 @@
-// بررسی محیط اجرا
-const isDevelopment = process.env.NODE_ENV === 'development';
-console.log('Current environment:', process.env.NODE_ENV); // برای دیباگ
+// تعیین هوشمند آدرس API بدون نیاز به .env
+const isProduction = process.env.NODE_ENV === 'production';
 
-// در حالت production، حتماً باید NEXT_PUBLIC_API_URL ست شده باشد. اگر نبود، به صورت پیش‌فرض روی api.zareoon.ir قرار می‌گیرد.
 let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 if (!API_BASE_URL) {
-  if (!isDevelopment) {
-    // هشدار برای لاگ سرور
-    console.warn('⚠️ NEXT_PUBLIC_API_URL is not set! Defaulting to https://api.zareoon.ir');
+  if (isProduction) {
+    // روی سرور: دامنه‌های اصلی
     API_BASE_URL = 'https://api.zareoon.ir';
   } else {
-    API_BASE_URL = 'http://localhost:3000';
+    // توسعه: از آدرس فرانت استفاده کن و پورت را به 3000 (بک‌اند) نگاشت بده
+    try {
+      if (typeof window !== 'undefined' && window.location) {
+        const loc = window.location;
+        const host = loc.hostname; // آی‌پی یا دامنه لوکال
+        // اگر پورتی وجود دارد روی فرانت، API را روی 3000 هدف بگیر
+        const protocol = loc.protocol || 'http:';
+        API_BASE_URL = `${protocol}//${host}:3000`;
+      } else {
+        // SSR توسعه
+        API_BASE_URL = 'http://localhost:3000';
+      }
+    } catch {
+      API_BASE_URL = 'http://localhost:3000';
+    }
   }
 }
 
