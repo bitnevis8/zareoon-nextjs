@@ -5,14 +5,19 @@ import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
+import { getProductStockClass, calculateAvailableStock } from "@/app/utils/stockUtils";
+import CartStatusBanner from "@/app/components/CartStatusBanner";
 
 export default function CatalogItemPage({ params }) {
   // Next.js 15: params is a Promise; unwrap with React.use()
   const { id } = usePromise(params);
   const auth = useAuth();
   const userPhone = auth?.user?.mobile || auth?.user?.phone || null;
+  const isAdmin = auth?.user?.roles?.some(role => role.nameEn === 'Administrator') || false;
   const [item, setItem] = useState(null);
   const [children, setChildren] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [inventoryLots, setInventoryLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lots, setLots] = useState([]);
   // سفارش‌دهی به‌ازای هر بار در ردیف‌ها انجام می‌شود
@@ -112,17 +117,35 @@ export default function CatalogItemPage({ params }) {
     if (!id) return;
     (async () => {
       try {
-        const [ri, rc, rl] = await Promise.all([
+        const [ri, rc, rl, rall] = await Promise.all([
           fetch(API_ENDPOINTS.farmer.products.getById(id), { cache: "no-store" }),
           fetch(`${API_ENDPOINTS.farmer.products.getAll}?parentId=${id}`, { cache: "no-store" }),
           fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.farmer.products.getAll, { cache: "no-store" }),
         ]);
         const di = await ri.json();
         const dc = await rc.json();
         const dl = await rl.json();
+        const dall = await rall.json();
         setItem(di.data || null);
         setChildren(dc.data || []);
         setLots(dl.data || []);
+        setInventoryLots(dl.data || []);
+        setAllProducts(dall.data || []);
+        
+        // Debug: Check inventory lots
+        console.log('Inventory lots loaded:', dl.data?.length || 0);
+        const wheatLots = dl.data?.filter(lot => lot.productId === 1101) || [];
+        console.log('Wheat bread lots:', wheatLots.map(lot => `${lot.qualityGrade}: ${lot.totalQuantity}kg`));
+        
+        // Debug: Check children
+        console.log('Children loaded:', dc.data?.length || 0);
+        console.log('Children:', dc.data?.map(ch => `${ch.name} (${ch.id}, orderable: ${ch.isOrderable})`));
+        
+        // Debug: Check all products
+        console.log('All products loaded:', dall.data?.length || 0);
+        const wheatProducts = dall.data?.filter(p => p.parentId === 1001) || [];
+        console.log('Wheat products in allProducts:', wheatProducts.map(p => `${p.name} (${p.id})`));
         // After loading product data, fetch cart info to display user's existing amount for this product
         fetchCart();
       } finally {
@@ -203,10 +226,11 @@ export default function CatalogItemPage({ params }) {
 
   return (
     <main className="max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-8">
+      <CartStatusBanner />
       <div className="text-sm text-slate-500"><Link href="/">صفحه اصلی</Link> / {item?.name || "..."}</div>
 
       {/* Header: image on the right, title on the left of the image (RTL-friendly) */}
-      <section className="bg-white rounded-xl shadow border p-4">
+      <section className={`bg-white rounded-xl shadow border p-4 ${item ? getProductStockClass(item, allProducts, inventoryLots) : ''}`}>
         <div className="flex items-center gap-4 flex-row-reverse">
           <div className="shrink-0">
             <ProductImage slug={item?.slug} imageUrl={item?.imageUrl} alt={item?.name || "item"} width={96} height={96} />
@@ -253,6 +277,34 @@ export default function CatalogItemPage({ params }) {
           </div>
         </div>
       </section>
+
+      {/* Category stock summary (for non-orderable items) */}
+      {!item?.isOrderable && children.length > 0 && (
+        <section className="bg-white rounded-xl shadow border p-4">
+          <h2 className="text-lg font-semibold mb-3">وضعیت موجودی کل</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="bg-slate-50 rounded-md border p-3">
+              <div className="text-xs text-slate-500">کل موجودی</div>
+              <div className="text-lg font-semibold">
+                {children.reduce((sum, ch) => {
+                  const stock = calculateAvailableStock(ch, allProducts, inventoryLots);
+                  return sum + stock;
+                }, 0).toLocaleString()} کیلوگرم
+              </div>
+            </div>
+            <div className="bg-slate-50 rounded-md border p-3">
+              <div className="text-xs text-slate-500">تعداد محصولات</div>
+              <div className="text-lg font-semibold">{children.length} محصول</div>
+            </div>
+            <div className="bg-slate-50 rounded-md border p-3">
+              <div className="text-xs text-slate-500">محصولات دارای موجودی</div>
+              <div className="text-lg font-semibold">
+                {children.filter(ch => calculateAvailableStock(ch, allProducts, inventoryLots) > 0).length} محصول
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Inventory summary (if any) */}
       {filteredLots.length > 0 && (
@@ -326,6 +378,7 @@ export default function CatalogItemPage({ params }) {
                   <th className="p-2">وضعیت</th>
                   <th className="p-2">ویژگی‌ها</th>
                   <th className="p-2">رسانه</th>
+                  {isAdmin && <th className="p-2">تامین‌کننده</th>}
                   <th className="p-2">درخواست</th>
                 </tr>
               </thead>
@@ -379,6 +432,18 @@ export default function CatalogItemPage({ params }) {
                         );
                       })()}
                     </td>
+                    {isAdmin && (
+                      <td className="p-2">
+                        {l.farmer ? (
+                          <div className="text-sm">
+                            <div className="font-medium">{l.farmer.firstName} {l.farmer.lastName}</div>
+                            <div className="text-gray-500 text-xs">{l.farmer.username}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                    )}
                     <td className="p-2">
                       <div className="flex items-center gap-2">
                         <input
@@ -401,22 +466,22 @@ export default function CatalogItemPage({ params }) {
                             if (v > available + 1e-9) { setOrderMsgType('error'); setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${l.unit||''}`); return; }
                             setPlacingLotId(l.id);
                             try {
-                              const payload = { productId: productIdNum, qualityGrade: l.qualityGrade, quantity: Number(v.toFixed(3)), unit: l.unit || item?.unit || null };
+                              const payload = { productId: productIdNum, inventoryLotId: l.id, qualityGrade: l.qualityGrade, quantity: Number(v.toFixed(3)), unit: l.unit || item?.unit || null };
                               const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
                               const j = await res.json();
-                              if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به سبد');
+                              if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به بار');
                               setOrderMsgType('success');
                               const contactNote = userPhone ? ` (${userPhone})` : '';
-                              setOrderMsg(`به سبد خرید اضافه شد. رزرو توسط مدیریت انجام می‌شود و برای تایید نهایی با شما تماس می‌گیریم${contactNote}.`);
+                              setOrderMsg(`به بار اضافه شد. رزرو توسط مدیریت انجام می‌شود و برای تایید نهایی با شما تماس می‌گیریم${contactNote}. شما می‌توانید از بالای صفحه یا از داشبورد بخش بار، سفارشات خود را مشاهده کرده و ثبت بار را بزنید. با زدن ثبت بار، بار رزرو نمی‌شود ولی با مشتری تماس گرفته می‌شود جهت رزرو شدن بار. تماس پشتیبانی: 09393387148`);
                               // refresh cart badge for this product
                               fetchCart();
                             } catch (e) {
-                              setOrderMsgType('error'); setOrderMsg(e.message || 'خطا در افزودن به سبد');
+                              setOrderMsgType('error'); setOrderMsg(e.message || 'خطا در افزودن به بار');
                             } finally {
                               setPlacingLotId(null);
                             }
                           }}
-                        >{placingLotId === l.id ? '...' : 'افزودن به سبد'}</button>
+                        >{placingLotId === l.id ? '...' : 'افزودن به بار'}</button>
                       </div>
                     </td>
                   </tr>
@@ -468,12 +533,37 @@ export default function CatalogItemPage({ params }) {
         <section>
           <h2 className="text-lg font-semibold mb-3">محصولات</h2>
           <div className="space-y-2">
-            {children.map((ch) => (
-              <Link key={ch.id} href={`/catalog/${ch.id}`} className="flex items-center justify-between bg-white rounded-lg shadow p-3 border hover:bg-slate-50">
-                <div className="font-medium text-slate-800">{ch.name}</div>
-                <span className="text-xs text-slate-400">مشاهده</span>
-              </Link>
-            ))}
+            {children.map((ch) => {
+              // محاسبه موجودی برای هر محصول/دسته
+              const availableStock = calculateAvailableStock(ch, allProducts, inventoryLots);
+              console.log(`Child ${ch.name} (${ch.id}): availableStock = ${availableStock}`);
+              
+              // Debug: Check inventory lots for this product
+              if (ch.isOrderable) {
+                const productLots = inventoryLots.filter(lot => lot.productId === ch.id);
+                console.log(`Debug ${ch.name}:`, productLots.map(lot => ({
+                  id: lot.id,
+                  totalQuantity: lot.totalQuantity,
+                  reservedQuantity: lot.reservedQuantity,
+                  totalParsed: parseFloat(lot.totalQuantity || 0),
+                  reservedParsed: parseFloat(lot.reservedQuantity || 0)
+                })));
+              }
+              
+              return (
+                <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between bg-white rounded-lg shadow p-3 border hover:bg-slate-50 ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : ''}`}>
+                  <div className="font-medium text-slate-800">{ch.name}</div>
+                  <div className="flex items-center gap-2">
+                    {availableStock > 0 && (
+                      <span className="text-xs text-green-600 font-medium">
+                        {availableStock.toLocaleString()} کیلوگرم
+                      </span>
+                    )}
+                    <span className="text-xs text-slate-400">مشاهده</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}

@@ -41,6 +41,11 @@ const baseMenuItems = [
       { title: 'سفارش‌ها', path: '/dashboard/farmer/orders', icon: '🧾' },
     ],
   },
+  {
+    title: 'مدیریت سفارشات',
+    path: '/dashboard/order-management',
+    icon: '📋',
+  },
 ];
 
 export default function Sidebar({ onLinkClick }) {

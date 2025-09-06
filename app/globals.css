@@ -122,3 +122,36 @@ body {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Stock status color classes */
+.stock-empty {
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  color: #333;
+}
+
+.stock-low {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.stock-medium {
+  background-color: #28a745;
+  color: white !important;
+  border: 1px solid #1e7e34;
+}
+
+.stock-medium * {
+  color: white !important;
+}
+
+.stock-high {
+  background-color: #155724;
+  color: white !important;
+  border: 1px solid #0f5132;
+}
+
+.stock-high * {
+  color: white !important;
+}

@@ -20,13 +20,17 @@ export default function OrdersPage() {
   const [products, setProducts] = useState([]);
   const statusToFa = { pending: 'در انتظار', reserved: 'رزرو شده', completed: 'تکمیل‌شده', cancelled: 'لغو شده' };
   const itemStatusToFa = {
+    pending: 'در انتظار',
+    approved: 'تایید شده',
     assigned: 'محول‌شده',
     reviewing: 'در حال بررسی',
     preparing: 'در حال آماده‌سازی',
+    processing: 'در حال پردازش',
     ready: 'آماده تحویل',
     shipped: 'ارسال شد',
     delivered: 'تحویل شد',
-    cancelled: 'لغو'
+    cancelled: 'لغو',
+    rejected: 'رد شده'
   };
   const [cart, setCart] = useState(null);
 
@@ -97,8 +101,7 @@ export default function OrdersPage() {
           <thead>
             <tr className="bg-gray-100 text-gray-700">
               <th className="p-2">ID</th>
-              <th className="p-2">جزئیات سفارش</th>
-              <th className="p-2">وضعیت</th>
+              <th className="p-2">آیتم‌های تخصیص یافته</th>
               <th className="p-2">تاریخ</th>
             </tr>
           </thead>
@@ -114,18 +117,33 @@ export default function OrdersPage() {
                     }}>{o.id}</button>
                   </td>
                   <td className="p-2 text-xs text-slate-700">
-                    {(o.items||[]).map(it => {
-                      const prod = it.inventoryLot?.product?.name || `#${it.inventoryLot?.productId||''}`;
-                      const grade = it.inventoryLot?.qualityGrade || '';
-                      return `${prod}${grade?` - درجه ${grade}`:''}: ${it.quantity}`;
-                    }).join(' | ')}
+                    <div className="space-y-1">
+                      {(o.items||[]).map((it, index) => {
+                        const prod = it.inventoryLot?.product?.name || `#${it.inventoryLot?.productId||''}`;
+                        const grade = it.inventoryLot?.qualityGrade || '';
+                        const status = itemStatusToFa[it.status] || it.status;
+                        return (
+                          <div key={index} className="flex justify-between items-center bg-blue-50 p-2 rounded">
+                            <span>{prod}{grade?` - درجه ${grade}`:''}: {it.quantity}</span>
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              it.status === 'approved' ? 'bg-green-100 text-green-800' :
+                              it.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                              it.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                              it.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {status}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </td>
-                  <td className="p-2">{statusToFa[o.status] || o.status}</td>
                   <td className="p-2">{o.createdAt ? new Date(o.createdAt).toLocaleString('fa-IR') : '—'}</td>
                 </tr>
                 {expandedOrderId === o.id ? (
                   <tr>
-                    <td colSpan={4} className="bg-slate-50 p-3">
+                    <td colSpan={3} className="bg-slate-50 p-3">
                       {loadingItems ? (
                         <div className="text-sm text-slate-500">در حال بارگذاری آیتم‌ها...</div>
                       ) : orderItems.length === 0 ? (

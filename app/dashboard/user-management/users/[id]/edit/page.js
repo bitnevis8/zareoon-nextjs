@@ -20,6 +20,7 @@ const EditUserPage = () => {
     phone: "",
     businessName: "",
     businessContactInfo: "",
+    password: "",
     roleIds: [],
     avatar: ""
   });
@@ -33,9 +34,11 @@ const EditUserPage = () => {
         const userResponse = await fetch(API_ENDPOINTS.users.getById(id));
         const userData = await userResponse.json();
         if (userData.success) {
-          const roleIds = userData.data.roles ? userData.data.roles.map(role => role.id) : [];
+          console.log('Full user data:', userData.data);
           console.log('User roles:', userData.data.roles);
+          const roleIds = userData.data.roles ? userData.data.roles.map(role => parseInt(role.id, 10)) : [];
           console.log('Role IDs:', roleIds);
+          console.log('Role IDs type:', typeof roleIds[0]);
           setFormData({
             firstName: userData.data.firstName || "",
             lastName: userData.data.lastName || "",
@@ -45,6 +48,7 @@ const EditUserPage = () => {
             phone: userData.data.phone || "",
             businessName: userData.data.businessName || "",
             businessContactInfo: userData.data.businessContactInfo || "",
+            password: "", // رمز عبور خالی برای ویرایش
             roleIds: roleIds,
             avatar: userData.data.avatar || "",
           });
@@ -91,8 +95,8 @@ const EditUserPage = () => {
 
   const handleRoleChange = (e) => {
     const selectedRoleIds = Array.from(e.target.selectedOptions)
-      .filter((option) => option.selected)
       .map((option) => parseInt(option.value, 10));
+    console.log('Selected role IDs:', selectedRoleIds);
     setFormData({ ...formData, roleIds: selectedRoleIds });
   };
 
@@ -109,12 +113,18 @@ const EditUserPage = () => {
     setSubmitting(true);
     setError(null);
     try {
+      // اگر رمز عبور خالی است، آن را از داده‌ها حذف کن
+      const submitData = { ...formData };
+      if (!submitData.password || submitData.password.trim() === "") {
+        delete submitData.password;
+      }
+
       const response = await fetch(API_ENDPOINTS.users.update(id), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       const result = await response.json();
@@ -226,13 +236,25 @@ const EditUserPage = () => {
                         value={formData.email}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        required
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">رمز عبور جدید</label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="برای تغییر رمز عبور، رمز جدید وارد کنید"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">اگر رمز عبور را تغییر نمی‌دهید، این فیلد را خالی بگذارید</p>
+                  </div>
                   <div>
                     <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">موبایل</label>
                     <input
@@ -244,6 +266,9 @@ const EditUserPage = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">تلفن</label>
                     <input
@@ -255,9 +280,6 @@ const EditUserPage = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">نام کسب‌وکار</label>
                     <input
@@ -269,6 +291,9 @@ const EditUserPage = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="businessContactInfo" className="block text-sm font-medium text-gray-700 mb-2">اطلاعات تماس کسب‌وکار</label>
                     <input
@@ -302,6 +327,8 @@ const EditUserPage = () => {
                     ))}
                   </select>
                   <p className="mt-1 text-xs text-gray-500">برای انتخاب چندگانه، Ctrl (یا Cmd) را نگه دارید و کلیک کنید.</p>
+                  <p className="mt-1 text-xs text-blue-600">نقش‌های فعلی کاربر به طور خودکار انتخاب شده‌اند</p>
+                  <p className="mt-1 text-xs text-gray-500">Debug: Current roleIds = {JSON.stringify(formData.roleIds)}</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse pt-6 border-t border-gray-200">
