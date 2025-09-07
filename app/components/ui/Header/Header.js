@@ -6,7 +6,7 @@ import AuthButtons from '../../AuthButtons';
 
 export default function Header() {
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[9999]">
+    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[10002]">
       <div className="w-full">
         <div className="flex justify-between items-center h-16 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
