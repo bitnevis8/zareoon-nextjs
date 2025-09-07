@@ -3,6 +3,7 @@ import "./globals.css";
 import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/ui/Header/Header";
+import MobileBottomBarWrapper from "./components/ui/MobileBottomBarWrapper";
 import StructuredData from "./components/StructuredData";
 
 const vazirmatn = Vazirmatn({ 
@@ -85,12 +86,15 @@ export default function RootLayout({ children }) {
           <Header />
 
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 pb-20 md:pb-0">
             {children}
           </main>
 
           {/* Footer */}
           <Footer />
+
+          {/* Mobile Bottom Bar */}
+          <MobileBottomBarWrapper />
         </AuthProvider>
       </body>
     </html>

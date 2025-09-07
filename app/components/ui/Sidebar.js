@@ -38,7 +38,7 @@ const baseMenuItems = [
       { title: 'محصولات', path: '/dashboard/farmer/products', icon: '🍎' },
       { title: 'ویژگی‌های سفارشی', path: '/dashboard/farmer/attributes', icon: '🔖' },
       { title: 'موجودی‌ها', path: '/dashboard/farmer/inventory', icon: '📦' },
-      { title: 'مدیریت سفارشات', path: '/dashboard/order-management', icon: '📋' },
+      { title: 'سفارش‌ها', path: '/dashboard/order-management', icon: '📋' },
     ],
   },
 ];
@@ -73,7 +73,7 @@ export default function Sidebar({ onLinkClick }) {
       const cloned = JSON.parse(JSON.stringify(baseMenuItems));
       const supply = cloned.find(mi => mi.title === 'مدیریت تامین');
       if (supply && Array.isArray(supply.submenu)) {
-        const ord = supply.submenu.find(si => si.title === 'مدیریت سفارشات');
+        const ord = supply.submenu.find(si => si.title === 'سفارش‌ها');
         if (ord) ord.path = '/dashboard/admin/orders';
       }
       return cloned;
@@ -87,7 +87,7 @@ export default function Sidebar({ onLinkClick }) {
           icon: '🌾',
           submenu: [
             { title: 'موجودی‌های من', path: '/dashboard/farmer/inventory', icon: '📦' },
-            { title: 'مدیریت سفارشات', path: '/dashboard/order-management', icon: '📋' },
+            { title: 'سفارش‌ها', path: '/dashboard/order-management', icon: '📋' },
           ]
         }
       ];

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import MobileMenu from '../../MobileMenu';
 import AuthButtons from '../../AuthButtons';
 
 export default function Header() {
@@ -71,10 +70,6 @@ export default function Header() {
             </div>
           </nav>
 
-          {/* Mobile Menu */}
-          <div className="md:hidden">
-            <MobileMenu />
-          </div>
         </div>
       </div>
     </header>
