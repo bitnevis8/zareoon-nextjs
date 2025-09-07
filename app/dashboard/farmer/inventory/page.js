@@ -221,10 +221,10 @@ export default function InventoryLotsPage() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">موجودی‌ها</h1>
-      <form onSubmit={create} className="bg-white p-4 rounded-md shadow mb-6 grid grid-cols-1 md:grid-cols-6 gap-2">
-        <div className="md:col-span-2">
+    <div className="p-2 sm:p-4">
+      <h1 className="text-lg sm:text-xl font-bold mb-4">موجودی‌ها</h1>
+      <form onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div className="sm:col-span-2 lg:col-span-2">
           <AsyncSelect
             cacheOptions
             defaultOptions={products.map(p => ({ value: p.id, label: p.name }))}
@@ -240,7 +240,7 @@ export default function InventoryLotsPage() {
           const isFarmer = roles.includes('farmer') || roles.includes('loader');
           if (isFarmer) return null;
           return (
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-2">
               <AsyncSelect
                 cacheOptions
                 defaultOptions
@@ -253,9 +253,9 @@ export default function InventoryLotsPage() {
             </div>
           );
         })()}
-        <input className="border p-2 rounded" placeholder="واحد" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
+        <input className="border p-2 rounded text-sm" placeholder="واحد" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
         <select
-          className="border p-2 rounded"
+          className="border p-2 rounded text-sm"
           value={form.qualityGrade}
           onChange={(e)=>setForm({...form, qualityGrade:e.target.value})}
         >
@@ -265,10 +265,10 @@ export default function InventoryLotsPage() {
           <option value="درجه 3">درجه 3</option>
           <option value="ضایعاتی">ضایعاتی</option>
         </select>
-        <input className="border p-2 rounded" placeholder="مقدار کل" value={form.totalQuantity} onChange={(e)=>setForm({...form, totalQuantity:e.target.value})} />
-        <input className="border p-2 rounded" placeholder="قیمت (اختیاری)" value={form.price} onChange={(e)=>setForm({...form, price:e.target.value})} />
+        <input className="border p-2 rounded text-sm" placeholder="مقدار کل" value={form.totalQuantity} onChange={(e)=>setForm({...form, totalQuantity:e.target.value})} />
+        <input className="border p-2 rounded text-sm" placeholder="قیمت (اختیاری)" value={form.price} onChange={(e)=>setForm({...form, price:e.target.value})} />
         <select
-          className="border p-2 rounded"
+          className="border p-2 rounded text-sm"
           value={form.status}
           onChange={(e)=>setForm({...form, status:e.target.value})}
           title="وضعیت"
@@ -307,27 +307,29 @@ export default function InventoryLotsPage() {
           </div>
         )}
 
-        <button disabled={saving} className="bg-blue-600 text-white rounded px-4">{saving?"...":"افزودن"}</button>
+        <button disabled={saving} className="w-full sm:w-auto bg-blue-600 text-white rounded px-4 py-2 text-sm">{saving?"...":"افزودن"}</button>
       </form>
 
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">ID</th>
-              <th className="p-2">محصول</th>
-              <th className="p-2">نام محصول</th>
-              <th className="p-2">تامین‌کننده</th>
-              <th className="p-2">کیفیت</th>
-              <th className="p-2">واحد</th>
-              <th className="p-2">کل</th>
-              <th className="p-2">رزرو</th>
-              <th className="p-2">قیمت</th>
-              <th className="p-2">وضعیت</th>
-              <th className="p-2">ویژگی‌ها</th>
-              <th className="p-2">عملیات</th>
-            </tr>
-          </thead>
+        {/* Desktop Table */}
+        <div className="hidden lg:block">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="bg-gray-100 text-gray-700">
+                <th className="p-2">ID</th>
+                <th className="p-2">محصول</th>
+                <th className="p-2">نام محصول</th>
+                <th className="p-2">تامین‌کننده</th>
+                <th className="p-2">کیفیت</th>
+                <th className="p-2">واحد</th>
+                <th className="p-2">کل</th>
+                <th className="p-2">رزرو</th>
+                <th className="p-2">قیمت</th>
+                <th className="p-2">وضعیت</th>
+                <th className="p-2">ویژگی‌ها</th>
+                <th className="p-2">عملیات</th>
+              </tr>
+            </thead>
           <tbody>
             {items.map((x)=> (
               <tr key={x.id} className="border-t">
@@ -363,6 +365,7 @@ export default function InventoryLotsPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Edit modal */}

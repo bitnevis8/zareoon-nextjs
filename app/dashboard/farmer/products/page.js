@@ -111,17 +111,17 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-2 sm:p-4">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold">مدیریت محصولات</h1>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <h1 className="text-lg sm:text-xl font-bold">مدیریت محصولات</h1>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           <input
             className="border rounded px-3 py-2 text-sm w-full sm:w-80"
             placeholder="جست‌وجوی جامع در نام، نام انگلیسی یا اسلاگ..."
             value={q}
             onChange={(e)=>setQ(e.target.value)}
           />
-          <button onClick={()=>load(q.trim())} className="border rounded px-3 py-2 text-sm">{searching? '...' : 'جست‌وجو'}</button>
+          <button onClick={()=>load(q.trim())} className="border rounded px-3 py-2 text-sm w-full sm:w-auto">{searching? '...' : 'جست‌وجو'}</button>
         </div>
       </div>
       <div className="mb-3">
@@ -132,67 +132,104 @@ export default function ProductsPage() {
           دانلود CSV نام انگلیسی محصولات/دسته‌ها
         </a>
       </div>
-      <form id="productForm" onSubmit={create} className="bg-white p-4 rounded-md shadow mb-6 grid grid-cols-1 md:grid-cols-5 gap-2">
-        <input className="border p-2 rounded" placeholder="نام" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
-        <select className="border p-2 rounded" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})}>
+      <form id="productForm" onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <input className="border p-2 rounded text-sm" placeholder="نام" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
+        <select className="border p-2 rounded text-sm" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})}>
           <option value="">بدون والد (دسته ریشه)</option>
           {categories.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <input className="border p-2 rounded" placeholder="واحد (اختیاری)" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
+        <input className="border p-2 rounded text-sm" placeholder="واحد (اختیاری)" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={form.isOrderable} onChange={(e)=>setForm({...form, isOrderable:e.target.checked})} />
           قابل سفارش
         </label>
-        <div className="flex items-center justify-end">
-          <button disabled={loading} type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-3 text-sm font-medium shadow-sm">
+        <div className="flex items-center justify-end sm:col-span-2 lg:col-span-1">
+          <button disabled={loading} type="submit" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2 sm:py-3 text-sm font-medium shadow-sm">
             {loading? '...' : 'افزودن'}
           </button>
         </div>
       </form>
 
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">ID</th>
-              <th className="p-2">نام</th>
-              <th className="p-2">نام انگلیسی</th>
-              <th className="p-2">والد</th>
-              <th className="p-2">قابل سفارش</th>
-              <th className="p-2">واحد</th>
-              <th className="p-2">عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayRows.map((x)=> (
-              <tr key={x.id} className={`border-t ${!x.parentId ? 'bg-amber-300' : (!x.isOrderable ? 'bg-gray-100' : '')}`}>
-                <td className="p-2">{x.id}</td>
-                <td className="p-2">
-                  {x.__depth ? <span className="text-slate-400">{Array(x.__depth).fill('— ').join('')}</span> : null}
-                  {x.name}
-                </td>
-                <td className="p-2">{x.englishName || '-'}</td>
-                <td className="p-2">{x.parentId ? (idToName.get(x.parentId) || x.parentId) : '-'}</td>
-                <td className="p-2">
-                  {x.isOrderable ? (
-                    <span className="text-emerald-600" title="قابل سفارش">✓</span>
-                  ) : (
-                    <span className="text-rose-600" title="غیرقابل سفارش">✗</span>
-                  )}
-                </td>
-                <td className="p-2">{x.unit || "-"}</td>
-                <td className="p-2">
-                  <div className="flex items-center gap-2 rtl:space-x-reverse">
-                    <Link href={`/catalog/${x.id}`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">مشاهده</Link>
-                    <Link href={`/dashboard/farmer/products/${x.id}/edit`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">ویرایش</Link>
-                    <Link href={`/dashboard/farmer/products/${x.id}/report`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50 text-blue-700 border-blue-200">گزارش</Link>
-                    <button onClick={()=>remove(x.id)} className="px-2 py-1 rounded border text-xs hover:bg-rose-50 text-rose-700 border-rose-200">حذف</button>
-                  </div>
-                </td>
+        {/* Desktop Table */}
+        <div className="hidden md:block">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="bg-gray-100 text-gray-700">
+                <th className="p-2">ID</th>
+                <th className="p-2">نام</th>
+                <th className="p-2">نام انگلیسی</th>
+                <th className="p-2">والد</th>
+                <th className="p-2">قابل سفارش</th>
+                <th className="p-2">واحد</th>
+                <th className="p-2">عملیات</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {displayRows.map((x)=> (
+                <tr key={x.id} className={`border-t ${!x.parentId ? 'bg-amber-300' : (!x.isOrderable ? 'bg-gray-100' : '')}`}>
+                  <td className="p-2">{x.id}</td>
+                  <td className="p-2">
+                    {x.__depth ? <span className="text-slate-400">{Array(x.__depth).fill('— ').join('')}</span> : null}
+                    {x.name}
+                  </td>
+                  <td className="p-2">{x.englishName || '-'}</td>
+                  <td className="p-2">{x.parentId ? (idToName.get(x.parentId) || x.parentId) : '-'}</td>
+                  <td className="p-2">
+                    {x.isOrderable ? (
+                      <span className="text-emerald-600" title="قابل سفارش">✓</span>
+                    ) : (
+                      <span className="text-rose-600" title="غیرقابل سفارش">✗</span>
+                    )}
+                  </td>
+                  <td className="p-2">{x.unit || "-"}</td>
+                  <td className="p-2">
+                    <div className="flex items-center gap-2 rtl:space-x-reverse">
+                      <Link href={`/catalog/${x.id}`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">مشاهده</Link>
+                      <Link href={`/dashboard/farmer/products/${x.id}/edit`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">ویرایش</Link>
+                      <Link href={`/dashboard/farmer/products/${x.id}/report`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50 text-blue-700 border-blue-200">گزارش</Link>
+                      <button onClick={()=>remove(x.id)} className="px-2 py-1 rounded border text-xs hover:bg-rose-50 text-rose-700 border-rose-200">حذف</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden">
+          {displayRows.map((x)=> (
+            <div key={x.id} className={`p-3 border-b border-gray-200 ${!x.parentId ? 'bg-amber-50' : (!x.isOrderable ? 'bg-gray-50' : '')}`}>
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">
+                    {x.__depth ? <span className="text-slate-400">{Array(x.__depth).fill('— ').join('')}</span> : null}
+                    {x.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">ID: {x.id}</p>
+                  {x.englishName && <p className="text-sm text-gray-600">انگلیسی: {x.englishName}</p>}
+                  {x.parentId && <p className="text-sm text-gray-600">والد: {idToName.get(x.parentId) || x.parentId}</p>}
+                  <p className="text-sm text-gray-600">
+                    قابل سفارش: {x.isOrderable ? (
+                      <span className="text-emerald-600">✓ بله</span>
+                    ) : (
+                      <span className="text-rose-600">✗ خیر</span>
+                    )}
+                  </p>
+                  {x.unit && <p className="text-sm text-gray-600">واحد: {x.unit}</p>}
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/catalog/${x.id}`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white">مشاهده</Link>
+                <Link href={`/dashboard/farmer/products/${x.id}/edit`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white">ویرایش</Link>
+                <Link href={`/dashboard/farmer/products/${x.id}/report`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 text-blue-700 border-blue-200 bg-white">گزارش</Link>
+                <button onClick={()=>remove(x.id)} className="px-3 py-1 rounded border text-xs hover:bg-rose-50 text-rose-700 border-rose-200 bg-white">حذف</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

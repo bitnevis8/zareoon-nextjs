@@ -112,9 +112,9 @@ export default function CartPage() {
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="p-2 sm:p-4 max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">بار</h1>
+        <h1 className="text-lg sm:text-xl font-bold">بار</h1>
         {userInfo && (
           <div className="text-sm text-slate-600">
             <span className="font-medium">
@@ -138,21 +138,21 @@ export default function CartPage() {
           ) : (
             <div className="space-y-3">
               {(cart.items||[]).map(it => (
-                <div key={it.id} className="flex items-center justify-between border rounded-lg p-3 bg-white">
-                  <div className="text-sm">
+                <div key={it.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border rounded-lg p-3 bg-white space-y-2 sm:space-y-0">
+                  <div className="text-sm flex-1">
                     <div className="font-medium">محصول #{it.productId}</div>
                     <div className="text-slate-600">درجه: {it.qualityGrade}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <input type="number" min="0" step="0.001" className="border rounded px-2 py-1 w-28" value={it.quantity}
+                    <input type="number" min="0" step="0.001" className="border rounded px-2 py-1 w-24 sm:w-28 text-sm" value={it.quantity}
                       onChange={(e)=>updateQty(it.id, e.target.value)} />
-                    <button className="text-rose-600" onClick={()=>remove(it.id)}>حذف</button>
+                    <button className="text-rose-600 text-sm" onClick={()=>remove(it.id)}>حذف</button>
                   </div>
                 </div>
               ))}
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 space-y-2 sm:space-y-0">
                 <div className="text-sm text-slate-600">تعداد آیتم: {totalItems}</div>
-                <button className="bg-emerald-600 text-white rounded px-4 py-2" onClick={checkout}>ثبت بار</button>
+                <button className="w-full sm:w-auto bg-emerald-600 text-white rounded px-4 py-2 text-sm" onClick={checkout}>ثبت بار</button>
               </div>
             </div>
           )}
@@ -176,13 +176,13 @@ export default function CartPage() {
             </div>
             
             {/* دکمه نمایش سفارشات */}
-            <div className="flex justify-center space-x-4">
+            <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
               <button 
                 onClick={() => {
                   setShowOrders(!showOrders);
                   if (!showOrders) loadOrders();
                 }}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
                 {showOrders ? 'مخفی کردن سفارشات' : 'مشاهده سفارشات ثبت شده'}
               </button>
@@ -201,7 +201,7 @@ export default function CartPage() {
                     alert(`Test error: ${error.message}`);
                   }
                 }}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
               >
                 تست API
               </button>
@@ -220,7 +220,7 @@ export default function CartPage() {
                     alert(`Auth error: ${error.message}`);
                   }
                 }}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
               >
                 تست Auth
               </button>

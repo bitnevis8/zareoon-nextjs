@@ -90,41 +90,41 @@ export default function OrdersPage() {
   if (auth?.loading) return <div className="p-6">در حال بررسی دسترسی...</div>;
   if (!isSupplier) return null;
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">سفارش‌ها (تامین‌کننده)</h1>
+    <div className="p-2 sm:p-4">
+      <h1 className="text-lg sm:text-xl font-bold mb-4">سفارش‌ها (تامین‌کننده)</h1>
 
       {/* Supplier cannot access customer cart; section removed */}
 
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <h2 className="text-lg font-semibold p-4 pb-0">گزارش سفارشات</h2>
+        <h2 className="text-base sm:text-lg font-semibold p-2 sm:p-4 pb-0">گزارش سفارشات</h2>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">ID</th>
-              <th className="p-2">آیتم‌های تخصیص یافته</th>
-              <th className="p-2">تاریخ</th>
+              <th className="p-1 sm:p-2 text-xs sm:text-sm">ID</th>
+              <th className="p-1 sm:p-2 text-xs sm:text-sm">آیتم‌های تخصیص یافته</th>
+              <th className="p-1 sm:p-2 text-xs sm:text-sm hidden sm:table-cell">تاریخ</th>
             </tr>
           </thead>
           <tbody>
             {orders.map(o=> (
               <Fragment key={o.id}>
                 <tr className="border-t">
-                  <td className="p-2">
-                    <button className="text-blue-600 underline" onClick={async ()=>{
+                  <td className="p-1 sm:p-2">
+                    <button className="text-blue-600 underline text-xs sm:text-sm" onClick={async ()=>{
                       if (expandedOrderId === o.id) { setExpandedOrderId(null); setOrderItems([]); return; }
                       setExpandedOrderId(o.id);
                       await loadOrderItems(o.id);
                     }}>{o.id}</button>
                   </td>
-                  <td className="p-2 text-xs text-slate-700">
+                  <td className="p-1 sm:p-2 text-xs text-slate-700">
                     <div className="space-y-1">
                       {(o.items||[]).map((it, index) => {
                         const prod = it.inventoryLot?.product?.name || `#${it.inventoryLot?.productId||''}`;
                         const grade = it.inventoryLot?.qualityGrade || '';
                         const status = itemStatusToFa[it.status] || it.status;
                         return (
-                          <div key={index} className="flex justify-between items-center bg-blue-50 p-2 rounded">
-                            <span>{prod}{grade?` - درجه ${grade}`:''}: {it.quantity}</span>
+                          <div key={index} className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-blue-50 p-2 rounded space-y-1 sm:space-y-0">
+                            <span className="text-xs">{prod}{grade?` - درجه ${grade}`:''}: {it.quantity}</span>
                             <span className={`px-2 py-1 rounded text-xs ${
                               it.status === 'approved' ? 'bg-green-100 text-green-800' :
                               it.status === 'processing' ? 'bg-blue-100 text-blue-800' :
@@ -139,7 +139,7 @@ export default function OrdersPage() {
                       })}
                     </div>
                   </td>
-                  <td className="p-2">{o.createdAt ? new Date(o.createdAt).toLocaleString('fa-IR') : '—'}</td>
+                  <td className="p-1 sm:p-2 text-xs hidden sm:table-cell">{o.createdAt ? new Date(o.createdAt).toLocaleString('fa-IR') : '—'}</td>
                 </tr>
                 {expandedOrderId === o.id ? (
                   <tr>

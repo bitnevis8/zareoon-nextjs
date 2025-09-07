@@ -76,9 +76,9 @@ export default function AttributesPage() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">ویژگی‌های سفارشی</h1>
-      <form onSubmit={create} className="bg-white p-4 rounded-md shadow mb-6 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div className="p-2 sm:p-4">
+      <h1 className="text-lg sm:text-xl font-bold mb-4">ویژگی‌های سفارشی</h1>
+      <form onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         <select className="border p-2 rounded" value={form.scope} onChange={(e)=>setForm({...form, scope:e.target.value, categoryId:"", productId:""})}>
           <option value="category">برای دسته‌بندی</option>
           <option value="product">برای محصول</option>
@@ -106,15 +106,15 @@ export default function AttributesPage() {
             value={form.productId ? { value: form.productId, label: products.find(p=>p.id===Number(form.productId))?.name || `#${form.productId}` } : null}
           />
         )}
-        <input className="border p-2 rounded" placeholder="نام ویژگی" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
-        <select className="border p-2 rounded" value={form.type} onChange={(e)=>setForm({...form, type:e.target.value, options: [], optionsInput: ""})}>
+        <input className="border p-2 rounded text-sm" placeholder="نام ویژگی" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
+        <select className="border p-2 rounded text-sm" value={form.type} onChange={(e)=>setForm({...form, type:e.target.value, options: [], optionsInput: ""})}>
           <option value="text">متن</option>
           <option value="number">عدد</option>
           <option value="boolean">بولین</option>
           <option value="date">تاریخ</option>
           <option value="select">انتخابی</option>
         </select>
-        <div />
+        <div className="sm:col-span-2 lg:col-span-1" />
         {form.type === 'select' && (
           <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-6 gap-2 border-t pt-2">
             <div className="md:col-span-3 flex gap-2">
@@ -153,44 +153,79 @@ export default function AttributesPage() {
             )}
           </div>
         )}
-        <button className="bg-blue-600 text-white rounded px-4">افزودن</button>
+        <button className="w-full sm:w-auto bg-blue-600 text-white rounded px-4 py-2 text-sm">افزودن</button>
       </form>
 
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">ID</th>
-              <th className="p-2">دسته/محصول</th>
-              <th className="p-2">نام</th>
-              <th className="p-2">نوع</th>
-              <th className="p-2">گزینه‌ها</th>
-              <th className="p-2">عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {defs.map(d=> (
-              <tr key={d.id} className="border-t">
-                <td className="p-2">{d.id}</td>
-                <td className="p-2">{
-                  d.productId
-                    ? (productIdToName.get(d.productId) || `محصول #${d.productId}`)
-                    : d.categoryId
-                      ? (categoryIdToName.get(d.categoryId) || `دسته #${d.categoryId}`)
-                      : '—'
-                }</td>
-                <td className="p-2">{d.name}</td>
-                <td className="p-2">{d.type}</td>
-                <td className="p-2">{Array.isArray(d.options) && d.options.length ? d.options.map(o => (typeof o === 'object' ? (o.label ?? o.value) : String(o))).join('، ') : '—'}</td>
-                <td className="p-2 flex gap-3">
-                  <Link href={`/dashboard/farmer/attributes/${d.id}/view`} className="text-blue-600">مشاهده</Link>
-                  <Link href={`/dashboard/farmer/attributes/${d.id}/edit`} className="text-amber-600">ویرایش</Link>
-                  <button onClick={()=>remove(d.id)} className="text-red-600">حذف</button>
-                </td>
+        {/* Desktop Table */}
+        <div className="hidden md:block">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="bg-gray-100 text-gray-700">
+                <th className="p-2">ID</th>
+                <th className="p-2">دسته/محصول</th>
+                <th className="p-2">نام</th>
+                <th className="p-2">نوع</th>
+                <th className="p-2">گزینه‌ها</th>
+                <th className="p-2">عملیات</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {defs.map(d=> (
+                <tr key={d.id} className="border-t">
+                  <td className="p-2">{d.id}</td>
+                  <td className="p-2">{
+                    d.productId
+                      ? (productIdToName.get(d.productId) || `محصول #${d.productId}`)
+                      : d.categoryId
+                        ? (categoryIdToName.get(d.categoryId) || `دسته #${d.categoryId}`)
+                        : '—'
+                  }</td>
+                  <td className="p-2">{d.name}</td>
+                  <td className="p-2">{d.type}</td>
+                  <td className="p-2">{Array.isArray(d.options) && d.options.length ? d.options.map(o => (typeof o === 'object' ? (o.label ?? o.value) : String(o))).join('، ') : '—'}</td>
+                  <td className="p-2 flex gap-3">
+                    <Link href={`/dashboard/farmer/attributes/${d.id}/view`} className="text-blue-600">مشاهده</Link>
+                    <Link href={`/dashboard/farmer/attributes/${d.id}/edit`} className="text-amber-600">ویرایش</Link>
+                    <button onClick={()=>remove(d.id)} className="text-red-600">حذف</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden">
+          {defs.map(d=> (
+            <div key={d.id} className="p-3 border-b border-gray-200">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{d.name}</h3>
+                  <p className="text-sm text-gray-600">ID: {d.id}</p>
+                  <p className="text-sm text-gray-600">
+                    {d.productId
+                      ? `محصول: ${productIdToName.get(d.productId) || `#${d.productId}`}`
+                      : d.categoryId
+                        ? `دسته: ${categoryIdToName.get(d.categoryId) || `#${d.categoryId}`}`
+                        : 'بدون دسته/محصول'
+                    }
+                  </p>
+                  <p className="text-sm text-gray-600">نوع: {d.type}</p>
+                  {Array.isArray(d.options) && d.options.length > 0 && (
+                    <p className="text-sm text-gray-600">گزینه‌ها: {d.options.map(o => (typeof o === 'object' ? (o.label ?? o.value) : String(o))).join('، ')}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/dashboard/farmer/attributes/${d.id}/view`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white text-blue-600">مشاهده</Link>
+                <Link href={`/dashboard/farmer/attributes/${d.id}/edit`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white text-amber-600">ویرایش</Link>
+                <button onClick={()=>remove(d.id)} className="px-3 py-1 rounded border text-xs hover:bg-rose-50 text-red-600 bg-white">حذف</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

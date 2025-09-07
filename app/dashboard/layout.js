@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from '../components/ui/Sidebar';
+import MobileBottomBar from '../components/ui/MobileBottomBar';
 import { useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "../context/AuthContext";
@@ -101,44 +102,28 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
-      {/* Mobile Sidebar Toggle Button */}
-      <button
-        className="md:hidden fixed top-4 right-4 z-50 p-2 rounded-md bg-gray-800 text-white"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        {isSidebarOpen ? (
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        )}
-      </button>
+    <div className="flex h-screen bg-gray-100">
+      {/* Desktop Sidebar - Always visible on desktop */}
+      <aside className="hidden md:block w-64 flex-shrink-0 bg-white border-r border-gray-200">
+        <Sidebar onLinkClick={() => {}} />
+      </aside>
 
-      {/* Overlay for mobile sidebar */}
+      {/* Mobile Sidebar - Slide in from right */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="md:hidden fixed inset-0 z-50"
           onClick={() => setIsSidebarOpen(false)}
-        ></div>
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-50" />
+          <aside className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+            <Sidebar onLinkClick={() => setIsSidebarOpen(false)} />
+          </aside>
+        </div>
       )}
-
-      {/* Sidebar */}
-      <aside
-        className={`transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
-          fixed top-0 right-0 h-full w-64 bg-white text-slate-800 z-50 md:relative md:translate-x-0 md:w-64 md:flex-shrink-0 border-l border-gray-200`}
-      >
-        <Sidebar onLinkClick={() => setIsSidebarOpen(false)} />
-      </aside>
       
       {/* Main content */}
-      <main className={`flex-1 overflow-y-auto p-4 md:p-6 transition-all duration-300 ease-in-out
-        ${isSidebarOpen ? 'md:mr-64' : 'md:mr-0'}`}
-      >
+      <main className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="p-4 md:p-6 pb-20 md:pb-6">
         {/* دکمه خروج به منوی هدر منتقل شد */}
         {user && user.email && !user.isEmailVerified && (
           <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
@@ -181,7 +166,14 @@ export default function DashboardLayout({ children }) {
           </div>
         )}
         {children}
+        </div>
       </main>
+
+      {/* Mobile Bottom Bar */}
+      <MobileBottomBar 
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        isSidebarOpen={isSidebarOpen}
+      />
     </div>
   );
 }
