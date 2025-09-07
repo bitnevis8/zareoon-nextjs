@@ -1,18 +1,15 @@
 "use client";
 
 import Sidebar from '../components/ui/Sidebar';
-import MobileBottomBar from '../components/ui/MobileBottomBar';
 import { useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "../context/AuthContext";
-import { useSidebar } from "../context/SidebarContext";
 
 export default function DashboardLayout({ children }) {
   const [emailVerificationCode, setEmailVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState(null);
   const [verificationSuccess, setVerificationSuccess] = useState(null);
   const [resendLoading, setResendLoading] = useState(false);
-  const { isSidebarOpen, closeSidebar } = useSidebar();
 
   const auth = useAuth();
   const { user, loading, setUser } = auth || { user: null, loading: false, setUser: undefined };
@@ -109,19 +106,6 @@ export default function DashboardLayout({ children }) {
         <Sidebar onLinkClick={() => {}} />
       </aside>
 
-      {/* Mobile Sidebar - Slide in from right */}
-      {isSidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-[9999]"
-          onClick={closeSidebar}
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-50" />
-          <aside className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-[10000]">
-            <Sidebar onLinkClick={closeSidebar} />
-          </aside>
-        </div>
-      )}
-      
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-gray-100">
         <div className="p-4 md:p-6 pb-20 md:pb-6">
@@ -169,12 +153,6 @@ export default function DashboardLayout({ children }) {
         {children}
         </div>
       </main>
-
-      {/* Mobile Bottom Bar */}
-      <MobileBottomBar 
-        onMenuClick={() => {}} 
-        isSidebarOpen={isSidebarOpen}
-      />
     </div>
   );
 }

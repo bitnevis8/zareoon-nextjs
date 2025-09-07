@@ -1,20 +1,31 @@
 'use client';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 const SidebarContext = createContext();
 
 export function SidebarProvider({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
-  const toggleSidebar = () => {
+  // Close sidebar when navigating to a different page
+  useEffect(() => {
+    console.log('Pathname changed, closing sidebar:', pathname);
+    setIsSidebarOpen(false);
+  }, [pathname]);
+
+  const toggleSidebar = useCallback(() => {
     console.log('Toggling sidebar, current state:', isSidebarOpen);
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+    setIsSidebarOpen(prev => {
+      console.log('Previous state:', prev, 'New state:', !prev);
+      return !prev;
+    });
+  }, [isSidebarOpen]);
 
-  const closeSidebar = () => {
+  const closeSidebar = useCallback(() => {
     console.log('Closing sidebar');
     setIsSidebarOpen(false);
-  };
+  }, []);
 
   return (
     <SidebarContext.Provider value={{
