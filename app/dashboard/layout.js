@@ -5,13 +5,14 @@ import MobileBottomBar from '../components/ui/MobileBottomBar';
 import { useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "../context/AuthContext";
+import { useSidebar } from "../context/SidebarContext";
 
 export default function DashboardLayout({ children }) {
   const [emailVerificationCode, setEmailVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState(null);
   const [verificationSuccess, setVerificationSuccess] = useState(null);
   const [resendLoading, setResendLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isSidebarOpen, closeSidebar } = useSidebar();
 
   const auth = useAuth();
   const { user, loading, setUser } = auth || { user: null, loading: false, setUser: undefined };
@@ -108,15 +109,15 @@ export default function DashboardLayout({ children }) {
         <Sidebar onLinkClick={() => {}} />
       </aside>
 
-      {/* Mobile Sidebar - Slide in from right */}
+      {/* Mobile Sidebar - Slide in from left */}
       {isSidebarOpen && (
         <div
           className="md:hidden fixed inset-0 z-50"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={closeSidebar}
         >
           <div className="fixed inset-0 bg-black bg-opacity-50" />
-          <aside className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-            <Sidebar onLinkClick={() => setIsSidebarOpen(false)} />
+          <aside className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+            <Sidebar onLinkClick={closeSidebar} />
           </aside>
         </div>
       )}
@@ -171,7 +172,7 @@ export default function DashboardLayout({ children }) {
 
       {/* Mobile Bottom Bar */}
       <MobileBottomBar 
-        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        onMenuClick={() => {}} 
         isSidebarOpen={isSidebarOpen}
       />
     </div>

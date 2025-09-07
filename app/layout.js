@@ -2,8 +2,10 @@ import { Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
+import { SidebarProvider } from "./context/SidebarContext";
 import Header from "./components/ui/Header/Header";
 import MobileBottomBarWrapper from "./components/ui/MobileBottomBarWrapper";
+import ClientSideWrapper from "./components/ui/ClientSideWrapper";
 import StructuredData from "./components/StructuredData";
 
 const vazirmatn = Vazirmatn({ 
@@ -82,19 +84,23 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${vazirmatn.className} min-h-screen flex flex-col bg-gray-50`}>
         <AuthProvider>
-          {/* Header */}
-          <Header />
+          <SidebarProvider>
+            {/* Header */}
+            <Header />
 
-          {/* Main Content */}
-          <main className="flex-1 pb-20 md:pb-0">
-            {children}
-          </main>
+            {/* Main Content */}
+            <main className="flex-1 pb-20 md:pb-0">
+              {children}
+            </main>
 
-          {/* Footer */}
-          <Footer />
+            {/* Footer */}
+            <Footer />
 
-          {/* Mobile Bottom Bar */}
-          <MobileBottomBarWrapper />
+            {/* Mobile Bottom Bar - Client Side Only */}
+            <ClientSideWrapper>
+              <MobileBottomBarWrapper />
+            </ClientSideWrapper>
+          </SidebarProvider>
         </AuthProvider>
       </body>
     </html>
