@@ -11,6 +11,7 @@ export default function MobileBottomBarWrapper() {
 
   // For non-dashboard pages, menu button should do nothing
   const handleMenuClick = () => {
+    console.log('Menu button clicked, isDashboard:', isDashboard, 'isSidebarOpen:', isSidebarOpen);
     if (isDashboard) {
       toggleSidebar();
     }

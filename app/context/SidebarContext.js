@@ -7,10 +7,12 @@ export function SidebarProvider({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
+    console.log('Toggling sidebar, current state:', isSidebarOpen);
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const closeSidebar = () => {
+    console.log('Closing sidebar');
     setIsSidebarOpen(false);
   };
 

@@ -109,14 +109,14 @@ export default function DashboardLayout({ children }) {
         <Sidebar onLinkClick={() => {}} />
       </aside>
 
-      {/* Mobile Sidebar - Slide in from left */}
+      {/* Mobile Sidebar - Slide in from right */}
       {isSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 z-50"
+          className="md:hidden fixed inset-0 z-[9999]"
           onClick={closeSidebar}
         >
           <div className="fixed inset-0 bg-black bg-opacity-50" />
-          <aside className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+          <aside className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-[10000]">
             <Sidebar onLinkClick={closeSidebar} />
           </aside>
         </div>

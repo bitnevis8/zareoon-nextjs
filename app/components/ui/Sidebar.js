@@ -74,7 +74,7 @@ export default function Sidebar({ onLinkClick }) {
       const supply = cloned.find(mi => mi.title === 'مدیریت تامین');
       if (supply && Array.isArray(supply.submenu)) {
         const ord = supply.submenu.find(si => si.title === 'سفارش‌ها');
-        if (ord) ord.path = '/dashboard/admin/orders';
+        if (ord) ord.path = '/dashboard/order-management';
       }
       return cloned;
     }
@@ -87,7 +87,7 @@ export default function Sidebar({ onLinkClick }) {
           icon: '🌾',
           submenu: [
             { title: 'موجودی‌های من', path: '/dashboard/farmer/inventory', icon: '📦' },
-            { title: 'سفارش‌ها', path: '/dashboard/order-management', icon: '📋' },
+            { title: 'سفارش‌ها', path: '/dashboard/farmer/orders', icon: '📋' },
           ]
         }
       ];
