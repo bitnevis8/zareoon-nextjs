@@ -3,15 +3,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import AuthButtons from '../../AuthButtons';
+import TypeWriter from '../TypeWriter';
 
 export default function Header() {
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[10002]">
       <div className="w-full">
-        <div className="flex justify-between items-center h-16 px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center min-h-16 px-4 sm:px-6 lg:px-8 py-2">
           {/* Logo */}
-          <div className="flex flex-row  items-center ">
-            <Link href="/" className="flex  items-center space-x-3" prefetch={true}>
+          <div className="flex flex-row items-center">
+            <Link href="/" className="flex items-center space-x-3" prefetch={true}>
               <Image
                 src="/images/logo.png"
                 alt="لوگو تگانه"
@@ -24,7 +25,12 @@ export default function Header() {
                 <h1 className="text-lg sm:text-2xl font-bold text-slate-800 bg-clip-text">
                   زارعون
                 </h1>
-
+                {/* Static Text */}
+                <div className="hidden md:block mt-1">
+                  <p className="text-xs text-gray-600 font-medium">
+                    زارعون بستری امن میان تولید و مصرف
+                  </p>
+                </div>
               </div>
             </Link>
           </div>
@@ -104,6 +110,17 @@ export default function Header() {
 
           </nav>
 
+        </div>
+        
+        {/* Full Description - Mobile and Desktop */}
+        <div className="bg-green-50 border-t border-green-200 py-4 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <TypeWriter 
+              text="برای کشاورز، همراهی مطمئن در عرضه محصول؛ برای مشتری، منبعی قابل‌اعتماد برای خرید. زارعون بستری امن و شفاف برای تبادل محصولات شما"
+              speed={25}
+              className="text-sm text-gray-700 text-center leading-relaxed"
+            />
+          </div>
         </div>
       </div>
     </header>
