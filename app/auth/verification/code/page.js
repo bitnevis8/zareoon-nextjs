@@ -18,6 +18,15 @@ export default function VerificationCodePage() {
   const searchParams = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
 
+  // تابع کمکی برای فوکوس
+  const focusLastInput = () => {
+    const lastInput = document.getElementById("code-5");
+    if (lastInput) {
+      lastInput.focus();
+      lastInput.select();
+    }
+  };
+
   useEffect(() => {
     const id = searchParams.get("identifier");
     const act = searchParams.get("action");
@@ -95,6 +104,65 @@ export default function VerificationCodePage() {
     }
   }, [identifier, action, handleSendCode]);
 
+  // فوکوس بعد از ارسال کد
+  useEffect(() => {
+    if (identifier && action) {
+      const timer = setTimeout(() => {
+        const lastInput = document.getElementById("code-5");
+        if (lastInput) {
+          lastInput.focus();
+          lastInput.select();
+        }
+      }, 1000); // بعد از ارسال کد
+      return () => clearTimeout(timer);
+    }
+  }, [identifier, action]);
+
+  // فوکوس خودکار به آخرین خانه هنگام لود صفحه (از راست به چپ)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      focusLastInput();
+    }, 500); // افزایش زمان برای اطمینان از لود کامل
+    return () => clearTimeout(timer);
+  }, []);
+
+  // فوکوس اضافی بعد از لود کامل صفحه
+  useEffect(() => {
+    const handleLoad = () => {
+      focusLastInput();
+    };
+    
+    // اگر صفحه قبلاً لود شده
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      // اگر هنوز در حال لود است
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
+  }, []);
+
+  // فوکوس مجدد بعد از هر بار تغییر state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const lastInput = document.getElementById("code-5");
+      if (lastInput && !lastInput.value) {
+        focusLastInput();
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [code]);
+
+  // فوکوس بعد از تغییر loading state
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        focusLastInput();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   // تایمر
   useEffect(() => {
     if (timeLeft > 0) {
@@ -106,29 +174,64 @@ export default function VerificationCodePage() {
   }, [timeLeft]);
 
   const handleCodeChange = (index, value) => {
-    if (value.length > 1) return; // فقط یک کاراکتر
+    // فقط یک کاراکتر مجاز
+    if (value.length > 1) {
+      value = value.slice(-1); // فقط آخرین کاراکتر را بگیر
+    }
     
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
 
-    // اگر کاراکتر وارد شد، برو به فیلد بعدی
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`code-${index + 1}`);
-      if (nextInput) nextInput.focus();
+    // اگر کاراکتر وارد شد، برو به فیلد بعدی (از راست به چپ)
+    if (value && index > 0) {
+      setTimeout(() => {
+        const nextInput = document.getElementById(`code-${index - 1}`);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }, 10);
     }
 
-    // اگر کد کامل شد، تایید کن
+    // اگر کد کامل شد، تایید کن - ترتیب را برعکس کن
     if (newCode.every(c => c !== "") && newCode.join("").length === 6) {
-      handleVerifyCode(newCode.join(""));
+      // برعکس کردن ترتیب کد برای ارسال
+      const reversedCode = [...newCode].reverse().join("");
+      handleVerifyCode(reversedCode);
     }
   };
 
   const handleKeyDown = (index, e) => {
-    // اگر Backspace زده شد و فیلد خالی است، برو به فیلد قبلی
-    if (e.key === "Backspace" && !code[index] && index > 0) {
+    // اگر Backspace زده شد و فیلد خالی است، برو به فیلد بعدی (از راست به چپ)
+    if (e.key === "Backspace" && !code[index] && index < 5) {
+      setTimeout(() => {
+        const nextInput = document.getElementById(`code-${index + 1}`);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }, 10);
+    }
+    
+    // اگر Arrow Right زده شد، برو به فیلد قبلی (از راست به چپ)
+    if (e.key === "ArrowRight" && index > 0) {
+      e.preventDefault();
       const prevInput = document.getElementById(`code-${index - 1}`);
-      if (prevInput) prevInput.focus();
+      if (prevInput) {
+        prevInput.focus();
+        prevInput.select();
+      }
+    }
+    
+    // اگر Arrow Left زده شد، برو به فیلد بعدی (از چپ به راست)
+    if (e.key === "ArrowLeft" && index < 5) {
+      e.preventDefault();
+      const nextInput = document.getElementById(`code-${index + 1}`);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
     }
   };
 
@@ -174,9 +277,10 @@ export default function VerificationCodePage() {
       } else {
         setError(data.message || "کد تایید اشتباه است");
         setCode(["", "", "", "", "", ""]);
-        // فوکوس به فیلد اول
-        const firstInput = document.getElementById("code-0");
-        if (firstInput) firstInput.focus();
+        // فوکوس به فیلد آخر بعد از خطا (از راست به چپ)
+        setTimeout(() => {
+          focusLastInput();
+        }, 100);
       }
     } catch (err) {
       console.error("Verification error:", err);
@@ -189,9 +293,10 @@ export default function VerificationCodePage() {
   const handleResendCode = async () => {
     await handleSendCode();
     setCode(["", "", "", "", "", ""]);
-    // فوکوس به فیلد اول
-    const firstInput = document.getElementById("code-0");
-    if (firstInput) firstInput.focus();
+    // فوکوس به فیلد آخر بعد از ارسال مجدد (از راست به چپ)
+    setTimeout(() => {
+      focusLastInput();
+    }, 100);
   };
 
   const formatIdentifier = (id) => {
@@ -250,6 +355,8 @@ export default function VerificationCodePage() {
                   onChange={(e) => handleCodeChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   className="w-12 h-12 text-center text-2xl font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  dir="ltr"
+                  style={{ textAlign: 'center' }}
                   disabled={loading}
                 />
               ))}
