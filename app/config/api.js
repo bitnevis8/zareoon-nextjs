@@ -5,28 +5,21 @@ const isProduction = process.env.NODE_ENV === 'production';
 const isRealProduction = (() => {
   if (typeof window !== 'undefined' && window.location) {
     const hostname = window.location.hostname;
-    // اگر دامنه zareoon.ir است و پورت 80 یا 443 (پیش‌فرض) است، سرور واقعی است
+    // اگر دامنه zareoon.ir است، سرور واقعی است
     return hostname === 'zareoon.ir' || hostname === 'www.zareoon.ir';
   }
-  return false;
+  // در SSR، از متغیر محیطی استفاده کن
+  return process.env.VERCEL_URL?.includes('zareoon.ir') || 
+         process.env.NEXT_PUBLIC_VERCEL_URL?.includes('zareoon.ir') ||
+         false;
 })();
 
 let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_BASE_URL) {
-  if (isProduction && isRealProduction) {
-    // روی سرور واقعی: از api.zareoon.ir استفاده کن
+  if (isProduction) {
+    // در production همیشه از api.zareoon.ir استفاده کن
     API_BASE_URL = 'https://api.zareoon.ir';
-  } else if (isProduction) {
-    // روی سرور local production: از همان دامنه با پورت 3000 استفاده کن
-    if (typeof window !== 'undefined' && window.location) {
-      const loc = window.location;
-      const host = loc.hostname;
-      const protocol = loc.protocol;
-      API_BASE_URL = `${protocol}//${host}:3000`;
-    } else {
-      API_BASE_URL = 'https://zareoon.ir:3000';
-    }
   } else {
     // توسعه: از آدرس فرانت استفاده کن و پورت را به 3000 (بک‌اند) نگاشت بده
     try {
@@ -54,6 +47,13 @@ if (typeof window !== 'undefined') {
   console.log('  - isRealProduction:', isRealProduction);
   console.log('  - hostname:', window.location.hostname);
   console.log('  - port:', window.location.port);
+  console.log('  - NODE_ENV:', process.env.NODE_ENV);
+} else {
+  // SSR logging
+  console.log('🔍 API Configuration (SSR):');
+  console.log('  - API_BASE_URL:', API_BASE_URL);
+  console.log('  - isProduction:', isProduction);
+  console.log('  - NODE_ENV:', process.env.NODE_ENV);
 }
 
 export const API_ENDPOINTS = {
