@@ -39,7 +39,7 @@ export default function AttributeEditPage() {
     }
   }, [id]);
 
-  useEffect(() => { if (Number.isFinite(id)) load(); }, [load]);
+  useEffect(() => { if (Number.isFinite(id)) load(); }, [id, load]);
 
   const save = async (e) => {
     e.preventDefault();

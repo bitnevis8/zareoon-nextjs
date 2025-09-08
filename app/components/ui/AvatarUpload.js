@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { API_ENDPOINTS } from '@/app/config/api';
 import { useAuth } from '@/app/context/AuthContext';
 
@@ -121,10 +122,12 @@ export default function AvatarUpload({ onUploadSuccess, currentAvatar, className
       <div className="flex items-center space-x-4">
         {/* نمایش آواتار */}
         <div className="flex-shrink-0">
-          <img
+          <Image
             src={preview || currentAvatar || '/images/default/male.png'}
             alt="آواتار"
             className="w-20 h-20 rounded-lg object-cover"
+            width={80}
+            height={80}
           />
         </div>
 

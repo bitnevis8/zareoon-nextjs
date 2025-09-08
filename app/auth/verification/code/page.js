@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -41,9 +41,9 @@ export default function VerificationCodePage() {
     if (identifier && action) {
       handleSendCode();
     }
-  }, [identifier, action]);
+  }, [identifier, action, handleSendCode]);
 
-  const handleSendCode = async () => {
+  const handleSendCode = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -92,7 +92,7 @@ export default function VerificationCodePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [identifier, action]);
 
   // تایمر
   useEffect(() => {

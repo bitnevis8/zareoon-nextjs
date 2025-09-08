@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TestVerifyCodePage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [localStorageData, setLocalStorageData] = useState({ token: null, user: null });
+
+  // Load localStorage data on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setLocalStorageData({
+        token: localStorage.getItem("token"),
+        user: localStorage.getItem("user")
+      });
+    }
+  }, []);
 
   const testVerifyCode = async () => {
     setLoading(true);
@@ -29,12 +40,21 @@ export default function TestVerifyCodePage() {
       
       if (data.success) {
         if (data.data?.token) {
-          localStorage.setItem("token", data.data.token);
-          console.log("Token saved to localStorage:", data.data.token);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem("token", data.data.token);
+            console.log("Token saved to localStorage:", data.data.token);
+          }
         }
         if (data.data?.user) {
-          localStorage.setItem("user", JSON.stringify(data.data.user));
-          console.log("User saved to localStorage:", data.data.user);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem("user", JSON.stringify(data.data.user));
+            console.log("User saved to localStorage:", data.data.user);
+            // Update state
+            setLocalStorageData({
+              token: data.data.token,
+              user: JSON.stringify(data.data.user)
+            });
+          }
         }
       }
       
@@ -75,10 +95,10 @@ export default function TestVerifyCodePage() {
           <h2 className="text-xl font-bold mb-4">LocalStorage:</h2>
           <div className="space-y-2">
             <div>
-              <strong>Token:</strong> {localStorage.getItem("token") || "None"}
+              <strong>Token:</strong> {localStorageData.token || "None"}
             </div>
             <div>
-              <strong>User:</strong> {localStorage.getItem("user") || "None"}
+              <strong>User:</strong> {localStorageData.user || "None"}
             </div>
           </div>
         </div>

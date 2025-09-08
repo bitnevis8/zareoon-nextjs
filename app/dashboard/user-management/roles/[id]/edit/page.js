@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/app/config/api';
 
@@ -19,9 +19,9 @@ export default function EditRolePage({ params }) {
 
   useEffect(() => {
     fetchRole();
-  }, [id]);
+  }, [id, fetchRole]);
 
-  const fetchRole = async () => {
+  const fetchRole = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(API_ENDPOINTS.roles.getById(id), {
@@ -53,7 +53,7 @@ export default function EditRolePage({ params }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

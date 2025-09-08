@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const AuthContext = createContext();
 
@@ -9,12 +9,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
 
-  // بررسی وضعیت احراز هویت
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       // ابتدا localStorage را چک کن
       const localToken = localStorage.getItem("token");
@@ -60,7 +55,12 @@ export function AuthProvider({ children }) {
       console.error("Auth check failed:", error);
       setLoading(false);
     }
-  };
+  }, []);
+
+  // بررسی وضعیت احراز هویت
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
 
   const loginWithToken = async (token) => {
     try {

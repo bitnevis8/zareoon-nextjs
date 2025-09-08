@@ -149,7 +149,7 @@ export default function TestSMSPage() {
               </h3>
               <ol className="text-yellow-700 space-y-1 text-sm">
                 <li>1. ابتدا سرور API را راه‌اندازی کن (npm run dev در پوشه api)</li>
-                <li>2. روی دکمه "تست ثبت‌نام + ارسال SMS" کلیک کن</li>
+                <li>2. روی دکمه &quot;تست ثبت‌نام + ارسال SMS&quot; کلیک کن</li>
                 <li>3. شماره 09025189007 باید پیامک دریافت کند</li>
                 <li>4. اگر خطا داد، Console API را چک کن</li>
               </ol>

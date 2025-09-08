@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import AsyncSelect from "react-select/async";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "@/app/context/AuthContext";
@@ -26,7 +26,7 @@ export default function InventoryLotsPage() {
     sold: "فروخته شده",
   };
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const [r1, r2] = await Promise.all([
       fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: "no-store" }),
       // Only orderable products should be listed for inventory creation
@@ -63,8 +63,8 @@ export default function InventoryLotsPage() {
     } else {
       setFarmerNameMap(new Map());
     }
-  };
-  useEffect(() => { load(); }, [user]);
+  }, [user]);
+  useEffect(() => { load(); }, [user, load]);
 
   // Load attribute definitions when product changes (merge product-level + category-level)
   useEffect(() => {

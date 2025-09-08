@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { API_ENDPOINTS } from '@/app/config/api';
 
 export default function MediaUpload({
@@ -15,15 +16,15 @@ export default function MediaUpload({
   const [uploading, setUploading] = useState(false);
   const [items, setItems] = useState([]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const url = `${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?entityId=${encodeURIComponent(entityId || '')}`;
       const r = await fetch(url, { credentials: 'include', cache: 'no-store' });
       const j = await r.json();
       if (j?.success) setItems(Array.isArray(j.data) ? j.data : []);
     } catch {}
-  };
-  useEffect(() => { if (entityId) load(); }, [module, entityId, fileType]);
+  }, [module, entityId, fileType]);
+  useEffect(() => { if (entityId) load(); }, [module, entityId, fileType, load]);
 
   const onPick = () => inputRef.current?.click();
 
@@ -79,7 +80,7 @@ export default function MediaUpload({
               {String(it.mimeType||'').startsWith('video/') ? (
                 <video src={it.downloadUrl} className="w-full h-full object-cover" controls />
               ) : (
-                <img src={it.downloadUrl} alt={it.originalName||''} className="w-full h-full object-cover" />
+                <Image src={it.downloadUrl} alt={it.originalName||''} className="w-full h-full object-cover" width={200} height={150} />
               )}
             </div>
             <div className="p-2 flex items-center justify-between gap-2 text-xs">

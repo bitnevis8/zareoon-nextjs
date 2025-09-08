@@ -124,7 +124,7 @@ export default function TestSMSVerifyPage() {
               <ol className="text-yellow-700 space-y-1 text-sm">
                 <li>1. ابتدا از صفحه تست SMS، کد را دریافت کن</li>
                 <li>2. کد دریافتی را در اینجا وارد کن</li>
-                <li>3. روی "تایید کد" کلیک کن</li>
+                <li>3. روی &quot;تایید کد&quot; کلیک کن</li>
                 <li>4. اگر موفق بود، کاربر تایید می‌شود</li>
               </ol>
             </div>

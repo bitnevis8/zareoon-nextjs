@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, use as usePromise } from "react";
 import ProductImage from "@/app/components/ui/ProductImage";
 import Link from "next/link";
+import Image from "next/image";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
@@ -63,7 +64,7 @@ export default function CatalogItemPage({ params }) {
       setCartTotalQty(sum);
       setCartUnit(unit || item?.unit || '');
     } catch {}
-  }, [API_ENDPOINTS?.farmer?.cart?.base, id, cartUnit, item?.unit]);
+  }, [id, cartUnit, item?.unit]);
 
   const loadLotMediaCounts = useCallback(async (lotId) => {
     try {
@@ -256,7 +257,7 @@ export default function CatalogItemPage({ params }) {
                       {String(m.mimeType||'').startsWith('video/') ? (
                         <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
                       ) : (
-                        <img src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" />
+                        <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
                       )}
                     </div>
                   ))}
@@ -419,7 +420,7 @@ export default function CatalogItemPage({ params }) {
                                 {String(m.mimeType||'').startsWith('video/') ? (
                                   <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
                                 ) : (
-                                  <img src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" />
+                                  <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
                                 )}
                               </div>
                             ))}
@@ -516,7 +517,7 @@ export default function CatalogItemPage({ params }) {
                       {String(m.mimeType||'').startsWith('video/') ? (
                         <video src={m.downloadUrl} className="w-full h-full object-cover" controls />
                       ) : (
-                        <img src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" />
+                        <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
                       )}
                     </div>
                     <div className="p-2 text-xs truncate" title={m.originalName}>{m.originalName}</div>

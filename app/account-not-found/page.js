@@ -80,7 +80,7 @@ export default function AccountNotFoundPage() {
 
           {/* راهنمای اضافی */}
           <div className="text-center text-sm text-gray-500">
-            <p>اگر شماره موبایل یا ایمیل را اشتباه وارد کرده‌اید، روی "ویرایش شماره همراه" کلیک کنید.</p>
+            <p>اگر شماره موبایل یا ایمیل را اشتباه وارد کرده‌اید، روی &quot;ویرایش شماره همراه&quot; کلیک کنید.</p>
           </div>
         </div>
       </div>
