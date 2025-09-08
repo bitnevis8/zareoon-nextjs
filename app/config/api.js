@@ -1,12 +1,32 @@
 // تعیین هوشمند آدرس API بدون نیاز به .env
 const isProduction = process.env.NODE_ENV === 'production';
 
+// تشخیص خودکار سرور واقعی بر اساس دامنه
+const isRealProduction = (() => {
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname;
+    // اگر دامنه zareoon.ir است و پورت 80 یا 443 (پیش‌فرض) است، سرور واقعی است
+    return hostname === 'zareoon.ir' || hostname === 'www.zareoon.ir';
+  }
+  return false;
+})();
+
 let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_BASE_URL) {
-  if (isProduction) {
-    // روی سرور: دامنه‌های اصلی
+  if (isProduction && isRealProduction) {
+    // روی سرور واقعی: از api.zareoon.ir استفاده کن
     API_BASE_URL = 'https://api.zareoon.ir';
+  } else if (isProduction) {
+    // روی سرور local production: از همان دامنه با پورت 3000 استفاده کن
+    if (typeof window !== 'undefined' && window.location) {
+      const loc = window.location;
+      const host = loc.hostname;
+      const protocol = loc.protocol;
+      API_BASE_URL = `${protocol}//${host}:3000`;
+    } else {
+      API_BASE_URL = 'https://zareoon.ir:3000';
+    }
   } else {
     // توسعه: از آدرس فرانت استفاده کن و پورت را به 3000 (بک‌اند) نگاشت بده
     try {
@@ -24,6 +44,16 @@ if (!API_BASE_URL) {
       API_BASE_URL = 'http://localhost:3000';
     }
   }
+}
+
+// Log the API URL for debugging
+if (typeof window !== 'undefined') {
+  console.log('🔍 API Configuration:');
+  console.log('  - API_BASE_URL:', API_BASE_URL);
+  console.log('  - isProduction:', isProduction);
+  console.log('  - isRealProduction:', isRealProduction);
+  console.log('  - hostname:', window.location.hostname);
+  console.log('  - port:', window.location.port);
 }
 
 export const API_ENDPOINTS = {
