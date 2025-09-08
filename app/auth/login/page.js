@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
+import { API_ENDPOINTS } from "../../config/api";
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -28,7 +29,7 @@ export default function LoginPage() {
 
     try {
       // ارسال درخواست به API
-      const response = await fetch("http://localhost:3000/user/auth/check-identifier", {
+      const response = await fetch(`${API_ENDPOINTS.auth.checkIdentifier}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

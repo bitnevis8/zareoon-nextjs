@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { API_ENDPOINTS } from "../config/api";
 
 const AuthContext = createContext();
 
@@ -34,7 +35,7 @@ export function AuthProvider({ children }) {
       }
 
       // اگر localStorage کار نکرد، HttpOnly cookie را چک کن
-      const response = await fetch("http://localhost:3000/user/auth/me", {
+      const response = await fetch(API_ENDPOINTS.auth.me, {
         method: "GET",
         credentials: "include", // برای HttpOnly cookies
       });
@@ -64,7 +65,7 @@ export function AuthProvider({ children }) {
 
   const loginWithToken = async (token) => {
     try {
-      const response = await fetch("http://localhost:3000/user/auth/me", {
+      const response = await fetch(API_ENDPOINTS.auth.me, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -116,7 +117,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await fetch("http://localhost:3000/user/auth/logout", {
+      await fetch(API_ENDPOINTS.auth.logout, {
         method: "POST",
         credentials: "include",
       });

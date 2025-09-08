@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
+import { API_ENDPOINTS } from "../../../config/api";
 
 export default function CompleteRegistrationPage() {
   const [formData, setFormData] = useState({
@@ -73,7 +74,7 @@ export default function CompleteRegistrationPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/user/auth/complete-registration", {
+      const response = await fetch(API_ENDPOINTS.auth.completeRegistration, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

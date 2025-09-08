@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
+import { API_ENDPOINTS } from "../../../config/api";
 
 export default function VerificationCodePage() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -52,7 +53,7 @@ export default function VerificationCodePage() {
       
       if (action === "register") {
         // برای ثبت‌نام - ارسال کد برای ثبت‌نام
-        response = await fetch("http://localhost:3000/user/auth/send-code-for-registration", {
+        response = await fetch(API_ENDPOINTS.auth.sendCodeForRegistration, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -64,7 +65,7 @@ export default function VerificationCodePage() {
         });
       } else {
         // برای ورود یا بازیابی - کد را ارسال کن
-        response = await fetch("http://localhost:3000/user/auth/resend-code", {
+        response = await fetch(API_ENDPOINTS.auth.resendCode, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -136,7 +137,7 @@ export default function VerificationCodePage() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:3000/user/auth/verify-code", {
+      const response = await fetch(API_ENDPOINTS.auth.verifyCode, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

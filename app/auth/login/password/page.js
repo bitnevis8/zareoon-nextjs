@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
+import { API_ENDPOINTS } from "../../../config/api";
 
 export default function LoginPasswordPage() {
   const [password, setPassword] = useState("");
@@ -37,7 +38,7 @@ export default function LoginPasswordPage() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:3000/user/auth/login", {
+      const response = await fetch(API_ENDPOINTS.auth.login, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
