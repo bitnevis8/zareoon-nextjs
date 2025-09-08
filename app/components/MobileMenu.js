@@ -38,24 +38,14 @@ export default function MobileMenu() {
                 {user.firstName} {user.lastName}
               </Link>
             ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
-                  onClick={() => setIsOpen(false)}
-                  prefetch={true}
-                >
-                  ورود
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
-                  onClick={() => setIsOpen(false)}
-                  prefetch={true}
-                >
-                  ثبت نام
-                </Link>
-              </>
+              <Link
+                href="/auth/login"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                onClick={() => setIsOpen(false)}
+                prefetch={true}
+              >
+                ورود / ثبت نام
+              </Link>
             )}
           </div>
         </div>

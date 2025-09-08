@@ -4,8 +4,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AuthButtons from '../../AuthButtons';
 import TypeWriter from '../TypeWriter';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function Header() {
+  const { user, loading } = useAuth();
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[10002]">
       <div className="w-full">
@@ -110,17 +112,6 @@ export default function Header() {
 
           </nav>
 
-        </div>
-        
-        {/* Full Description - Mobile and Desktop */}
-        <div className="bg-green-50 border-t border-green-200 py-4 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <TypeWriter 
-              text="برای کشاورز، همراهی مطمئن در عرضه محصول؛ برای مشتری، منبعی قابل‌اعتماد برای خرید. زارعون بستری امن و شفاف برای تبادل محصولات شما"
-              speed={25}
-              className="text-sm text-gray-700 text-center leading-relaxed"
-            />
-          </div>
         </div>
       </div>
     </header>
