@@ -29,21 +29,6 @@ export default function VerificationCodePage() {
     }
   }, [searchParams]);
 
-  // اگر کاربر قبلاً لاگین کرده، به داشبورد هدایت کن
-  useEffect(() => {
-    if (!authLoading && user) {
-      console.log("🔍 User already logged in, redirecting to dashboard");
-      router.push("/dashboard");
-    }
-  }, [user, authLoading, router]);
-
-  // ارسال کد هنگام لود صفحه
-  useEffect(() => {
-    if (identifier && action) {
-      handleSendCode();
-    }
-  }, [identifier, action, handleSendCode]);
-
   const handleSendCode = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -94,6 +79,21 @@ export default function VerificationCodePage() {
       setLoading(false);
     }
   }, [identifier, action]);
+
+  // اگر کاربر قبلاً لاگین کرده، به داشبورد هدایت کن
+  useEffect(() => {
+    if (!authLoading && user) {
+      console.log("🔍 User already logged in, redirecting to dashboard");
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
+
+  // ارسال کد هنگام لود صفحه
+  useEffect(() => {
+    if (identifier && action) {
+      handleSendCode();
+    }
+  }, [identifier, action, handleSendCode]);
 
   // تایمر
   useEffect(() => {
