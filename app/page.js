@@ -3,10 +3,24 @@ import { useEffect, useState } from "react";
 import Link from 'next/link';
 import ProductImage from './components/ui/ProductImage';
 import Image from 'next/image';
+import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from './config/api';
 import { getProductStockClass, calculateAvailableStock, calculateParentStockQuantity } from './utils/stockUtils';
+import { useAuth } from './context/AuthContext';
 
 export default function Home() {
+  const router = useRouter();
+  const auth = useAuth();
+  
+  // Check user roles for bottom bar
+  const userRoles = auth?.user?.roles?.map(role => role.nameEn) || [];
+  const isFarmer = userRoles.includes('Farmer') || userRoles.includes('farmer');
+  const isSupplier = userRoles.includes('Supplier') || userRoles.includes('supplier');
+  const isBargeCollector = userRoles.includes('BargeCollector') || userRoles.includes('bargeCollector');
+  const isSupervisor = userRoles.includes('Supervisor') || userRoles.includes('supervisor');
+  const isAdmin = userRoles.includes('Administrator') || userRoles.includes('administrator');
+  const canAddProduct = isAdmin || isFarmer || isSupplier || isBargeCollector || isSupervisor;
+  
   const [categories, setCategories] = useState([]);
   const [childrenMap, setChildrenMap] = useState({});
   const [allProducts, setAllProducts] = useState([]);
@@ -15,6 +29,7 @@ export default function Home() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [cartTotalQty, setCartTotalQty] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -110,6 +125,24 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [q]);
 
+  // Load cart info
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store', credentials: 'include' });
+        const j = await r.json();
+        const items = j?.data?.items || [];
+        let sum = 0;
+        for (const it of items) {
+          const q = parseFloat(it.quantity || 0);
+          if (Number.isFinite(q)) sum += q;
+        }
+        setCartTotalQty(sum);
+      } catch {}
+    };
+    fetchCart();
+  }, []);
+
   return (
     <main className="max-w-6xl mx-auto px-3 sm:px-6 py-10 space-y-8">
       <section className="text-center space-y-10">
@@ -195,6 +228,8 @@ export default function Home() {
           <div className="text-slate-500 text-sm">دسته‌بندی‌ای ثبت نشده است.</div>
         )}
       </section>
+
+
     </main>
   );
 }

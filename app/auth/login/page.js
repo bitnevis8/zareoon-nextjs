@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "../../context/AuthContext";
 import { API_ENDPOINTS } from "../../config/api";
 
@@ -69,7 +70,7 @@ export default function LoginPage() {
   // اگر AuthContext در حال لود است، loading نشان بده
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">در حال بارگذاری...</p>
@@ -79,27 +80,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        {/* لوگو */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">ز</span>
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-4 md:items-center">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        {/* هدر */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-800">ورود / ثبت نام</h1>
+          <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
+            <Image
+              src="/images/logo.png"
+              alt="لوگو زارعون"
+              width={48}
+              height={48}
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">زارعون</h1>
         </div>
+        
+        <div className="p-8">
 
         {/* فرم ورود */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              شماره موبایل یا ایمیل خود را وارد کنید
+              شماره موبایل خود را وارد کنید
             </label>
             <input
-              type="text"
+              type="tel"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="09123456789 یا example@gmail.com"
+              placeholder="09123456789"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
               required
             />
@@ -150,6 +159,7 @@ export default function LoginPage() {
           <Link href="/help" className="text-sm text-gray-600 hover:text-gray-800">
             راهنمای ورود
           </Link>
+        </div>
         </div>
       </div>
     </div>

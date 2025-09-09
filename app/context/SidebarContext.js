@@ -27,12 +27,18 @@ export function SidebarProvider({ children }) {
     setIsSidebarOpen(false);
   }, []);
 
+  const openSidebar = useCallback(() => {
+    console.log('Opening sidebar');
+    setIsSidebarOpen(true);
+  }, []);
+
   return (
     <SidebarContext.Provider value={{
       isSidebarOpen,
       setIsSidebarOpen,
       toggleSidebar,
-      closeSidebar
+      closeSidebar,
+      openSidebar
     }}>
       {children}
     </SidebarContext.Provider>

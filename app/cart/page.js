@@ -2,8 +2,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 
-export default function CartPage() {
+function CartPageContent() {
   const [cart, setCart] = useState({ id: null, items: [] });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -317,6 +318,14 @@ export default function CartPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <ProtectedRoute>
+      <CartPageContent />
+    </ProtectedRoute>
   );
 }
 

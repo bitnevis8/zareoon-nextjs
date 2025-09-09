@@ -5,9 +5,11 @@ import Image from 'next/image';
 import AuthButtons from '../../AuthButtons';
 import TypeWriter from '../TypeWriter';
 import { useAuth } from '../../../context/AuthContext';
+import LoginRequiredMessage from '../../LoginRequiredMessage';
 
 export default function Header() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth() || { user: null };
+  
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[10002]">
       <div className="w-full">
@@ -47,7 +49,6 @@ export default function Header() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-
             </a>
           </div>
 
@@ -97,12 +98,19 @@ export default function Header() {
             </a>
 
 
-            <Link href="/cart" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center gap-2 mx-4 md:mx-6" prefetch={true}>
-              سبد خرید
-
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l3-7H6.4" /><circle cx="9" cy="19" r="1" /><circle cx="20" cy="19" r="1" /></svg>
-
-            </Link>
+            {user ? (
+              <Link href="/cart" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center gap-2 mx-4 md:mx-6" prefetch={true}>
+                سبد خرید
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l3-7H6.4" /><circle cx="9" cy="19" r="1" /><circle cx="20" cy="19" r="1" /></svg>
+              </Link>
+            ) : (
+              <LoginRequiredMessage>
+                <div className="text-gray-500 hover:text-gray-600 transition-colors duration-200 font-medium flex items-center gap-2 mx-4 md:mx-6 cursor-pointer">
+                  سبد خرید
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l3-7H6.4" /><circle cx="9" cy="19" r="1" /><circle cx="20" cy="19" r="1" /></svg>
+                </div>
+              </LoginRequiredMessage>
+            )}
 
 
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
 
@@ -92,7 +93,7 @@ export default function LoginPasswordPage() {
   // اگر AuthContext در حال لود است، loading نشان بده
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">در حال بارگذاری...</p>
@@ -102,24 +103,34 @@ export default function LoginPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        {/* لوگو */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">ز</span>
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        {/* هدر */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">ورود</h1>
+            <p className="text-gray-600 text-sm mt-1">
+              با {formatIdentifier(identifier)}
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">ورود</h1>
-          <p className="text-gray-600 text-sm mt-2">
-            با {formatIdentifier(identifier)}
-          </p>
+          <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
+            <Image
+              src="/images/logo.png"
+              alt="لوگو زارعون"
+              width={48}
+              height={48}
+              className="w-full h-full object-contain"
+            />
+          </div>
         </div>
+        
+        <div className="p-8">
 
         {/* فرم ورود */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              با یکی از روش‌های زیر می‌توانید وارد اکانت مورد نظر خود شوید.
+              رمز عبور خود را وارد کنید تا وارد اکانت شوید.
             </p>
           </div>
 
@@ -209,8 +220,9 @@ export default function LoginPasswordPage() {
         {/* لینک‌های اضافی */}
         <div className="mt-6 text-center">
           <Link href="/auth/login" className="text-sm text-gray-600 hover:text-gray-800">
-            تغییر شماره موبایل یا ایمیل
+            تغییر شماره موبایل
           </Link>
+        </div>
         </div>
       </div>
     </div>

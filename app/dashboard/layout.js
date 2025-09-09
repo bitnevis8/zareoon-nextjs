@@ -4,8 +4,9 @@ import Sidebar from '../components/ui/Sidebar';
 import { useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "../context/AuthContext";
+import ProtectedRoute from "../components/ProtectedRoute";
 
-export default function DashboardLayout({ children }) {
+function DashboardLayoutContent({ children }) {
   const [emailVerificationCode, setEmailVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState(null);
   const [verificationSuccess, setVerificationSuccess] = useState(null);
@@ -154,5 +155,13 @@ export default function DashboardLayout({ children }) {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }) {
+  return (
+    <ProtectedRoute>
+      <DashboardLayoutContent children={children} />
+    </ProtectedRoute>
   );
 }

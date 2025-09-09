@@ -122,18 +122,18 @@ export default function Sidebar({ onLinkClick }) {
       {/* User Info */}
       <div className="mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-blue-600 font-semibold text-sm">
-              {auth?.user?.firstName?.charAt(0) || 'U'}
-            </span>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-900">
+          <div className="flex-1">
+            <p className="text-base font-semibold text-gray-900 mb-1">
               {auth?.user?.firstName || ''} {auth?.user?.lastName || ''}
             </p>
-            <p className="text-xs text-gray-500">
-              {auth?.user?.email || ''}
+            <p className="text-sm text-gray-600">
+              {auth?.user?.mobile || auth?.user?.phone || 'شماره موبایل ثبت نشده'}
             </p>
+          </div>
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <span className="text-blue-600 font-semibold text-lg">
+              {auth?.user?.firstName?.charAt(0) || 'U'}
+            </span>
           </div>
         </div>
       </div>
@@ -192,25 +192,6 @@ export default function Sidebar({ onLinkClick }) {
         ))}
       </nav>
 
-      {/* Logout Button */}
-      <div className="mt-8 pt-4 border-t border-gray-200">
-        <button
-          onClick={async () => {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              credentials: "include",
-            });
-            if (typeof window !== 'undefined') {
-              localStorage.clear();
-              window.location.href = "/";
-            }
-          }}
-          className="w-full flex items-center p-3 rounded-lg hover:bg-red-50 transition-colors text-sm text-red-600 hover:text-red-700"
-        >
-          <span className="ml-2 text-lg">🚪</span>
-          <span className="font-medium">خروج</span>
-        </button>
-      </div>
     </aside>
   );
 } 

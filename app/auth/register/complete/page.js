@@ -117,7 +117,7 @@ export default function CompleteRegistrationPage() {
   // اگر AuthContext در حال لود است، loading نشان بده
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">در حال بارگذاری...</p>
@@ -127,13 +127,21 @@ export default function CompleteRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        {/* لوگو */}
-        <div className="text-center mb-8">
+        {/* لوگو - فقط در دسکتاپ */}
+        <div className="text-center mb-8 hidden md:block">
           <div className="w-20 h-20 bg-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-white text-2xl">✓</span>
           </div>
+          <h1 className="text-2xl font-bold text-gray-800">تکمیل ثبت‌نام</h1>
+          <p className="text-gray-600 text-sm mt-2">
+            جهت ثبت‌نام در زارعون اطلاعات خواسته شده را وارد کنید.
+          </p>
+        </div>
+        
+        {/* عنوان موبایل */}
+        <div className="text-center mb-8 md:hidden">
           <h1 className="text-2xl font-bold text-gray-800">تکمیل ثبت‌نام</h1>
           <p className="text-gray-600 text-sm mt-2">
             جهت ثبت‌نام در زارعون اطلاعات خواسته شده را وارد کنید.
@@ -161,7 +169,7 @@ export default function CompleteRegistrationPage() {
           {/* ایمیل */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              ایمیل
+              ایمیل (اختیاری)
             </label>
             <input
               type="email"

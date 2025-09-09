@@ -39,6 +39,7 @@ export default function InventoryLotsPage() {
     status: "harvested" 
   });
   const [showTieredPricing, setShowTieredPricing] = useState(false);
+  const [showTieredPricingInfo, setShowTieredPricingInfo] = useState(false);
 
   const statusToFa = {
     on_field: "در مزرعه",
@@ -309,8 +310,34 @@ export default function InventoryLotsPage() {
   return (
     <div className="p-2 sm:p-4">
       <h1 className="text-lg sm:text-xl font-bold mb-4">موجودی‌ها</h1>
-      <form onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+      
+      {/* توضیحات قیمت‌گذاری پلکانی */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+        <div className="flex items-center gap-2">
+          <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm text-blue-800">
+            <strong>قیمت‌گذاری پلکانی (اختیاری):</strong> برای مقادیر مختلف محصول، قیمت‌های متفاوت تعریف کنید تا برای خریدهای عمده تخفیف ارائه دهید.
+          </span>
+          <button
+            onClick={() => setShowTieredPricingInfo(!showTieredPricingInfo)}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline flex-shrink-0"
+          >
+            {showTieredPricingInfo ? 'کمتر' : 'بیشتر'}
+          </button>
+        </div>
+        
+        {showTieredPricingInfo && (
+          <div className="mt-3 pr-7 text-xs text-blue-700">
+            <p className="mb-1"><strong>مثال:</strong> 0-100 کیلو: 5000 تومان، 100-500 کیلو: 4500 تومان، 500+ کیلو: 4000 تومان</p>
+            <p><strong>هدف:</strong> افزایش فروش و جذب مشتریان عمده</p>
+          </div>
+        )}
+      </div>
+      <form onSubmit={create} className="bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="sm:col-span-2 lg:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">انتخاب محصول</label>
           <AsyncSelect
             cacheOptions
             defaultOptions={products.map(p => ({ value: p.id, label: p.name }))}
@@ -327,6 +354,7 @@ export default function InventoryLotsPage() {
           if (isFarmer) return null;
           return (
             <div className="sm:col-span-2 lg:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">انتخاب تامین‌کننده</label>
               <AsyncSelect
                 cacheOptions
                 defaultOptions
@@ -339,30 +367,70 @@ export default function InventoryLotsPage() {
             </div>
           );
         })()}
-        <input className="border p-2 rounded text-sm" placeholder="واحد" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
-        <select
-          className="border p-2 rounded text-sm"
-          value={form.qualityGrade}
-          onChange={(e)=>setForm({...form, qualityGrade:e.target.value})}
-        >
-          <option value="صادراتی">صادراتی</option>
-          <option value="درجه 1">درجه 1</option>
-          <option value="درجه 2">درجه 2</option>
-          <option value="درجه 3">درجه 3</option>
-          <option value="ضایعاتی">ضایعاتی</option>
-        </select>
-        <input className="border p-2 rounded text-sm" placeholder="مقدار کل" value={form.totalQuantity} onChange={(e)=>setForm({...form, totalQuantity:e.target.value})} />
-        <input className="border p-2 rounded text-sm" placeholder="قیمت (اختیاری)" value={form.price} onChange={(e)=>setForm({...form, price:e.target.value})} />
-        <input className="border p-2 rounded text-sm" placeholder="حداقل سفارش" value={form.minimumOrderQuantity} onChange={(e)=>setForm({...form, minimumOrderQuantity:e.target.value})} />
-        <select
-          className="border p-2 rounded text-sm"
-          value={form.status}
-          onChange={(e)=>setForm({...form, status:e.target.value})}
-          title="وضعیت"
-        >
-          <option value="harvested">برداشت‌شده</option>
-          <option value="on_field">در مزرعه</option>
-        </select>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">واحد</label>
+          <input 
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="مثل: کیلوگرم، تن" 
+            value={form.unit} 
+            onChange={(e)=>setForm({...form, unit:e.target.value})} 
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">کیفیت</label>
+          <select
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            value={form.qualityGrade}
+            onChange={(e)=>setForm({...form, qualityGrade:e.target.value})}
+          >
+            <option value="صادراتی">صادراتی</option>
+            <option value="درجه 1">درجه 1</option>
+            <option value="درجه 2">درجه 2</option>
+            <option value="درجه 3">درجه 3</option>
+            <option value="ضایعاتی">ضایعاتی</option>
+          </select>
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">مقدار کل</label>
+          <input 
+            type="number"
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="مقدار موجودی" 
+            value={form.totalQuantity} 
+            onChange={(e)=>setForm({...form, totalQuantity:e.target.value})} 
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">قیمت (اختیاری)</label>
+          <input 
+            type="number"
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="قیمت به تومان" 
+            value={form.price} 
+            onChange={(e)=>setForm({...form, price:e.target.value})} 
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">حداقل سفارش</label>
+          <input 
+            type="number"
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="حداقل مقدار سفارش" 
+            value={form.minimumOrderQuantity} 
+            onChange={(e)=>setForm({...form, minimumOrderQuantity:e.target.value})} 
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">وضعیت</label>
+          <select
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            value={form.status}
+            onChange={(e)=>setForm({...form, status:e.target.value})}
+          >
+            <option value="harvested">برداشت‌شده</option>
+            <option value="on_field">در مزرعه</option>
+          </select>
+        </div>
         {/* Custom attributes dynamic fields */}
         {attributeDefs.length > 0 && (
           <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-3 gap-2 border-t pt-2">
@@ -497,72 +565,92 @@ export default function InventoryLotsPage() {
           )}
         </div>
 
-        <button disabled={saving} className="w-full sm:w-auto bg-blue-600 text-white rounded px-4 py-2 text-sm">{saving?"...":"افزودن"}</button>
+        <button 
+          disabled={saving} 
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg px-6 py-3 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+        >
+          {saving ? (
+            <>
+              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              در حال افزودن...
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              افزودن موجودی
+            </>
+          )}
+        </button>
       </form>
 
-      <div className="bg-white rounded-md shadow">
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Desktop Table */}
-        <div className="hidden xl:block overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-700 border-b">
-                <th className="px-4 py-3 text-right font-medium">ID</th>
-                <th className="px-4 py-3 text-right font-medium">محصول</th>
-                <th className="px-4 py-3 text-right font-medium">نام محصول</th>
-                <th className="px-4 py-3 text-right font-medium">تامین‌کننده</th>
-                <th className="px-4 py-3 text-right font-medium">کیفیت</th>
-                <th className="px-4 py-3 text-right font-medium">واحد</th>
-                <th className="px-4 py-3 text-right font-medium">کل</th>
-                <th className="px-4 py-3 text-right font-medium">رزرو</th>
-                <th className="px-4 py-3 text-right font-medium">قیمت</th>
-                <th className="px-4 py-3 text-right font-medium">حداقل سفارش</th>
-                <th className="px-4 py-3 text-right font-medium">قیمت‌گذاری پلکانی</th>
-                <th className="px-4 py-3 text-right font-medium">وضعیت</th>
-                <th className="px-4 py-3 text-right font-medium">عملیات</th>
+              <tr className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border-b">
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">ID</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">محصول</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">نام محصول</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">تامین‌کننده</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">کیفیت</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">واحد</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">کل</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">رزرو</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">قیمت</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">حداقل سفارش</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">قیمت‌گذاری پلکانی</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">وضعیت</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">عملیات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {items.map((x)=> (
-                <tr key={x.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs">{x.id}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{x.productId}</td>
-                  <td className="px-4 py-3 max-w-xs truncate" title={products.find(p => p.id === x.productId)?.name || "—"}>
+                <tr key={x.id} className="hover:bg-gray-50 transition-colors duration-200">
+                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.id}</td>
+                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.productId}</td>
+                  <td className="px-6 py-4 max-w-xs truncate font-medium text-gray-900" title={products.find(p => p.id === x.productId)?.name || "—"}>
                     {products.find(p => p.id === x.productId)?.name || "—"}
                   </td>
-                  <td className="px-4 py-3">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <td className="px-6 py-4 text-sm text-gray-700">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {x.qualityGrade}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs">{x.unit}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{x.totalQuantity?.toLocaleString('fa-IR')}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{x.reservedQuantity?.toLocaleString('fa-IR')}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.unit}</td>
+                  <td className="px-6 py-4 font-mono text-sm font-medium text-gray-900">{x.totalQuantity?.toLocaleString('fa-IR')}</td>
+                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.reservedQuantity?.toLocaleString('fa-IR')}</td>
+                  <td className="px-6 py-4">
                     {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-gray-500">قیمت پلکانی</span>
+                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
                     ) : x.price ? (
-                      <span className="font-medium text-green-600">{x.price.toLocaleString('fa-IR')} تومان</span>
+                      <span className="font-semibold text-green-600">{x.price.toLocaleString('fa-IR')} تومان</span>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4">
                     {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-gray-500">قیمت پلکانی</span>
+                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
                     ) : x.minimumOrderQuantity ? (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
                         {x.minimumOrderQuantity} {x.unit}
                       </span>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4">
                     <TieredPricingDisplay tieredPricing={x.tieredPricing} unit={x.unit} />
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                       x.status === 'harvested' ? 'bg-green-100 text-green-800' :
                       x.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
                       x.status === 'sold' ? 'bg-blue-100 text-blue-800' :
@@ -571,22 +659,22 @@ export default function InventoryLotsPage() {
                       {statusToFa[x.status] || x.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1">
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
                       <button 
-                        className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50 transition-colors" 
+                        className="text-blue-600 hover:text-blue-800 text-xs px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors duration-200 font-medium" 
                         onClick={()=>openEdit(x)}
                       >
                         ویرایش
                       </button>
                       <button 
-                        className="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors" 
+                        className="text-red-600 hover:text-red-800 text-xs px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors duration-200 font-medium" 
                         onClick={()=>remove(x.id)}
                       >
                         حذف
                       </button>
                       <button 
-                        className="text-green-600 hover:text-green-800 text-xs px-2 py-1 rounded hover:bg-green-50 transition-colors" 
+                        className="text-green-600 hover:text-green-800 text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors duration-200 font-medium" 
                         onClick={()=>openMedia(x)}
                       >
                         رسانه
@@ -600,70 +688,76 @@ export default function InventoryLotsPage() {
         </div>
 
         {/* Mobile/Tablet Cards */}
-        <div className="xl:hidden">
+        <div className="lg:hidden">
           {items.map((x) => (
-            <div key={x.id} className="border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-gray-500">#{x.id}</span>
-                  <span className="text-sm font-medium">{products.find(p => p.id === x.productId)?.name || "—"}</span>
+            <div key={x.id} className="border-b border-gray-200 p-6 hover:bg-gray-50 transition-colors duration-200">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">#{x.id}</span>
+                  <span className="text-base font-semibold text-gray-900">{products.find(p => p.id === x.productId)?.name || "—"}</span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-2">
                   <button 
-                    className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50" 
+                    className="text-blue-600 hover:text-blue-800 text-xs px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors duration-200 font-medium" 
                     onClick={()=>openEdit(x)}
                   >
                     ویرایش
                   </button>
                   <button 
-                    className="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded hover:bg-red-50" 
+                    className="text-red-600 hover:text-red-800 text-xs px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors duration-200 font-medium" 
                     onClick={()=>remove(x.id)}
                   >
                     حذف
                   </button>
+                  <button 
+                    className="text-green-600 hover:text-green-800 text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors duration-200 font-medium" 
+                    onClick={()=>openMedia(x)}
+                  >
+                    رسانه
+                  </button>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-500 text-xs">تامین‌کننده:</span>
-                  <div className="font-medium">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">تامین‌کننده</span>
+                  <div className="font-semibold text-gray-900">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">کیفیت:</span>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">کیفیت</span>
                   <div>
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {x.qualityGrade}
                     </span>
                   </div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">مقدار کل:</span>
-                  <div className="font-mono">{x.totalQuantity?.toLocaleString('fa-IR')} {x.unit}</div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">مقدار کل</span>
+                  <div className="font-semibold text-gray-900 font-mono">{x.totalQuantity?.toLocaleString('fa-IR')} {x.unit}</div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">رزرو شده:</span>
-                  <div className="font-mono">{x.reservedQuantity?.toLocaleString('fa-IR')} {x.unit}</div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">رزرو شده</span>
+                  <div className="font-semibold text-gray-900 font-mono">{x.reservedQuantity?.toLocaleString('fa-IR')} {x.unit}</div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">قیمت:</span>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">قیمت</span>
                   <div>
                     {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-gray-500">قیمت پلکانی</span>
+                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
                     ) : x.price ? (
-                      <span className="font-medium text-green-600">{x.price.toLocaleString('fa-IR')} تومان</span>
+                      <span className="font-semibold text-green-600">{x.price.toLocaleString('fa-IR')} تومان</span>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
                   </div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">حداقل سفارش:</span>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">حداقل سفارش</span>
                   <div>
                     {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-gray-500">قیمت پلکانی</span>
+                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
                     ) : x.minimumOrderQuantity ? (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
                         {x.minimumOrderQuantity} {x.unit}
                       </span>
                     ) : (
@@ -671,16 +765,16 @@ export default function InventoryLotsPage() {
                     )}
                   </div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">قیمت‌گذاری پلکانی:</span>
+                <div className="bg-gray-50 p-3 rounded-lg sm:col-span-2">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">قیمت‌گذاری پلکانی</span>
                   <div>
                     <TieredPricingDisplay tieredPricing={x.tieredPricing} unit={x.unit} />
                   </div>
                 </div>
-                <div>
-                  <span className="text-gray-500 text-xs">وضعیت:</span>
+                <div className="bg-gray-50 p-3 rounded-lg sm:col-span-2">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">وضعیت</span>
                   <div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                       x.status === 'harvested' ? 'bg-green-100 text-green-800' :
                       x.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
                       x.status === 'sold' ? 'bg-blue-100 text-blue-800' :
@@ -705,14 +799,6 @@ export default function InventoryLotsPage() {
                 </div>
               )}
               
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <button 
-                  className="text-green-600 hover:text-green-800 text-xs px-2 py-1 rounded hover:bg-green-50" 
-                  onClick={()=>openMedia(x)}
-                >
-                  مدیریت رسانه
-                </button>
-              </div>
             </div>
           ))}
         </div>

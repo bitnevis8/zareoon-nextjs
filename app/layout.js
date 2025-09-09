@@ -4,10 +4,10 @@ import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import Header from "./components/ui/Header/Header";
-import MobileBottomBarWrapper from "./components/ui/MobileBottomBarWrapper";
 import ClientSideWrapper from "./components/ui/ClientSideWrapper";
 import StructuredData from "./components/StructuredData";
 import GlobalSidebar from "./components/ui/GlobalSidebar";
+import MobileBottomBar from "./components/MobileBottomBar";
 
 const vazirmatn = Vazirmatn({ 
   subsets: ["arabic"],
@@ -102,10 +102,11 @@ export default function RootLayout({ children }) {
               <GlobalSidebar />
             </ClientSideWrapper>
 
-            {/* Mobile Bottom Bar - Client Side Only */}
+            {/* Mobile Bottom Bar - Available on all pages */}
             <ClientSideWrapper>
-              <MobileBottomBarWrapper />
+              <MobileBottomBar />
             </ClientSideWrapper>
+
           </SidebarProvider>
         </AuthProvider>
       </body>

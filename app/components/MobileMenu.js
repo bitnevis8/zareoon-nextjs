@@ -3,10 +3,17 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
+import LoginRequiredMessage from './LoginRequiredMessage';
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth() || { user: null };
+
+  const menuItems = [
+    { title: 'داشبورد', href: '/dashboard', protected: true },
+    { title: 'سبد خرید', href: '/cart', protected: true },
+    { title: 'تنظیمات', href: '/dashboard/settings', protected: true },
+  ];
 
   return (
     <div className="md:hidden">
@@ -47,6 +54,28 @@ export default function MobileMenu() {
                 ورود / ثبت نام
               </Link>
             )}
+
+            {/* Menu items */}
+            {menuItems.map((item) => (
+              <div key={item.title}>
+                {item.protected && !user ? (
+                  <LoginRequiredMessage>
+                    <div className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 bg-gray-100 cursor-pointer">
+                      {item.title}
+                    </div>
+                  </LoginRequiredMessage>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    onClick={() => setIsOpen(false)}
+                    prefetch={true}
+                  >
+                    {item.title}
+                  </Link>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
