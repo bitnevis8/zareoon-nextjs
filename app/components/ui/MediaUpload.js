@@ -35,8 +35,8 @@ export default function MediaUpload({
       const j = await r.json();
       if (j?.success) setItems(Array.isArray(j.data) ? j.data : []);
     } catch {}
-  }, [module, entityId, fileType]);
-  useEffect(() => { if (entityId) load(); }, [module, entityId, fileType, load]);
+  }, [module, entityId]);
+  useEffect(() => { if (entityId) load(); }, [module, entityId, load]);
 
   const onPick = () => inputRef.current?.click();
 

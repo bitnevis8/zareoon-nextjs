@@ -45,7 +45,7 @@ const InventoryPricingDisplay = ({
     if (inventoryLot?.id && quantity) {
       calculatePrice(quantity);
     }
-  }, [inventoryLot?.id, quantity]);
+  }, [inventoryLot?.id, quantity, calculatePrice]);
 
   // اگر موجودی tiered pricing نداشته باشد
   if (!inventoryLot?.tieredPricing || !Array.isArray(inventoryLot.tieredPricing)) {

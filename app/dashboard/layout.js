@@ -161,7 +161,9 @@ function DashboardLayoutContent({ children }) {
 export default function DashboardLayout({ children }) {
   return (
     <ProtectedRoute>
-      <DashboardLayoutContent children={children} />
+      <DashboardLayoutContent>
+        {children}
+      </DashboardLayoutContent>
     </ProtectedRoute>
   );
 }
