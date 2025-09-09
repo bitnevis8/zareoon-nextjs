@@ -19,7 +19,19 @@ export default function MediaUpload({
   const load = useCallback(async () => {
     try {
       const url = `${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?entityId=${encodeURIComponent(entityId || '')}`;
-      const r = await fetch(url, { credentials: 'include', cache: 'no-store' });
+      
+      // گرفتن token از localStorage
+      const token = localStorage.getItem('token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const r = await fetch(url, { 
+        credentials: 'include', 
+        cache: 'no-store',
+        headers
+      });
       const j = await r.json();
       if (j?.success) setItems(Array.isArray(j.data) ? j.data : []);
     } catch {}
@@ -46,7 +58,19 @@ export default function MediaUpload({
     if (entityId) form.append('entityId', String(entityId));
     setUploading(true);
     try {
-      const r = await fetch(API_ENDPOINTS.fileUpload.upload, { method: 'POST', body: form, credentials: 'include' });
+      // گرفتن token از localStorage
+      const token = localStorage.getItem('token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const r = await fetch(API_ENDPOINTS.fileUpload.upload, { 
+        method: 'POST', 
+        body: form, 
+        credentials: 'include',
+        headers
+      });
       const j = await r.json();
       if (!j?.success) alert(j?.message || 'خطا در آپلود');
     } catch (e) {
@@ -59,7 +83,18 @@ export default function MediaUpload({
   const remove = async (id) => {
     if (!confirm('حذف فایل؟')) return;
     try {
-      const r = await fetch(API_ENDPOINTS.fileUpload.deleteFile(id), { method: 'DELETE', credentials: 'include' });
+      // گرفتن token از localStorage
+      const token = localStorage.getItem('token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const r = await fetch(API_ENDPOINTS.fileUpload.deleteFile(id), { 
+        method: 'DELETE', 
+        credentials: 'include',
+        headers
+      });
       const j = await r.json();
       if (j?.success) load(); else alert(j?.message || 'خطا در حذف');
     } catch {
