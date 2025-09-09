@@ -11,7 +11,7 @@ export default function Header() {
   const { user } = useAuth() || { user: null };
   
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[10002]">
+    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-[9997]">
       <div className="w-full">
         <div className="flex justify-between items-center min-h-16 px-4 sm:px-6 lg:px-8 py-2">
           {/* Logo */}

@@ -11,12 +11,12 @@ export default function ProductImage({ slug, imageUrl, alt = "", width = 96, hei
       for (const ext of DEFAULT_EXTS) list.push(`/images/products/${slug}${ext}`);
     }
     if (imageUrl) list.push(imageUrl);
-    list.push("/file.svg");
+    list.push("/images/image-loader.webp"); // استفاده از loader به عنوان تصویر پیش‌فرض
     return list;
   }, [slug, imageUrl]);
 
   const [idx, setIdx] = useState(0);
-  const src = candidates[idx] || "/file.svg";
+  const src = candidates[idx] || "/images/image-loader.webp";
 
   return (
     <Image

@@ -144,7 +144,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="max-w-6xl mx-auto px-3 sm:px-6 py-10 space-y-8">
+    <main className="max-w-6xl mx-auto px-3 sm:px-6 py-4 space-y-8 overflow-x-hidden">
       <section className="text-center space-y-10">
         <div className="mb-4">
         <Image
@@ -166,7 +166,16 @@ export default function Home() {
           {q && (
             <div className="absolute z-10 left-0 right-0 mt-2 bg-white border rounded-xl shadow max-h-80 overflow-auto text-right">
               {searching ? (
-                <div className="p-3 text-sm text-slate-500">در حال جست‌وجو...</div>
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className="flex items-center justify-between px-4 py-2 animate-pulse">
+                        <div className="h-4 bg-gray-300 rounded w-32"></div>
+                        <div className="h-5 bg-gray-300 rounded w-12"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : results.length ? (
                 results.map((it) => (
                   <Link key={it.id} href={`/catalog/${it.id}`} className={`flex items-center justify-between px-4 py-2 hover:bg-slate-50 ${it ? getProductStockClass(it, allProducts, inventoryLots) : ''}`}>
@@ -182,47 +191,91 @@ export default function Home() {
         </div>
      
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-          {categories.map((c) => (
-            <div key={c.id} className={`card bg-base-100 shadow-xl border ${c ? getProductStockClass(c, allProducts, inventoryLots) : ''}`}>
-              <figure className="h-64 w-full max-h-64 bg-base-200 flex items-center justify-center ">
-                <ProductImage slug={c.slug} imageUrl={c.imageUrl} alt={c.name} width={400} height={400} className=" object-cover w-full h-full" />
-              </figure>
-              <div className="card-body p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="card-title text-base">{c.name}</h3>
-                  <Link href={`/catalog/${c.id}`} className="btn btn-ghost btn-xs text-primary">مشاهده همه</Link>
-                </div>
-                {c.slug ? <div className="text-gray-400 text-xs mt-0.5">{c.slug}</div> : null}
-                <div className="mt-3">
-                  <div className="text-xs text-slate-600 mb-2">زیردسته‌ها و محصولات</div>
-                  <div className="space-y-2">
-                    {(childrenMap[c.id] || []).slice(0, 10).map((ch) => {
-                      // محاسبه موجودی برای هر محصول/دسته
-                      const availableStock = calculateAvailableStock(ch, allProducts, inventoryLots);
-                      console.log(`Home page - ${ch.name} (${ch.id}): availableStock = ${availableStock}, isOrderable = ${ch.isOrderable}`);
-                      
-                      return (
-                        <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between rounded-md px-3 py-2 border hover:bg-base-200 ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : ''}`}>
-                          <div className="text-sm">{ch.name}</div>
+          {loading ? (
+            // Skeleton loading cards
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="card bg-base-100 shadow-xl border animate-pulse">
+                <figure className="h-64 w-full max-h-64 bg-gray-200 flex items-center justify-center">
+                  <Image
+                    src="/images/image-loader.webp"
+                    alt="در حال بارگذاری..."
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 object-contain opacity-50"
+                  />
+                </figure>
+                <div className="card-body p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="h-5 bg-gray-300 rounded w-24"></div>
+                    <div className="h-6 bg-gray-300 rounded w-16"></div>
+                  </div>
+                  <div className="h-3 bg-gray-300 rounded w-20 mb-4"></div>
+                  <div className="mt-3">
+                    <div className="h-3 bg-gray-300 rounded w-32 mb-2"></div>
+                    <div className="space-y-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-md px-3 py-2 border bg-gray-50">
+                          <div className="h-4 bg-gray-300 rounded w-20"></div>
                           <div className="flex items-center gap-2">
-                            {availableStock > 0 && (
-                              <span className="text-xs text-green-600 font-medium">
-                                {availableStock.toLocaleString()} کیلوگرم
-                              </span>
-                            )}
-                            <span className="badge badge-ghost badge-sm">{ch.isOrderable ? 'محصول' : 'دسته'}</span>
+                            <div className="h-4 bg-gray-300 rounded w-12"></div>
+                            <div className="h-5 bg-gray-300 rounded w-12"></div>
                           </div>
-                        </Link>
-                      );
-                    })}
-                    {(childrenMap[c.id] || []).length === 0 && !loading && (
-                      <span className="text-slate-400 text-xs">موردی ثبت نشده</span>
-                    )}
+                        </div>
+                      ))}
+                      <div className="flex items-center justify-center rounded-md px-3 py-2 border border-dashed border-gray-300 bg-gray-50">
+                        <span className="text-sm text-gray-500">مشاهده همه</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            categories.map((c) => (
+              <div key={c.id} className={`card bg-base-100 shadow-xl border ${c ? getProductStockClass(c, allProducts, inventoryLots) : ''}`}>
+                <figure className="h-64 w-full max-h-64 bg-base-200 flex items-center justify-center ">
+                  <ProductImage slug={c.slug} imageUrl={c.imageUrl} alt={c.name} width={400} height={400} className=" object-cover w-full h-full" />
+                </figure>
+                <div className="card-body p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="card-title text-base">{c.name}</h3>
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-xs text-slate-600 mb-2">زیردسته‌ها و محصولات</div>
+                    <div className="space-y-2">
+                      {(childrenMap[c.id] || []).slice(0, 5).map((ch) => {
+                        // محاسبه موجودی برای هر محصول/دسته
+                        const availableStock = calculateAvailableStock(ch, allProducts, inventoryLots);
+                        console.log(`Home page - ${ch.name} (${ch.id}): availableStock = ${availableStock}, isOrderable = ${ch.isOrderable}`);
+                        
+                        return (
+                          <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between rounded-md px-3 py-2 border hover:bg-base-200 ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : ''}`}>
+                            <div className="text-sm">{ch.name}</div>
+                            <div className="flex items-center gap-2">
+                              {availableStock > 0 && (
+                                <span className="text-xs text-green-600 font-medium">
+                                  {availableStock.toLocaleString()} کیلوگرم
+                                </span>
+                              )}
+                              <span className="badge badge-ghost badge-sm">{ch.isOrderable ? 'محصول' : 'دسته'}</span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                      {(childrenMap[c.id] || []).length > 0 && (
+                        <Link href={`/catalog/${c.id}`} className="flex items-center justify-center rounded-md px-3 py-2 border border-dashed border-gray-300 hover:bg-gray-50 text-gray-600 hover:text-gray-800 transition-colors">
+                          <span className="text-sm font-medium">مشاهده همه</span>
+                        </Link>
+                      )}
+                      {(childrenMap[c.id] || []).length === 0 && !loading && (
+                        <span className="text-slate-400 text-xs">موردی ثبت نشده</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
         {categories.length === 0 && !loading && (
           <div className="text-slate-500 text-sm">دسته‌بندی‌ای ثبت نشده است.</div>
