@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import LoginRequiredMessage from "./LoginRequiredMessage";
 import SearchModal from "./SearchModal";
+import ProfileDropdown from "./ProfileDropdown";
 
 export default function MobileBottomBar() {
   const router = useRouter();
@@ -147,16 +148,9 @@ export default function MobileBottomBar() {
       onClick: () => router.push('/cart')
     });
 
-    // Always add profile button at the end
-    buttons.push({
-      id: 'profile',
-      label: auth.user.firstName || 'پروفایل',
-      icon: 'profile',
-      onClick: () => router.push('/dashboard')
-    });
-
-    // Limit to 5 buttons maximum
-    return buttons.slice(0, 5);
+    // Profile dropdown will be added separately
+    // Limit to 4 buttons maximum (profile dropdown is separate)
+    return buttons.slice(0, 4);
   };
 
   const buttons = getBottomBarButtons();
@@ -229,25 +223,29 @@ export default function MobileBottomBar() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-[9998]">
         <div className="flex items-center justify-between px-1 py-2">
           {buttons.map((button, index) => {
-            const isLastButton = index === buttons.length - 1;
-            const isProfileButton = button.id === 'profile';
-            
             return (
               <button
                 key={button.id}
                 onClick={button.disabled ? undefined : button.onClick}
                 disabled={button.disabled}
-                className={`flex flex-col items-center gap-1 p-2 text-gray-600 hover:text-blue-600 transition-colors min-w-0 flex-1 ${
+                className={`flex flex-col items-center justify-center gap-1 p-2 text-gray-600 hover:text-blue-600 transition-colors w-16 h-16 ${
                   button.active ? 'text-blue-600' : ''
-                } ${button.disabled ? 'opacity-50 cursor-not-allowed' : ''} ${isProfileButton ? 'max-w-16' : ''}`}
+                } ${button.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {getIcon(button.icon)}
-                <span className={`text-xs ${isProfileButton ? 'truncate max-w-12' : ''}`}>
+                <span className="text-xs">
                   {button.label}
                 </span>
               </button>
             );
           })}
+          
+          {/* Profile Dropdown - Always show for logged in users */}
+          {auth?.user && (
+            <div className="flex-shrink-0">
+              <ProfileDropdown />
+            </div>
+          )}
         </div>
       </div>
 

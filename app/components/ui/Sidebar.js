@@ -18,9 +18,9 @@ const baseMenuItems = [
     icon: '🏠',
   },
   {
-    title: 'تنظیمات',
+    title: 'حساب کاربری',
     path: '/dashboard/settings',
-    icon: '⚙️',
+    icon: '👤',
   },
   {
     title: 'مدیریت کاربران',
@@ -45,7 +45,7 @@ const baseMenuItems = [
 
 export default function Sidebar({ onLinkClick }) {
   const pathname = usePathname();
-  const [openMenu, setOpenMenu] = useState('مدیریت تامین');
+  const [openMenu, setOpenMenu] = useState(null);
   const auth = useAuth();
   const roles = (auth?.user?.roles || []).map(r => (r.name || r.nameEn || '')).map(n => (n||'').toLowerCase());
   const isAdmin = roles.includes('admin');
@@ -119,24 +119,6 @@ export default function Sidebar({ onLinkClick }) {
         </button>
       </div>
 
-      {/* User Info */}
-      <div className="mb-6 pb-4 border-b border-gray-200">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <div className="flex-1">
-            <p className="text-base font-semibold text-gray-900 mb-1">
-              {auth?.user?.firstName || ''} {auth?.user?.lastName || ''}
-            </p>
-            <p className="text-sm text-gray-600">
-              {auth?.user?.mobile || auth?.user?.phone || 'شماره موبایل ثبت نشده'}
-            </p>
-          </div>
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-blue-600 font-semibold text-lg">
-              {auth?.user?.firstName?.charAt(0) || 'U'}
-            </span>
-          </div>
-        </div>
-      </div>
       
       <nav className="space-y-2">
         {menuItems.map((item) => (

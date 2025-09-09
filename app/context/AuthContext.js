@@ -115,6 +115,12 @@ export function AuthProvider({ children }) {
     console.log("🔍 Login completed - user set, loading false");
   };
 
+  const updateUser = (updatedUserData) => {
+    console.log("🔍 Updating user data:", updatedUserData);
+    setUser(updatedUserData);
+    localStorage.setItem("user", JSON.stringify(updatedUserData));
+  };
+
   const logout = async () => {
     try {
       await fetch(API_ENDPOINTS.auth.logout, {
@@ -138,6 +144,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     logout,
+    updateUser,
     checkAuthStatus,
   };
 
