@@ -39,7 +39,8 @@ const baseMenuItems = [
       { title: 'ویژگی‌های سفارشی', path: '/dashboard/farmer/attributes', icon: '🔖' },
       { title: 'موجودی‌ها', path: '/dashboard/farmer/inventory', icon: '📦' },
       { title: 'سفارش‌ها', path: '/dashboard/order-management', icon: '📋' },
-      { title: 'درخواست‌های LC', path: '/dashboard/lc-requests', icon: '💳' },
+      { title: 'درخواست‌های خدمات بازرگانی', path: '/dashboard/service-requests', icon: '📋' },
+      { title: 'ترتیب صفحه اصلی', path: '/dashboard/homepage-order', icon: '↕️' },
     ],
   },
 ];

@@ -15,6 +15,10 @@ import { formatLocalizedNumber, formatLocalizedPrice, getLocalizedLotLabel, getL
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import CartStatusBanner from "@/app/components/CartStatusBanner";
 import CatalogGuidePanel from "@/app/components/CatalogGuidePanel";
+import CatalogBreadcrumb, { buildCatalogPath } from "@/app/components/CatalogBreadcrumb";
+import CatalogChildrenGrid from "@/app/components/CatalogChildrenGrid";
+import LatestAvailableProductsSection from "@/app/components/LatestAvailableProductsSection";
+import { sortCatalogItems } from "@/app/utils/productSort";
 
 export default function CatalogItemPage({ params }) {
   // Next.js 15: params is a Promise; unwrap with React.use()
@@ -138,32 +142,26 @@ export default function CatalogItemPage({ params }) {
         const dc = await rc.json();
         const dl = await rl.json();
         const dall = await rall.json();
+        const childItems = sortCatalogItems(dc.data || [], language);
         setItem(di.data || null);
-        setChildren(dc.data || []);
+        setChildren(childItems);
         setLots(dl.data || []);
         setInventoryLots(dl.data || []);
         setAllProducts(dall.data || []);
-        
-        // Debug: Check inventory lots
-        console.log('Inventory lots loaded:', dl.data?.length || 0);
-        const wheatLots = dl.data?.filter(lot => lot.productId === 1101) || [];
-        console.log('Wheat bread lots:', wheatLots.map(lot => `${lot.qualityGrade}: ${lot.totalQuantity}kg`));
-        
-        // Debug: Check children
-        console.log('Children loaded:', dc.data?.length || 0);
-        console.log('Children:', dc.data?.map(ch => `${ch.name} (${ch.id}, orderable: ${ch.isOrderable})`));
-        
-        // Debug: Check all products
-        console.log('All products loaded:', dall.data?.length || 0);
-        const wheatProducts = dall.data?.filter(p => p.parentId === 1001) || [];
-        console.log('Wheat products in allProducts:', wheatProducts.map(p => `${p.name} (${p.id})`));
-        // After loading product data, fetch cart info to display user's existing amount for this product
         fetchCart();
       } finally {
         setLoading(false);
       }
     })();
-  }, [id, fetchCart]);
+  }, [id, fetchCart, language]);
+
+  const productById = useMemo(() => {
+    const map = new Map();
+    for (const p of allProducts) map.set(p.id, p);
+    return map;
+  }, [allProducts]);
+
+  const breadcrumbPath = useMemo(() => buildCatalogPath(item, productById), [item, productById]);
 
   // Inventory summary for this product (no farmer names)
   const productIdNum = Number(id);
@@ -236,13 +234,9 @@ export default function CatalogItemPage({ params }) {
   // محاسبه قیمت تقریبی حذف شد چون سفارش در سطح بار انجام می‌شود
 
   return (
-    <main className="w-full px-2 sm:px-4 lg:px-6 py-2 space-y-4 sm:space-y-6 overflow-x-hidden">
+    <main className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-2 sm:py-4 space-y-4 sm:space-y-6 overflow-x-hidden">
       <CartStatusBanner />
-      <div className="text-sm text-slate-500"><Link href="/">{t("mainPage")}</Link> / {getLocalizedText(item, language) || "..."}</div>
-
-      <CatalogGuidePanel
-        showCategoryGuide={!item?.isOrderable && children.length > 0}
-      />
+      <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
 
       {/* Header: image on the right, title on the left of the image (RTL-friendly) */}
         <section className={`rounded-xl shadow border p-3 sm:p-4 ${item ? getProductStockClass(item, allProducts, inventoryLots) : 'bg-white'}`}>
@@ -305,45 +299,53 @@ export default function CatalogItemPage({ params }) {
 
       {/* Category stock summary (for non-orderable items) */}
       {!item?.isOrderable && children.length > 0 && (
-        <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
-          <h2 className="text-lg font-semibold mb-3">{t("totalStockStatus")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div className="bg-slate-50 rounded-md border p-3">
-              <div className="text-xs text-slate-500">{t("totalStock")}</div>
-              <div className="text-lg font-semibold">
-                {formatLocalizedNumber(
-                  children.reduce((sum, ch) => {
-                    const stock = calculateAvailableStock(ch, allProducts, inventoryLots);
-                    return sum + stock;
-                  }, 0),
-                  language
-                )}{" "}
-                {localizeUnit("kg", language)}
+        <>
+          <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
+            <h2 className="text-lg font-semibold mb-3">{t("totalStockStatus")}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="bg-slate-50 rounded-md border p-3">
+                <div className="text-xs text-slate-500">{t("totalStock")}</div>
+                <div className="text-lg font-semibold">
+                  {formatLocalizedNumber(
+                    children.reduce((sum, ch) => {
+                      const stock = calculateAvailableStock(ch, allProducts, inventoryLots);
+                      return sum + stock;
+                    }, 0),
+                    language
+                  )}{" "}
+                  {localizeUnit("kg", language)}
+                </div>
+              </div>
+              <div className="bg-slate-50 rounded-md border p-3">
+                <div className="text-xs text-slate-500">{t("totalProducts")}</div>
+                <div className="text-lg font-semibold">{children.length} {t("product")}</div>
+              </div>
+              <div className="bg-slate-50 rounded-md border p-3">
+                <div className="text-xs text-slate-500">{t("productsWithStock")}</div>
+                <div className="text-lg font-semibold">
+                  {children.filter(ch => calculateAvailableStock(ch, allProducts, inventoryLots) > 0).length} {t("product")}
+                </div>
               </div>
             </div>
-            <div className="bg-slate-50 rounded-md border p-3">
-              <div className="text-xs text-slate-500">{t("totalProducts")}</div>
-              <div className="text-lg font-semibold">{children.length} {t("product")}</div>
-            </div>
-            <div className="bg-slate-50 rounded-md border p-3">
-              <div className="text-xs text-slate-500">{t("productsWithStock")}</div>
-              <div className="text-lg font-semibold">
-                {children.filter(ch => calculateAvailableStock(ch, allProducts, inventoryLots) > 0).length} {t("product")}
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
+          <CatalogGuidePanel
+            showCategoryGuide
+            showStockLegend
+            className="mt-2"
+          />
+        </>
       )}
 
       {/* Inventory summary (if any) */}
       {filteredLots.length > 0 && (
         <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
           <h2 className="text-lg font-semibold mb-3">{t("inventoryStatus")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-3">
             <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("totalStock")}</div><div className="text-lg font-semibold">{summary.totalQuantity.toFixed(3)}</div></div>
             <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("reserved")}</div><div className="text-lg font-semibold">{summary.reservedQuantity.toFixed(3)}</div></div>
             <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("availableToOffer")}</div><div className="text-lg font-semibold">{summary.availableQuantity.toFixed(3)}</div></div>
           </div>
+          <CatalogGuidePanel showCategoryGuide={false} showStockLegend className="mb-4" />
           {/* جعبه سفارش سریع حذف شد؛ سفارش در ردیف هر بار انجام می‌شود */}
           {orderMsg ? (
             <div
@@ -778,45 +780,33 @@ export default function CatalogItemPage({ params }) {
         </div>
       ) : null}
 
-      {/* Products list (only show when there are sub-products) */}
+      {!loading && !item?.isOrderable ? (
+        <LatestAvailableProductsSection
+          inventoryLots={inventoryLots}
+          allProducts={allProducts}
+          loading={loading}
+          scopeCategoryId={item.id}
+          scopeCategoryName={getLocalizedText(item, language)}
+          variant="catalog"
+          className="mb-4"
+        />
+      ) : null}
+
+      {/* Subcategories and products */}
       {!loading && children.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold mb-3">{t("productLabelPlural")}</h2>
-          <div className="space-y-2 sm:space-y-3">
-            {children.map((ch) => {
-              // محاسبه موجودی برای هر محصول/دسته
-              const availableStock = calculateAvailableStock(ch, allProducts, inventoryLots);
-              console.log(`Child ${ch.name} (${ch.id}): availableStock = ${availableStock}`);
-              
-              // Debug: Check inventory lots for this product
-              if (ch.isOrderable) {
-                const productLots = inventoryLots.filter(lot => lot.productId === ch.id);
-                console.log(`Debug ${ch.name}:`, productLots.map(lot => ({
-                  id: lot.id,
-                  totalQuantity: lot.totalQuantity,
-                  reservedQuantity: lot.reservedQuantity,
-                  totalParsed: parseFloat(lot.totalQuantity || 0),
-                  reservedParsed: parseFloat(lot.reservedQuantity || 0)
-                })));
-              }
-              
-              return (
-                <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between rounded-lg shadow p-3 sm:p-4 border transition-colors ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : 'bg-white'}`}>
-                    <div className="font-medium">{getLocalizedText(ch, language)}</div>
-                  <div className="flex items-center gap-2">
-                    {availableStock > 0 && (
-                      <span className="text-xs font-medium">
-                        {formatLocalizedNumber(availableStock, language)} {localizeUnit("kg", language)}
-                      </span>
-                    )}
-                    <span className="text-xs opacity-80">{t("view")}</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+        <CatalogChildrenGrid
+          items={children}
+          allProducts={allProducts}
+          inventoryLots={inventoryLots}
+          parentItem={item}
+        />
       )}
+
+      {!loading && !item?.isOrderable && children.length === 0 ? (
+        <div className="rounded-xl border bg-white p-6 text-center text-sm text-slate-500">
+          {t("noItemsRegistered")}
+        </div>
+      ) : null}
 
 
     </main>

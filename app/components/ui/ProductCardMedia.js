@@ -12,6 +12,7 @@ export default function ProductCardMedia({
   height = 300,
   className = "object-cover w-full h-full",
   figureClassName = "",
+  showFlag = true,
 }) {
   const supplyCountry = product?.supplyCountry || "IR";
   const supplyCity = product?.supplyCity || "";
@@ -26,9 +27,11 @@ export default function ProductCardMedia({
         height={height}
         className={className}
       />
-      <div className="absolute top-2 right-2 z-10">
-        <SupplyCountryFlag countryCode={supplyCountry} city={supplyCity} />
-      </div>
+      {showFlag ? (
+        <div className="absolute top-2 right-2 z-[1]">
+          <SupplyCountryFlag countryCode={supplyCountry} city={supplyCity} />
+        </div>
+      ) : null}
     </div>
   );
 }

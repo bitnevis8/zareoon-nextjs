@@ -1,28 +1,33 @@
 "use client";
+
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
 
-const DEFAULT_EXTS = [".webp", ".jpg", ".jpeg", ".png", ".svg"];
+const FALLBACK_SRC = "/images/product-placeholder.svg";
 
-export default function ProductImage({ slug, imageUrl, alt = "", width = 96, height = 96, className = "rounded-lg bg-slate-50 p-2 border" }) {
+export default function ProductImage({
+  slug,
+  imageUrl,
+  alt = "",
+  width = 96,
+  height = 96,
+  className = "rounded-lg bg-slate-50 p-2 border",
+}) {
   const candidates = useMemo(() => {
     const list = [];
     if (imageUrl) list.push(resolveMediaUrl(imageUrl));
-    if (slug) {
-      for (const ext of DEFAULT_EXTS) list.push(`/images/products/${slug}${ext}`);
-    }
-    list.push("/images/image-loader.webp");
+    list.push(FALLBACK_SRC);
     return list;
-  }, [slug, imageUrl]);
+  }, [imageUrl]);
 
   const [idx, setIdx] = useState(0);
-  const src = candidates[idx] || "/images/image-loader.webp";
+  const src = candidates[idx] || FALLBACK_SRC;
 
   return (
     <Image
       src={src}
-      alt={alt}
+      alt={alt || slug || "product"}
       width={width}
       height={height}
       className={className}
@@ -33,4 +38,3 @@ export default function ProductImage({ slug, imageUrl, alt = "", width = 96, hei
     />
   );
 }
-

@@ -316,4 +316,10 @@ export const API_ENDPOINTS = {
     getById: (id) => `${API_BASE_URL}/lc-request/${id}`,
     updateStatus: (id) => `${API_BASE_URL}/lc-request/${id}/status`,
   },
+  serviceRequests: {
+    create: `${API_BASE_URL}/service-request`,
+    getAll: `${API_BASE_URL}/service-request`,
+    getById: (id) => `${API_BASE_URL}/service-request/${id}`,
+    updateStatus: (id) => `${API_BASE_URL}/service-request/${id}/status`,
+  },
 }; 

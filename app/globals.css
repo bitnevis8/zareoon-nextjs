@@ -112,27 +112,14 @@ body {
 
 .product-scroll-row {
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: #16a34a #e2e8f0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .product-scroll-row::-webkit-scrollbar {
-  height: 5px;
-}
-
-.product-scroll-row::-webkit-scrollbar-track {
-  background: #e2e8f0;
-  border-radius: 9999px;
-  margin-inline: 2px;
-}
-
-.product-scroll-row::-webkit-scrollbar-thumb {
-  background: #22c55e;
-  border-radius: 9999px;
-}
-
-.product-scroll-row::-webkit-scrollbar-thumb:hover {
-  background: #16a34a;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* RTL specific styles */
@@ -210,6 +197,36 @@ html, body {
   background-color: #155724;
   border: 1px solid #0f5132;
   color: #ffffff;
+}
+
+.stock-guide-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 9999px;
+  vertical-align: middle;
+}
+
+.stock-guide-dot-empty {
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.stock-guide-dot-low {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.stock-guide-dot-medium {
+  background-color: #28a745;
+  border: 1px solid #1e7e34;
+}
+
+.stock-guide-dot-high {
+  background-color: #155724;
+  border: 1px solid #0f5132;
 }
 
 /* Readable text on medium/high colored surfaces */

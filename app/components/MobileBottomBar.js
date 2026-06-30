@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -13,14 +13,10 @@ function openDashboardSidebar() {
 
 export default function MobileBottomBar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const auth = useAuth();
   const { t, isRTL } = useLanguage();
 
-  const viewParam = searchParams.get("view");
   const isHome = pathname === "/";
-  const isAvailableActive = isHome && (viewParam === "available" || !viewParam);
-  const isAllActive = isHome && viewParam === "all";
 
   const buttons = [
     {
@@ -28,21 +24,21 @@ export default function MobileBottomBar() {
       label: t("siteName"),
       icon: "home",
       href: "/",
-      active: isHome && !isAllActive && !isAvailableActive,
+      active: isHome,
     },
     {
-      id: "available",
-      label: t("productsAvailable"),
-      icon: "available",
-      href: "/?view=available",
-      active: isAvailableActive,
-    },
-    {
-      id: "all-categories",
-      label: t("showAllCategories"),
+      id: "categories",
+      label: t("productCategories"),
       icon: "categories",
-      href: "/?view=all",
-      active: isAllActive,
+      href: "/#product-categories",
+      active: false,
+    },
+    {
+      id: "latest",
+      label: t("latestAvailableShort"),
+      icon: "available",
+      href: "/#latest-available",
+      active: false,
     },
     auth?.user
       ? {
