@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['api.zareoon.ir', 'localhost', 'zareoon.ir'],
+    domains: ['api.zareoon.ir', 'localhost', 'zareoon.ir', 'dl.zareoon.ir', '2193182645.cloudydl.com'],
     formats: ['image/webp', 'image/avif'],
     unoptimized: true, // برای تصاویر خارجی
   },

@@ -3,7 +3,7 @@ export default function StructuredData({ articles = [] }) {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "زارعون",
-    "url": (typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')),
+    "url": process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     "logo": "/logo.png",
     "description": "بازار آنلاین خرید و فروش محصولات و نهاده‌های کشاورزی",
     "foundingDate": "2024",

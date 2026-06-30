@@ -403,24 +403,24 @@ export default function CatalogItemPage({ params }) {
                       {(() => {
                         const c = lotMediaCounts.get(l.id);
                         const preview = lotMediaPreview.get(l.id) || [];
-                        if (!c || (c.images + c.videos) === 0) return '—';
+                        const thumb = preview[0];
+                        const thumbUrl = thumb?.downloadUrl || l.coverImageUrl;
+                        if (!thumbUrl) return '—';
+                        const isVideo = thumb ? String(thumb.mimeType || '').startsWith('video/') : false;
                         return (
                           <div className="flex items-center gap-2">
-                            {preview.slice(0, 1).map(m => (
-                              <div
-                                key={m.id}
-                                className="w-16 h-12 rounded overflow-hidden bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: String(m.mimeType||'').startsWith('video/') ? 'videos' : 'images' })}
-                                title="مشاهده رسانه‌ها"
-                              >
-                                {String(m.mimeType||'').startsWith('video/') ? (
-                                  <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
-                                ) : (
-                                  <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
-                                )}
-                              </div>
-                            ))}
-                            {(c.images + c.videos) > 1 ? (
+                            <div
+                              className="w-16 h-12 rounded overflow-hidden bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: isVideo ? 'videos' : 'images' })}
+                              title="مشاهده رسانه‌ها"
+                            >
+                              {isVideo ? (
+                                <video src={thumbUrl} className="w-full h-full object-cover" muted />
+                              ) : (
+                                <Image src={thumbUrl} alt={thumb?.originalName || l.qualityGrade || ''} className="w-full h-full object-cover" width={300} height={200} unoptimized />
+                              )}
+                            </div>
+                            {c && (c.images + c.videos) > 1 ? (
                               <button className="text-indigo-600 text-xs hover:text-indigo-800" onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: 'images' })}>
                                 +{(c.images + c.videos) - 1}
                               </button>
@@ -544,26 +544,25 @@ export default function CatalogItemPage({ params }) {
                 {(() => {
                   const c = lotMediaCounts.get(l.id);
                   const preview = lotMediaPreview.get(l.id) || [];
-                  if (c && (c.images + c.videos) > 0) {
-                    return (
+                  const thumb = preview[0];
+                  const thumbUrl = thumb?.downloadUrl || l.coverImageUrl;
+                  if (!thumbUrl) return null;
+                  const isVideo = thumb ? String(thumb.mimeType || '').startsWith('video/') : false;
+                  return (
                       <div className="relative">
                         <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
-                          {preview.slice(0, 1).map(m => (
                             <div
-                              key={m.id}
                               className="w-full h-full cursor-pointer hover:scale-105 transition-transform duration-200"
-                              onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: String(m.mimeType||'').startsWith('video/') ? 'videos' : 'images' })}
+                              onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: isVideo ? 'videos' : 'images' })}
                               title="مشاهده رسانه‌ها"
                             >
-                              {String(m.mimeType||'').startsWith('video/') ? (
-                                <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
+                              {isVideo ? (
+                                <video src={thumbUrl} className="w-full h-full object-cover" muted />
                               ) : (
-                                <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={400} height={300} />
+                                <Image src={thumbUrl} alt={thumb?.originalName || l.qualityGrade || ''} className="w-full h-full object-cover" width={400} height={300} unoptimized />
                               )}
                             </div>
-                          ))}
-                          {/* Media count badge */}
-                          {(c.images + c.videos) > 1 && (
+                          {c && (c.images + c.videos) > 1 && (
                             <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
                               +{(c.images + c.videos) - 1}
                             </div>
@@ -588,24 +587,6 @@ export default function CatalogItemPage({ params }) {
                         </div>
                       </div>
                     );
-                  } else {
-                    // No media - show badges in header area instead
-                    return (
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-lg">
-                          {l.qualityGrade}
-                        </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-lg ${
-                          l.status === 'harvested' ? 'bg-green-600 text-white' :
-                          l.status === 'reserved' ? 'bg-yellow-600 text-white' :
-                          l.status === 'sold' ? 'bg-blue-600 text-white' :
-                          'bg-gray-600 text-white'
-                        }`}>
-                          {statusToFa[l.status] || l.status}
-                        </span>
-                      </div>
-                    );
-                  }
                 })()}
 
                 {/* Content */}

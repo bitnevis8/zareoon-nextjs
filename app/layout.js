@@ -1,4 +1,3 @@
-import { Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
@@ -8,12 +7,6 @@ import ClientSideWrapper from "./components/ui/ClientSideWrapper";
 import StructuredData from "./components/StructuredData";
 import GlobalSidebar from "./components/ui/GlobalSidebar";
 import MobileBottomBar from "./components/MobileBottomBar";
-
-const vazirmatn = Vazirmatn({ 
-  subsets: ["arabic"],
-  display: 'swap',
-  variable: '--font-vazirmatn',
-});
 
 export const metadata = {
   title: {
@@ -73,26 +66,26 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#ffffff',
+};
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="fa" dir="rtl" data-theme="taganeh" className={vazirmatn.variable}>
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#ffffff" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <html lang="fa" dir="rtl" data-theme="taganeh" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-gray-50">
         <StructuredData />
-      </head>
-      <body className={`${vazirmatn.className} min-h-screen flex flex-col bg-gray-50`}>
         <AuthProvider>
           <SidebarProvider>
             {/* Header */}
             <Header />
 
             {/* Main Content */}
-            <main className="flex-1 pb-20 md:pb-0 pt-0 md:pt-0">
+            <div className="flex-1 pb-20 md:pb-0 pt-0 md:pt-0">
               {children}
-            </main>
+            </div>
 
             {/* Footer */}
             <Footer />

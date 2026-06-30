@@ -932,14 +932,15 @@ export default function InventoryLotsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-slate-600 mb-1">تصاویر</div>
+                <div className="text-xs text-slate-600 mb-1">تصاویر موجودی (چندتایی)</div>
                 <MediaUpload module="inventory" entityId={selectedLot.id} fileType="images" accept="image/*" buttonLabel="آپلود تصویر" />
               </div>
               <div>
-                <div className="text-xs text-slate-600 mb-1">ویدیوها</div>
+                <div className="text-xs text-slate-600 mb-1">ویدیوهای موجودی (چندتایی)</div>
                 <MediaUpload module="inventory" entityId={selectedLot.id} fileType="videos" accept="video/*" buttonLabel="آپلود ویدیو" />
               </div>
             </div>
+            <p className="text-xs text-slate-500 mt-3">فایل‌ها روی dl.zareoon.ir ذخیره می‌شوند.</p>
           </div>
         </div>
       ) : null}

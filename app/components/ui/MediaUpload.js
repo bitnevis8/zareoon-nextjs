@@ -4,123 +4,155 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { API_ENDPOINTS } from '@/app/config/api';
 
+function authHeaders() {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export default function MediaUpload({
   module = 'products',
   entityId,
-  fileType = 'images', // 'images' | 'videos'
+  fileType = 'images',
   accept = 'image/*,video/*',
   buttonLabel = 'آپلود رسانه',
   className = '',
+  multiple = true,
 }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [items, setItems] = useState([]);
+  const [error, setError] = useState('');
 
   const load = useCallback(async () => {
+    if (!entityId) return;
     try {
-      const url = `${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?entityId=${encodeURIComponent(entityId || '')}`;
-      
-      // گرفتن token از localStorage
-      const token = localStorage.getItem('token');
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const r = await fetch(url, { 
-        credentials: 'include', 
+      const params = new URLSearchParams({
+        entityId: String(entityId),
+        fileType,
+      });
+      const url = `${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?${params}`;
+      const r = await fetch(url, {
+        credentials: 'include',
         cache: 'no-store',
-        headers
+        headers: authHeaders(),
       });
       const j = await r.json();
       if (j?.success) setItems(Array.isArray(j.data) ? j.data : []);
-    } catch {}
-  }, [module, entityId]);
-  useEffect(() => { if (entityId) load(); }, [module, entityId, load]);
+    } catch {
+      setError('خطا در بارگذاری فایل‌ها');
+    }
+  }, [module, entityId, fileType]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const onPick = () => inputRef.current?.click();
 
-  const onChange = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    for (const file of files) {
-      await upload(file);
-    }
-    e.target.value = '';
-    load();
-  };
-
   const upload = async (file) => {
+    const inferredType = file.type.startsWith('video/') ? 'videos' : 'images';
     const form = new FormData();
     form.append('file', file);
     form.append('module', module);
-    form.append('fileType', fileType);
-    if (entityId) form.append('entityId', String(entityId));
+    form.append('fileType', inferredType);
+    form.append('entityId', String(entityId));
+
+    const r = await fetch(API_ENDPOINTS.fileUpload.upload, {
+      method: 'POST',
+      body: form,
+      credentials: 'include',
+      headers: authHeaders(),
+    });
+    const j = await r.json();
+    if (!j?.success) throw new Error(j?.message || 'خطا در آپلود');
+    return j.data;
+  };
+
+  const onChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length || !entityId) return;
     setUploading(true);
+    setError('');
     try {
-      // گرفتن token از localStorage
-      const token = localStorage.getItem('token');
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      for (const file of files) {
+        await upload(file);
       }
-      
-      const r = await fetch(API_ENDPOINTS.fileUpload.upload, { 
-        method: 'POST', 
-        body: form, 
-        credentials: 'include',
-        headers
-      });
-      const j = await r.json();
-      if (!j?.success) alert(j?.message || 'خطا در آپلود');
-    } catch (e) {
-      alert('خطا در ارتباط با سرور');
+      await load();
+    } catch (err) {
+      setError(err.message || 'خطا در آپلود');
     } finally {
       setUploading(false);
+      e.target.value = '';
     }
   };
 
   const remove = async (id) => {
     if (!confirm('حذف فایل؟')) return;
+    setError('');
     try {
-      // گرفتن token از localStorage
-      const token = localStorage.getItem('token');
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const r = await fetch(API_ENDPOINTS.fileUpload.deleteFile(id), { 
-        method: 'DELETE', 
+      const r = await fetch(API_ENDPOINTS.fileUpload.deleteFile(id), {
+        method: 'DELETE',
         credentials: 'include',
-        headers
+        headers: authHeaders(),
       });
       const j = await r.json();
-      if (j?.success) load(); else alert(j?.message || 'خطا در حذف');
+      if (j?.success) await load();
+      else setError(j?.message || 'خطا در حذف');
     } catch {
-      alert('خطا در حذف فایل');
+      setError('خطا در حذف فایل');
     }
   };
 
+  if (!entityId) {
+    return (
+      <p className="text-xs text-amber-600">ابتدا محصول را ذخیره کنید، سپس رسانه آپلود کنید.</p>
+    );
+  }
+
   return (
     <div className={`space-y-3 ${className}`}>
-      <input ref={inputRef} type="file" accept={accept} multiple className="hidden" onChange={onChange} />
-      <button type="button" onClick={onPick} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded px-3 py-1.5 text-sm" disabled={uploading}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        className="hidden"
+        onChange={onChange}
+      />
+      <button
+        type="button"
+        onClick={onPick}
+        className="bg-indigo-600 hover:bg-indigo-700 text-white rounded px-3 py-1.5 text-sm disabled:opacity-60"
+        disabled={uploading}
+      >
         {uploading ? 'در حال آپلود...' : buttonLabel}
       </button>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {items.map(it => (
+      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+      {items.length === 0 && !uploading ? (
+        <p className="text-xs text-slate-400">هنوز فایلی آپلود نشده</p>
+      ) : null}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {items.map((it) => (
           <div key={it.id} className="border rounded-md overflow-hidden bg-white">
             <div className="aspect-video bg-slate-100 flex items-center justify-center overflow-hidden">
-              {String(it.mimeType||'').startsWith('video/') ? (
+              {String(it.mimeType || '').startsWith('video/') ? (
                 <video src={it.downloadUrl} className="w-full h-full object-cover" controls />
               ) : (
-                <Image src={it.downloadUrl} alt={it.originalName||''} className="w-full h-full object-cover" width={200} height={150} />
+                <Image
+                  src={it.downloadUrl}
+                  alt={it.originalName || ''}
+                  className="w-full h-full object-cover"
+                  width={200}
+                  height={150}
+                  unoptimized
+                />
               )}
             </div>
             <div className="p-2 flex items-center justify-between gap-2 text-xs">
               <div className="truncate" title={it.originalName}>{it.originalName}</div>
-              <button type="button" className="text-red-600" onClick={() => remove(it.id)}>حذف</button>
+              <button type="button" className="text-red-600 shrink-0" onClick={() => remove(it.id)}>
+                حذف
+              </button>
             </div>
           </div>
         ))}
@@ -128,5 +160,3 @@ export default function MediaUpload({
     </div>
   );
 }
-
-

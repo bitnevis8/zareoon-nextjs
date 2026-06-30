@@ -1,4 +1,11 @@
 // تابع محاسبه کلاس بر اساس مقدار مطلق موجودی (کیلوگرم)
+export const STOCK_LEGEND = [
+  { className: 'stock-empty', label: 'بدون موجودی', range: '۰ کیلوگرم' },
+  { className: 'stock-low', label: 'موجودی کم', range: 'زیر ۵ تن' },
+  { className: 'stock-medium', label: 'موجودی متوسط', range: '۵ تا ۲۰ تن' },
+  { className: 'stock-high', label: 'موجودی زیاد', range: 'بالای ۲۰ تن' },
+];
+
 export function getStockClass(availableStock) {
   if (availableStock === 0) return 'stock-empty';
   if (availableStock < 5000) return 'stock-low';        // زیر 5000 کیلوگرم → سبز روشن

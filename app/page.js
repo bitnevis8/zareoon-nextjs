@@ -1,12 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from 'next/link';
 import ProductImage from './components/ui/ProductImage';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from './config/api';
-import { getProductStockClass, calculateAvailableStock, calculateParentStockQuantity } from './utils/stockUtils';
+import { getProductStockClass, calculateAvailableStock } from './utils/stockUtils';
 import { useAuth } from './context/AuthContext';
+import StockLegend from './components/StockLegend';
 
 export default function Home() {
   const router = useRouter();
@@ -30,80 +31,38 @@ export default function Home() {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [cartTotalQty, setCartTotalQty] = useState(0);
+  const [viewMode, setViewMode] = useState('available'); // 'available' | 'all'
 
   useEffect(() => {
     (async () => {
-      // دسته‌های ریشه (غیرقابل سفارش)
-      const resCats = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?isOrderable=false&parentId=`, { cache: 'no-store' });
+      const [resCats, resLots, resAll] = await Promise.all([
+        fetch(`${API_ENDPOINTS.farmer.products.getAll}?isOrderable=false&parentId=`, { cache: 'no-store' }),
+        fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: 'no-store' }),
+        fetch(API_ENDPOINTS.farmer.products.getAll, { cache: 'no-store' }),
+      ]);
+
       const dc = await resCats.json();
+      const dl = await resLots.json();
+      const dAll = await resAll.json();
       const roots = dc.data || [];
+      const allProductsList = dAll.data || [];
+
       setCategories(roots);
 
-      // فرزندان هر دسته 
       const childPromises = roots.map(async (c) => {
         const res = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?parentId=${c.id}`, { cache: 'no-store' });
         const d = await res.json();
-        console.log(`API Response for parentId ${c.id}:`, d.data?.length || 0, 'items');
-        if (c.id === 1) { // غلات
-          console.log('Cereals API response:', d.data);
-        }
         return { parentId: c.id, items: d.data || [] };
       });
       const children = await Promise.all(childPromises);
       const map = {};
-      let allProductsList = [...roots]; // شامل دسته‌های اصلی
-      
       for (const { parentId, items } of children) {
         map[parentId] = items;
-        allProductsList = [...allProductsList, ...items]; // اضافه کردن زیردسته‌ها
-        console.log(`Added ${items.length} items for parentId ${parentId}`);
-        if (parentId === 1) { // غلات
-          console.log('Cereals items added:', items.map(item => `${item.name} (${item.id})`));
-        }
       }
-      
-      // دریافت InventoryLot ها
-      const resLots = await fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: 'no-store' });
-      const dl = await resLots.json();
+
       setInventoryLots(dl.data || []);
-      
       setChildrenMap(map);
       setAllProducts(allProductsList);
-      
-      // Debug: Check wheat products
-      const wheatProducts = allProductsList.filter(p => p.parentId === 1001);
-      console.log('Home page - Wheat products:', wheatProducts.map(p => `${p.name} (${p.id}, orderable: ${p.isOrderable})`));
-      
-      // Debug: Check all products with parentId 1 (cereals)
-      const cerealsProducts = allProductsList.filter(p => p.parentId === 1);
-      console.log('Home page - Cereals products:', cerealsProducts.map(p => `${p.name} (${p.id}, orderable: ${p.isOrderable})`));
-      
-      // Debug: Check inventory lots
-      console.log('Home page - Inventory lots loaded:', dl.data?.length || 0);
-      const wheatLots = dl.data?.filter(lot => lot.productId === 1101) || [];
-      console.log('Home page - Wheat bread lots:', wheatLots.map(lot => `${lot.qualityGrade}: ${lot.totalQuantity}kg`));
-      
-      // Debug: Check wheat category
-      const wheatCategory = allProductsList.find(p => p.id === 1001);
-      if (wheatCategory) {
-        console.log('Home page - Wheat category:', wheatCategory);
-        const wheatStock = calculateAvailableStock(wheatCategory, allProductsList, dl.data || []);
-        console.log('Home page - Wheat category stock:', wheatStock);
-        
-        // Debug: Check if wheat is in childrenMap
-        console.log('Home page - ChildrenMap for cereals (1):', map[1]);
-        const wheatInChildren = map[1]?.find(ch => ch.id === 1001);
-        console.log('Home page - Wheat in children:', wheatInChildren);
-        
-        // Debug: Test calculateParentStockQuantity directly
-        const directStock = calculateParentStockQuantity(allProductsList, 1001, dl.data || []);
-        console.log('Home page - Direct wheat stock calculation:', directStock);
-        
-        // Debug: Check if wheat has children
-        const wheatChildren = allProductsList.filter(p => p.parentId === 1001);
-        console.log('Home page - Wheat children in allProducts:', wheatChildren.map(p => `${p.name} (${p.id})`));
-      }
-      
       setLoading(false);
     })();
   }, []);
@@ -142,6 +101,60 @@ export default function Home() {
     };
     fetchCart();
   }, []);
+
+  const productById = useMemo(() => {
+    const map = new Map();
+    for (const p of allProducts) map.set(p.id, p);
+    return map;
+  }, [allProducts]);
+
+  const getProductPath = (product) => {
+    if (!product) return '';
+    const parts = [product.name];
+    let current = product;
+    while (current?.parentId) {
+      const parent = productById.get(current.parentId);
+      if (!parent) break;
+      parts.unshift(parent.name);
+      current = parent;
+    }
+    return parts.join(' › ');
+  };
+
+  const availableProducts = useMemo(() => {
+    const grouped = new Map();
+
+    for (const lot of inventoryLots) {
+      const total = parseFloat(lot.totalQuantity || 0);
+      const reserved = parseFloat(lot.reservedQuantity || 0);
+      const availableQty = total - reserved;
+      if (!Number.isFinite(availableQty) || availableQty <= 0) continue;
+
+      const product = productById.get(lot.productId);
+      if (!product) continue;
+
+      if (!grouped.has(product.id)) {
+        grouped.set(product.id, { product, lots: [], totalAvailable: 0 });
+      }
+      const entry = grouped.get(product.id);
+      entry.lots.push({
+        id: lot.id,
+        qualityGrade: lot.qualityGrade || 'بدون درجه',
+        availableQty,
+        unit: lot.unit || 'kg',
+        price: lot.price,
+      });
+      entry.totalAvailable += availableQty;
+    }
+
+    return Array.from(grouped.values())
+      .sort((a, b) => a.product.name.localeCompare(b.product.name, 'fa'));
+  }, [inventoryLots, productById]);
+
+  const formatQty = (qty, unit) => {
+    const label = unit === 'kg' ? 'کیلوگرم' : unit === 'ton' ? 'تن' : unit;
+    return `${qty.toLocaleString('fa-IR')} ${label}`;
+  };
 
   return (
     <main className="max-w-6xl mx-auto px-3 sm:px-6 py-4 space-y-8 overflow-x-hidden">
@@ -189,8 +202,110 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        <div className="flex justify-center">
+          <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setViewMode('available')}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                viewMode === 'available'
+                  ? 'bg-green-600 text-white shadow'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              محصولات موجود
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('all')}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                viewMode === 'all'
+                  ? 'bg-green-600 text-white shadow'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              نمایش همه دسته‌ها
+            </button>
+          </div>
+        </div>
+
+        <StockLegend className="max-w-3xl mx-auto" />
      
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+        {viewMode === 'available' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            {loading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="card bg-base-100 shadow-xl border animate-pulse">
+                  <figure className="h-48 bg-gray-200" />
+                  <div className="card-body p-4 space-y-3">
+                    <div className="h-5 bg-gray-300 rounded w-2/3" />
+                    <div className="h-4 bg-gray-200 rounded w-full" />
+                    <div className="h-10 bg-gray-200 rounded" />
+                  </div>
+                </div>
+              ))
+            ) : availableProducts.length > 0 ? (
+              availableProducts.map(({ product, lots, totalAvailable }) => (
+                <Link
+                  key={product.id}
+                  href={`/catalog/${product.id}`}
+                  className={`card bg-base-100 shadow-xl border hover:shadow-2xl transition-shadow ${getProductStockClass(product, allProducts, inventoryLots)}`}
+                >
+                  <figure className="h-48 w-full bg-base-200 flex items-center justify-center overflow-hidden">
+                    <ProductImage
+                      slug={product.slug}
+                      imageUrl={product.imageUrl}
+                      alt={product.name}
+                      width={400}
+                      height={300}
+                      className="object-cover w-full h-full"
+                    />
+                  </figure>
+                  <div className="card-body p-4">
+                    <div className="text-xs text-slate-500 mb-1">{getProductPath(product)}</div>
+                    <h3 className="card-title text-base">{product.name}</h3>
+                    <div className="text-sm font-medium text-green-700 mt-1">
+                      مجموع موجودی: {formatQty(totalAvailable, lots[0]?.unit || 'kg')}
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {lots.map((lot) => (
+                        <div
+                          key={lot.id}
+                          className="flex items-center justify-between rounded-lg border border-green-100 bg-green-50/60 px-3 py-2"
+                        >
+                          <span className="text-sm text-slate-800">{lot.qualityGrade}</span>
+                          <div className="text-left">
+                            <div className="text-xs font-medium text-green-700">
+                              {formatQty(lot.availableQty, lot.unit)}
+                            </div>
+                            {lot.price > 0 && (
+                              <div className="text-xs text-slate-500">
+                                {Number(lot.price).toLocaleString('fa-IR')} تومان
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-slate-500">
+                <p className="text-base mb-2">محصولی با موجودی ثبت نشده است.</p>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('all')}
+                  className="text-sm text-green-700 hover:underline"
+                >
+                  مشاهده همه دسته‌ها
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {loading ? (
             // Skeleton loading cards
             Array.from({ length: 6 }).map((_, index) => (
@@ -244,9 +359,7 @@ export default function Home() {
                     <div className="text-xs text-slate-600 mb-2">زیردسته‌ها و محصولات</div>
                     <div className="space-y-2">
                       {(childrenMap[c.id] || []).slice(0, 5).map((ch) => {
-                        // محاسبه موجودی برای هر محصول/دسته
                         const availableStock = calculateAvailableStock(ch, allProducts, inventoryLots);
-                        console.log(`Home page - ${ch.name} (${ch.id}): availableStock = ${availableStock}, isOrderable = ${ch.isOrderable}`);
                         
                         return (
                           <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between rounded-md px-3 py-2 border hover:bg-base-200 ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : ''}`}>
@@ -277,7 +390,8 @@ export default function Home() {
             ))
           )}
         </div>
-        {categories.length === 0 && !loading && (
+        )}
+        {viewMode === 'all' && categories.length === 0 && !loading && (
           <div className="text-slate-500 text-sm">دسته‌بندی‌ای ثبت نشده است.</div>
         )}
       </section>

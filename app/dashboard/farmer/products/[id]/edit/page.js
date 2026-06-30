@@ -65,9 +65,14 @@ export default function EditProductPage({ params }) {
         parentId: form.parentId ? Number(form.parentId) : null,
         isOrderable: Boolean(form.isOrderable),
       };
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(API_ENDPOINTS.farmer.products.update(productId), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
       const dj = await res.json();
@@ -106,15 +111,18 @@ export default function EditProductPage({ params }) {
 
           {/* Media uploaders */}
           <div className="md:col-span-2 border-t pt-3 mt-2">
-            <h2 className="font-semibold text-sm mb-2">رسانه‌های محصول</h2>
+            <h2 className="font-semibold text-sm mb-1">رسانه‌های محصول</h2>
+            <p className="text-xs text-slate-500 mb-3">
+              تصویر یا ویدیو را انتخاب کنید؛ فایل‌ها روی سرور دانلود (dl.zareoon.ir) ذخیره می‌شوند.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-slate-600 mb-1">تصاویر</div>
-                <MediaUpload module="products" entityId={productId} fileType="images" accept="image/*" buttonLabel="آپلود تصویر" />
+                <div className="text-xs text-slate-600 mb-1">تصاویر (چندتایی)</div>
+                <MediaUpload module="products" entityId={productId} fileType="images" accept="image/*" buttonLabel="انتخاب و آپلود تصویر" />
               </div>
               <div>
-                <div className="text-xs text-slate-600 mb-1">ویدیوها</div>
-                <MediaUpload module="products" entityId={productId} fileType="videos" accept="video/*" buttonLabel="آپلود ویدیو" />
+                <div className="text-xs text-slate-600 mb-1">ویدیوها (چندتایی)</div>
+                <MediaUpload module="products" entityId={productId} fileType="videos" accept="video/*" buttonLabel="انتخاب و آپلود ویدیو" />
               </div>
             </div>
           </div>

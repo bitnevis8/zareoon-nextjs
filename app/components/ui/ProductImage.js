@@ -7,11 +7,12 @@ const DEFAULT_EXTS = [".webp", ".jpg", ".jpeg", ".png", ".svg"];
 export default function ProductImage({ slug, imageUrl, alt = "", width = 96, height = 96, className = "rounded-lg bg-slate-50 p-2 border" }) {
   const candidates = useMemo(() => {
     const list = [];
+    // تصویر آپلودشده (FTP) اولویت دارد
+    if (imageUrl) list.push(imageUrl);
     if (slug) {
       for (const ext of DEFAULT_EXTS) list.push(`/images/products/${slug}${ext}`);
     }
-    if (imageUrl) list.push(imageUrl);
-    list.push("/images/image-loader.webp"); // استفاده از loader به عنوان تصویر پیش‌فرض
+    list.push("/images/image-loader.webp");
     return list;
   }, [slug, imageUrl]);
 
