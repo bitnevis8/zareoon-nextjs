@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function TestAPIPage() {
   const [loading, setLoading] = useState(false);
@@ -159,16 +160,17 @@ export default function TestAPIPage() {
               <a 
                 href="http://localhost:3000/user/auth/me" 
                 target="_blank" 
+                rel="noreferrer"
                 className="text-blue-600 hover:text-blue-800"
               >
                 تست مستقیم API
               </a>
-              <a 
-                href="/test-sms-main" 
+              <Link
+                href="/test-sms-main"
                 className="text-green-600 hover:text-green-800"
               >
                 صفحه تست کامل
-              </a>
+              </Link>
             </div>
           </div>
         </div>

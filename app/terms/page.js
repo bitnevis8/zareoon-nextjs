@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -143,7 +145,7 @@ export default function TermsPage() {
                   پلتفرم هیچ مسئولیتی در قبال حفظ، امنیت یا حریم خصوصی اطلاعات ندارد.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  جزئیات بیشتر در <a href="/privacy" className="text-blue-600 hover:underline">سیاست حریم خصوصی</a> آمده است.
+                  جزئیات بیشتر در <Link href="/privacy" className="text-blue-600 hover:underline">سیاست حریم خصوصی</Link> آمده است.
                 </p>
               </div>
             </div>

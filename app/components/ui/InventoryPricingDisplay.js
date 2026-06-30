@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const InventoryPricingDisplay = ({ 
   inventoryLot, 
@@ -13,7 +13,7 @@ const InventoryPricingDisplay = ({
   const [error, setError] = useState(null);
 
   // محاسبه قیمت بر اساس مقدار وارد شده
-  const calculatePrice = async (qty) => {
+  const calculatePrice = useCallback(async (qty) => {
     if (!inventoryLot?.id || !qty) return;
 
     setLoading(true);
@@ -38,7 +38,7 @@ const InventoryPricingDisplay = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [inventoryLot?.id, onPriceChange]);
 
   // محاسبه اولیه
   useEffect(() => {

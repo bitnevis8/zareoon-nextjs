@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export default function SearchBox() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,7 +207,7 @@ export default function SearchBox() {
 
       {/* Advanced Categories Link */}
       <div className="mt-4 flex justify-center">
-        <a
+        <Link
           href="/advanced-categories"
           className="w-44 flex justify-center  px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200"
         >
@@ -214,7 +215,7 @@ export default function SearchBox() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
            دسته‌بندی پیشرفته 
-        </a>
+        </Link>
       </div>
 
       {/* Filtered Articles Results */}
@@ -236,8 +237,8 @@ export default function SearchBox() {
               <ul className="space-y-2 text-right">
                 {filteredArticles.map((article) => (
                   <li key={article.id}>
-                      <a
-                      href={`/`}
+                    <Link
+                      href="/"
                       className="flex items-center gap-3 hover:bg-blue-50 rounded p-2 transition-colors"
                     >
                       <span className="text-sm font-medium text-blue-800 truncate text-right">
@@ -246,7 +247,7 @@ export default function SearchBox() {
                           <span className="text-gray-500 font-normal ml-2">| {article.agency.name}</span>
                         )}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

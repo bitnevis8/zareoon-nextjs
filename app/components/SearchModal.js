@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { API_ENDPOINTS } from "../config/api";
@@ -21,6 +21,15 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
     }
   }, [isOpen]);
 
+  // Handle close with animation
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 200);
+  }, [onClose]);
+
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e) => {
@@ -33,7 +42,7 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
-  }, [isOpen]);
+  }, [handleClose, isOpen]);
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -85,15 +94,6 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
   const handleResultClick = (item) => {
     saveRecentSearch(item.name);
     handleClose();
-  };
-
-  // Handle close with animation
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      onClose();
-      setIsClosing(false);
-    }, 200);
   };
 
   // Handle recent search click

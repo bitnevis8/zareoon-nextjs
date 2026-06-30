@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function CartStatusBanner() {
@@ -38,9 +39,9 @@ export default function CartStatusBanner() {
           </span>
         </div>
         <div className="text-sm text-blue-600">
-          <a href="/cart" className="hover:underline">
+          <Link href="/cart" className="hover:underline">
             مشاهده بار و ثبت بار
-          </a>
+          </Link>
         </div>
       </div>
       <div className="mt-2 text-xs text-blue-600">
