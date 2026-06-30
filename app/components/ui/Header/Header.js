@@ -6,6 +6,7 @@ import AuthButtons from '../../AuthButtons';
 import { useAuth } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import LoginRequiredMessage from '../../LoginRequiredMessage';
+import MobileHeaderActions from '../../MobileHeaderActions';
 
 const headerIconBtnClass =
   'inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors';
@@ -80,7 +81,10 @@ export default function Header() {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="flex items-center gap-2">
+            <MobileHeaderActions />
+
+            <div className="hidden md:flex items-center gap-2">
             {user ? (
               <Link
                 href="/cart"
@@ -100,6 +104,7 @@ export default function Header() {
             )}
 
             <AuthButtons iconButtonClass={headerIconBtnClass} />
+            </div>
           </nav>
         </div>
       </div>

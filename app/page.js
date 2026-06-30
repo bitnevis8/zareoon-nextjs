@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
+import { Suspense, useEffect, useState, useMemo, useCallback } from "react";
 import Link from 'next/link';
 import ProductCardMedia from './components/ui/ProductCardMedia';
 import Image from 'next/image';
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from './config/api';
 import { getProductStockClass, calculateAvailableStock } from './utils/stockUtils';
 import { useAuth } from './context/AuthContext';
@@ -18,7 +18,16 @@ const languageOptions = [
 ];
 
 export default function Home() {
+  return (
+    <Suspense fallback={<main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 animate-pulse min-h-[40vh]" />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const auth = useAuth();
   const { language, setLanguage, t, isRTL, isHydrated } = useLanguage();
   
@@ -41,6 +50,22 @@ export default function Home() {
   const [searching, setSearching] = useState(false);
   const [cartTotalQty, setCartTotalQty] = useState(0);
   const [viewMode, setViewMode] = useState('available'); // 'available' | 'all'
+
+  useEffect(() => {
+    const view = searchParams.get('view');
+    if (view === 'all' || view === 'available') {
+      setViewMode(view);
+    }
+  }, [searchParams]);
+
+  const changeViewMode = useCallback(
+    (mode) => {
+      setViewMode(mode);
+      const query = mode === 'all' ? '/?view=all' : '/?view=available';
+      router.replace(query, { scroll: false });
+    },
+    [router]
+  );
 
   useEffect(() => {
     (async () => {
@@ -163,14 +188,78 @@ export default function Home() {
       .sort((a, b) => getLocalizedText(a.product, language).localeCompare(getLocalizedText(b.product, language), language === 'ru' ? 'ru' : language === 'en' ? 'en' : 'fa'));
   }, [inventoryLots, productById, language]);
 
+  const availableProductsByCategory = useMemo(() => {
+    const groups = new Map();
+
+    for (const entry of availableProducts) {
+      const parentId = entry.product?.parentId;
+      const category = parentId ? productById.get(parentId) : null;
+      const key = parentId ?? "other";
+
+      if (!groups.has(key)) {
+        groups.set(key, { id: key, category, products: [] });
+      }
+      groups.get(key).products.push(entry);
+    }
+
+    return Array.from(groups.values()).sort((a, b) => {
+      const nameA = a.category ? getLocalizedText(a.category, language) : "";
+      const nameB = b.category ? getLocalizedText(b.category, language) : "";
+      return nameA.localeCompare(nameB, language === "ru" ? "ru" : language === "en" ? "en" : "fa");
+    });
+  }, [availableProducts, productById, language]);
+
+  const renderAvailableProductCard = ({ product, lots, totalAvailable }, className = "", compact = false) => (
+    <Link
+      key={product.id}
+      href={`/catalog/${product.id}`}
+      className={`card bg-base-100 shadow-xl border hover:shadow-2xl transition-shadow ${getProductStockClass(product, allProducts, inventoryLots)} ${className}`}
+    >
+      <figure className="h-40 sm:h-48 w-full bg-base-200 flex items-center justify-center overflow-hidden">
+        <ProductCardMedia
+          product={product}
+          alt={product.name}
+          width={400}
+          height={300}
+          className="object-cover w-full h-full"
+        />
+      </figure>
+      <div className="card-body p-4">
+        {!compact && (
+          <div className="text-xs text-slate-500 mb-1">{getProductPath(product)}</div>
+        )}
+        <h3 className="card-title text-base">{getLocalizedText(product, language)}</h3>
+        <div className="text-sm font-medium text-green-700 mt-1">
+          {t("totalAvailableStock")}: {formatQty(totalAvailable, lots[0]?.unit || "kg")}
+        </div>
+        <div className="mt-3 space-y-2">
+          {lots.map((lot) => (
+            <div
+              key={lot.id}
+              className="stock-info-row flex items-center justify-between rounded-lg border border-green-100 bg-green-50/60 px-3 py-2"
+            >
+              <span className="text-sm text-slate-800">{getLocalizedLotLabel(lot, language, t)}</span>
+              <div className="text-left">
+                <div className="text-xs font-medium text-green-700">{formatQty(lot.availableQty, lot.unit)}</div>
+                {lot.price > 0 && (
+                  <div className="text-xs text-slate-500">{formatLocalizedPrice(lot.price, language, t)}</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Link>
+  );
+
   const formatQty = (qty, unit) => {
     const label = localizeUnit(unit, language);
     return `${formatLocalizedNumber(qty, language)} ${label}`;
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-3 sm:px-6 py-4 space-y-8 overflow-x-hidden">
-      <section className="text-center space-y-10">
+    <main className="max-w-6xl mx-auto px-3 sm:px-6 pt-4 pb-1 lg:pb-4 space-y-6 lg:space-y-8 overflow-x-hidden">
+      <section className="text-center space-y-6 lg:space-y-10">
         <div className="flex justify-center">
           <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/95 px-3 py-2 shadow-sm">
             {languageOptions.map((option) => {
@@ -243,7 +332,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="w-full max-w-5xl mx-auto space-y-2">
+        <div className="hidden lg:block w-full max-w-5xl mx-auto space-y-2">
           <div className={`flex items-center gap-2 px-1 ${isRTL ? "justify-end" : "justify-start"}`}>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-amber-900">
               {t("adSponsoredLabel")}
@@ -342,7 +431,7 @@ export default function Home() {
           <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
             <button
               type="button"
-              onClick={() => setViewMode('available')}
+              onClick={() => changeViewMode('available')}
               className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
                 viewMode === 'available'
                   ? 'bg-green-600 text-white shadow'
@@ -353,7 +442,7 @@ export default function Home() {
             </button>
             <button
               type="button"
-              onClick={() => setViewMode('all')}
+              onClick={() => changeViewMode('all')}
               className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
                 viewMode === 'all'
                   ? 'bg-green-600 text-white shadow'
@@ -368,9 +457,9 @@ export default function Home() {
         <CatalogGuidePanel showCategoryGuide={viewMode === 'all'} className="w-full" />
      
         {viewMode === 'available' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-            {loading ? (
-              Array.from({ length: 3 }).map((_, index) => (
+          loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {Array.from({ length: 3 }).map((_, index) => (
                 <div key={index} className="card bg-base-100 shadow-xl border animate-pulse">
                   <figure className="h-48 bg-gray-200" />
                   <div className="card-body p-4 space-y-3">
@@ -379,65 +468,41 @@ export default function Home() {
                     <div className="h-10 bg-gray-200 rounded" />
                   </div>
                 </div>
-              ))
-            ) : availableProducts.length > 0 ? (
-              availableProducts.map(({ product, lots, totalAvailable }) => (
-                <Link
-                  key={product.id}
-                  href={`/catalog/${product.id}`}
-                  className={`card bg-base-100 shadow-xl border hover:shadow-2xl transition-shadow ${getProductStockClass(product, allProducts, inventoryLots)}`}
-                >
-                  <figure className="h-48 w-full bg-base-200 flex items-center justify-center overflow-hidden">
-                    <ProductCardMedia
-                      product={product}
-                      alt={product.name}
-                      width={400}
-                      height={300}
-                      className="object-cover w-full h-full"
-                    />
-                  </figure>
-                  <div className="card-body p-4">
-                    <div className="text-xs text-slate-500 mb-1">{getProductPath(product)}</div>
-                    <h3 className="card-title text-base">{getLocalizedText(product, language)}</h3>
-                    <div className="text-sm font-medium text-green-700 mt-1">
-                      {t("totalAvailableStock")}: {formatQty(totalAvailable, lots[0]?.unit || 'kg')}
+              ))}
+            </div>
+          ) : availableProducts.length > 0 ? (
+            <>
+              <div className="lg:hidden mt-4 space-y-4 -mx-3 px-3 mb-0">
+                {availableProductsByCategory.map((group) => (
+                  <section key={group.id}>
+                    <h2 className={`text-lg font-extrabold text-slate-900 mb-2 px-1 ${isRTL ? "text-right" : "text-left"}`}>
+                      {group.category ? getLocalizedText(group.category, language) : t("productCategories")}
+                    </h2>
+                    <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory product-scroll-row">
+                      {group.products.map((entry) =>
+                        renderAvailableProductCard(entry, "shrink-0 w-[min(88vw,300px)] snap-start", true)
+                      )}
                     </div>
-                    <div className="mt-3 space-y-2">
-                      {lots.map((lot) => (
-                        <div
-                          key={lot.id}
-                          className="stock-info-row flex items-center justify-between rounded-lg border border-green-100 bg-green-50/60 px-3 py-2"
-                        >
-                          <span className="text-sm text-slate-800">{getLocalizedLotLabel(lot, language, t)}</span>
-                          <div className="text-left">
-                            <div className="text-xs font-medium text-green-700">
-                              {formatQty(lot.availableQty, lot.unit)}
-                            </div>
-                            {lot.price > 0 && (
-                              <div className="text-xs text-slate-500">
-                                {formatLocalizedPrice(lot.price, language, t)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12 text-slate-500">
-                <p className="text-base mb-2">{t("noProductsWithStock")}</p>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('all')}
-                  className="text-sm text-green-700 hover:underline"
-                >
-                  {t("viewAllCategories")}
-                </button>
+                  </section>
+                ))}
               </div>
-            )}
-          </div>
+
+              <div className="hidden lg:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                {availableProducts.map((entry) => renderAvailableProductCard(entry))}
+              </div>
+            </>
+          ) : (
+            <div className="col-span-full text-center py-12 text-slate-500 mt-4">
+              <p className="text-base mb-2">{t("noProductsWithStock")}</p>
+              <button
+                type="button"
+                onClick={() => changeViewMode('all')}
+                className="text-sm text-green-700 hover:underline"
+              >
+                {t("showAllCategories")}
+              </button>
+            </div>
+          )
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {loading ? (

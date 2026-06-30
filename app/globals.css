@@ -110,6 +110,31 @@ body {
   background: #555;
 }
 
+.product-scroll-row {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #16a34a #e2e8f0;
+}
+
+.product-scroll-row::-webkit-scrollbar {
+  height: 5px;
+}
+
+.product-scroll-row::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 9999px;
+  margin-inline: 2px;
+}
+
+.product-scroll-row::-webkit-scrollbar-thumb {
+  background: #22c55e;
+  border-radius: 9999px;
+}
+
+.product-scroll-row::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}
+
 /* RTL specific styles */
 [dir="rtl"] {
   text-align: right;

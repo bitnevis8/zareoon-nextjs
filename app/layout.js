@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import "./globals.css";
 import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
@@ -85,7 +86,7 @@ export default function RootLayout({ children }) {
               <Header />
 
               {/* Main Content */}
-              <div className="flex-1 pb-20 md:pb-0 pt-0 md:pt-0">
+              <div className="flex-1 pb-[4.25rem] md:pb-0 pt-0 md:pt-0">
                 {children}
               </div>
 
@@ -99,7 +100,9 @@ export default function RootLayout({ children }) {
 
               {/* Mobile Bottom Bar - Available on all pages */}
               <ClientSideWrapper>
-                <MobileBottomBar />
+                <Suspense fallback={null}>
+                  <MobileBottomBar />
+                </Suspense>
               </ClientSideWrapper>
 
             </SidebarProvider>
