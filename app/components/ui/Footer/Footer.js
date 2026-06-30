@@ -1,6 +1,9 @@
 "use client";
 
+import { useLanguage } from "../../../context/LanguageContext";
+
 const Footer = () => {
+  const { t } = useLanguage();
   return (
     <footer className="bg-white border-t border-gray-100 mt-auto">
       {/* Bottom Section */}
@@ -10,7 +13,7 @@ const Footer = () => {
             {/* Copyright */}
             <div className="text-center">
               <p className="text-sm text-slate-800">
-                تمامی حقوق این سایت برای زارعون محفوظ است © <time suppressHydrationWarning>{new Date().getFullYear()}</time>
+                {t("allRightsReserved")} © <time suppressHydrationWarning>{new Date().getFullYear()}</time>
               </p>
             </div>
           </div>

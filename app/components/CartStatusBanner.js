@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 export default function CartStatusBanner() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -35,18 +37,17 @@ export default function CartStatusBanner() {
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
           <span className="text-blue-800 font-medium">
-            درخواست داده شده - {cartItems.length} آیتم در بار شما موجود است
+            {t("requestedItemsInCart", { count: cartItems.length })}
           </span>
         </div>
         <div className="text-sm text-blue-600">
           <Link href="/cart" className="hover:underline">
-            مشاهده بار و ثبت بار
+            {t("viewCartAndSubmit")}
           </Link>
         </div>
       </div>
       <div className="mt-2 text-xs text-blue-600">
-        با زدن ثبت بار، بار رزرو نمی‌شود ولی با مشتری تماس گرفته می‌شود جهت رزرو شدن بار. 
-        تماس پشتیبانی: 09393387148
+        {t("cartReservationNote")} {t("supportContact")}: 09393387148
       </div>
     </div>
   );

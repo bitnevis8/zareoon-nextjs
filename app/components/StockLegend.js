@@ -1,17 +1,22 @@
-import { STOCK_LEGEND } from '../utils/stockUtils';
+import { useLanguage } from '../context/LanguageContext';
+import { getStockLegend } from '../utils/stockUtils';
 
 export default function StockLegend({ className = '' }) {
+  const { t, isRTL } = useLanguage();
+  const legendItems = getStockLegend(t);
+
   return (
     <div
-      className={`rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-right ${className}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className={`rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 ${className}`}
       role="note"
-      aria-label="راهنمای رنگ موجودی"
+      aria-label={t("stockLegendAriaLabel")}
     >
       <p className="text-xs font-medium text-slate-600 mb-2">
-        رنگ کارت‌ها بر اساس میزان موجودی (کیلوگرم) است:
+        {t("stockLegendTitle")}
       </p>
-      <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3">
-        {STOCK_LEGEND.map((item) => (
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 sm:justify-start">
+        {legendItems.map((item) => (
           <div
             key={item.className}
             className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs border ${item.className}`}

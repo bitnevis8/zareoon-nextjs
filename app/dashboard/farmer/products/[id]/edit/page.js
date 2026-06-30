@@ -3,6 +3,7 @@ import { useEffect, useState, use as usePromise } from "react";
 import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
 import MediaUpload from "@/app/components/ui/MediaUpload";
+import { SUPPLY_COUNTRIES } from "@/app/utils/supplySource";
 
 export default function EditProductPage({ params }) {
   const { id } = usePromise(params);
@@ -13,10 +14,14 @@ export default function EditProductPage({ params }) {
   const [form, setForm] = useState({
     name: "",
     englishName: "",
+    arabicName: "",
+    russianName: "",
     slug: "",
     parentId: "",
     unit: "",
     isOrderable: true,
+    supplyCountry: "IR",
+    supplyCity: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,10 +45,14 @@ export default function EditProductPage({ params }) {
           setForm({
             name: it.name || "",
             englishName: it.englishName || "",
+            arabicName: it.arabicName || "",
+            russianName: it.russianName || "",
             slug: it.slug || "",
             parentId: it.parentId ? String(it.parentId) : "",
             unit: it.unit || "",
             isOrderable: Boolean(it.isOrderable),
+            supplyCountry: it.supplyCountry || "IR",
+            supplyCity: it.supplyCity || "",
           });
         }
       } finally {
@@ -60,10 +69,14 @@ export default function EditProductPage({ params }) {
       const payload = {
         name: form.name,
         englishName: form.englishName || null,
+        arabicName: form.arabicName || null,
+        russianName: form.russianName || null,
         slug: form.slug || null,
         unit: form.unit || null,
         parentId: form.parentId ? Number(form.parentId) : null,
         isOrderable: Boolean(form.isOrderable),
+        supplyCountry: form.supplyCountry || "IR",
+        supplyCity: form.supplyCity?.trim() || null,
       };
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json' };
@@ -98,8 +111,16 @@ export default function EditProductPage({ params }) {
         <form onSubmit={save} className="bg-white p-4 rounded-md shadow grid grid-cols-1 md:grid-cols-2 gap-3">
           <input className="border p-2 rounded" placeholder="نام" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
           <input className="border p-2 rounded" placeholder="نام انگلیسی (اختیاری)" value={form.englishName} onChange={(e)=>setForm({...form, englishName:e.target.value})} />
+          <input className="border p-2 rounded" placeholder="نام عربی (اختیاری)" value={form.arabicName} onChange={(e)=>setForm({...form, arabicName:e.target.value})} />
+          <input className="border p-2 rounded" placeholder="نام روسی (اختیاری)" value={form.russianName} onChange={(e)=>setForm({...form, russianName:e.target.value})} />
           <input className="border p-2 rounded" placeholder="اسلاگ (اختیاری)" value={form.slug} onChange={(e)=>setForm({...form, slug:e.target.value})} />
           <input className="border p-2 rounded" placeholder="واحد (اختیاری)" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
+          <select className="border p-2 rounded" value={form.supplyCountry} onChange={(e)=>setForm({...form, supplyCountry:e.target.value})} required>
+            {SUPPLY_COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>{c.nameFa}</option>
+            ))}
+          </select>
+          <input className="border p-2 rounded" placeholder="شهر عرضه (اختیاری)" value={form.supplyCity} onChange={(e)=>setForm({...form, supplyCity:e.target.value})} />
           <select className="border p-2 rounded" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})}>
             <option value="">بدون والد (دسته ریشه)</option>
             {categories.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}

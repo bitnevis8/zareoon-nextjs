@@ -14,6 +14,9 @@ export default function InventoryLotsPage() {
     productId: "", 
     farmerId: "", 
     farmerLabel: "", 
+    englishName: "",
+    arabicName: "",
+    russianName: "",
     unit: "kg", 
     qualityGrade: "درجه 1", 
     totalQuantity: "", 
@@ -30,6 +33,9 @@ export default function InventoryLotsPage() {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [selectedLot, setSelectedLot] = useState(null);
   const [editForm, setEditForm] = useState({ 
+    englishName: "",
+    arabicName: "",
+    russianName: "",
     unit: "", 
     qualityGrade: "", 
     totalQuantity: "", 
@@ -169,6 +175,9 @@ export default function InventoryLotsPage() {
           return isFarmer ? Number(user?.userId) : (Number(form.farmerId) || 1);
         })(),
         unit: form.unit,
+        englishName: form.englishName || null,
+        arabicName: form.arabicName || null,
+        russianName: form.russianName || null,
         qualityGrade: form.qualityGrade,
         totalQuantity: Number(form.totalQuantity),
         price: form.price ? Number(form.price) : null,
@@ -199,6 +208,9 @@ export default function InventoryLotsPage() {
       productId: "", 
       farmerId: "", 
       farmerLabel: "", 
+      englishName: "",
+      arabicName: "",
+      russianName: "",
       unit: "kg", 
       qualityGrade: "درجه 1", 
       totalQuantity: "", 
@@ -221,6 +233,9 @@ export default function InventoryLotsPage() {
   const openEdit = (lot) => {
     setSelectedLot(lot);
     setEditForm({
+      englishName: lot.englishName || "",
+      arabicName: lot.arabicName || "",
+      russianName: lot.russianName || "",
       unit: lot.unit || "",
       qualityGrade: lot.qualityGrade || "",
       totalQuantity: String(lot.totalQuantity ?? ""),
@@ -236,6 +251,9 @@ export default function InventoryLotsPage() {
     if (!selectedLot) return;
     const payload = {
       unit: editForm.unit || null,
+      englishName: editForm.englishName || null,
+      arabicName: editForm.arabicName || null,
+      russianName: editForm.russianName || null,
       qualityGrade: editForm.qualityGrade || null,
       totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
       price: editForm.price !== "" ? Number(editForm.price) : null,
@@ -367,6 +385,33 @@ export default function InventoryLotsPage() {
             </div>
           );
         })()}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">نام انگلیسی</label>
+          <input 
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="اختیاری" 
+            value={form.englishName} 
+            onChange={(e)=>setForm({...form, englishName:e.target.value})} 
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">نام عربی</label>
+          <input 
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="اختیاری" 
+            value={form.arabicName} 
+            onChange={(e)=>setForm({...form, arabicName:e.target.value})} 
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">نام روسی</label>
+          <input 
+            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+            placeholder="اختیاری" 
+            value={form.russianName} 
+            onChange={(e)=>setForm({...form, russianName:e.target.value})} 
+          />
+        </div>
         <div className="flex flex-col">
           <label className="text-sm font-medium text-gray-700 mb-1">واحد</label>
           <input 
@@ -597,6 +642,7 @@ export default function InventoryLotsPage() {
                 <th className="px-6 py-4 text-right font-semibold text-gray-900">ID</th>
                 <th className="px-6 py-4 text-right font-semibold text-gray-900">محصول</th>
                 <th className="px-6 py-4 text-right font-semibold text-gray-900">نام محصول</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-900">معادل‌ها</th>
                 <th className="px-6 py-4 text-right font-semibold text-gray-900">تامین‌کننده</th>
                 <th className="px-6 py-4 text-right font-semibold text-gray-900">کیفیت</th>
                 <th className="px-6 py-4 text-right font-semibold text-gray-900">واحد</th>
@@ -616,6 +662,11 @@ export default function InventoryLotsPage() {
                   <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.productId}</td>
                   <td className="px-6 py-4 max-w-xs truncate font-medium text-gray-900" title={products.find(p => p.id === x.productId)?.name || "—"}>
                     {products.find(p => p.id === x.productId)?.name || "—"}
+                  </td>
+                  <td className="px-6 py-4 text-xs text-gray-600">
+                    <div>{x.englishName || "EN: —"}</div>
+                    <div>{x.arabicName || "AR: —"}</div>
+                    <div>{x.russianName || "RU: —"}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</td>
                   <td className="px-6 py-4">
@@ -723,6 +774,14 @@ export default function InventoryLotsPage() {
                   <span className="text-gray-600 text-xs font-medium block mb-1">تامین‌کننده</span>
                   <div className="font-semibold text-gray-900">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</div>
                 </div>
+                <div className="bg-gray-50 p-3 rounded-lg sm:col-span-2">
+                  <span className="text-gray-600 text-xs font-medium block mb-1">معادل‌ها</span>
+                  <div className="space-y-1 text-sm text-gray-700">
+                    <div>EN: {x.englishName || "—"}</div>
+                    <div>AR: {x.arabicName || "—"}</div>
+                    <div>RU: {x.russianName || "—"}</div>
+                  </div>
+                </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <span className="text-gray-600 text-xs font-medium block mb-1">کیفیت</span>
                   <div>
@@ -813,6 +872,9 @@ export default function InventoryLotsPage() {
               <button className="text-slate-500" onClick={()=>{setEditOpen(false); setSelectedLot(null);}}>✕</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <input className="border p-2 rounded" placeholder="نام انگلیسی (اختیاری)" value={editForm.englishName} onChange={(e)=>setEditForm({...editForm, englishName:e.target.value})} />
+              <input className="border p-2 rounded" placeholder="نام عربی (اختیاری)" value={editForm.arabicName} onChange={(e)=>setEditForm({...editForm, arabicName:e.target.value})} />
+              <input className="border p-2 rounded" placeholder="نام روسی (اختیاری)" value={editForm.russianName} onChange={(e)=>setEditForm({...editForm, russianName:e.target.value})} />
               <input className="border p-2 rounded" placeholder="واحد" value={editForm.unit} onChange={(e)=>setEditForm({...editForm, unit:e.target.value})} />
               <input className="border p-2 rounded" placeholder="کیفیت" value={editForm.qualityGrade} onChange={(e)=>setEditForm({...editForm, qualityGrade:e.target.value})} />
               <input className="border p-2 rounded" placeholder="مقدار کل" value={editForm.totalQuantity} onChange={(e)=>setEditForm({...editForm, totalQuantity:e.target.value})} />

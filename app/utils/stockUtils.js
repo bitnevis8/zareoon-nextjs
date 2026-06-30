@@ -1,10 +1,12 @@
 // تابع محاسبه کلاس بر اساس مقدار مطلق موجودی (کیلوگرم)
-export const STOCK_LEGEND = [
-  { className: 'stock-empty', label: 'بدون موجودی', range: '۰ کیلوگرم' },
-  { className: 'stock-low', label: 'موجودی کم', range: 'زیر ۵ تن' },
-  { className: 'stock-medium', label: 'موجودی متوسط', range: '۵ تا ۲۰ تن' },
-  { className: 'stock-high', label: 'موجودی زیاد', range: 'بالای ۲۰ تن' },
-];
+export function getStockLegend(t) {
+  return [
+    { className: 'stock-empty', label: t('stockEmpty'), range: t('stockEmptyRange') },
+    { className: 'stock-low', label: t('stockLow'), range: t('stockLowRange') },
+    { className: 'stock-medium', label: t('stockMedium'), range: t('stockMediumRange') },
+    { className: 'stock-high', label: t('stockHigh'), range: t('stockHighRange') },
+  ];
+}
 
 export function getStockClass(availableStock) {
   if (availableStock === 0) return 'stock-empty';

@@ -177,20 +177,95 @@ html, body {
 
 .stock-medium {
   background-color: #28a745;
-  color: white !important;
   border: 1px solid #1e7e34;
-}
-
-.stock-medium * {
-  color: white !important;
+  color: #ffffff;
 }
 
 .stock-high {
   background-color: #155724;
-  color: white !important;
   border: 1px solid #0f5132;
+  color: #ffffff;
 }
 
-.stock-high * {
-  color: white !important;
+/* Readable text on medium/high colored surfaces */
+.stock-medium :is(h1, h2, h3, .card-title, .font-medium, .font-semibold),
+.stock-high :is(h1, h2, h3, .card-title, .font-medium, .font-semibold) {
+  color: #ffffff !important;
+}
+
+.stock-medium :is(.text-slate-800, .text-slate-600, .text-slate-500, .text-slate-400, .text-green-700, .text-green-600),
+.stock-high :is(.text-slate-800, .text-slate-600, .text-slate-500, .text-slate-400, .text-green-700, .text-green-600) {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.stock-medium .text-emerald-700,
+.stock-high .text-emerald-700 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Info rows inside colored parent cards */
+.stock-medium .stock-info-row,
+.stock-high .stock-info-row {
+  background-color: rgba(0, 0, 0, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.stock-medium .stock-info-row:hover,
+.stock-high .stock-info-row:hover {
+  background-color: rgba(0, 0, 0, 0.38) !important;
+}
+
+.stock-medium .stock-info-row :is(.text-slate-800, .text-green-700, .text-green-600, .text-xs, .text-sm, .text-sm *),
+.stock-high .stock-info-row :is(.text-slate-800, .text-green-700, .text-green-600, .text-xs, .text-sm, .text-sm *) {
+  color: #ffffff !important;
+}
+
+/* Info rows on light cards */
+.stock-empty .stock-info-row,
+.stock-low .stock-info-row {
+  background-color: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+  color: #155724 !important;
+}
+
+.stock-empty .stock-info-row :is(.text-sm, .text-xs, .text-green-600),
+.stock-low .stock-info-row :is(.text-sm, .text-xs, .text-green-600) {
+  color: #15803d !important;
+}
+
+/* Category / product label — text only, no gray badge background */
+.stock-type-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.stock-low .stock-type-label {
+  color: #166534;
+}
+
+.stock-medium .stock-type-label,
+.stock-high .stock-type-label {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+/* View-all link inside colored cards */
+.stock-medium .stock-view-all,
+.stock-high .stock-view-all {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+.stock-medium .stock-view-all:hover,
+.stock-high .stock-view-all:hover {
+  background: rgba(0, 0, 0, 0.18) !important;
+  color: #ffffff !important;
 }

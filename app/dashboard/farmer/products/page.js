@@ -2,11 +2,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import Link from "next/link";
+import { SUPPLY_COUNTRIES } from "@/app/utils/supplySource";
+
+const emptyProductForm = {
+  name: "",
+  englishName: "",
+  arabicName: "",
+  russianName: "",
+  parentId: "",
+  unit: "",
+  isOrderable: true,
+  supplyCountry: "IR",
+  supplyCity: "",
+};
 
 export default function ProductsPage() {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [form, setForm] = useState({ name: "", parentId: "", unit: "", isOrderable: true });
+  const [form, setForm] = useState(emptyProductForm);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
   const [searching, setSearching] = useState(false);
@@ -95,12 +108,17 @@ export default function ProductsPage() {
       headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
         name: form.name,
+        englishName: form.englishName || null,
+        arabicName: form.arabicName || null,
+        russianName: form.russianName || null,
         unit: form.unit || null,
         parentId: form.parentId ? Number(form.parentId) : null,
         isOrderable: Boolean(form.isOrderable),
+        supplyCountry: form.supplyCountry || "IR",
+        supplyCity: form.supplyCity?.trim() || null,
       }),
     });
-    setForm({ name: "", parentId: "", unit: "", isOrderable: true });
+    setForm(emptyProductForm);
     setLoading(false);
     load();
   };
@@ -134,11 +152,20 @@ export default function ProductsPage() {
       </div>
       <form id="productForm" onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <input className="border p-2 rounded text-sm" placeholder="نام" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
+        <input className="border p-2 rounded text-sm" placeholder="نام انگلیسی (اختیاری)" value={form.englishName} onChange={(e)=>setForm({...form, englishName:e.target.value})} />
+        <input className="border p-2 rounded text-sm" placeholder="نام عربی (اختیاری)" value={form.arabicName} onChange={(e)=>setForm({...form, arabicName:e.target.value})} />
+        <input className="border p-2 rounded text-sm" placeholder="نام روسی (اختیاری)" value={form.russianName} onChange={(e)=>setForm({...form, russianName:e.target.value})} />
         <select className="border p-2 rounded text-sm" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})}>
           <option value="">بدون والد (دسته ریشه)</option>
           {categories.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <input className="border p-2 rounded text-sm" placeholder="واحد (اختیاری)" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
+        <select className="border p-2 rounded text-sm" value={form.supplyCountry} onChange={(e)=>setForm({...form, supplyCountry:e.target.value})} required>
+          {SUPPLY_COUNTRIES.map((c) => (
+            <option key={c.code} value={c.code}>{c.nameFa}</option>
+          ))}
+        </select>
+        <input className="border p-2 rounded text-sm" placeholder="شهر عرضه (اختیاری)" value={form.supplyCity} onChange={(e)=>setForm({...form, supplyCity:e.target.value})} />
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={form.isOrderable} onChange={(e)=>setForm({...form, isOrderable:e.target.checked})} />
           قابل سفارش
@@ -159,6 +186,8 @@ export default function ProductsPage() {
                 <th className="p-2">ID</th>
                 <th className="p-2">نام</th>
                 <th className="p-2">نام انگلیسی</th>
+                <th className="p-2">نام عربی</th>
+                <th className="p-2">نام روسی</th>
                 <th className="p-2">والد</th>
                 <th className="p-2">قابل سفارش</th>
                 <th className="p-2">واحد</th>
@@ -174,6 +203,8 @@ export default function ProductsPage() {
                     {x.name}
                   </td>
                   <td className="p-2">{x.englishName || '-'}</td>
+                  <td className="p-2">{x.arabicName || '-'}</td>
+                  <td className="p-2">{x.russianName || '-'}</td>
                   <td className="p-2">{x.parentId ? (idToName.get(x.parentId) || x.parentId) : '-'}</td>
                   <td className="p-2">
                     {x.isOrderable ? (
@@ -209,6 +240,8 @@ export default function ProductsPage() {
                   </h3>
                   <p className="text-sm text-gray-600">ID: {x.id}</p>
                   {x.englishName && <p className="text-sm text-gray-600">انگلیسی: {x.englishName}</p>}
+                  {x.arabicName && <p className="text-sm text-gray-600">عربی: {x.arabicName}</p>}
+                  {x.russianName && <p className="text-sm text-gray-600">روسی: {x.russianName}</p>}
                   {x.parentId && <p className="text-sm text-gray-600">والد: {idToName.get(x.parentId) || x.parentId}</p>}
                   <p className="text-sm text-gray-600">
                     قابل سفارش: {x.isOrderable ? (

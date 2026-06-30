@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import LoginRequiredMessage from "./LoginRequiredMessage";
 import SearchModal from "./SearchModal";
 import ProfileDropdown from "./ProfileDropdown";
@@ -10,6 +11,7 @@ import ProfileDropdown from "./ProfileDropdown";
 export default function MobileBottomBar() {
   const router = useRouter();
   const auth = useAuth();
+  const { t, isRTL } = useLanguage();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [inventoryLots, setInventoryLots] = useState([]);
@@ -54,7 +56,7 @@ export default function MobileBottomBar() {
       return [
         {
           id: 'dashboard',
-          label: 'داشبورد',
+          label: t('dashboard'),
           icon: 'dashboard',
           onClick: () => {
             // Trigger sidebar opening
@@ -67,27 +69,27 @@ export default function MobileBottomBar() {
         },
         {
           id: 'search',
-          label: 'جستجو',
+          label: t('search'),
           icon: 'search',
           onClick: () => setIsSearchModalOpen(true),
           active: true
         },
         {
           id: 'catalog',
-          label: 'محصولات',
+          label: t('products'),
           icon: 'catalog',
           onClick: () => router.push('/catalog/1')
         },
         {
           id: 'cart',
-          label: 'سبد خرید',
+          label: t('cart'),
           icon: 'cart',
           onClick: () => router.push('/cart'),
           disabled: true
         },
         {
           id: 'login',
-          label: 'ورود',
+          label: t('login'),
           icon: 'login',
           onClick: () => router.push('/auth/login')
         }
@@ -98,7 +100,7 @@ export default function MobileBottomBar() {
     const buttons = [
       {
         id: 'dashboard',
-        label: 'داشبورد',
+        label: t('dashboard'),
         icon: 'dashboard',
         onClick: () => {
           if (typeof window !== 'undefined') {
@@ -109,7 +111,7 @@ export default function MobileBottomBar() {
       },
       {
         id: 'search',
-        label: 'جستجو',
+        label: t('search'),
         icon: 'search',
         onClick: () => setIsSearchModalOpen(true),
         active: true
@@ -120,21 +122,21 @@ export default function MobileBottomBar() {
     if (isAdmin) {
       buttons.push({
         id: 'products',
-        label: 'محصولات',
+        label: t('products'),
         icon: 'products',
         onClick: () => router.push('/dashboard/farmer/products')
       });
     } else if (isFarmer || isSupplier) {
       buttons.push({
         id: 'inventory',
-        label: 'موجودی',
+        label: t('inventory'),
         icon: 'inventory',
         onClick: () => router.push('/dashboard/farmer/inventory')
       });
     } else {
       buttons.push({
         id: 'catalog',
-        label: 'محصولات',
+        label: t('products'),
         icon: 'catalog',
         onClick: () => router.push('/catalog/1')
       });
@@ -143,7 +145,7 @@ export default function MobileBottomBar() {
     // Add orders button for all logged in users
     buttons.push({
       id: 'orders',
-      label: 'سفارشات',
+      label: t('orders'),
       icon: 'orders',
       onClick: () => router.push('/cart')
     });
@@ -221,7 +223,7 @@ export default function MobileBottomBar() {
   return (
     <>
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-[9998]">
-        <div className="flex items-center justify-between px-1 py-2">
+        <div className={`flex items-center justify-between px-1 py-2 ${isRTL ? "" : "flex-row-reverse"}`}>
           {buttons.map((button, index) => {
             return (
               <button

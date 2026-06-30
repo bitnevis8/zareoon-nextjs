@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState, use as usePromise } from "react";
-import ProductImage from "@/app/components/ui/ProductImage";
+import ProductCardMedia from "@/app/components/ui/ProductCardMedia";
+import { formatSupplySource } from "@/app/utils/supplySource";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,14 +9,18 @@ import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
+import { useLanguage } from "@/app/context/LanguageContext";
 import { getProductStockClass, calculateAvailableStock } from "@/app/utils/stockUtils";
+import { formatLocalizedNumber, formatLocalizedPrice, getLocalizedLotLabel, getLocalizedText, localizeGrade, localizeStatus, localizeUnit } from "@/app/utils/localize";
 import CartStatusBanner from "@/app/components/CartStatusBanner";
+import CatalogGuidePanel from "@/app/components/CatalogGuidePanel";
 
 export default function CatalogItemPage({ params }) {
   // Next.js 15: params is a Promise; unwrap with React.use()
   const { id } = usePromise(params);
   const router = useRouter();
   const auth = useAuth();
+  const { t, language, isRTL } = useLanguage();
   const userPhone = auth?.user?.mobile || auth?.user?.phone || null;
   const isAdmin = auth?.user?.roles?.some(role => role.nameEn === 'Administrator') || false;
   
@@ -37,13 +42,6 @@ export default function CatalogItemPage({ params }) {
   const [placingLotId, setPlacingLotId] = useState(null);
   const [orderMsg, setOrderMsg] = useState("");
   const [orderMsgType, setOrderMsgType] = useState("info"); // 'success' | 'error' | 'info'
-  const statusToFa = {
-    on_field: "در مزرعه",
-    harvested: "برداشت‌شده",
-    reserved: "رزرو شده",
-    sold: "فروخته شده",
-  };
-
   // Media state for lots
   const [lotMediaCounts, setLotMediaCounts] = useState(new Map()); // lotId -> { images, videos }
   const [productMediaCounts, setProductMediaCounts] = useState({ images: 0, videos: 0 });
@@ -239,21 +237,35 @@ export default function CatalogItemPage({ params }) {
   return (
     <main className="w-full px-2 sm:px-4 lg:px-6 py-2 space-y-4 sm:space-y-6 overflow-x-hidden">
       <CartStatusBanner />
-      <div className="text-sm text-slate-500"><Link href="/">صفحه اصلی</Link> / {item?.name || "..."}</div>
+      <div className="text-sm text-slate-500"><Link href="/">{t("mainPage")}</Link> / {getLocalizedText(item, language) || "..."}</div>
+
+      <CatalogGuidePanel
+        showCategoryGuide={!item?.isOrderable && children.length > 0}
+      />
 
       {/* Header: image on the right, title on the left of the image (RTL-friendly) */}
-        <section className={`bg-white rounded-xl shadow border p-3 sm:p-4 ${item ? getProductStockClass(item, allProducts, inventoryLots) : ''}`}>
+        <section className={`rounded-xl shadow border p-3 sm:p-4 ${item ? getProductStockClass(item, allProducts, inventoryLots) : 'bg-white'}`}>
         <div className="flex items-center gap-3 sm:gap-4 flex-row-reverse">
-          <div className="shrink-0">
-            <ProductImage slug={item?.slug} imageUrl={item?.imageUrl} alt={item?.name || "item"} width={80} height={80} className="sm:w-24 sm:h-24" />
+          <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24">
+            <ProductCardMedia
+              product={item}
+              alt={getLocalizedText(item, language) || "item"}
+              width={80}
+              height={80}
+              className="object-cover w-full h-full rounded-lg border bg-slate-50"
+              figureClassName="rounded-lg"
+            />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-800 truncate">{item?.name || ""}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{getLocalizedText(item, language) || ""}</h1>
             {item?.slug ? <div className="text-slate-400 text-xs mt-1">{item.slug}</div> : null}
+            <div className="text-slate-600 text-xs mt-1">
+              {t("supplySource")}: {formatSupplySource(item, language)}
+            </div>
             {item?.isOrderable ? (
-              <div className="text-emerald-700 text-xs mt-2">قابل سفارش • واحد: {item?.unit || '-'}</div>
+              <div className="text-emerald-700 text-xs mt-2">{t("orderable")} • {t("unitLabel")}: {localizeUnit(item?.unit || '-', language)}</div>
             ) : (
-              <div className="text-slate-500 text-xs mt-2">غیرقابل سفارش (نقش دسته)</div>
+              <div className="text-slate-500 text-xs mt-2">{t("nonOrderableCategoryRole")}</div>
             )}
             <div className="flex items-center gap-3 mt-3">
               {productMediaPreview && productMediaPreview.length > 0 ? (
@@ -263,7 +275,7 @@ export default function CatalogItemPage({ params }) {
                       key={m.id}
                       className="w-24 h-16 rounded overflow-hidden bg-slate-100 cursor-pointer"
                       onClick={() => openMediaModal({ module: 'products', entityId: productIdNum, lot: null, tab: String(m.mimeType||'').startsWith('video/') ? 'videos' : 'images' })}
-                      title="مشاهده در اندازه بزرگ"
+                      title={t("view")}
                     >
                       {String(m.mimeType||'').startsWith('video/') ? (
                         <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
@@ -274,15 +286,15 @@ export default function CatalogItemPage({ params }) {
                   ))}
                   {(productMediaCounts.images + productMediaCounts.videos) > productMediaPreview.length ? (
                     <button className="text-indigo-600 text-sm" onClick={()=> openMediaModal({ module: 'products', entityId: productIdNum, lot: null, tab: 'images' })}>
-                      مشاهده سایر رسانه‌ها ({(productMediaCounts.images + productMediaCounts.videos) - productMediaPreview.length})
+                      {t("view")} ({(productMediaCounts.images + productMediaCounts.videos) - productMediaPreview.length})
                     </button>
                   ) : null}
                 </div>
               ) : null}
               {cartTotalQty > 0 ? (
                 <div className="text-[13px] sm:text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded px-3 py-2">
-                  شما هم‌اکنون <span className="font-semibold">{cartTotalQty.toFixed(3)} {cartUnit || ''}</span> از این محصول را در سبد دارید.
-                  <Link href="/cart" className="underline mx-1 text-amber-800">مشاهده سبد خرید</Link>
+                  {t("youHaveInCart", { quantity: cartTotalQty.toFixed(3), unit: localizeUnit(cartUnit || '', language) })}
+                  <Link href="/cart" className="underline mx-1 text-amber-800">{t("viewCart")}</Link>
                 </div>
               ) : null}
             </div>
@@ -293,25 +305,29 @@ export default function CatalogItemPage({ params }) {
       {/* Category stock summary (for non-orderable items) */}
       {!item?.isOrderable && children.length > 0 && (
         <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
-          <h2 className="text-lg font-semibold mb-3">وضعیت موجودی کل</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("totalStockStatus")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div className="bg-slate-50 rounded-md border p-3">
-              <div className="text-xs text-slate-500">کل موجودی</div>
+              <div className="text-xs text-slate-500">{t("totalStock")}</div>
               <div className="text-lg font-semibold">
-                {children.reduce((sum, ch) => {
-                  const stock = calculateAvailableStock(ch, allProducts, inventoryLots);
-                  return sum + stock;
-                }, 0).toLocaleString()} کیلوگرم
+                {formatLocalizedNumber(
+                  children.reduce((sum, ch) => {
+                    const stock = calculateAvailableStock(ch, allProducts, inventoryLots);
+                    return sum + stock;
+                  }, 0),
+                  language
+                )}{" "}
+                {localizeUnit("kg", language)}
               </div>
             </div>
             <div className="bg-slate-50 rounded-md border p-3">
-              <div className="text-xs text-slate-500">تعداد محصولات</div>
-              <div className="text-lg font-semibold">{children.length} محصول</div>
+              <div className="text-xs text-slate-500">{t("totalProducts")}</div>
+              <div className="text-lg font-semibold">{children.length} {t("product")}</div>
             </div>
             <div className="bg-slate-50 rounded-md border p-3">
-              <div className="text-xs text-slate-500">محصولات دارای موجودی</div>
+              <div className="text-xs text-slate-500">{t("productsWithStock")}</div>
               <div className="text-lg font-semibold">
-                {children.filter(ch => calculateAvailableStock(ch, allProducts, inventoryLots) > 0).length} محصول
+                {children.filter(ch => calculateAvailableStock(ch, allProducts, inventoryLots) > 0).length} {t("product")}
               </div>
             </div>
           </div>
@@ -321,11 +337,11 @@ export default function CatalogItemPage({ params }) {
       {/* Inventory summary (if any) */}
       {filteredLots.length > 0 && (
         <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
-          <h2 className="text-lg font-semibold mb-3">وضعیت موجودی</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("inventoryStatus")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4">
-            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">کل موجودی</div><div className="text-lg font-semibold">{summary.totalQuantity.toFixed(3)}</div></div>
-            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">رزرو شده</div><div className="text-lg font-semibold">{summary.reservedQuantity.toFixed(3)}</div></div>
-            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">قابل عرضه</div><div className="text-lg font-semibold">{summary.availableQuantity.toFixed(3)}</div></div>
+            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("totalStock")}</div><div className="text-lg font-semibold">{summary.totalQuantity.toFixed(3)}</div></div>
+            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("reserved")}</div><div className="text-lg font-semibold">{summary.reservedQuantity.toFixed(3)}</div></div>
+            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("availableToOffer")}</div><div className="text-lg font-semibold">{summary.availableQuantity.toFixed(3)}</div></div>
           </div>
           {/* جعبه سفارش سریع حذف شد؛ سفارش در ردیف هر بار انجام می‌شود */}
           {orderMsg ? (
@@ -351,17 +367,17 @@ export default function CatalogItemPage({ params }) {
             <table className="w-full text-sm" style={{ minWidth: '100%' }}>
               <thead>
                 <tr className="bg-gray-100 text-gray-700">
-                  <th className="p-2">درجه</th>
-                  <th className="p-2">کل</th>
-                  <th className="p-2">رزرو</th>
-                  <th className="p-2">قابل عرضه</th>
-                  <th className="p-2">تعداد بار</th>
+                  <th className="p-2">{t("grade")}</th>
+                  <th className="p-2">{t("total")}</th>
+                  <th className="p-2">{t("reserved")}</th>
+                  <th className="p-2">{t("availableToOffer")}</th>
+                  <th className="p-2">{t("lotsCount")}</th>
                 </tr>
               </thead>
               <tbody>
                 {byGrade.map((g) => (
                   <tr key={g.grade} className="border-t">
-                    <td className="p-2">{g.grade}</td>
+                    <td className="p-2">{localizeGrade(g.grade, t)}</td>
                     <td className="p-2">{g.total.toFixed(3)}</td>
                     <td className="p-2">{g.reserved.toFixed(3)}</td>
                     <td className="p-2">{g.available.toFixed(3)}</td>
@@ -377,23 +393,23 @@ export default function CatalogItemPage({ params }) {
       {/* Available lots with attributes */}
       {filteredLots.length > 0 && (
         <section className="bg-gray-50 rounded-xl shadow border p-3 sm:p-4">
-          <h2 className="text-lg font-semibold mb-3 text-gray-800">محصولات موجود</h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">{t("availableProductsTitle")}</h2>
           {/* Desktop Table */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm" style={{ minWidth: '100%' }}>
               <thead>
                 <tr className="bg-gray-50 text-gray-700 border-b">
-                  <th className="px-4 py-3 text-right font-medium">رسانه</th>
-                  <th className="px-4 py-3 text-right font-medium">درجه</th>
-                  <th className="px-4 py-3 text-right font-medium">واحد</th>
-                  <th className="px-4 py-3 text-right font-medium">کل</th>
-                  <th className="px-4 py-3 text-right font-medium">رزرو</th>
-                  <th className="px-4 py-3 text-right font-medium">قیمت</th>
-                  <th className="px-4 py-3 text-right font-medium">حداقل سفارش</th>
-                  <th className="px-4 py-3 text-right font-medium">وضعیت</th>
-                  <th className="px-4 py-3 text-right font-medium">ویژگی‌ها</th>
-                  {isAdmin && <th className="px-4 py-3 text-right font-medium">تامین‌کننده</th>}
-                  <th className="px-4 py-3 text-right font-medium">درخواست</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("media")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("grade")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("unitLabel")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("total")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("reserved")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("price")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("minimumOrder")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("status")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("attributes")}</th>
+                  {isAdmin && <th className="px-4 py-3 text-right font-medium">{t("supplier")}</th>}
+                  <th className="px-4 py-3 text-right font-medium">{t("request")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -412,7 +428,7 @@ export default function CatalogItemPage({ params }) {
                             <div
                               className="w-16 h-12 rounded overflow-hidden bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity"
                               onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: isVideo ? 'videos' : 'images' })}
-                              title="مشاهده رسانه‌ها"
+                              title={t("media")}
                             >
                               {isVideo ? (
                                 <video src={thumbUrl} className="w-full h-full object-cover" muted />
@@ -431,27 +447,27 @@ export default function CatalogItemPage({ params }) {
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {l.qualityGrade}
+                        {getLocalizedLotLabel(l, language, t)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs">{l.unit}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{l.totalQuantity?.toLocaleString('fa-IR')}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{l.reservedQuantity?.toLocaleString('fa-IR')}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{localizeUnit(l.unit, language)}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{formatLocalizedNumber(l.totalQuantity, language)}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{formatLocalizedNumber(l.reservedQuantity, language)}</td>
                     <td className="px-4 py-3">
                       {l.tieredPricing && l.tieredPricing.length > 0 ? (
                         <TieredPricingDisplay tieredPricing={l.tieredPricing} unit={l.unit} />
                       ) : l.price ? (
-                        <span className="font-medium text-green-600">{l.price.toLocaleString('fa-IR')} تومان</span>
+                        <span className="font-medium text-green-600">{formatLocalizedPrice(l.price, language, t)}</span>
                       ) : (
                         <span className="text-gray-400">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {l.tieredPricing && l.tieredPricing.length > 0 ? (
-                        <span className="text-xs text-gray-500">قیمت پلکانی</span>
+                        <span className="text-xs text-gray-500">{t("steppedPricing")}</span>
                       ) : l.minimumOrderQuantity ? (
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                          {l.minimumOrderQuantity} {l.unit}
+                        {l.minimumOrderQuantity} {localizeUnit(l.unit, language)}
                         </span>
                       ) : (
                         <span className="text-gray-400">—</span>
@@ -464,7 +480,7 @@ export default function CatalogItemPage({ params }) {
                         l.status === 'sold' ? 'bg-blue-100 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {statusToFa[l.status] || l.status}
+                        {localizeStatus(l.status, t)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -476,7 +492,7 @@ export default function CatalogItemPage({ params }) {
                             </div>
                           ))}
                         </div>
-                      ) : '—'}
+                      ) : t("notSet")}
                     </td>
                     {isAdmin && (
                       <td className="px-4 py-3">
@@ -486,7 +502,7 @@ export default function CatalogItemPage({ params }) {
                             <div className="text-gray-500 text-xs">{l.farmer.username}</div>
                           </div>
                         ) : (
-                          <span className="text-gray-400">—</span>
+                          <span className="text-gray-400">{t("notSet")}</span>
                         )}
                       </td>
                     )}
@@ -497,7 +513,7 @@ export default function CatalogItemPage({ params }) {
                           min="0"
                           step="0.001"
                           className="border rounded px-2 py-1 w-24 sm:w-32 md:w-40 lg:w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          placeholder={`حداکثر ${(Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0)))||0).toFixed(3)}`}
+                          placeholder={`max ${(Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0)))||0).toFixed(3)}`}
                           value={lotQtyById[l.id] ?? ''}
                           onChange={(e)=> setLotQtyById(prev => ({ ...prev, [l.id]: e.target.value }))}
                         />
@@ -518,7 +534,7 @@ export default function CatalogItemPage({ params }) {
                               if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به بار');
                               setOrderMsgType('success');
                               const contactNote = userPhone ? ` (${userPhone})` : '';
-                              setOrderMsg(`به بار اضافه شد. رزرو توسط مدیریت انجام می‌شود و برای تایید نهایی با شما تماس می‌گیریم${contactNote}. شما می‌توانید از بالای صفحه یا از داشبورد بخش بار، سفارشات خود را مشاهده کرده و ثبت بار را بزنید. با زدن ثبت بار، بار رزرو نمی‌شود ولی با مشتری تماس گرفته می‌شود جهت رزرو شدن بار. تماس پشتیبانی: 09393387148`);
+                              setOrderMsg(`${t("orderAdded")}${contactNote}`);
                               // refresh cart badge for this product
                               fetchCart();
                             } catch (e) {
@@ -527,7 +543,7 @@ export default function CatalogItemPage({ params }) {
                               setPlacingLotId(null);
                             }
                           }}
-                        >{placingLotId === l.id ? '...' : 'سفارش'}</button>
+                        >{placingLotId === l.id ? '...' : t('order')}</button>
                       </div>
                     </td>
                   </tr>
@@ -554,7 +570,7 @@ export default function CatalogItemPage({ params }) {
                             <div
                               className="w-full h-full cursor-pointer hover:scale-105 transition-transform duration-200"
                               onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: isVideo ? 'videos' : 'images' })}
-                              title="مشاهده رسانه‌ها"
+                              title={t("media")}
                             >
                               {isVideo ? (
                                 <video src={thumbUrl} className="w-full h-full object-cover" muted />
@@ -570,7 +586,7 @@ export default function CatalogItemPage({ params }) {
                           {/* Quality grade badge */}
                           <div className="absolute top-2 right-2">
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-lg">
-                              {l.qualityGrade}
+                              {getLocalizedLotLabel(l, language, t)}
                             </span>
                           </div>
                           {/* Status badge */}
@@ -581,7 +597,7 @@ export default function CatalogItemPage({ params }) {
                               l.status === 'sold' ? 'bg-blue-600 text-white' :
                               'bg-gray-600 text-white'
                             }`}>
-                              {statusToFa[l.status] || l.status}
+                              {localizeStatus(l.status, t)}
                             </span>
                           </div>
                         </div>
@@ -595,7 +611,7 @@ export default function CatalogItemPage({ params }) {
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-gray-600">{l.unit}</span>
                     <div className="text-xs text-gray-500">
-                      موجودی: {Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0))).toFixed(3)}
+                      {t("inventory")}: {Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0))).toFixed(3)}
                     </div>
                   </div>
                   
@@ -603,11 +619,11 @@ export default function CatalogItemPage({ params }) {
                   <div className="grid grid-cols-2 gap-3 text-sm mb-4">
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
                       <div className="text-gray-500 text-xs mb-1">مقدار کل</div>
-                      <div className="font-mono font-semibold text-gray-900">{l.totalQuantity?.toLocaleString('fa-IR')}</div>
+                      <div className="font-mono font-semibold text-gray-900">{formatLocalizedNumber(l.totalQuantity, language)}</div>
                     </div>
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-gray-500 text-xs mb-1">رزرو شده</div>
-                      <div className="font-mono font-semibold text-gray-900">{l.reservedQuantity?.toLocaleString('fa-IR')}</div>
+                      <div className="text-gray-500 text-xs mb-1">{t("reserved")}</div>
+                      <div className="font-mono font-semibold text-gray-900">{formatLocalizedNumber(l.reservedQuantity, language)}</div>
                     </div>
                   </div>
 
@@ -619,7 +635,7 @@ export default function CatalogItemPage({ params }) {
                         <TieredPricingDisplay tieredPricing={l.tieredPricing} unit={l.unit} />
                       ) : l.price ? (
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-green-700 text-lg">{l.price.toLocaleString('fa-IR')} تومان</span>
+                          <span className="font-semibold text-green-700 text-lg">{formatLocalizedPrice(l.price, language, t)}</span>
                           <span className="text-xs text-green-600">قیمت ثابت</span>
                         </div>
                       ) : (
@@ -648,7 +664,7 @@ export default function CatalogItemPage({ params }) {
                   {/* Attributes */}
                   {Array.isArray(l.attributes) && l.attributes.length > 0 && (
                     <div className="mb-4">
-                      <div className="text-gray-500 text-xs mb-2">ویژگی‌ها</div>
+                      <div className="text-gray-500 text-xs mb-2">{t("attributes")}</div>
                       <div className="space-y-2">
                         {l.attributes.slice(0, 3).map((a) => (
                           <div key={a.id} className="flex justify-between items-center text-xs bg-white rounded px-3 py-2 border border-gray-200">
@@ -658,7 +674,7 @@ export default function CatalogItemPage({ params }) {
                         ))}
                         {l.attributes.length > 3 && (
                           <div className="text-xs text-gray-500 text-center">
-                            +{l.attributes.length - 3} ویژگی دیگر
+                            {t("moreAttributes", { count: l.attributes.length - 3 })}
                           </div>
                         )}
                       </div>
@@ -695,7 +711,7 @@ export default function CatalogItemPage({ params }) {
                         onClick={async ()=>{
                           setOrderMsg('');
                           const v = parseFloat(lotQtyById[l.id] || 0);
-                          if (!Number.isFinite(v) || v <= 0) { setOrderMsgType('error'); setOrderMsg('مقدار نامعتبر است'); return; }
+                          if (!Number.isFinite(v) || v <= 0) { setOrderMsgType('error'); setOrderMsg(t('invalidQuantity')); return; }
                           const available = Math.max(0, parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0));
                           if (v > available + 1e-9) { setOrderMsgType('error'); setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${l.unit||''}`); return; }
                           setPlacingLotId(l.id);
@@ -706,7 +722,7 @@ export default function CatalogItemPage({ params }) {
                             if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به بار');
                             setOrderMsgType('success');
                             const contactNote = userPhone ? ` (${userPhone})` : '';
-                            setOrderMsg(`به بار اضافه شد. رزرو توسط مدیریت انجام می‌شود و برای تایید نهایی با شما تماس می‌گیریم${contactNote}. شما می‌توانید از بالای صفحه یا از داشبورد بخش بار، سفارشات خود را مشاهده کرده و ثبت بار را بزنید. با زدن ثبت بار، بار رزرو نمی‌شود ولی با مشتری تماس گرفته می‌شود جهت رزرو شدن بار. تماس پشتیبانی: 09393387148`);
+                            setOrderMsg(`${t("orderAdded")}${contactNote}`);
                             // refresh cart badge for this product
                             fetchCart();
                           } catch (e) {
@@ -715,7 +731,7 @@ export default function CatalogItemPage({ params }) {
                             setPlacingLotId(null);
                           }
                         }}
-                      >{placingLotId === l.id ? '...' : 'سفارش'}</button>
+                        >{placingLotId === l.id ? '...' : t('order')}</button>
                     </div>
                   </div>
                 </div>
@@ -730,17 +746,17 @@ export default function CatalogItemPage({ params }) {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow border p-4 w-full max-w-4xl">
             <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">{mediaContext.module === 'inventory' && mediaLot ? `رسانه‌های محصول #${mediaLot.id}` : 'رسانه‌های محصول'}</div>
+              <div className="font-semibold">{mediaContext.module === 'inventory' && mediaLot ? `${t('productMedia')} #${mediaLot.id}` : t('productMedia')}</div>
               <button className="text-slate-500" onClick={()=>{ setMediaOpen(false); setMediaLot(null); setMediaItems([]); }}>✕</button>
             </div>
             <div className="flex items-center gap-2 mb-3">
-              <button className={`px-3 py-1 rounded ${mediaTab==='images'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'images' })}>تصاویر</button>
-              <button className={`px-3 py-1 rounded ${mediaTab==='videos'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'videos' })}>ویدیوها</button>
+              <button className={`px-3 py-1 rounded ${mediaTab==='images'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'images' })}>{t('images')}</button>
+              <button className={`px-3 py-1 rounded ${mediaTab==='videos'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'videos' })}>{t('videos')}</button>
             </div>
             {mediaLoading ? (
-              <div className="text-slate-500">در حال بارگذاری...</div>
+              <div className="text-slate-500">{t("loading")}</div>
             ) : mediaItems.length === 0 ? (
-              <div className="text-slate-500">موردی برای نمایش وجود ندارد.</div>
+              <div className="text-slate-500">{t("noMediaToShow")}</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {mediaItems.map(m => (
@@ -764,7 +780,7 @@ export default function CatalogItemPage({ params }) {
       {/* Products list (only show when there are sub-products) */}
       {!loading && children.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">محصولات</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("productLabelPlural")}</h2>
           <div className="space-y-2 sm:space-y-3">
             {children.map((ch) => {
               // محاسبه موجودی برای هر محصول/دسته
@@ -784,15 +800,15 @@ export default function CatalogItemPage({ params }) {
               }
               
               return (
-                <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between bg-white rounded-lg shadow p-3 sm:p-4 border hover:bg-slate-50 transition-colors ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : ''}`}>
-                  <div className="font-medium text-slate-800">{ch.name}</div>
+                <Link key={ch.id} href={`/catalog/${ch.id}`} className={`flex items-center justify-between rounded-lg shadow p-3 sm:p-4 border transition-colors ${ch ? getProductStockClass(ch, allProducts, inventoryLots) : 'bg-white'}`}>
+                    <div className="font-medium">{getLocalizedText(ch, language)}</div>
                   <div className="flex items-center gap-2">
                     {availableStock > 0 && (
-                      <span className="text-xs text-green-600 font-medium">
-                        {availableStock.toLocaleString()} کیلوگرم
+                      <span className="text-xs font-medium">
+                        {formatLocalizedNumber(availableStock, language)} {localizeUnit("kg", language)}
                       </span>
                     )}
-                    <span className="text-xs text-slate-400">مشاهده</span>
+                    <span className="text-xs opacity-80">{t("view")}</span>
                   </div>
                 </Link>
               );

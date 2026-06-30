@@ -2,6 +2,7 @@ import "./globals.css";
 import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { SidebarProvider } from "./context/SidebarContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import Header from "./components/ui/Header/Header";
 import ClientSideWrapper from "./components/ui/ClientSideWrapper";
 import StructuredData from "./components/StructuredData";
@@ -77,31 +78,33 @@ export default function RootLayout({ children }) {
     <html lang="fa" dir="rtl" data-theme="taganeh" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-gray-50">
         <StructuredData />
-        <AuthProvider>
-          <SidebarProvider>
-            {/* Header */}
-            <Header />
+        <LanguageProvider>
+          <AuthProvider>
+            <SidebarProvider>
+              {/* Header */}
+              <Header />
 
-            {/* Main Content */}
-            <div className="flex-1 pb-20 md:pb-0 pt-0 md:pt-0">
-              {children}
-            </div>
+              {/* Main Content */}
+              <div className="flex-1 pb-20 md:pb-0 pt-0 md:pt-0">
+                {children}
+              </div>
 
-            {/* Footer */}
-            <Footer />
+              {/* Footer */}
+              <Footer />
 
-            {/* Global Sidebar - Available on all pages for logged-in users */}
-            <ClientSideWrapper>
-              <GlobalSidebar />
-            </ClientSideWrapper>
+              {/* Global Sidebar - Available on all pages for logged-in users */}
+              <ClientSideWrapper>
+                <GlobalSidebar />
+              </ClientSideWrapper>
 
-            {/* Mobile Bottom Bar - Available on all pages */}
-            <ClientSideWrapper>
-              <MobileBottomBar />
-            </ClientSideWrapper>
+              {/* Mobile Bottom Bar - Available on all pages */}
+              <ClientSideWrapper>
+                <MobileBottomBar />
+              </ClientSideWrapper>
 
-          </SidebarProvider>
-        </AuthProvider>
+            </SidebarProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
