@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { API_ENDPOINTS } from '@/app/config/api';
+import { resolveMediaUrl } from '@/app/utils/mediaUrl';
 
 function authHeaders() {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -136,10 +137,10 @@ export default function MediaUpload({
           <div key={it.id} className="border rounded-md overflow-hidden bg-white">
             <div className="aspect-video bg-slate-100 flex items-center justify-center overflow-hidden">
               {String(it.mimeType || '').startsWith('video/') ? (
-                <video src={it.downloadUrl} className="w-full h-full object-cover" controls />
+                <video src={resolveMediaUrl(it.downloadUrl)} className="w-full h-full object-cover" controls />
               ) : (
                 <Image
-                  src={it.downloadUrl}
+                  src={resolveMediaUrl(it.downloadUrl)}
                   alt={it.originalName || ''}
                   className="w-full h-full object-cover"
                   width={200}

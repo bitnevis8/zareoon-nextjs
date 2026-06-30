@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { API_ENDPOINTS } from "../config/api";
 import { getProductStockClass, calculateAvailableStock } from "../utils/stockUtils";
+import { resolveMediaUrl } from "../utils/mediaUrl";
 
 export default function SearchModal({ isOpen, onClose, allProducts = [], inventoryLots = [] }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -189,7 +190,7 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
                       >
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
                           <Image
-                            src={item.imageUrl || "/images/image-loader.webp"}
+                            src={resolveMediaUrl(item.imageUrl) || "/images/image-loader.webp"}
                             alt={item.name}
                             width={48}
                             height={48}

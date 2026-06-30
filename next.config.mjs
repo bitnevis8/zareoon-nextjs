@@ -5,6 +5,14 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     unoptimized: true, // برای تصاویر خارجی
   },
+  async rewrites() {
+    return [
+      {
+        source: '/dl-media/:path*',
+        destination: 'http://dl.zareoon.ir/:path*',
+      },
+    ];
+  },
   // غیرفعال کردن کامل کش
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'react-leaflet'],

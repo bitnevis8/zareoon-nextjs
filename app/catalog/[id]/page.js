@@ -12,6 +12,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getProductStockClass, calculateAvailableStock } from "@/app/utils/stockUtils";
 import { formatLocalizedNumber, formatLocalizedPrice, getLocalizedLotLabel, getLocalizedText, localizeGrade, localizeStatus, localizeUnit } from "@/app/utils/localize";
+import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import CartStatusBanner from "@/app/components/CartStatusBanner";
 import CatalogGuidePanel from "@/app/components/CatalogGuidePanel";
 
@@ -278,9 +279,9 @@ export default function CatalogItemPage({ params }) {
                       title={t("view")}
                     >
                       {String(m.mimeType||'').startsWith('video/') ? (
-                        <video src={m.downloadUrl} className="w-full h-full object-cover" muted />
+                        <video src={resolveMediaUrl(m.downloadUrl)} className="w-full h-full object-cover" muted />
                       ) : (
-                        <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
+                        <Image src={resolveMediaUrl(m.downloadUrl)} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
                       )}
                     </div>
                   ))}
@@ -420,7 +421,7 @@ export default function CatalogItemPage({ params }) {
                         const c = lotMediaCounts.get(l.id);
                         const preview = lotMediaPreview.get(l.id) || [];
                         const thumb = preview[0];
-                        const thumbUrl = thumb?.downloadUrl || l.coverImageUrl;
+                        const thumbUrl = resolveMediaUrl(thumb?.downloadUrl || l.coverImageUrl);
                         if (!thumbUrl) return '—';
                         const isVideo = thumb ? String(thumb.mimeType || '').startsWith('video/') : false;
                         return (
@@ -561,7 +562,7 @@ export default function CatalogItemPage({ params }) {
                   const c = lotMediaCounts.get(l.id);
                   const preview = lotMediaPreview.get(l.id) || [];
                   const thumb = preview[0];
-                  const thumbUrl = thumb?.downloadUrl || l.coverImageUrl;
+                  const thumbUrl = resolveMediaUrl(thumb?.downloadUrl || l.coverImageUrl);
                   if (!thumbUrl) return null;
                   const isVideo = thumb ? String(thumb.mimeType || '').startsWith('video/') : false;
                   return (
@@ -763,9 +764,9 @@ export default function CatalogItemPage({ params }) {
                   <div key={m.id} className="border rounded-md overflow-hidden bg-white">
                     <div className="aspect-video bg-slate-100 flex items-center justify-center overflow-hidden">
                       {String(m.mimeType||'').startsWith('video/') ? (
-                        <video src={m.downloadUrl} className="w-full h-full object-cover" controls />
+                        <video src={resolveMediaUrl(m.downloadUrl)} className="w-full h-full object-cover" controls />
                       ) : (
-                        <Image src={m.downloadUrl} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
+                        <Image src={resolveMediaUrl(m.downloadUrl)} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
                       )}
                     </div>
                     <div className="p-2 text-xs truncate" title={m.originalName}>{m.originalName}</div>
