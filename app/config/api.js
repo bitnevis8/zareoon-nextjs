@@ -310,4 +310,10 @@ export const API_ENDPOINTS = {
       delete: (id) => `${API_BASE_URL}/farmer/attribute-value/${id}`,
     },
   },
+  lcRequests: {
+    create: `${API_BASE_URL}/lc-request`,
+    getAll: `${API_BASE_URL}/lc-request`,
+    getById: (id) => `${API_BASE_URL}/lc-request/${id}`,
+    updateStatus: (id) => `${API_BASE_URL}/lc-request/${id}/status`,
+  },
 }; 

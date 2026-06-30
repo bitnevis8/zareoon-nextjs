@@ -9,6 +9,8 @@ import { getProductStockClass, calculateAvailableStock } from './utils/stockUtil
 import { useAuth } from './context/AuthContext';
 import { useLanguage, siteIntroByLang } from './context/LanguageContext';
 import CatalogGuidePanel from './components/CatalogGuidePanel';
+import AryaFouladAd from './components/AryaFouladAd';
+import ZareoonLcAd from './components/ZareoonLcAd';
 import { formatLocalizedPrice, formatLocalizedNumber, getLocalizedLotLabel, getLocalizedText, localizeUnit } from './utils/localize';
 
 const languageOptions = [
@@ -298,6 +300,39 @@ function HomeContent() {
       priority
     />
         </div>
+        <div className="relative max-w-xl mx-auto w-full px-2">
+          <input
+            className="w-full border rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={t("searchPlaceholder")}
+            value={q}
+            onChange={(e)=>setQ(e.target.value)}
+          />
+          {q && (
+            <div className={`absolute z-10 left-0 right-0 mt-2 bg-white border rounded-xl shadow max-h-80 overflow-auto ${isRTL ? "text-right" : "text-left"}`}>
+              {searching ? (
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className="flex items-center justify-between px-4 py-2 animate-pulse">
+                        <div className="h-4 bg-gray-300 rounded w-32"></div>
+                        <div className="h-5 bg-gray-300 rounded w-12"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : results.length ? (
+                results.map((it) => (
+                  <Link key={it.id} href={`/catalog/${it.id}`} className={`flex items-center justify-between px-4 py-2 hover:bg-slate-50 ${it ? getProductStockClass(it, allProducts, inventoryLots) : ''}`}>
+                    <div className="text-sm font-medium text-slate-800">{getLocalizedText(it, language)}</div>
+                    <span className="text-xs text-slate-400">{it.isOrderable ? t("product") : t("category")}</span>
+                  </Link>
+                ))
+              ) : (
+                <div className="p-3 text-sm text-slate-500">{t("nothingFound")}</div>
+              )}
+            </div>
+          )}
+        </div>
         <div className="mx-auto max-w-[46.2rem] space-y-1.5 px-2" suppressHydrationWarning>
           <p
             className={`text-sm sm:text-base leading-7 ${
@@ -332,99 +367,9 @@ function HomeContent() {
           </p>
         </div>
 
-        <div className="hidden lg:block w-full max-w-5xl mx-auto space-y-2">
-          <div className={`flex items-center gap-2 px-1 ${isRTL ? "justify-end" : "justify-start"}`}>
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-amber-900">
-              {t("adSponsoredLabel")}
-            </span>
-            <span className="text-[11px] sm:text-xs text-slate-400">{t("adBadge")}</span>
-          </div>
-        <a
-          href="https://next.afg-insp.ir"
-          target="_blank"
-          rel="noreferrer"
-          className={`block w-full rounded-[2rem] border border-amber-200/80 bg-gradient-to-r from-amber-50 via-white to-orange-50 shadow-[0_18px_50px_-18px_rgba(245,158,11,0.35)] overflow-hidden relative hover:shadow-[0_22px_55px_-20px_rgba(245,158,11,0.42)] transition-shadow ${isRTL ? "text-right" : "text-left"}`}
-        >
-          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-amber-100/40 to-transparent pointer-events-none" />
-          <div className="relative px-4 py-4 sm:px-6 sm:py-5 lg:px-8 space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="max-w-4xl space-y-2">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold leading-8 sm:leading-10 text-slate-900">
-                  {t("adTitle")}
-                </h2>
-                <p className="text-sm sm:text-base leading-7 text-slate-700">{t("adDescription")}</p>
-              </div>
-              <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 border border-amber-200/80 shadow-md overflow-hidden self-start">
-                <Image
-                  src="/images/afg.png"
-                  alt="شرکت بازرسی مهندسی آریا فولاد"
-                  width={80}
-                  height={80}
-                  className="object-contain w-full h-full"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5 text-sm">
-              <div className="rounded-2xl border border-emerald-100 bg-white/90 px-3 py-3 text-slate-800 shadow-sm flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                <span>{t("adItem1")}</span>
-              </div>
-              <div className="rounded-2xl border border-emerald-100 bg-white/90 px-3 py-3 text-slate-800 shadow-sm flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                <span>{t("adItem2")}</span>
-              </div>
-              <div className="rounded-2xl border border-emerald-100 bg-white/90 px-3 py-3 text-slate-800 shadow-sm flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                <span>{t("adItem3")}</span>
-              </div>
-              <div className="rounded-2xl border border-emerald-100 bg-white/90 px-3 py-3 text-slate-800 shadow-sm flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                <span>{t("adItem4")}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between bg-[#1a2d4d] px-4 py-3.5 sm:px-6 text-sm font-semibold text-white border-t border-indigo-900/60">
-            <span className="text-indigo-50/95 leading-relaxed">{t("adFooter")}</span>
-            <span className="inline-flex items-center justify-center rounded-full bg-white/10 border border-white/20 px-3 py-1.5 text-amber-200 text-xs sm:text-sm whitespace-nowrap">
-              {t("enterSite")}
-            </span>
-          </div>
-        </a>
-        </div>
-        <div className="relative">
-          <input
-            className="w-full border rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={t("searchPlaceholder")}
-            value={q}
-            onChange={(e)=>setQ(e.target.value)}
-          />
-          {q && (
-            <div className={`absolute z-10 left-0 right-0 mt-2 bg-white border rounded-xl shadow max-h-80 overflow-auto ${isRTL ? "text-right" : "text-left"}`}>
-              {searching ? (
-                <div className="p-4">
-                  <div className="space-y-3">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <div key={index} className="flex items-center justify-between px-4 py-2 animate-pulse">
-                        <div className="h-4 bg-gray-300 rounded w-32"></div>
-                        <div className="h-5 bg-gray-300 rounded w-12"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : results.length ? (
-                results.map((it) => (
-                  <Link key={it.id} href={`/catalog/${it.id}`} className={`flex items-center justify-between px-4 py-2 hover:bg-slate-50 ${it ? getProductStockClass(it, allProducts, inventoryLots) : ''}`}>
-                    <div className="text-sm font-medium text-slate-800">{getLocalizedText(it, language)}</div>
-                    <span className="text-xs text-slate-400">{it.isOrderable ? t("product") : t("category")}</span>
-                  </Link>
-                ))
-              ) : (
-                <div className="p-3 text-sm text-slate-500">{t("nothingFound")}</div>
-              )}
-            </div>
-          )}
+        <div className="w-full max-w-5xl mx-auto space-y-2.5">
+          <ZareoonLcAd />
+          <AryaFouladAd />
         </div>
 
         <div className="flex justify-center">
