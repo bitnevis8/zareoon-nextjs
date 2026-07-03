@@ -1,4 +1,4 @@
-import { proxyMessaging } from "../../../_proxy";
+import { proxyMessaging } from "../../../../_proxy";
 
 export async function POST(request, { params }) {
   const { id } = await params;
