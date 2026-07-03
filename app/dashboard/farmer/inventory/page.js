@@ -1,236 +1,72 @@
-"use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import AsyncSelect from "react-select/async";
-import { API_ENDPOINTS } from "@/app/config/api";
-import { useAuth } from "@/app/context/AuthContext";
-import MediaUpload from "@/app/components/ui/MediaUpload";
-import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
+﻿"use client";
 
-export default function InventoryLotsPage() {
-  const { user, loading: authLoading } = useAuth() || {};
-  const [items, setItems] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [form, setForm] = useState({ 
-    productId: "", 
-    farmerId: "", 
-    farmerLabel: "", 
-    englishName: "",
-    arabicName: "",
-    russianName: "",
-    unit: "kg", 
-    qualityGrade: "درجه 1", 
-    totalQuantity: "", 
-    price: "", 
-    minimumOrderQuantity: "",
-    tieredPricing: [],
-    status: "harvested" 
-  });
-  const [attributeDefs, setAttributeDefs] = useState([]);
-  const [attributeValues, setAttributeValues] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [farmerNameMap, setFarmerNameMap] = useState(new Map());
+import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { API_ENDPOINTS } from "@/app/config/api";
+import { useLanguage } from "@/app/context/LanguageContext";
+import InventoryStats from "./components/InventoryStats";
+import InventoryLotCard from "./components/InventoryLotCard";
+import InventoryLotTable from "./components/InventoryLotTable";
+import InventoryViewModal from "./components/InventoryViewModal";
+import InventoryEditModal from "./components/InventoryEditModal";
+import InventoryMediaModal from "./components/InventoryMediaModal";
+import InventoryFilters, { DEFAULT_FILTERS } from "./components/InventoryFilters";
+import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
+import { useRequireSupplierArea } from "@/app/hooks/useDashboardRole";
+import { isAdmin } from "@/app/utils/roles";
+import { Section } from "./components/Field";
+import { inv } from "./inventoryTheme";
+import { INITIAL_FORM, EMPTY_TIER } from "./inventoryConstants";
+import { useInventoryLots } from "./hooks/useInventoryLots";
+import { filterAndSortLots, countActiveFilters, loadAttributeDefsForProduct, saveLotAttributeValues } from "./inventoryUtils";
+
+export default function InventoryListPage() {
+  const searchParams = useSearchParams();
+  const scope = searchParams.get("scope");
+  const { user, allowed, isOwnScope, loading: authLoading } = useRequireSupplierArea(scope);
+  const { t } = useLanguage();
+  const { items, products, farmerNameMap, loading, reload } = useInventoryLots(user, isOwnScope);
+
+  const showFarmerFilter = !isOwnScope && isAdmin(user);
+
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [selectedLot, setSelectedLot] = useState(null);
+  const [editForm, setEditForm] = useState({ ...INITIAL_FORM });
+  const [editAttributeDefs, setEditAttributeDefs] = useState([]);
+  const [editAttributeValues, setEditAttributeValues] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [mediaOpen, setMediaOpen] = useState(false);
-  const [selectedLot, setSelectedLot] = useState(null);
-  const [editForm, setEditForm] = useState({ 
-    englishName: "",
-    arabicName: "",
-    russianName: "",
-    unit: "", 
-    qualityGrade: "", 
-    totalQuantity: "", 
-    price: "", 
-    minimumOrderQuantity: "",
-    tieredPricing: [],
-    status: "harvested" 
-  });
-  const [showTieredPricing, setShowTieredPricing] = useState(false);
-  const [showTieredPricingInfo, setShowTieredPricingInfo] = useState(false);
 
-  const statusToFa = {
-    on_field: "در مزرعه",
-    harvested: "برداشت‌شده",
-    reserved: "رزرو شده",
-    sold: "فروخته شده",
-  };
+  const productName = useCallback(
+    (productId) => products.find((p) => p.id === productId)?.name || "—",
+    [products]
+  );
 
-  const load = useCallback(async () => {
-    const [r1, r2] = await Promise.all([
-      fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: "no-store" }),
-      // Only orderable products should be listed for inventory creation
-      fetch(API_ENDPOINTS.farmer.products.getAll + '?isOrderable=true', { cache: "no-store" }),
-    ]);
-    const d1 = await r1.json();
-    const d2 = await r2.json();
-    const lots = (d1.data || []).map(l => ({
-      ...l,
-      attributes: Array.isArray(l.attributes) ? l.attributes : []
-    }));
-    const roles = (user?.roles || []).map(r => (r.name || r.nameEn || '').toLowerCase());
-    const isFarmer = roles.includes('farmer') || roles.includes('loader');
-    const currentUserId = user?.userId;
-    setItems(isFarmer && currentUserId ? lots.filter(l => Number(l.farmerId) === Number(currentUserId)) : lots);
-    const prods = d2.data || [];
-    setProducts(prods);
-    // Load supplier names for display
-    const ids = [...new Set(lots.map(x => x.farmerId).filter(Boolean))];
-    if (ids.length) {
-      const results = await Promise.all(ids.map(async (uid) => {
-        try {
-          const res = await fetch(API_ENDPOINTS.users.getById(uid), { cache: "no-store" });
-          const d = await res.json();
-          const u = d?.data || d; // compatibility
-          const name = (`${u.firstName || ""} ${u.lastName || ""}`.trim()) || u.username || u.mobile || `#${uid}`;
-          return [uid, name];
-        } catch {
-          return [uid, `#${uid}`];
-        }
-      }));
-      const map = new Map(results);
-      setFarmerNameMap(map);
-    } else {
-      setFarmerNameMap(new Map());
-    }
-  }, [user]);
-  useEffect(() => { load(); }, [user, load]);
+  const farmers = useMemo(() => [...farmerNameMap.entries()], [farmerNameMap]);
 
-  // Load attribute definitions when product changes (merge product-level + category-level)
-  useEffect(() => {
-    const selected = products.find(p => p.id === Number(form.productId));
-    const categoryId = selected?.parentId ?? selected?.categoryId;
-    if (!selected) {
-      setAttributeDefs([]);
-      setAttributeValues({});
-      return;
-    }
-    (async () => {
-      try {
-        const [rCat, rProd] = await Promise.all([
-          categoryId ? fetch(API_ENDPOINTS.farmer.attributeDefinitions.getByCategoryId(categoryId), { cache: "no-store" }) : null,
-          fetch(API_ENDPOINTS.farmer.attributeDefinitions.getByProductId(selected.id), { cache: "no-store" })
-        ]);
-        const dCat = rCat ? await rCat.json() : { data: [] };
-        const dProd = rProd ? await rProd.json() : { data: [] };
-        const rawDefs = [...(dCat.data || []), ...(dProd.data || [])];
-        // Client-side guard: only include defs exactly matching this productId or its direct categoryId
-        const filtered = rawDefs.filter(def => {
-          if (def.productId && Number(def.productId) === Number(selected.id)) return true;
-          if (def.categoryId && Number(def.categoryId) === Number(categoryId)) return true;
-          return false;
-        });
-        // Dedupe by id
-        const unique = Array.from(new Map(filtered.map(d => [d.id, d])).values());
-        setAttributeDefs(unique);
-        // Initialize values for new defs if not present
-        setAttributeValues(prev => {
-          const next = { ...prev };
-          unique.forEach(def => {
-            if (!(def.id in next)) next[def.id] = "";
-          });
-          // remove values for defs that no longer exist
-          Object.keys(next).forEach(k => {
-            if (!unique.some(d => String(d.id) === String(k))) delete next[k];
-          });
-          return next;
-        });
-      } catch {}
-    })();
-  }, [form.productId, products]);
+  const filteredItems = useMemo(
+    () => filterAndSortLots(items, filters, { productName, farmerNameMap }),
+    [items, filters, productName, farmerNameMap]
+  );
 
-  // Async loaders for react-select
-  const loadProductOptions = async (inputValue) => {
-    const q = (inputValue || "").trim();
-    const url = `${API_ENDPOINTS.farmer.products.getAll}?isOrderable=true${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    const d = await res.json();
-    const list = d?.data || [];
-    return list.map(p => ({ value: p.id, label: p.name }));
-  };
-  const loadFarmerOptions = async (inputValue) => {
-    const q = (inputValue || "").trim();
-    const url = `${API_ENDPOINTS.users.search}?limit=20&offset=0${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    const data = await res.json();
-    const rows = (data?.data?.rows || data?.data || []).filter(
-      (u) => Array.isArray(u.userRoles) && u.userRoles.some((r) => r.name === "farmer")
-    );
-    return rows.map(u => ({
-      value: u.id,
-      label: (`${u.firstName || ""} ${u.lastName || ""}`.trim() || u.username || u.mobile || `#${u.id}`)
-    }));
-  };
-
-  const create = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    // 1) Create inventory lot
-    const lotRes = await fetch(API_ENDPOINTS.farmer.inventoryLots.create, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        productId: Number(form.productId),
-        farmerId: (()=>{
-          const roles = (user?.roles || []).map(r => (r.name || r.nameEn || '').toLowerCase());
-          const isFarmer = roles.includes('farmer') || roles.includes('loader');
-          return isFarmer ? Number(user?.userId) : (Number(form.farmerId) || 1);
-        })(),
-        unit: form.unit,
-        englishName: form.englishName || null,
-        arabicName: form.arabicName || null,
-        russianName: form.russianName || null,
-        qualityGrade: form.qualityGrade,
-        totalQuantity: Number(form.totalQuantity),
-        price: form.price ? Number(form.price) : null,
-        minimumOrderQuantity: form.minimumOrderQuantity ? Number(form.minimumOrderQuantity) : null,
-        tieredPricing: form.tieredPricing.length > 0 ? form.tieredPricing : null,
-        reservedQuantity: 0,
-        status: form.status || "harvested",
-      }),
-    });
-    const lotData = await lotRes.json();
-    const lotId = lotData?.data?.id;
-    // 2) Save custom attribute values if any
-    if (lotId && attributeDefs.length > 0) {
-      const entries = Object.entries(attributeValues).filter(([k, v]) => v !== undefined && v !== null && String(v).trim() !== "");
-      for (const [defId, val] of entries) {
-        await fetch(API_ENDPOINTS.farmer.attributeValues.create, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            inventoryLotId: lotId,
-            attributeDefinitionId: Number(defId),
-            value: String(val),
-          })
-        });
-      }
-    }
-    setForm({ 
-      productId: "", 
-      farmerId: "", 
-      farmerLabel: "", 
-      englishName: "",
-      arabicName: "",
-      russianName: "",
-      unit: "kg", 
-      qualityGrade: "درجه 1", 
-      totalQuantity: "", 
-      price: "", 
-      minimumOrderQuantity: "",
-      tieredPricing: [],
-      status: "harvested" 
-    });
-    setAttributeDefs([]);
-    setAttributeValues({});
-    setSaving(false);
-    load();
-  };
+  const activeFilterCount = countActiveFilters(filters);
 
   const remove = async (id) => {
-    await fetch(API_ENDPOINTS.farmer.inventoryLots.delete(id), { method: "DELETE" });
-    load();
+    if (!window.confirm("این موجودی حذف شود؟")) return;
+    await fetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
+    reload();
   };
 
-  const openEdit = (lot) => {
+  const openView = (lot) => {
+    setSelectedLot(lot);
+    setViewOpen(true);
+  };
+
+  const openEdit = async (lot) => {
+    setViewOpen(false);
     setSelectedLot(lot);
     setEditForm({
       englishName: lot.englishName || "",
@@ -243,770 +79,216 @@ export default function InventoryLotsPage() {
       minimumOrderQuantity: lot.minimumOrderQuantity ? String(lot.minimumOrderQuantity) : "",
       tieredPricing: lot.tieredPricing || [],
       status: lot.status || "harvested",
+      description: lot.description || "",
+      locationLabel: lot.locationLabel || "",
+      latitude: lot.latitude != null ? String(lot.latitude) : "",
+      longitude: lot.longitude != null ? String(lot.longitude) : "",
     });
+    const defs = await loadAttributeDefsForProduct(lot.productId, products);
+    setEditAttributeDefs(defs);
+    const vals = {};
+    defs.forEach((def) => {
+      const existing = (lot.attributes || []).find((a) => Number(a.attributeDefinitionId) === Number(def.id));
+      vals[def.id] = existing?.value ?? "";
+    });
+    setEditAttributeValues(vals);
     setEditOpen(true);
   };
 
   const saveEdit = async () => {
     if (!selectedLot) return;
-    const payload = {
-      unit: editForm.unit || null,
-      englishName: editForm.englishName || null,
-      arabicName: editForm.arabicName || null,
-      russianName: editForm.russianName || null,
-      qualityGrade: editForm.qualityGrade || null,
-      totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
-      price: editForm.price !== "" ? Number(editForm.price) : null,
-      minimumOrderQuantity: editForm.minimumOrderQuantity ? Number(editForm.minimumOrderQuantity) : null,
-      tieredPricing: editForm.tieredPricing.length > 0 ? editForm.tieredPricing : null,
-      status: editForm.status || null,
-    };
-    await fetch(API_ENDPOINTS.farmer.inventoryLots.update(selectedLot.id), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      credentials: 'include'
-    });
-    setEditOpen(false);
-    setSelectedLot(null);
-    load();
+    setEditSaving(true);
+    try {
+      const payload = {
+        unit: editForm.unit || null,
+        englishName: editForm.englishName || null,
+        arabicName: editForm.arabicName || null,
+        russianName: editForm.russianName || null,
+        qualityGrade: editForm.qualityGrade || null,
+        totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
+        price: editForm.price !== "" ? Number(editForm.price) : null,
+        minimumOrderQuantity: editForm.minimumOrderQuantity ? Number(editForm.minimumOrderQuantity) : null,
+        tieredPricing: editForm.tieredPricing.length > 0 ? editForm.tieredPricing : null,
+        status: editForm.status || null,
+        description: editForm.description?.trim() || null,
+        locationLabel: editForm.locationLabel?.trim() || null,
+        latitude: editForm.latitude !== "" && editForm.latitude != null ? Number(editForm.latitude) : null,
+        longitude: editForm.longitude !== "" && editForm.longitude != null ? Number(editForm.longitude) : null,
+      };
+      await fetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include",
+      });
+      if (editAttributeDefs.length > 0) {
+        await saveLotAttributeValues(selectedLot.id, editAttributeDefs, editAttributeValues, selectedLot.attributes || []);
+      }
+      closeModals();
+      reload();
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const openMedia = (lot) => {
+    setViewOpen(false);
     setSelectedLot(lot);
     setMediaOpen(true);
   };
 
-  // مدیریت قیمت‌گذاری پلکانی
-  const addPricingTier = () => {
-    setForm({
-      ...form,
-      tieredPricing: [...form.tieredPricing, {
-        minQuantity: '',
-        maxQuantity: '',
-        pricePerUnit: '',
-        description: ''
-      }]
-    });
-  };
-
-  const removePricingTier = (index) => {
-    const newTiers = form.tieredPricing.filter((_, i) => i !== index);
-    setForm({ ...form, tieredPricing: newTiers });
+  const closeModals = () => {
+    setViewOpen(false);
+    setEditOpen(false);
+    setMediaOpen(false);
+    setSelectedLot(null);
+    setEditAttributeDefs([]);
+    setEditAttributeValues({});
   };
 
   const updatePricingTier = (index, field, value) => {
-    const newTiers = [...form.tieredPricing];
-    newTiers[index] = { ...newTiers[index], [field]: value };
-    setForm({ ...form, tieredPricing: newTiers });
+    const tiers = [...editForm.tieredPricing];
+    tiers[index] = { ...tiers[index], [field]: value };
+    setEditForm({ ...editForm, tieredPricing: tiers });
   };
 
-  // مدیریت قیمت‌گذاری پلکانی برای فرم ویرایش
-  const addEditPricingTier = () => {
-    setEditForm({
-      ...editForm,
-      tieredPricing: [...editForm.tieredPricing, {
-        minQuantity: '',
-        maxQuantity: '',
-        pricePerUnit: '',
-        description: ''
-      }]
-    });
-  };
+  const lotProductName = selectedLot ? productName(selectedLot.productId) : "—";
+  const lotFarmerName = selectedLot ? farmerNameMap.get(selectedLot.farmerId) : "";
 
-  const removeEditPricingTier = (index) => {
-    const newTiers = editForm.tieredPricing.filter((_, i) => i !== index);
-    setEditForm({ ...editForm, tieredPricing: newTiers });
-  };
-
-  const updateEditPricingTier = (index, field, value) => {
-    const newTiers = [...editForm.tieredPricing];
-    newTiers[index] = { ...newTiers[index], [field]: value };
-    setEditForm({ ...editForm, tieredPricing: newTiers });
-  };
+  if (authLoading || !allowed) {
+    return (
+      <div className={inv.page}>
+        <div className="flex justify-center py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-2 sm:p-4">
-      <h1 className="text-lg sm:text-xl font-bold mb-4">موجودی‌ها</h1>
-      
-      {/* توضیحات قیمت‌گذاری پلکانی */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-        <div className="flex items-center gap-2">
-          <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <div className={inv.page}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          {isAdmin(user) ? (
+            <CatalogPdfDownload scope="full" label="دانلود PDF کاتالوگ" variant="dashboard" />
+          ) : null}
+          <Link href={isOwnScope ? "/dashboard/supplier/inventory/create?scope=own" : "/dashboard/supplier/inventory/create"} className={inv.btnPrimary}>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
           </svg>
-          <span className="text-sm text-blue-800">
-            <strong>قیمت‌گذاری پلکانی (اختیاری):</strong> برای مقادیر مختلف محصول، قیمت‌های متفاوت تعریف کنید تا برای خریدهای عمده تخفیف ارائه دهید.
-          </span>
-          <button
-            onClick={() => setShowTieredPricingInfo(!showTieredPricingInfo)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline flex-shrink-0"
-          >
-            {showTieredPricingInfo ? 'کمتر' : 'بیشتر'}
-          </button>
+          افزودن محصول
+          </Link>
         </div>
-        
-        {showTieredPricingInfo && (
-          <div className="mt-3 pr-7 text-xs text-blue-700">
-            <p className="mb-1"><strong>مثال:</strong> 0-100 کیلو: 5000 تومان، 100-500 کیلو: 4500 تومان، 500+ کیلو: 4000 تومان</p>
-            <p><strong>هدف:</strong> افزایش فروش و جذب مشتریان عمده</p>
-          </div>
-        )}
       </div>
-      <form onSubmit={create} className="bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-        <div className="sm:col-span-2 lg:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">انتخاب محصول</label>
-          <AsyncSelect
-            cacheOptions
-            defaultOptions={products.map(p => ({ value: p.id, label: p.name }))}
-            loadOptions={loadProductOptions}
-            placeholder="انتخاب محصول"
-            noOptionsMessage={()=>"موردی یافت نشد"}
-            onChange={(opt)=> setForm({ ...form, productId: opt?.value || "" })}
-            value={form.productId ? { value: form.productId, label: products.find(p=>p.id===Number(form.productId))?.name || `#${form.productId}` } : null}
-          />
-        </div>
-        {(() => {
-          const roles = (user?.roles || []).map(r => (r.name || r.nameEn || '').toLowerCase());
-          const isFarmer = roles.includes('farmer') || roles.includes('loader');
-          if (isFarmer) return null;
-          return (
-            <div className="sm:col-span-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">انتخاب تامین‌کننده</label>
-              <AsyncSelect
-                cacheOptions
-                defaultOptions
-                loadOptions={loadFarmerOptions}
-                placeholder="انتخاب تامین‌کننده"
-                noOptionsMessage={()=>"موردی یافت نشد"}
-                onChange={(opt)=> setForm({ ...form, farmerId: opt?.value || "", farmerLabel: opt?.label || "" })}
-                value={form.farmerId ? { value: form.farmerId, label: form.farmerLabel || farmerNameMap.get(Number(form.farmerId)) || `#${form.farmerId}` } : null}
-              />
-            </div>
-          );
-        })()}
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">نام انگلیسی</label>
-          <input 
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="اختیاری" 
-            value={form.englishName} 
-            onChange={(e)=>setForm({...form, englishName:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">نام عربی</label>
-          <input 
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="اختیاری" 
-            value={form.arabicName} 
-            onChange={(e)=>setForm({...form, arabicName:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">نام روسی</label>
-          <input 
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="اختیاری" 
-            value={form.russianName} 
-            onChange={(e)=>setForm({...form, russianName:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">واحد</label>
-          <input 
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="مثل: کیلوگرم، تن" 
-            value={form.unit} 
-            onChange={(e)=>setForm({...form, unit:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">کیفیت</label>
-          <select
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.qualityGrade}
-            onChange={(e)=>setForm({...form, qualityGrade:e.target.value})}
-          >
-            <option value="صادراتی">صادراتی</option>
-            <option value="درجه 1">درجه 1</option>
-            <option value="درجه 2">درجه 2</option>
-            <option value="درجه 3">درجه 3</option>
-            <option value="ضایعاتی">ضایعاتی</option>
-          </select>
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">مقدار کل</label>
-          <input 
-            type="number"
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="مقدار موجودی" 
-            value={form.totalQuantity} 
-            onChange={(e)=>setForm({...form, totalQuantity:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">قیمت (اختیاری)</label>
-          <input 
-            type="number"
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="قیمت به تومان" 
-            value={form.price} 
-            onChange={(e)=>setForm({...form, price:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">حداقل سفارش</label>
-          <input 
-            type="number"
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-            placeholder="حداقل مقدار سفارش" 
-            value={form.minimumOrderQuantity} 
-            onChange={(e)=>setForm({...form, minimumOrderQuantity:e.target.value})} 
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">وضعیت</label>
-          <select
-            className="border border-gray-300 p-3 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.status}
-            onChange={(e)=>setForm({...form, status:e.target.value})}
-          >
-            <option value="harvested">برداشت‌شده</option>
-            <option value="on_field">در مزرعه</option>
-          </select>
-        </div>
-        {/* Custom attributes dynamic fields */}
-        {attributeDefs.length > 0 && (
-          <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-3 gap-2 border-t pt-2">
-            {attributeDefs.map(def => (
-              <div key={def.id} className="flex flex-col">
-                <label className="text-xs text-gray-600 mb-1">{def.name}</label>
-                {def.type === 'number' ? (
-                  <input type="number" className="border p-2 rounded" value={attributeValues[def.id] ?? ''} onChange={(e)=> setAttributeValues(v=>({ ...v, [def.id]: e.target.value }))} />
-                ) : def.type === 'boolean' ? (
-                  <select className="border p-2 rounded" value={attributeValues[def.id] ?? ''} onChange={(e)=> setAttributeValues(v=>({ ...v, [def.id]: e.target.value }))}>
-                    <option value="">—</option>
-                    <option value="true">بلی</option>
-                    <option value="false">خیر</option>
-                  </select>
-                ) : def.type === 'date' ? (
-                  <input type="date" className="border p-2 rounded" value={attributeValues[def.id] ?? ''} onChange={(e)=> setAttributeValues(v=>({ ...v, [def.id]: e.target.value }))} />
-                ) : def.type === 'select' && Array.isArray(def.options) ? (
-                  <select className="border p-2 rounded" value={attributeValues[def.id] ?? ''} onChange={(e)=> setAttributeValues(v=>({ ...v, [def.id]: e.target.value }))}>
-                    <option value="">—</option>
-                    {def.options.map(opt => (
-                      <option key={String(opt?.value ?? opt)} value={String(opt?.value ?? opt)}>{String(opt?.label ?? opt)}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input className="border p-2 rounded" value={attributeValues[def.id] ?? ''} onChange={(e)=> setAttributeValues(v=>({ ...v, [def.id]: e.target.value }))} />
-                )}
-              </div>
-            ))}
+
+      <InventoryStats items={items} t={t} />
+
+      <Section title="فیلتر و جستجو" desc="موجودی‌ها را سریع پیدا کنید">
+        <InventoryFilters
+          filters={filters}
+          setFilters={setFilters}
+          products={products}
+          farmers={farmers}
+          showFarmerFilter={showFarmerFilter}
+          t={t}
+          resultCount={filteredItems.length}
+          totalCount={items.length}
+          activeCount={activeFilterCount}
+          onClear={() => setFilters(DEFAULT_FILTERS)}
+        />
+      </Section>
+
+      <Section title="نتایج" desc={`${filteredItems.length} مورد`}>
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
           </div>
-        )}
-
-        {/* قیمت‌گذاری پلکانی */}
-        <div className="md:col-span-6 border-t pt-4">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-gray-900">قیمت‌گذاری پلکانی (اختیاری)</h4>
-            <button
-              type="button"
-              onClick={() => setShowTieredPricing(!showTieredPricing)}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              {showTieredPricing ? 'مخفی کردن' : 'نمایش'}
-            </button>
+        ) : filteredItems.length === 0 ? (
+          <div className={inv.empty}>
+            <svg className="mb-3 h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <p className="font-semibold text-slate-700">
+              {items.length === 0 ? "موجودی ثبت نشده" : "نتیجه‌ای یافت نشد"}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {items.length === 0 ? "اولین بار خود را ثبت کنید" : "فیلترها را تغییر دهید یا جستجو را پاک کنید"}
+            </p>
+            {items.length === 0 ? (
+              <Link href="/dashboard/supplier/inventory/create" className={`${inv.btnPrimary} mt-4`}>
+                افزودن محصول
+              </Link>
+            ) : (
+              <button type="button" className={`${inv.btnSecondary} mt-4`} onClick={() => setFilters(DEFAULT_FILTERS)}>
+                پاک کردن فیلترها
+              </button>
+            )}
           </div>
-          
-          {showTieredPricing && (
-            <div className="space-y-3">
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={addPricingTier}
-                  className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                >
-                  + اضافه کردن سطح قیمت
-                </button>
-              </div>
-              
-              {form.tieredPricing.length === 0 ? (
-                <div className="text-center py-4 text-gray-500 text-sm">
-                  هنوز سطح قیمتی تعریف نشده است
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {form.tieredPricing.map((tier, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-gray-700">سطح {index + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => removePricingTier(index)}
-                          className="text-red-600 hover:text-red-800 text-xs"
-                        >
-                          حذف
-                        </button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">حداقل مقدار</label>
-                          <input
-                            type="number"
-                            value={tier.minQuantity}
-                            onChange={(e) => updatePricingTier(index, 'minQuantity', e.target.value)}
-                            min="0"
-                            step="0.1"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="0"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">حداکثر مقدار</label>
-                          <input
-                            type="number"
-                            value={tier.maxQuantity}
-                            onChange={(e) => updatePricingTier(index, 'maxQuantity', e.target.value)}
-                            min="0"
-                            step="0.1"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="خالی = نامحدود"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">قیمت هر {form.unit}</label>
-                          <input
-                            type="number"
-                            value={tier.pricePerUnit}
-                            onChange={(e) => updatePricingTier(index, 'pricePerUnit', e.target.value)}
-                            min="0"
-                            step="0.01"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="0"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">توضیحات</label>
-                          <input
-                            type="text"
-                            value={tier.description}
-                            onChange={(e) => updatePricingTier(index, 'description', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="توضیحات اختیاری"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <button 
-          disabled={saving} 
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg px-6 py-3 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-        >
-          {saving ? (
-            <>
-              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              در حال افزودن...
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              افزودن موجودی
-            </>
-          )}
-        </button>
-      </form>
-
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Desktop Table */}
-        <div className="hidden lg:block overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border-b">
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">ID</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">محصول</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">نام محصول</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">معادل‌ها</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">تامین‌کننده</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">کیفیت</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">واحد</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">کل</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">رزرو</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">قیمت</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">حداقل سفارش</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">قیمت‌گذاری پلکانی</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">وضعیت</th>
-                <th className="px-6 py-4 text-right font-semibold text-gray-900">عملیات</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {items.map((x)=> (
-                <tr key={x.id} className="hover:bg-gray-50 transition-colors duration-200">
-                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.id}</td>
-                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.productId}</td>
-                  <td className="px-6 py-4 max-w-xs truncate font-medium text-gray-900" title={products.find(p => p.id === x.productId)?.name || "—"}>
-                    {products.find(p => p.id === x.productId)?.name || "—"}
-                  </td>
-                  <td className="px-6 py-4 text-xs text-gray-600">
-                    <div>{x.englishName || "EN: —"}</div>
-                    <div>{x.arabicName || "AR: —"}</div>
-                    <div>{x.russianName || "RU: —"}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {x.qualityGrade}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.unit}</td>
-                  <td className="px-6 py-4 font-mono text-sm font-medium text-gray-900">{x.totalQuantity?.toLocaleString('fa-IR')}</td>
-                  <td className="px-6 py-4 font-mono text-sm text-gray-600">{x.reservedQuantity?.toLocaleString('fa-IR')}</td>
-                  <td className="px-6 py-4">
-                    {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
-                    ) : x.price ? (
-                      <span className="font-semibold text-green-600">{x.price.toLocaleString('fa-IR')} تومان</span>
-                    ) : (
-                      <span className="text-gray-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
-                    ) : x.minimumOrderQuantity ? (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
-                        {x.minimumOrderQuantity} {x.unit}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <TieredPricingDisplay tieredPricing={x.tieredPricing} unit={x.unit} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      x.status === 'harvested' ? 'bg-green-100 text-green-800' :
-                      x.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
-                      x.status === 'sold' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {statusToFa[x.status] || x.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button 
-                        className="text-blue-600 hover:text-blue-800 text-xs px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors duration-200 font-medium" 
-                        onClick={()=>openEdit(x)}
-                      >
-                        ویرایش
-                      </button>
-                      <button 
-                        className="text-red-600 hover:text-red-800 text-xs px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors duration-200 font-medium" 
-                        onClick={()=>remove(x.id)}
-                      >
-                        حذف
-                      </button>
-                      <button 
-                        className="text-green-600 hover:text-green-800 text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors duration-200 font-medium" 
-                        onClick={()=>openMedia(x)}
-                      >
-                        رسانه
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+        ) : (
+          <>
+            <div className="space-y-3 lg:hidden">
+              {filteredItems.map((x) => (
+                <InventoryLotCard
+                  key={x.id}
+                  lot={x}
+                  productName={productName(x.productId)}
+                  farmerName={farmerNameMap.get(x.farmerId)}
+                  t={t}
+                  onView={openView}
+                  onEdit={openEdit}
+                  onMedia={openMedia}
+                  onDelete={remove}
+                />
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+            <InventoryLotTable
+              items={filteredItems}
+              products={products}
+              farmerNameMap={farmerNameMap}
+              t={t}
+              onView={openView}
+              onEdit={openEdit}
+              onMedia={openMedia}
+              onDelete={remove}
+            />
+          </>
+        )}
+      </Section>
 
-        {/* Mobile/Tablet Cards */}
-        <div className="lg:hidden">
-          {items.map((x) => (
-            <div key={x.id} className="border-b border-gray-200 p-6 hover:bg-gray-50 transition-colors duration-200">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">#{x.id}</span>
-                  <span className="text-base font-semibold text-gray-900">{products.find(p => p.id === x.productId)?.name || "—"}</span>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    className="text-blue-600 hover:text-blue-800 text-xs px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors duration-200 font-medium" 
-                    onClick={()=>openEdit(x)}
-                  >
-                    ویرایش
-                  </button>
-                  <button 
-                    className="text-red-600 hover:text-red-800 text-xs px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors duration-200 font-medium" 
-                    onClick={()=>remove(x.id)}
-                  >
-                    حذف
-                  </button>
-                  <button 
-                    className="text-green-600 hover:text-green-800 text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors duration-200 font-medium" 
-                    onClick={()=>openMedia(x)}
-                  >
-                    رسانه
-                  </button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">تامین‌کننده</span>
-                  <div className="font-semibold text-gray-900">{farmerNameMap.get(x.farmerId) || `#${x.farmerId}`}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg sm:col-span-2">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">معادل‌ها</span>
-                  <div className="space-y-1 text-sm text-gray-700">
-                    <div>EN: {x.englishName || "—"}</div>
-                    <div>AR: {x.arabicName || "—"}</div>
-                    <div>RU: {x.russianName || "—"}</div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">کیفیت</span>
-                  <div>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {x.qualityGrade}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">مقدار کل</span>
-                  <div className="font-semibold text-gray-900 font-mono">{x.totalQuantity?.toLocaleString('fa-IR')} {x.unit}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">رزرو شده</span>
-                  <div className="font-semibold text-gray-900 font-mono">{x.reservedQuantity?.toLocaleString('fa-IR')} {x.unit}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">قیمت</span>
-                  <div>
-                    {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
-                    ) : x.price ? (
-                      <span className="font-semibold text-green-600">{x.price.toLocaleString('fa-IR')} تومان</span>
-                    ) : (
-                      <span className="text-gray-400">—</span>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">حداقل سفارش</span>
-                  <div>
-                    {x.tieredPricing && x.tieredPricing.length > 0 ? (
-                      <span className="text-xs text-blue-600 font-medium">قیمت پلکانی</span>
-                    ) : x.minimumOrderQuantity ? (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
-                        {x.minimumOrderQuantity} {x.unit}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">—</span>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg sm:col-span-2">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">قیمت‌گذاری پلکانی</span>
-                  <div>
-                    <TieredPricingDisplay tieredPricing={x.tieredPricing} unit={x.unit} />
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg sm:col-span-2">
-                  <span className="text-gray-600 text-xs font-medium block mb-1">وضعیت</span>
-                  <div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      x.status === 'harvested' ? 'bg-green-100 text-green-800' :
-                      x.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
-                      x.status === 'sold' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {statusToFa[x.status] || x.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              {x.attributes && x.attributes.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <span className="text-gray-500 text-xs">ویژگی‌ها:</span>
-                  <div className="mt-1 space-y-1">
-                    {x.attributes.map((a) => (
-                      <div key={a.id} className="text-xs text-gray-700">
-                        <span className="font-medium">{a.definition?.name}:</span> {a.value}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Edit modal */}
-      {editOpen && selectedLot ? (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-md shadow p-4 w-full max-w-lg">
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">ویرایش موجودی #{selectedLot.id}</div>
-              <button className="text-slate-500" onClick={()=>{setEditOpen(false); setSelectedLot(null);}}>✕</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <input className="border p-2 rounded" placeholder="نام انگلیسی (اختیاری)" value={editForm.englishName} onChange={(e)=>setEditForm({...editForm, englishName:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="نام عربی (اختیاری)" value={editForm.arabicName} onChange={(e)=>setEditForm({...editForm, arabicName:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="نام روسی (اختیاری)" value={editForm.russianName} onChange={(e)=>setEditForm({...editForm, russianName:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="واحد" value={editForm.unit} onChange={(e)=>setEditForm({...editForm, unit:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="کیفیت" value={editForm.qualityGrade} onChange={(e)=>setEditForm({...editForm, qualityGrade:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="مقدار کل" value={editForm.totalQuantity} onChange={(e)=>setEditForm({...editForm, totalQuantity:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="قیمت (اختیاری)" value={editForm.price} onChange={(e)=>setEditForm({...editForm, price:e.target.value})} />
-              <input className="border p-2 rounded" placeholder="حداقل سفارش" value={editForm.minimumOrderQuantity} onChange={(e)=>setEditForm({...editForm, minimumOrderQuantity:e.target.value})} />
-              <select className="border p-2 rounded" value={editForm.status} onChange={(e)=>setEditForm({...editForm, status:e.target.value})}>
-                <option value="harvested">برداشت‌شده</option>
-                <option value="on_field">در مزرعه</option>
-                <option value="reserved">رزرو شده</option>
-                <option value="sold">فروخته شده</option>
-              </select>
-            </div>
-
-            {/* قیمت‌گذاری پلکانی در فرم ویرایش */}
-            <div className="mt-4 border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium text-gray-900">قیمت‌گذاری پلکانی</h4>
-                <button
-                  type="button"
-                  onClick={addEditPricingTier}
-                  className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                >
-                  + اضافه کردن سطح قیمت
-                </button>
-              </div>
-              
-              {editForm.tieredPricing.length === 0 ? (
-                <div className="text-center py-4 text-gray-500 text-sm">
-                  هنوز سطح قیمتی تعریف نشده است
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {editForm.tieredPricing.map((tier, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-gray-700">سطح {index + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeEditPricingTier(index)}
-                          className="text-red-600 hover:text-red-800 text-xs"
-                        >
-                          حذف
-                        </button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">حداقل مقدار</label>
-                          <input
-                            type="number"
-                            value={tier.minQuantity}
-                            onChange={(e) => updateEditPricingTier(index, 'minQuantity', e.target.value)}
-                            min="0"
-                            step="0.1"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="0"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">حداکثر مقدار</label>
-                          <input
-                            type="number"
-                            value={tier.maxQuantity}
-                            onChange={(e) => updateEditPricingTier(index, 'maxQuantity', e.target.value)}
-                            min="0"
-                            step="0.1"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="خالی = نامحدود"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">قیمت هر {editForm.unit}</label>
-                          <input
-                            type="number"
-                            value={tier.pricePerUnit}
-                            onChange={(e) => updateEditPricingTier(index, 'pricePerUnit', e.target.value)}
-                            min="0"
-                            step="0.01"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="0"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">توضیحات</label>
-                          <input
-                            type="text"
-                            value={tier.description}
-                            onChange={(e) => updateEditPricingTier(index, 'description', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="توضیحات اختیاری"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2 mt-3">
-              <button className="border rounded px-3 py-1" onClick={()=>{setEditOpen(false); setSelectedLot(null);}}>انصراف</button>
-              <button className="bg-emerald-600 text-white rounded px-3 py-1" onClick={saveEdit}>ذخیره</button>
-            </div>
-          </div>
-        </div>
+      {viewOpen && selectedLot ? (
+        <InventoryViewModal
+          lot={selectedLot}
+          productName={lotProductName}
+          farmerName={lotFarmerName}
+          t={t}
+          onClose={closeModals}
+          onEdit={openEdit}
+          onMedia={openMedia}
+        />
       ) : null}
 
-      {/* Media modal */}
+      {editOpen && selectedLot ? (
+        <InventoryEditModal
+          lot={selectedLot}
+          productName={lotProductName}
+          form={editForm}
+          setForm={setEditForm}
+          attributeDefs={editAttributeDefs}
+          attributeValues={editAttributeValues}
+          setAttributeValues={setEditAttributeValues}
+          t={t}
+          saving={editSaving}
+          onClose={closeModals}
+          onSave={saveEdit}
+          onAddTier={() => setEditForm({ ...editForm, tieredPricing: [...editForm.tieredPricing, { ...EMPTY_TIER }] })}
+          onRemoveTier={(i) => setEditForm({ ...editForm, tieredPricing: editForm.tieredPricing.filter((_, idx) => idx !== i) })}
+          onUpdateTier={updatePricingTier}
+        />
+      ) : null}
+
       {mediaOpen && selectedLot ? (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-md shadow p-4 w-full max-w-3xl">
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">رسانه‌های موجودی #{selectedLot.id}</div>
-              <button className="text-slate-500" onClick={()=>{setMediaOpen(false); setSelectedLot(null);}}>✕</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-xs text-slate-600 mb-1">تصاویر موجودی (چندتایی)</div>
-                <MediaUpload module="inventory" entityId={selectedLot.id} fileType="images" accept="image/*" buttonLabel="آپلود تصویر" />
-              </div>
-              <div>
-                <div className="text-xs text-slate-600 mb-1">ویدیوهای موجودی (چندتایی)</div>
-                <MediaUpload module="inventory" entityId={selectedLot.id} fileType="videos" accept="video/*" buttonLabel="آپلود ویدیو" />
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 mt-3">فایل‌ها روی dl.zareoon.ir ذخیره می‌شوند.</p>
-          </div>
-        </div>
+        <InventoryMediaModal lot={selectedLot} productName={lotProductName} onClose={closeModals} />
       ) : null}
     </div>
   );
 }
-

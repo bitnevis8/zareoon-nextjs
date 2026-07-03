@@ -1,15 +1,21 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith('/dashboard/farmer')) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace('/dashboard/farmer', '/dashboard/supplier');
+    return NextResponse.redirect(url, 308);
+  }
   
   // صفحاتی که نیاز به احراز هویت دارند
   const protectedRoutes = [
     '/dashboard',
-    '/dashboard/farmer',
+    '/dashboard/supplier',
     '/dashboard/user-management',
     '/dashboard/order-management',
-    '/dashboard/settings'
+    '/dashboard/account'
   ];
   
   // بررسی آیا مسیر محافظت شده است

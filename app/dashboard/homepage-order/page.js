@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "@/app/context/AuthContext";
 import { compareCatalogItems } from "@/app/utils/productSort";
+import { isAdmin } from "@/app/utils/roles";
 
 function buildPath(item, byId) {
   const parts = [item.name];
@@ -26,8 +27,7 @@ export default function HomepageOrderPage() {
   const [savingId, setSavingId] = useState(null);
   const [message, setMessage] = useState("");
 
-  const roles = (auth?.user?.roles || []).map((r) => (r.nameEn || r.name || "").toLowerCase());
-  const isAdmin = roles.includes("administrator") || roles.includes("admin");
+  const admin = isAdmin(auth?.user);
 
   const byId = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
@@ -40,7 +40,7 @@ export default function HomepageOrderPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?isOrderable=false`, {
+      const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false`, {
         credentials: "include",
         cache: "no-store",
       });
@@ -52,19 +52,19 @@ export default function HomepageOrderPage() {
   };
 
   useEffect(() => {
-    if (!auth?.loading && !isAdmin) {
+    if (!auth?.loading && !admin) {
       router.replace("/dashboard");
       return;
     }
-    if (isAdmin) load();
-  }, [auth?.loading, isAdmin, router]);
+    if (admin) load();
+  }, [auth?.loading, admin, router]);
 
   const saveOrder = async (id, value) => {
     setSavingId(id);
     setMessage("");
     try {
       const homepageSortOrder = value === "" || value == null ? null : Number(value);
-      const res = await fetch(API_ENDPOINTS.farmer.products.update(id), {
+      const res = await fetch(API_ENDPOINTS.supplier.products.update(id), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -90,23 +90,19 @@ export default function HomepageOrderPage() {
   if (auth?.loading || loading) {
     return <div className="p-8 text-center">در حال بارگذاری...</div>;
   }
-  if (!isAdmin) return null;
+  if (!admin) return null;
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">ترتیب نمایش در صفحه اصلی</h1>
-        <p className="mt-2 text-sm text-gray-600 leading-7">
-          عدد کوچکتر یعنی نمایش زودتر. این ترتیب هم در «محصولات موجود» و هم در «همه دسته‌ها» اعمال می‌شود.
-          دسته‌هایی بدون عدد، بعد از بقیه بر اساس ترتیب داخلی نمایش داده می‌شوند.
-        </p>
-        {message ? <p className="mt-2 text-sm text-emerald-700">{message}</p> : null}
-      </div>
+    <div className="space-y-4">
+      <p className="text-sm text-slate-600 leading-7">
+        عدد کوچکتر یعنی نمایش زودتر. دسته‌های بدون عدد، بعد از بقیه نمایش داده می‌شوند.
+        {message ? <span className="mr-2 font-medium text-emerald-700">{message}</span> : null}
+      </p>
 
       <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
         <div className="hidden md:grid grid-cols-[1fr_140px_120px] gap-3 px-4 py-3 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
           <span>دسته</span>
-          <span>ترتیب صفحه اصلی</span>
+          <span>ترتیب نمایش</span>
           <span>عملیات</span>
         </div>
         <div className="divide-y divide-gray-100">

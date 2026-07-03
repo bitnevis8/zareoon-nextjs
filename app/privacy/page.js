@@ -61,7 +61,7 @@ export default function PrivacyPage() {
               <div className="bg-yellow-50 p-6 rounded-lg">
                 <h3 className="text-lg font-semibold text-yellow-800 mb-3">موارد اشتراک‌گذاری:</h3>
                 <ul className="list-disc list-inside text-yellow-700 space-y-2">
-                  <li>اطلاعات سفارش با کشاورز مربوطه</li>
+                  <li>اطلاعات سفارش با تأمین‌کننده مربوطه</li>
                   <li>اطلاعات تحویل با راننده</li>
                   <li>اطلاعات پرداخت با درگاه‌های پرداخت</li>
                   <li>اطلاعات مورد نیاز برای رعایت قوانین</li>

@@ -15,7 +15,7 @@ export default function TermsPage() {
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. تعریف پلتفرم</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                پلتفرم زارعون یک بازار آنلاین برای خرید و فروش محصولات کشاورزی است که به عنوان واسطه بین کشاورزان (تامین‌کنندگان) و مشتریان عمل می‌کند.
+                پلتفرم زارعون یک بازار آنلاین برای خرید و فروش انواع محصولات و کالاهاست که به عنوان واسطه بین تأمین‌کنندگان و مشتریان عمل می‌کند.
               </p>
             </div>
 
@@ -24,10 +24,10 @@ export default function TermsPage() {
               <div className="bg-blue-50 p-6 rounded-lg mb-4">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">پلتفرم زارعون ارائه‌دهنده خدمات زیر است:</h3>
                 <ul className="list-disc list-inside text-blue-700 space-y-2">
-                  <li>نمایش محصولات کشاورزی از تامین‌کنندگان مختلف</li>
+                  <li>نمایش محصولات از تأمین‌کنندگان مختلف</li>
                   <li>دریافت سفارشات از مشتریان</li>
                   <li>ارسال سفارشات به تامین‌کنندگان مربوطه</li>
-                  <li>تسهیل فرآیند خرید و فروش محصولات کشاورزی</li>
+                  <li>تسهیل فرآیند خرید و فروش کالا و محصول</li>
                   <li>ارائه ابزارهای مدیریتی برای کاربران</li>
                 </ul>
               </div>

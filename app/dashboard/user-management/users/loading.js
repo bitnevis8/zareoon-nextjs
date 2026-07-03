@@ -1,58 +1,49 @@
+﻿import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
+
+function SkeletonBar({ className = "" }) {
+  return <div className={`animate-pulse rounded-lg bg-slate-200 ${className}`} />;
+}
+
 export default function UserManagementLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Loading */}
-        <div className="mb-8">
-          <div className="animate-pulse">
-            <div className="h-10 bg-gray-300 rounded-lg mb-4 w-1/3"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-          </div>
+    <div className={inv.page}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <SkeletonBar className="h-7 w-48" />
+          <SkeletonBar className="h-4 w-64" />
         </div>
+        <SkeletonBar className="h-10 w-32" />
+      </div>
 
-        {/* Action Bar Loading */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8 animate-pulse">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="h-10 bg-blue-300 rounded w-32"></div>
-              <div className="h-10 bg-gray-200 rounded w-48"></div>
-            </div>
-            <div className="h-10 bg-green-300 rounded w-24"></div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className={inv.statCard}>
+            <SkeletonBar className="h-3 w-16" />
+            <SkeletonBar className="mt-2 h-8 w-12" />
           </div>
+        ))}
+      </div>
+
+      <div className={inv.card}>
+        <div className={inv.cardHeader}>
+          <SkeletonBar className="h-5 w-32" />
         </div>
+        <div className={`${inv.cardBody} space-y-3`}>
+          <SkeletonBar className="h-11 w-full" />
+          <SkeletonBar className="h-10 w-48" />
+        </div>
+      </div>
 
-        {/* Table Loading */}
-        <div className="bg-white rounded-lg shadow-md animate-pulse">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="h-6 bg-gray-300 rounded w-1/4"></div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {[...Array(6)].map((_, index) => (
-                    <th key={index} className="px-6 py-3">
-                      <div className="h-4 bg-gray-200 rounded w-20"></div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {[...Array(8)].map((_, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {[...Array(6)].map((_, colIndex) => (
-                      <td key={colIndex} className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-4 bg-gray-200 rounded w-16"></div>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <div className={inv.card}>
+        <div className={inv.cardHeader}>
+          <SkeletonBar className="h-5 w-24" />
+        </div>
+        <div className={`${inv.cardBody} space-y-3`}>
+          {[...Array(6)].map((_, i) => (
+            <SkeletonBar key={i} className="h-14 w-full" />
+          ))}
         </div>
       </div>
     </div>
   );
-} 
+}

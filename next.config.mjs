@@ -13,6 +13,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/dashboard/farmer/:path*',
+        destination: '/dashboard/supplier/:path*',
+        permanent: true,
+      },
+    ];
+  },
   // غیرفعال کردن کامل کش
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'react-leaflet'],

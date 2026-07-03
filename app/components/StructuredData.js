@@ -5,7 +5,7 @@ export default function StructuredData({ articles = [] }) {
     "name": "زارعون",
     "url": process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     "logo": "/logo.png",
-    "description": "بازار آنلاین خرید و فروش محصولات و نهاده‌های کشاورزی",
+    "description": "بازار آنلاین خرید و فروش انواع محصولات و کالاها",
     "foundingDate": "2024",
     "sameAs": []
   };

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { ENTITY_TYPE_OPTIONS } from "@/app/data/entityTypes";
 
 export default function CreateUser() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function CreateUser() {
     username: "",
     password: "",
     roleIds: [],
+    entityType: "individual",
   });
 
   useEffect(() => {
@@ -189,6 +191,24 @@ export default function CreateUser() {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                نوع هویت (حقیقی / حقوقی)
+              </label>
+              <select
+                name="entityType"
+                value={formData.entityType}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {ENTITY_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -29,8 +29,9 @@ function CartIcon() {
 }
 
 export default function MobileHeaderActions() {
-  const { t } = useLanguage();
-  const { user } = useAuth() || { user: null };
+  const { t, isHydrated } = useLanguage();
+  const { user, loading } = useAuth() || { user: null, loading: true };
+  const showUser = isHydrated && !loading ? user : null;
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [inventoryLots, setInventoryLots] = useState([]);
@@ -40,8 +41,8 @@ export default function MobileHeaderActions() {
       try {
         const { API_ENDPOINTS } = await import("../config/api");
         const [productsRes, inventoryRes] = await Promise.all([
-          fetch(API_ENDPOINTS.farmer.products.getAll, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
         ]);
         const productsData = await productsRes.json();
         const inventoryData = await inventoryRes.json();
@@ -66,7 +67,7 @@ export default function MobileHeaderActions() {
           <SearchIcon />
         </button>
 
-        {user ? (
+        {showUser ? (
           <Link href="/cart" className={iconBtnClass} aria-label={t("cart")} title={t("cart")} prefetch>
             <CartIcon />
           </Link>

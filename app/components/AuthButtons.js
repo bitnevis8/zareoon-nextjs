@@ -1,8 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { AccountNavSubtitle } from "../utils/accountNav";
+import UserProfileMenu from "./UserProfileMenu";
 
 const defaultIconBtnClass =
   "inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors";
@@ -23,7 +26,7 @@ export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
   const { user, loading, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, isHydrated } = useLanguage();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -35,7 +38,14 @@ export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (loading) return null;
+  useEffect(() => {
+    if (!open) return;
+    const onEsc = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onEsc);
+    return () => document.removeEventListener("keydown", onEsc);
+  }, [open]);
+
+  if (loading || !isHydrated) return null;
 
   if (user) {
     const displayName = [user.firstName || user.username, user.lastName].filter(Boolean).join(" ");
@@ -46,7 +56,7 @@ export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
     };
 
     return (
-      <div className="relative" ref={rootRef}>
+      <div className="relative z-[10050]" ref={rootRef}>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -57,37 +67,38 @@ export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
         >
           <UserIcon />
         </button>
-        {open && (
-          <div
-            className={`absolute mt-2 min-w-[11rem] bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden ${
-              isRTL ? "left-0 right-auto" : "left-0 right-auto"
-            }`}
-          >
-            <div className={`px-4 py-3 border-b border-gray-100 bg-gray-50 ${isRTL ? "text-right" : "text-left"}`}>
-              <div className="text-sm font-semibold text-gray-900 truncate">{displayName}</div>
-              {(user.mobile || user.phone || user.email) && (
-                <div className="text-xs text-gray-500 truncate mt-0.5">
-                  {user.mobile || user.phone || user.email}
+
+        {open ? (
+          <>
+            <div
+              className="fixed inset-0 z-[10049] bg-black/20 md:bg-transparent"
+              onClick={() => setOpen(false)}
+              aria-hidden
+            />
+            <div
+              className={`absolute z-[10051] mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl ${
+                isRTL ? "left-0" : "right-0"
+              }`}
+            >
+              <div className={`border-b border-slate-100 bg-slate-50 px-4 py-3 ${isRTL ? "text-right" : "text-left"}`}>
+                <div className="truncate text-sm font-semibold text-slate-900">{displayName}</div>
+                {(user.mobile || user.phone || user.email) && (
+                  <div className="mt-0.5 truncate text-xs text-slate-500">
+                    {user.mobile || user.phone || user.email}
+                  </div>
+                )}
+                <div className="mt-1.5">
+                  <AccountNavSubtitle user={user} />
                 </div>
-              )}
+              </div>
+              <UserProfileMenu
+                user={user}
+                onClose={() => setOpen(false)}
+                onLogout={handleLogout}
+              />
             </div>
-            <div className="py-1">
-              <Link
-                href="/dashboard"
-                onClick={() => setOpen(false)}
-                className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 ${isRTL ? "text-right" : "text-left"}`}
-              >
-                {t("dashboard")}
-              </Link>
-              <button
-                onClick={handleLogout}
-                className={`w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 ${isRTL ? "text-right" : "text-left"}`}
-              >
-                {t("logout")}
-              </button>
-            </div>
-          </div>
-        )}
+          </>
+        ) : null}
       </div>
     );
   }

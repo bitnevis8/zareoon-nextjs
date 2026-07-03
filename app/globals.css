@@ -311,3 +311,40 @@ html, body {
   background: rgba(0, 0, 0, 0.18) !important;
   color: #ffffff !important;
 }
+
+/* نوار نرخ ارز — انیمیشن پیوسته */
+.zareoon-currency-ticker {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.zareoon-currency-ticker__inner {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: zareoon-currency-scroll 150s linear infinite reverse;
+}
+
+.zareoon-currency-ticker:hover .zareoon-currency-ticker__inner {
+  animation-play-state: paused;
+}
+
+.zareoon-currency-ticker__group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+@keyframes zareoon-currency-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

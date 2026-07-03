@@ -1,8 +1,8 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import Sidebar from '../components/ui/Sidebar';
-import { useState } from "react";
-import { API_ENDPOINTS } from "@/app/config/api";
+import DashboardBreadcrumb from '../components/dashboard/DashboardBreadcrumb';
 import { useAuth } from "../context/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 
@@ -108,8 +108,11 @@ function DashboardLayoutContent({ children }) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-gray-100">
-        <div className="p-4 md:p-6 pb-20 md:pb-6">
+      <main className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="mx-auto max-w-7xl p-4 md:p-6 pb-20 md:pb-6">
+        <Suspense fallback={<div className="mb-4 h-8 animate-pulse rounded bg-slate-200" />}>
+          <DashboardBreadcrumb />
+        </Suspense>
         {/* دکمه خروج به منوی هدر منتقل شد */}
         {user && user.email && !user.isEmailVerified && (
           <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">

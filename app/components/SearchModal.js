@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
@@ -77,7 +77,7 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
       
       setSearching(true);
       try {
-        const res = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: 'no-store' });
+        const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: 'no-store' });
         const d = await res.json();
         setSearchResults(d.data || []);
       } catch (error) {

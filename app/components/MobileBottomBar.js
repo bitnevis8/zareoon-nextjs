@@ -1,9 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import CategoryDrillDownMenu from "./CategoryDrillDownMenu";
 
 function openDashboardSidebar() {
   if (typeof window !== "undefined") {
@@ -11,40 +14,46 @@ function openDashboardSidebar() {
   }
 }
 
+function UserAvatar({ user, t }) {
+  const initial = (user.firstName?.[0] || user.username?.[0] || "ک").toUpperCase();
+
+  if (user.avatar) {
+    return (
+      <Image
+        src={user.avatar}
+        alt={user.firstName || t("profile")}
+        width={24}
+        height={24}
+        className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+        unoptimized
+      />
+    );
+  }
+
+  return (
+    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-semibold text-white ring-1 ring-emerald-200">
+      {initial}
+    </span>
+  );
+}
+
 export default function MobileBottomBar() {
   const pathname = usePathname();
   const auth = useAuth();
   const { t, isRTL } = useLanguage();
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
 
-  const isHome = pathname === "/";
+  const user = auth?.user;
+  const displayName = user
+    ? [user.firstName || user.username, user.lastName].filter(Boolean).join(" ") || t("profile")
+    : t("login");
 
   const buttons = [
-    {
-      id: "home",
-      label: t("siteName"),
-      icon: "home",
-      href: "/",
-      active: isHome,
-    },
-    {
-      id: "categories",
-      label: t("productCategories"),
-      icon: "categories",
-      href: "/#product-categories",
-      active: false,
-    },
-    {
-      id: "latest",
-      label: t("latestAvailableShort"),
-      icon: "available",
-      href: "/#latest-available",
-      active: false,
-    },
-    auth?.user
+    user
       ? {
           id: "account",
-          label: auth.user.firstName || t("profile"),
-          icon: "user",
+          label: displayName,
+          variant: "avatar",
           onClick: openDashboardSidebar,
           active: false,
         }
@@ -55,6 +64,20 @@ export default function MobileBottomBar() {
           href: "/auth/login",
           active: pathname.startsWith("/auth"),
         },
+    {
+      id: "categories",
+      label: t("categoriesShort"),
+      icon: "categories",
+      onClick: () => setCategoryMenuOpen(true),
+      active: categoryMenuOpen,
+    },
+    {
+      id: "latest",
+      label: t("latestAvailableShort"),
+      icon: "available",
+      href: "/#latest-available",
+      active: false,
+    },
   ];
 
   const getIcon = (iconName) => {
@@ -66,12 +89,6 @@ export default function MobileBottomBar() {
     };
 
     switch (iconName) {
-      case "home":
-        return (
-          <svg {...iconProps}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-        );
       case "available":
         return (
           <svg {...iconProps}>
@@ -85,7 +102,6 @@ export default function MobileBottomBar() {
           </svg>
         );
       case "login":
-      case "user":
         return (
           <svg {...iconProps}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -101,34 +117,53 @@ export default function MobileBottomBar() {
       active ? "text-green-600" : "text-gray-600 hover:text-blue-600"
     }`;
 
+  const renderContent = (button) => {
+    if (button.variant === "avatar" && user) {
+      return (
+        <>
+          <UserAvatar user={user} t={t} />
+          <span className="max-w-[5.5rem] truncate text-center text-[10px] leading-tight sm:text-xs">
+            {button.label}
+          </span>
+        </>
+      );
+    }
+
+    return (
+      <>
+        {getIcon(button.icon)}
+        <span className="max-w-[4.5rem] text-center text-[10px] leading-tight line-clamp-2 sm:text-xs">
+          {button.label}
+        </span>
+      </>
+    );
+  };
+
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-[9998]">
-      <div className={`flex items-stretch justify-between px-0.5 py-1 ${isRTL ? "" : "flex-row-reverse"}`}>
-        {buttons.map((button) => {
-          const content = (
-            <>
-              {getIcon(button.icon)}
-              <span className="text-[10px] sm:text-xs leading-tight text-center line-clamp-2 max-w-[4.5rem]">
-                {button.label}
-              </span>
-            </>
-          );
+    <>
+      <CategoryDrillDownMenu isOpen={categoryMenuOpen} onClose={() => setCategoryMenuOpen(false)} />
 
-          if (button.href) {
+      <div className="fixed bottom-0 left-0 right-0 z-[9998] border-t border-gray-200 bg-white shadow-lg lg:hidden">
+        <div className={`flex items-stretch justify-between px-0.5 py-1 ${isRTL ? "" : "flex-row-reverse"}`}>
+          {buttons.map((button) => {
+            const content = renderContent(button);
+
+            if (button.href) {
+              return (
+                <Link key={button.id} href={button.href} className={itemClass(button.active)} prefetch>
+                  {content}
+                </Link>
+              );
+            }
+
             return (
-              <Link key={button.id} href={button.href} className={itemClass(button.active)} prefetch>
+              <button key={button.id} type="button" onClick={button.onClick} className={itemClass(button.active)}>
                 {content}
-              </Link>
+              </button>
             );
-          }
-
-          return (
-            <button key={button.id} type="button" onClick={button.onClick} className={itemClass(button.active)}>
-              {content}
-            </button>
-          );
-        })}
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

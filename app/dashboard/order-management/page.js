@@ -1,9 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { API_ENDPOINTS } from '../../config/api';
+import { useRequireAdmin } from '@/app/hooks/useDashboardRole';
 
 export default function OrderManagementPage() {
+  const { allowed, loading: authLoading } = useRequireAdmin();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -13,7 +15,7 @@ export default function OrderManagementPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_ENDPOINTS.farmer.orders.getAdminOrders, {
+      const response = await fetch(API_ENDPOINTS.supplier.orders.getAdminOrders, {
         credentials: 'include'
       });
       
@@ -33,13 +35,13 @@ export default function OrderManagementPage() {
 
 
   useEffect(() => {
-    loadOrders();
-  }, []);
+    if (allowed) loadOrders();
+  }, [allowed]);
 
   // Approve order
   const approveOrder = async (orderId, supplierId, notes) => {
     try {
-      const response = await fetch(API_ENDPOINTS.farmer.orders.approve(orderId), {
+      const response = await fetch(API_ENDPOINTS.supplier.orders.approve(orderId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +69,7 @@ export default function OrderManagementPage() {
   // Update order status
   const updateOrderStatus = async (orderId, status, notes) => {
     try {
-      const response = await fetch(API_ENDPOINTS.farmer.orders.updateStatus(orderId), {
+      const response = await fetch(API_ENDPOINTS.supplier.orders.updateStatus(orderId), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -127,6 +129,14 @@ export default function OrderManagementPage() {
     return statusTexts[status] || status;
   };
 
+  if (authLoading || !allowed) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">در حال بررسی دسترسی...</div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -136,11 +146,8 @@ export default function OrderManagementPage() {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      <div className="mb-4 sm:mb-8">
-        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2">مدیریت سفارشات</h1>
-        <p className="text-sm sm:text-base text-gray-600">مدیریت و تایید سفارشات مشتریان</p>
-      </div>
+    <div className="space-y-4">
+      <p className="text-sm text-slate-600">مدیریت و تأیید سفارشات ثبت‌شده توسط مشتریان</p>
 
       {/* Orders Table - Mobile First Design */}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -199,7 +206,7 @@ export default function OrderManagementPage() {
                               onChange={async (e) => {
                                 const newStatus = e.target.value;
                                 try {
-                                  const response = await fetch(API_ENDPOINTS.farmer.orders.updateItemStatus(item.id), {
+                                  const response = await fetch(API_ENDPOINTS.supplier.orders.updateItemStatus(item.id), {
                                     method: 'PATCH',
                                     headers: {
                                       'Content-Type': 'application/json',
@@ -236,8 +243,8 @@ export default function OrderManagementPage() {
                             <span className="mr-4">مقدار: {item.quantity} {item.product?.unit}</span>
                           </div>
                           <div className="text-gray-600 mt-1">
-                            <span>تامین‌کننده: {item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.farmer?.lastName || ''}</span>
-                            <span className="mr-4">موبایل: {item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</span>
+                            <span>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</span>
+                            <span className="mr-4">موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</span>
                           </div>
                         </div>
                       ))}
@@ -256,7 +263,7 @@ export default function OrderManagementPage() {
                               onChange={async (e) => {
                                 const newStatus = e.target.value;
                                 try {
-                                  const response = await fetch(API_ENDPOINTS.farmer.orders.updateRequestItemStatus(item.id), {
+                                  const response = await fetch(API_ENDPOINTS.supplier.orders.updateRequestItemStatus(item.id), {
                                     method: 'PATCH',
                                     headers: {
                                       'Content-Type': 'application/json',
@@ -293,8 +300,8 @@ export default function OrderManagementPage() {
                             <span className="mr-4">مقدار: {item.quantity} {item.product?.unit}</span>
                           </div>
                           <div className="text-gray-600 mt-1">
-                            <span>تامین‌کننده: {item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.farmer?.lastName || ''}</span>
-                            <span className="mr-4">موبایل: {item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</span>
+                            <span>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</span>
+                            <span className="mr-4">موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</span>
                           </div>
                         </div>
                       ))}
@@ -368,7 +375,7 @@ export default function OrderManagementPage() {
                         onChange={async (e) => {
                           const newStatus = e.target.value;
                           try {
-                            const response = await fetch(API_ENDPOINTS.farmer.orders.updateItemStatus(item.id), {
+                            const response = await fetch(API_ENDPOINTS.supplier.orders.updateItemStatus(item.id), {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -403,8 +410,8 @@ export default function OrderManagementPage() {
                     <div className="text-gray-600 text-xs space-y-1">
                       <div>درجه: {item.inventoryLot?.qualityGrade}</div>
                       <div>مقدار: {item.quantity} {item.product?.unit}</div>
-                      <div>تامین‌کننده: {item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.farmer?.lastName || ''}</div>
-                      <div>موبایل: {item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</div>
+                      <div>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</div>
+                      <div>موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</div>
                     </div>
                   </div>
                 ))}
@@ -423,7 +430,7 @@ export default function OrderManagementPage() {
                         onChange={async (e) => {
                           const newStatus = e.target.value;
                           try {
-                            const response = await fetch(API_ENDPOINTS.farmer.orders.updateRequestItemStatus(item.id), {
+                            const response = await fetch(API_ENDPOINTS.supplier.orders.updateRequestItemStatus(item.id), {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -458,8 +465,8 @@ export default function OrderManagementPage() {
                     <div className="text-gray-600 text-xs space-y-1">
                       <div>درجه: {item.qualityGrade}</div>
                       <div>مقدار: {item.quantity} {item.product?.unit}</div>
-                      <div>تامین‌کننده: {item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.farmer?.lastName || ''}</div>
-                      <div>موبایل: {item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</div>
+                      <div>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</div>
+                      <div>موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</div>
                     </div>
                   </div>
                 ))}

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { API_ENDPOINTS } from '@/app/config/api';
+import { API_ENDPOINTS } from "@/app/config/api";
+import { getAuthHeaders } from "@/app/utils/authHeaders";
 
 export default function DocumentUpload({ onUploadSuccess, className = "" }) {
   const [uploading, setUploading] = useState(false);
@@ -43,9 +44,10 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
       formData.append('file', file);
 
       const response = await fetch(API_ENDPOINTS.fileUpload.uploadUserDocument, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
+        method: "POST",
+        credentials: "include",
+        headers: getAuthHeaders(),
+        body: formData,
       });
 
       const result = await response.json();
@@ -70,8 +72,9 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
   const deleteFile = async (fileId) => {
     try {
       const response = await fetch(API_ENDPOINTS.fileUpload.deleteFile(fileId), {
-        method: 'DELETE',
-        credentials: 'include'
+        method: "DELETE",
+        credentials: "include",
+        headers: getAuthHeaders(),
       });
 
       const result = await response.json();

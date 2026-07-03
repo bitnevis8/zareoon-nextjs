@@ -1,41 +1,34 @@
 "use client";
-import { useEffect, useMemo, useState, use as usePromise } from "react";
-import ProductCardMedia from "@/app/components/ui/ProductCardMedia";
-import { formatSupplySource } from "@/app/utils/supplySource";
-import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, useRef, use as usePromise } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getProductStockClass, calculateAvailableStock } from "@/app/utils/stockUtils";
-import { formatLocalizedNumber, formatLocalizedPrice, getLocalizedLotLabel, getLocalizedText, localizeGrade, localizeStatus, localizeUnit } from "@/app/utils/localize";
-import { resolveMediaUrl } from "@/app/utils/mediaUrl";
+import { formatLocalizedNumber, getLocalizedText, localizeUnit } from "@/app/utils/localize";
 import CartStatusBanner from "@/app/components/CartStatusBanner";
-import CatalogGuidePanel from "@/app/components/CatalogGuidePanel";
 import CatalogBreadcrumb, { buildCatalogPath } from "@/app/components/CatalogBreadcrumb";
 import CatalogChildrenGrid from "@/app/components/CatalogChildrenGrid";
 import LatestAvailableProductsSection from "@/app/components/LatestAvailableProductsSection";
+import CatalogProductHero from "@/app/components/catalog/CatalogProductHero";
+import CatalogProductDescription from "@/app/components/catalog/CatalogProductDescription";
+import CatalogGradeOffers from "@/app/components/catalog/CatalogGradeOffers";
+import { buildLotGalleryItems } from "@/app/utils/catalogGradeMedia";
+import CatalogMediaLightbox, { sortMediaItems, buildProductGalleryItems } from "@/app/components/catalog/CatalogMediaLightbox";
+import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
 import { sortCatalogItems } from "@/app/utils/productSort";
+import { authFetch } from "@/app/utils/authHeaders";
+import { isAdmin, shouldShowSupplierPanel } from "@/app/utils/roles";
 
 export default function CatalogItemPage({ params }) {
   // Next.js 15: params is a Promise; unwrap with React.use()
   const { id } = usePromise(params);
-  const router = useRouter();
   const auth = useAuth();
   const { t, language, isRTL } = useLanguage();
   const userPhone = auth?.user?.mobile || auth?.user?.phone || null;
-  const isAdmin = auth?.user?.roles?.some(role => role.nameEn === 'Administrator') || false;
-  
-  // Check user roles for bottom bar
-  const userRoles = auth?.user?.roles?.map(role => role.nameEn) || [];
-  const isFarmer = userRoles.includes('Farmer') || userRoles.includes('farmer');
-  const isSupplier = userRoles.includes('Supplier') || userRoles.includes('supplier');
-  const isBargeCollector = userRoles.includes('BargeCollector') || userRoles.includes('bargeCollector');
-  const isSupervisor = userRoles.includes('Supervisor') || userRoles.includes('supervisor');
-  const canAddProduct = isAdmin || isFarmer || isSupplier || isBargeCollector || isSupervisor;
+  const user = auth?.user;
+  const admin = isAdmin(user);
+  const canAddProduct = shouldShowSupplierPanel(user);
   const [item, setItem] = useState(null);
   const [children, setChildren] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
@@ -48,23 +41,23 @@ export default function CatalogItemPage({ params }) {
   const [orderMsg, setOrderMsg] = useState("");
   const [orderMsgType, setOrderMsgType] = useState("info"); // 'success' | 'error' | 'info'
   // Media state for lots
-  const [lotMediaCounts, setLotMediaCounts] = useState(new Map()); // lotId -> { images, videos }
-  const [productMediaCounts, setProductMediaCounts] = useState({ images: 0, videos: 0 });
-  const [productMediaPreview, setProductMediaPreview] = useState([]); // first two media items
-  const [mediaOpen, setMediaOpen] = useState(false);
-  const [mediaLot, setMediaLot] = useState(null); // if null and context is product
-  const [mediaTab, setMediaTab] = useState('images'); // 'images' | 'videos'
-  const [mediaItems, setMediaItems] = useState([]);
-  const [mediaLoading, setMediaLoading] = useState(false);
-  const [mediaContext, setMediaContext] = useState({ module: 'inventory', entityId: null });
-  const [lotMediaPreview, setLotMediaPreview] = useState(new Map()); // lotId -> first two media items
+  const [lotMediaCounts, setLotMediaCounts] = useState(new Map());
+  const [productMedia, setProductMedia] = useState([]);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [galleryTitle, setGalleryTitle] = useState("");
+  const mediaCacheRef = useRef(new Map());
+  const [lotMediaPreview, setLotMediaPreview] = useState(new Map());
+  const [activeOfferGrade, setActiveOfferGrade] = useState(null);
 
   // Cart info for this product
   const [cartTotalQty, setCartTotalQty] = useState(0);
   const [cartUnit, setCartUnit] = useState('');
   const fetchCart = useCallback(async () => {
     try {
-      const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store', credentials: 'include' });
+      const r = await authFetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: "no-store" });
       const j = await r.json();
       const items = j?.data?.items || [];
       let sum = 0; let unit = cartUnit;
@@ -86,47 +79,15 @@ export default function CatalogItemPage({ params }) {
       const j = await r.json();
       if (j?.success) {
         const arr = Array.isArray(j.data) ? j.data : [];
-        const images = arr.filter(it => String(it.mimeType||'').startsWith('image/')).length;
-        const videos = arr.filter(it => String(it.mimeType||'').startsWith('video/')).length;
-        setLotMediaCounts(prev => new Map(prev).set(lotId, { images, videos }));
-        // pick first two for preview (prefer images first)
-        const sorted = [...arr].sort((a,b)=>{
-          const ai = String(a.mimeType||'').startsWith('image/') ? 0 : 1;
-          const bi = String(b.mimeType||'').startsWith('image/') ? 0 : 1;
-          return ai - bi;
-        }).slice(0,2);
+        const sorted = sortMediaItems(arr);
+        setLotMediaCounts(prev => new Map(prev).set(lotId, {
+          images: sorted.filter(it => String(it.mimeType||'').startsWith('image/')).length,
+          videos: sorted.filter(it => String(it.mimeType||'').startsWith('video/')).length,
+        }));
         setLotMediaPreview(prev => new Map(prev).set(lotId, sorted));
       }
     } catch {}
   }, []);
-
-  const openMediaModal = async ({ module, entityId, lot = null, tab }) => {
-    setMediaLot(lot);
-    setMediaContext({ module, entityId });
-    setMediaTab(tab);
-    setMediaItems([]);
-    setMediaLoading(true);
-    setMediaOpen(true);
-    try {
-      const r = await fetch(`${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?entityId=${encodeURIComponent(entityId)}`, { cache: 'no-store', credentials: 'include' });
-      const j = await r.json();
-      const all = (j?.success && Array.isArray(j.data)) ? j.data : [];
-      const list = all.filter(it => tab === 'images' ? String(it.mimeType||'').startsWith('image/') : String(it.mimeType||'').startsWith('video/'));
-      setMediaItems(list);
-      // refresh counts cache
-      const images = all.filter(it => String(it.mimeType||'').startsWith('image/')).length;
-      const videos = all.filter(it => String(it.mimeType||'').startsWith('video/')).length;
-      if (module === 'inventory' && lot) {
-        setLotMediaCounts(prev => new Map(prev).set(lot.id, { images, videos }));
-      } else if (module === 'products') {
-        setProductMediaCounts({ images, videos });
-      }
-    } catch {
-      setMediaItems([]);
-    } finally {
-      setMediaLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (!id) return;
@@ -165,36 +126,77 @@ export default function CatalogItemPage({ params }) {
 
   // Inventory summary for this product (no farmer names)
   const productIdNum = Number(id);
-  const GRADE_COLUMNS = useMemo(() => ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"], []);
-  const normalizeGrade = (val) => {
-    const v = (val || "").toString().trim();
-    if (["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"].includes(v)) return v;
-    if (v === "درجه یک") return "درجه 1";
-    if (v === "درجه دو") return "درجه 2";
-    if (v === "درجه سه") return "درجه 3";
-    return "سایر";
-  };
   const filteredLots = useMemo(() => (lots || []).filter(l => l.productId === productIdNum), [lots, productIdNum]);
   const summary = useMemo(() => {
-    let total = 0, reserved = 0;
-    for (const l of filteredLots) { total += parseFloat(l.totalQuantity || 0); reserved += parseFloat(l.reservedQuantity || 0); }
-    return { totalQuantity: total, reservedQuantity: reserved, availableQuantity: total - reserved };
-  }, [filteredLots]);
-  const byGrade = useMemo(() => {
-    const map = new Map();
+    let total = 0;
+    let reserved = 0;
     for (const l of filteredLots) {
-      const key = normalizeGrade(l.qualityGrade);
-      if (!map.has(key)) map.set(key, { grade: key, total: 0, reserved: 0, count: 0 });
-      const row = map.get(key);
-      row.total += parseFloat(l.totalQuantity || 0);
-      row.reserved += parseFloat(l.reservedQuantity || 0);
-      row.count += 1;
+      total += parseFloat(l.totalQuantity || 0);
+      reserved += parseFloat(l.reservedQuantity || 0);
     }
-    const arr = GRADE_COLUMNS.filter(g => map.has(g)).map(g => ({ ...map.get(g), available: map.get(g).total - map.get(g).reserved }));
-    for (const [k, v] of map.entries()) if (!GRADE_COLUMNS.includes(k)) arr.push({ ...v, available: v.total - v.reserved });
-    return arr;
-  }, [filteredLots, GRADE_COLUMNS]);
-  // نمایش خلاصه بر اساس درجه حفظ می‌شود
+    return {
+      totalQuantity: total,
+      reservedQuantity: reserved,
+      availableQuantity: Math.max(0, total - reserved),
+      lots: filteredLots,
+    };
+  }, [filteredLots]);
+
+  const openMediaGallery = useCallback(async ({ module, entityId, startMediaId = null, startIndex = null, productItem = null, galleryTitle: titleOverride = null }) => {
+    const cacheKey = `${module}:${entityId}`;
+    setGalleryOpen(true);
+    setGalleryLoading(true);
+    setGalleryTitle(titleOverride || "");
+
+    try {
+      let items = mediaCacheRef.current.get(cacheKey);
+      if (!items) {
+        const r = await fetch(
+          `${API_ENDPOINTS.fileUpload.getFilesByModule(module)}?entityId=${encodeURIComponent(entityId)}`,
+          { cache: "no-store", credentials: "include" }
+        );
+        const j = await r.json();
+        const raw = j?.success && Array.isArray(j.data) ? j.data : [];
+        items = sortMediaItems(raw);
+        mediaCacheRef.current.set(cacheKey, items);
+
+        if (module === "inventory") {
+          setLotMediaPreview((prev) => new Map(prev).set(Number(entityId), items));
+          setLotMediaCounts((prev) =>
+            new Map(prev).set(Number(entityId), {
+              images: items.filter((it) => String(it.mimeType || "").startsWith("image/")).length,
+              videos: items.filter((it) => String(it.mimeType || "").startsWith("video/")).length,
+            })
+          );
+        } else if (module === "products") {
+          setProductMedia(items);
+        }
+      }
+
+      if (module === "products" && productItem) {
+        items = buildProductGalleryItems(productItem, items);
+      }
+
+      if (module === "inventory") {
+        const lot = filteredLots.find((l) => Number(l.id) === Number(entityId));
+        if (lot) items = buildLotGalleryItems(lot, items);
+      }
+
+      setGalleryItems(items);
+      let resolvedIndex = 0;
+      if (startIndex != null && startIndex >= 0) {
+        resolvedIndex = Math.min(startIndex, Math.max(0, items.length - 1));
+      } else if (startMediaId) {
+        resolvedIndex = Math.max(0, items.findIndex((it) => it.id === startMediaId));
+      }
+      setGalleryIndex(resolvedIndex);
+    } catch {
+      setGalleryItems([]);
+      setGalleryIndex(0);
+    } finally {
+      setGalleryLoading(false);
+    }
+  }, [filteredLots]);
 
   // Prefetch media counts for the visible lots
   useEffect(() => {
@@ -217,95 +219,135 @@ export default function CatalogItemPage({ params }) {
         const j = await r.json();
         if (j?.success) {
           const arr = Array.isArray(j.data) ? j.data : [];
-          const images = arr.filter(it => String(it.mimeType||'').startsWith('image/')).length;
-          const videos = arr.filter(it => String(it.mimeType||'').startsWith('video/')).length;
-          setProductMediaCounts({ images, videos });
-          const sorted = [...arr].sort((a,b)=>{
-            const ai = String(a.mimeType||'').startsWith('image/') ? 0 : 1;
-            const bi = String(b.mimeType||'').startsWith('image/') ? 0 : 1;
-            return ai - bi;
-          }).slice(0,2);
-          setProductMediaPreview(sorted);
+          const sorted = sortMediaItems(arr);
+          setProductMedia(sorted);
+          mediaCacheRef.current.set(`products:${productIdNum}`, sorted);
         }
       } catch {}
     })();
   }, [productIdNum]);
 
+  const handleAddToLotCart = useCallback(
+    async (lot, productUnit) => {
+      setOrderMsg("");
+      if (!auth?.user && typeof window !== "undefined" && !localStorage.getItem("token")) {
+        setOrderMsgType("error");
+        setOrderMsg(t("pleaseLoginFirst"));
+        return;
+      }
+      const v = parseFloat(lotQtyById[lot.id] || 0);
+      if (!Number.isFinite(v) || v <= 0) {
+        setOrderMsgType("error");
+        setOrderMsg(t("invalidQuantity"));
+        return;
+      }
+      const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
+      if (v > available + 1e-9) {
+        setOrderMsgType("error");
+        setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${lot.unit || ""}`);
+        return;
+      }
+      setPlacingLotId(lot.id);
+      try {
+        const payload = {
+          productId: productIdNum,
+          inventoryLotId: lot.id,
+          qualityGrade: lot.qualityGrade,
+          quantity: Number(v.toFixed(3)),
+          unit: lot.unit || productUnit || null,
+        };
+        const res = await authFetch(`${API_ENDPOINTS.farmer.cart.base}/add`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const j = await res.json();
+        if (!res.ok || !j?.success) throw new Error(j?.message || "خطا در افزودن به بار");
+        setOrderMsgType("success");
+        const contactNote = userPhone ? ` (${userPhone})` : "";
+        setOrderMsg(`${t("orderAdded")}${contactNote}`);
+        fetchCart();
+      } catch (e) {
+        setOrderMsgType("error");
+        setOrderMsg(e.message || "خطا در افزودن به بار");
+      } finally {
+        setPlacingLotId(null);
+      }
+    },
+    [lotQtyById, productIdNum, userPhone, t, fetchCart, auth?.user]
+  );
+
+  const stockClass = item ? getProductStockClass(item, allProducts, inventoryLots) : "bg-white";
+
   // محاسبه قیمت تقریبی حذف شد چون سفارش در سطح بار انجام می‌شود
 
   return (
-    <main className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-2 sm:py-4 space-y-4 sm:space-y-6 overflow-x-hidden">
+    <main className="mx-auto w-full max-w-6xl space-y-5 overflow-x-hidden px-3 py-3 pb-24 sm:space-y-6 sm:px-6 sm:py-4 sm:pb-6">
       <CartStatusBanner />
-      <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
+        {!loading && item ? (
+          <CatalogPdfDownload
+            scope={item.isOrderable ? "product" : "category"}
+            productId={item.isOrderable ? productIdNum : undefined}
+            categoryId={!item.isOrderable ? productIdNum : undefined}
+            label={t("downloadCatalogPdf")}
+            compact
+            className="shrink-0 self-start sm:self-center"
+          />
+        ) : null}
+      </div>
 
-      {/* Header: image on the right, title on the left of the image (RTL-friendly) */}
-        <section className={`rounded-xl shadow border p-3 sm:p-4 ${item ? getProductStockClass(item, allProducts, inventoryLots) : 'bg-white'}`}>
-        <div className="flex items-center gap-3 sm:gap-4 flex-row-reverse">
-          <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24">
-            <ProductCardMedia
-              product={item}
-              alt={getLocalizedText(item, language) || "item"}
-              width={80}
-              height={80}
-              className="object-cover w-full h-full rounded-lg border bg-slate-50"
-              figureClassName="rounded-lg"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">{getLocalizedText(item, language) || ""}</h1>
-            {item?.slug ? <div className="text-slate-400 text-xs mt-1">{item.slug}</div> : null}
-            <div className="text-slate-600 text-xs mt-1">
-              {t("supplySource")}: {formatSupplySource(item, language)}
-            </div>
-            {item?.isOrderable ? (
-              <div className="text-emerald-700 text-xs mt-2">{t("orderable")} • {t("unitLabel")}: {localizeUnit(item?.unit || '-', language)}</div>
-            ) : (
-              <div className="text-slate-500 text-xs mt-2">{t("nonOrderableCategoryRole")}</div>
-            )}
-            <div className="flex items-center gap-3 mt-3">
-              {productMediaPreview && productMediaPreview.length > 0 ? (
-                <div className="flex items-center gap-2">
-                  {productMediaPreview.map(m => (
-                    <div
-                      key={m.id}
-                      className="w-24 h-16 rounded overflow-hidden bg-slate-100 cursor-pointer"
-                      onClick={() => openMediaModal({ module: 'products', entityId: productIdNum, lot: null, tab: String(m.mimeType||'').startsWith('video/') ? 'videos' : 'images' })}
-                      title={t("view")}
-                    >
-                      {String(m.mimeType||'').startsWith('video/') ? (
-                        <video src={resolveMediaUrl(m.downloadUrl)} className="w-full h-full object-cover" muted />
-                      ) : (
-                        <Image src={resolveMediaUrl(m.downloadUrl)} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
-                      )}
-                    </div>
-                  ))}
-                  {(productMediaCounts.images + productMediaCounts.videos) > productMediaPreview.length ? (
-                    <button className="text-indigo-600 text-sm" onClick={()=> openMediaModal({ module: 'products', entityId: productIdNum, lot: null, tab: 'images' })}>
-                      {t("view")} ({(productMediaCounts.images + productMediaCounts.videos) - productMediaPreview.length})
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
-              {cartTotalQty > 0 ? (
-                <div className="text-[13px] sm:text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded px-3 py-2">
-                  {t("youHaveInCart", { quantity: cartTotalQty.toFixed(3), unit: localizeUnit(cartUnit || '', language) })}
-                  <Link href="/cart" className="underline mx-1 text-amber-800">{t("viewCart")}</Link>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </section>
+      <CatalogProductHero
+        item={item}
+        language={language}
+        t={t}
+        productMedia={productMedia}
+        productIdNum={productIdNum}
+        openMediaGallery={openMediaGallery}
+        cartTotalQty={cartTotalQty}
+        cartUnit={cartUnit}
+        hideMediaOnMobile={filteredLots.length > 0}
+      />
+
+      {filteredLots.length > 0 && (
+        <CatalogGradeOffers
+          item={item}
+          lots={filteredLots}
+          language={language}
+          t={t}
+          activeGrade={activeOfferGrade}
+          onActiveGradeChange={setActiveOfferGrade}
+          isAdmin={admin}
+          lotMediaPreview={lotMediaPreview}
+          openMediaGallery={openMediaGallery}
+          lotQtyById={lotQtyById}
+          setLotQtyById={setLotQtyById}
+          placingLotId={placingLotId}
+          onAddToCart={handleAddToLotCart}
+          productUnit={item?.unit}
+          cartTotalQty={cartTotalQty}
+          cartUnit={cartUnit}
+          inventorySummary={summary}
+          orderMsg={orderMsg}
+          orderMsgType={orderMsgType}
+          productDescription={item?.description}
+        />
+      )}
+
+      {item?.description && filteredLots.length === 0 ? (
+        <CatalogProductDescription description={item.description} t={t} />
+      ) : null}
 
       {/* Category stock summary (for non-orderable items) */}
       {!item?.isOrderable && children.length > 0 && (
         <>
-          <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
-            <h2 className="text-lg font-semibold mb-3">{t("totalStockStatus")}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="bg-slate-50 rounded-md border p-3">
-                <div className="text-xs text-slate-500">{t("totalStock")}</div>
-                <div className="text-lg font-semibold">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <h2 className="mb-3 text-base font-bold text-slate-900 sm:mb-4 sm:text-lg">{t("totalStockStatus")}</h2>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center sm:p-4 sm:text-right">
+                <div className="text-[10px] font-medium leading-tight text-slate-500 sm:text-xs">{t("totalStock")}</div>
+                <div className="mt-1 text-sm font-bold text-slate-900 sm:text-lg">
                   {formatLocalizedNumber(
                     children.reduce((sum, ch) => {
                       const stock = calculateAvailableStock(ch, allProducts, inventoryLots);
@@ -316,469 +358,37 @@ export default function CatalogItemPage({ params }) {
                   {localizeUnit("kg", language)}
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-md border p-3">
-                <div className="text-xs text-slate-500">{t("totalProducts")}</div>
-                <div className="text-lg font-semibold">{children.length} {t("product")}</div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center sm:p-4 sm:text-right">
+                <div className="text-[10px] font-medium leading-tight text-slate-500 sm:text-xs">{t("totalProducts")}</div>
+                <div className="mt-1 text-sm font-bold text-slate-900 sm:text-lg">{children.length} {t("product")}</div>
               </div>
-              <div className="bg-slate-50 rounded-md border p-3">
-                <div className="text-xs text-slate-500">{t("productsWithStock")}</div>
-                <div className="text-lg font-semibold">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center sm:p-4 sm:text-right">
+                <div className="text-[10px] font-medium leading-tight text-slate-500 sm:text-xs">{t("productsWithStock")}</div>
+                <div className="mt-1 text-sm font-bold text-slate-900 sm:text-lg">
                   {children.filter(ch => calculateAvailableStock(ch, allProducts, inventoryLots) > 0).length} {t("product")}
                 </div>
               </div>
             </div>
           </section>
-          <CatalogGuidePanel
-            showCategoryGuide
-            showStockLegend
-            className="mt-2"
-          />
         </>
       )}
 
-      {/* Inventory summary (if any) */}
-      {filteredLots.length > 0 && (
-        <section className="bg-white rounded-xl shadow border p-3 sm:p-4">
-          <h2 className="text-lg font-semibold mb-3">{t("inventoryStatus")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-3">
-            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("totalStock")}</div><div className="text-lg font-semibold">{summary.totalQuantity.toFixed(3)}</div></div>
-            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("reserved")}</div><div className="text-lg font-semibold">{summary.reservedQuantity.toFixed(3)}</div></div>
-            <div className="bg-slate-50 rounded-md border p-3"><div className="text-xs text-slate-500">{t("availableToOffer")}</div><div className="text-lg font-semibold">{summary.availableQuantity.toFixed(3)}</div></div>
-          </div>
-          <CatalogGuidePanel showCategoryGuide={false} showStockLegend className="mb-4" />
-          {/* جعبه سفارش سریع حذف شد؛ سفارش در ردیف هر بار انجام می‌شود */}
-          {orderMsg ? (
-            <div
-              className={
-                `mt-3 rounded-2xl border p-4 text-right flex items-start gap-3 ` +
-                (orderMsgType === 'success'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : orderMsgType === 'error'
-                  ? 'bg-rose-50 border-rose-200 text-rose-800'
-                  : 'bg-amber-50 border-amber-200 text-amber-800')
-              }
-            >
-              <div className="text-2xl leading-none">
-                {orderMsgType === 'success' ? '✅' : orderMsgType === 'error' ? '⚠️' : 'ℹ️'}
-              </div>
-              <div className="text-base sm:text-lg font-medium">
-                {orderMsg}
-              </div>
-            </div>
-          ) : null}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm" style={{ minWidth: '100%' }}>
-              <thead>
-                <tr className="bg-gray-100 text-gray-700">
-                  <th className="p-2">{t("grade")}</th>
-                  <th className="p-2">{t("total")}</th>
-                  <th className="p-2">{t("reserved")}</th>
-                  <th className="p-2">{t("availableToOffer")}</th>
-                  <th className="p-2">{t("lotsCount")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {byGrade.map((g) => (
-                  <tr key={g.grade} className="border-t">
-                    <td className="p-2">{localizeGrade(g.grade, t)}</td>
-                    <td className="p-2">{g.total.toFixed(3)}</td>
-                    <td className="p-2">{g.reserved.toFixed(3)}</td>
-                    <td className="p-2">{g.available.toFixed(3)}</td>
-                    <td className="p-2">{g.count}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {/* Available lots with attributes */}
-      {filteredLots.length > 0 && (
-        <section className="bg-gray-50 rounded-xl shadow border p-3 sm:p-4">
-          <h2 className="text-lg font-semibold mb-3 text-gray-800">{t("availableProductsTitle")}</h2>
-          {/* Desktop Table */}
-          <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full text-sm" style={{ minWidth: '100%' }}>
-              <thead>
-                <tr className="bg-gray-50 text-gray-700 border-b">
-                  <th className="px-4 py-3 text-right font-medium">{t("media")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("grade")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("unitLabel")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("total")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("reserved")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("price")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("minimumOrder")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("status")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("attributes")}</th>
-                  {isAdmin && <th className="px-4 py-3 text-right font-medium">{t("supplier")}</th>}
-                  <th className="px-4 py-3 text-right font-medium">{t("request")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredLots.map((l) => (
-                  <tr key={l.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
-                      {(() => {
-                        const c = lotMediaCounts.get(l.id);
-                        const preview = lotMediaPreview.get(l.id) || [];
-                        const thumb = preview[0];
-                        const thumbUrl = resolveMediaUrl(thumb?.downloadUrl || l.coverImageUrl);
-                        if (!thumbUrl) return '—';
-                        const isVideo = thumb ? String(thumb.mimeType || '').startsWith('video/') : false;
-                        return (
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-16 h-12 rounded overflow-hidden bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: isVideo ? 'videos' : 'images' })}
-                              title={t("media")}
-                            >
-                              {isVideo ? (
-                                <video src={thumbUrl} className="w-full h-full object-cover" muted />
-                              ) : (
-                                <Image src={thumbUrl} alt={thumb?.originalName || l.qualityGrade || ''} className="w-full h-full object-cover" width={300} height={200} unoptimized />
-                              )}
-                            </div>
-                            {c && (c.images + c.videos) > 1 ? (
-                              <button className="text-indigo-600 text-xs hover:text-indigo-800" onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: 'images' })}>
-                                +{(c.images + c.videos) - 1}
-                              </button>
-                            ) : null}
-                          </div>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {getLocalizedLotLabel(l, language, t)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs">{localizeUnit(l.unit, language)}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{formatLocalizedNumber(l.totalQuantity, language)}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{formatLocalizedNumber(l.reservedQuantity, language)}</td>
-                    <td className="px-4 py-3">
-                      {l.tieredPricing && l.tieredPricing.length > 0 ? (
-                        <TieredPricingDisplay tieredPricing={l.tieredPricing} unit={l.unit} />
-                      ) : l.price ? (
-                        <span className="font-medium text-green-600">{formatLocalizedPrice(l.price, language, t)}</span>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {l.tieredPricing && l.tieredPricing.length > 0 ? (
-                        <span className="text-xs text-gray-500">{t("steppedPricing")}</span>
-                      ) : l.minimumOrderQuantity ? (
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                        {l.minimumOrderQuantity} {localizeUnit(l.unit, language)}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        l.status === 'harvested' ? 'bg-green-100 text-green-800' :
-                        l.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
-                        l.status === 'sold' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {localizeStatus(l.status, t)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {Array.isArray(l.attributes) && l.attributes.length ? (
-                        <div className="flex flex-col gap-1 min-w-[200px]">
-                          {l.attributes.map((a) => (
-                            <div key={a.id} className="text-xs text-gray-700">
-                              <span className="text-gray-500">{a.definition?.name || `#${a.attributeDefinitionId}`}:</span> {a.value ?? '—'}
-                            </div>
-                          ))}
-                        </div>
-                      ) : t("notSet")}
-                    </td>
-                    {isAdmin && (
-                      <td className="px-4 py-3">
-                        {l.farmer ? (
-                          <div className="text-sm">
-                            <div className="font-medium">{l.farmer.firstName} {l.farmer.lastName}</div>
-                            <div className="text-gray-500 text-xs">{l.farmer.username}</div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">{t("notSet")}</span>
-                        )}
-                      </td>
-                    )}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.001"
-                          className="border rounded px-2 py-1 w-24 sm:w-32 md:w-40 lg:w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          placeholder={`max ${(Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0)))||0).toFixed(3)}`}
-                          value={lotQtyById[l.id] ?? ''}
-                          onChange={(e)=> setLotQtyById(prev => ({ ...prev, [l.id]: e.target.value }))}
-                        />
-                        <button
-                          className="bg-blue-600 text-white rounded px-3 py-1 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          disabled={placingLotId === l.id}
-                          onClick={async ()=>{
-                            setOrderMsg('');
-                            const v = parseFloat(lotQtyById[l.id] || 0);
-                            if (!Number.isFinite(v) || v <= 0) { setOrderMsgType('error'); setOrderMsg('مقدار نامعتبر است'); return; }
-                            const available = Math.max(0, parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0));
-                            if (v > available + 1e-9) { setOrderMsgType('error'); setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${l.unit||''}`); return; }
-                            setPlacingLotId(l.id);
-                            try {
-                              const payload = { productId: productIdNum, inventoryLotId: l.id, qualityGrade: l.qualityGrade, quantity: Number(v.toFixed(3)), unit: l.unit || item?.unit || null };
-                              const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
-                              const j = await res.json();
-                              if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به بار');
-                              setOrderMsgType('success');
-                              const contactNote = userPhone ? ` (${userPhone})` : '';
-                              setOrderMsg(`${t("orderAdded")}${contactNote}`);
-                              // refresh cart badge for this product
-                              fetchCart();
-                            } catch (e) {
-                              setOrderMsgType('error'); setOrderMsg(e.message || 'خطا در افزودن به بار');
-                            } finally {
-                              setPlacingLotId(null);
-                            }
-                          }}
-                        >{placingLotId === l.id ? '...' : t('order')}</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile/Tablet Cards */}
-          <div className="lg:hidden space-y-3 sm:space-y-4">
-            {filteredLots.map((l) => (
-              <div key={l.id} className="bg-gray-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-                {/* Header with image and basic info - only show if media exists */}
-                {(() => {
-                  const c = lotMediaCounts.get(l.id);
-                  const preview = lotMediaPreview.get(l.id) || [];
-                  const thumb = preview[0];
-                  const thumbUrl = resolveMediaUrl(thumb?.downloadUrl || l.coverImageUrl);
-                  if (!thumbUrl) return null;
-                  const isVideo = thumb ? String(thumb.mimeType || '').startsWith('video/') : false;
-                  return (
-                      <div className="relative">
-                        <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
-                            <div
-                              className="w-full h-full cursor-pointer hover:scale-105 transition-transform duration-200"
-                              onClick={() => openMediaModal({ module: 'inventory', entityId: l.id, lot: l, tab: isVideo ? 'videos' : 'images' })}
-                              title={t("media")}
-                            >
-                              {isVideo ? (
-                                <video src={thumbUrl} className="w-full h-full object-cover" muted />
-                              ) : (
-                                <Image src={thumbUrl} alt={thumb?.originalName || l.qualityGrade || ''} className="w-full h-full object-cover" width={400} height={300} unoptimized />
-                              )}
-                            </div>
-                          {c && (c.images + c.videos) > 1 && (
-                            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                              +{(c.images + c.videos) - 1}
-                            </div>
-                          )}
-                          {/* Quality grade badge */}
-                          <div className="absolute top-2 right-2">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-lg">
-                              {getLocalizedLotLabel(l, language, t)}
-                            </span>
-                          </div>
-                          {/* Status badge */}
-                          <div className="absolute bottom-2 right-2">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-lg ${
-                              l.status === 'harvested' ? 'bg-green-600 text-white' :
-                              l.status === 'reserved' ? 'bg-yellow-600 text-white' :
-                              l.status === 'sold' ? 'bg-blue-600 text-white' :
-                              'bg-gray-600 text-white'
-                            }`}>
-                              {localizeStatus(l.status, t)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                })()}
-
-                {/* Content */}
-                <div className="p-4">
-                  {/* Unit and basic info */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-600">{l.unit}</span>
-                    <div className="text-xs text-gray-500">
-                      {t("inventory")}: {Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0))).toFixed(3)}
-                    </div>
-                  </div>
-                  
-                  {/* Stock info grid */}
-                  <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-gray-500 text-xs mb-1">مقدار کل</div>
-                      <div className="font-mono font-semibold text-gray-900">{formatLocalizedNumber(l.totalQuantity, language)}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-gray-500 text-xs mb-1">{t("reserved")}</div>
-                      <div className="font-mono font-semibold text-gray-900">{formatLocalizedNumber(l.reservedQuantity, language)}</div>
-                    </div>
-                  </div>
-
-                  {/* Pricing */}
-                  <div className="mb-4">
-                    <div className="text-gray-500 text-xs mb-2">قیمت‌گذاری</div>
-                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                      {l.tieredPricing && l.tieredPricing.length > 0 ? (
-                        <TieredPricingDisplay tieredPricing={l.tieredPricing} unit={l.unit} />
-                      ) : l.price ? (
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-green-700 text-lg">{formatLocalizedPrice(l.price, language, t)}</span>
-                          <span className="text-xs text-green-600">قیمت ثابت</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">قیمت تعیین نشده</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Minimum order */}
-                  {l.tieredPricing && l.tieredPricing.length > 0 ? (
-                    <div className="mb-4">
-                      <div className="text-gray-500 text-xs mb-2">حداقل سفارش</div>
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <span className="text-sm text-blue-700">قیمت پلکانی - جزئیات در بالا</span>
-                      </div>
-                    </div>
-                  ) : l.minimumOrderQuantity ? (
-                    <div className="mb-4">
-                      <div className="text-gray-500 text-xs mb-2">حداقل سفارش</div>
-                      <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-                        <span className="text-sm font-medium text-yellow-800">{l.minimumOrderQuantity} {l.unit}</span>
-                      </div>
-                    </div>
-                  ) : null}
-                  
-                  {/* Attributes */}
-                  {Array.isArray(l.attributes) && l.attributes.length > 0 && (
-                    <div className="mb-4">
-                      <div className="text-gray-500 text-xs mb-2">{t("attributes")}</div>
-                      <div className="space-y-2">
-                        {l.attributes.slice(0, 3).map((a) => (
-                          <div key={a.id} className="flex justify-between items-center text-xs bg-white rounded px-3 py-2 border border-gray-200">
-                            <span className="font-medium text-gray-700">{a.definition?.name}:</span>
-                            <span className="text-gray-600">{a.value}</span>
-                          </div>
-                        ))}
-                        {l.attributes.length > 3 && (
-                          <div className="text-xs text-gray-500 text-center">
-                            {t("moreAttributes", { count: l.attributes.length - 3 })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Farmer info (admin only) */}
-                  {isAdmin && l.farmer && (
-                    <div className="mb-4 p-3 bg-white rounded-lg border border-gray-200">
-                      <div className="text-gray-500 text-xs mb-1">تامین‌کننده</div>
-                      <div className="text-sm">
-                        <div className="font-medium text-gray-900">{l.farmer.firstName} {l.farmer.lastName}</div>
-                        <div className="text-gray-500 text-xs">{l.farmer.username}</div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Order section */}
-                  <div className="pt-3 border-t border-gray-200">
-                    <div className="text-gray-500 text-xs mb-2">درخواست سفارش</div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.001"
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm max-w-[200px]"
-                        placeholder={`حداکثر ${(Math.max(0, (parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0)))||0).toFixed(3)}`}
-                        value={lotQtyById[l.id] ?? ''}
-                        onChange={(e)=> setLotQtyById(prev => ({ ...prev, [l.id]: e.target.value }))}
-                      />
-                      <button
-                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium shadow-sm"
-                        disabled={placingLotId === l.id}
-                        onClick={async ()=>{
-                          setOrderMsg('');
-                          const v = parseFloat(lotQtyById[l.id] || 0);
-                          if (!Number.isFinite(v) || v <= 0) { setOrderMsgType('error'); setOrderMsg(t('invalidQuantity')); return; }
-                          const available = Math.max(0, parseFloat(l.totalQuantity||0) - parseFloat(l.reservedQuantity||0));
-                          if (v > available + 1e-9) { setOrderMsgType('error'); setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${l.unit||''}`); return; }
-                          setPlacingLotId(l.id);
-                          try {
-                            const payload = { productId: productIdNum, inventoryLotId: l.id, qualityGrade: l.qualityGrade, quantity: Number(v.toFixed(3)), unit: l.unit || item?.unit || null };
-                            const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
-                            const j = await res.json();
-                            if (!res.ok || !j?.success) throw new Error(j?.message || 'خطا در افزودن به بار');
-                            setOrderMsgType('success');
-                            const contactNote = userPhone ? ` (${userPhone})` : '';
-                            setOrderMsg(`${t("orderAdded")}${contactNote}`);
-                            // refresh cart badge for this product
-                            fetchCart();
-                          } catch (e) {
-                            setOrderMsgType('error'); setOrderMsg(e.message || 'خطا در افزودن به بار');
-                          } finally {
-                            setPlacingLotId(null);
-                          }
-                        }}
-                        >{placingLotId === l.id ? '...' : t('order')}</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Media modal */}
-      {mediaOpen ? (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow border p-4 w-full max-w-4xl">
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">{mediaContext.module === 'inventory' && mediaLot ? `${t('productMedia')} #${mediaLot.id}` : t('productMedia')}</div>
-              <button className="text-slate-500" onClick={()=>{ setMediaOpen(false); setMediaLot(null); setMediaItems([]); }}>✕</button>
-            </div>
-            <div className="flex items-center gap-2 mb-3">
-              <button className={`px-3 py-1 rounded ${mediaTab==='images'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'images' })}>{t('images')}</button>
-              <button className={`px-3 py-1 rounded ${mediaTab==='videos'?'bg-indigo-600 text-white':'border'}`} onClick={()=>openMediaModal({ module: mediaContext.module, entityId: mediaContext.entityId, lot: mediaLot, tab: 'videos' })}>{t('videos')}</button>
-            </div>
-            {mediaLoading ? (
-              <div className="text-slate-500">{t("loading")}</div>
-            ) : mediaItems.length === 0 ? (
-              <div className="text-slate-500">{t("noMediaToShow")}</div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {mediaItems.map(m => (
-                  <div key={m.id} className="border rounded-md overflow-hidden bg-white">
-                    <div className="aspect-video bg-slate-100 flex items-center justify-center overflow-hidden">
-                      {String(m.mimeType||'').startsWith('video/') ? (
-                        <video src={resolveMediaUrl(m.downloadUrl)} className="w-full h-full object-cover" controls />
-                      ) : (
-                        <Image src={resolveMediaUrl(m.downloadUrl)} alt={m.originalName||''} className="w-full h-full object-cover" width={300} height={200} />
-                      )}
-                    </div>
-                    <div className="p-2 text-xs truncate" title={m.originalName}>{m.originalName}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+      <CatalogMediaLightbox
+        isOpen={galleryOpen}
+        onClose={() => {
+          setGalleryOpen(false);
+          setGalleryItems([]);
+          setGalleryIndex(0);
+          setGalleryTitle("");
+        }}
+        items={galleryItems}
+        activeIndex={galleryIndex}
+        onIndexChange={setGalleryIndex}
+        loading={galleryLoading}
+        titleOverride={galleryTitle}
+        t={t}
+        isRTL={isRTL}
+      />
 
       {!loading && !item?.isOrderable ? (
         <LatestAvailableProductsSection

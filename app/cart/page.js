@@ -1,321 +1,347 @@
-"use client";
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+﻿"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
+import { authFetch } from "@/app/utils/authHeaders";
+import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
+import { CartPageNav, CartGuide, SUPPORT_PHONE } from "./components/CartLayout";
+
+const ORDER_STATUS_FA = {
+  pending: "در انتظار تأیید",
+  reserved: "رزرو شده",
+  completed: "تکمیل‌شده",
+  cancelled: "لغو شده",
+};
+
+const ITEM_STATUS_FA = {
+  pending: "در انتظار",
+  approved: "تأیید شده",
+  processing: "در حال پردازش",
+  shipped: "ارسال شده",
+  delivered: "تحویل شده",
+  cancelled: "لغو شده",
+  rejected: "رد شده",
+};
+
+function CartItemRow({ item, productName, onUpdateQty, onRemove }) {
+  return (
+    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              درجه {item.qualityGrade}
+            </span>
+          </div>
+          <h3 className="truncate text-base font-bold text-slate-900">{productName}</h3>
+          <p className="mt-0.5 text-xs text-slate-500">شناسه محصول: {item.productId}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div>
+            <label className="mb-1 block text-[10px] font-semibold uppercase text-slate-400">مقدار</label>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min="0"
+                step="0.001"
+                className={`${inv.input} w-28 py-2 text-center font-mono`}
+                value={item.quantity}
+                onChange={(e) => onUpdateQty(item.id, e.target.value)}
+              />
+              <span className="text-xs text-slate-500">{item.unit || "کیلوگرم"}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onRemove(item.id)}
+            className="mt-5 rounded-lg px-2 py-1.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+          >
+            حذف
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function OrderHistory({ orders, loading, expanded, onToggle }) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between px-4 py-3.5 text-right sm:px-5"
+      >
+        <span className="text-sm font-bold text-slate-800">سفارش‌های من</span>
+        <span className="text-xs text-slate-500">{expanded ? "بستن ▲" : "مشاهده ▼"}</span>
+      </button>
+      {expanded ? (
+        <div className="border-t border-slate-100 px-4 py-4 sm:px-5">
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+            </div>
+          ) : orders.length === 0 ? (
+            <p className="py-6 text-center text-sm text-slate-500">هنوز سفارشی ثبت نکرده‌اید.</p>
+          ) : (
+            <div className="space-y-3">
+              {orders.map((order) => (
+                <div key={order.id} className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-semibold text-slate-900">سفارش #{order.id}</span>
+                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                      {ORDER_STATUS_FA[order.status] || order.status}
+                    </span>
+                  </div>
+                  <p className="mb-3 text-xs text-slate-500">
+                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString("fa-IR") : "—"}
+                  </p>
+                  <ul className="space-y-2">
+                    {order.items?.map((item, i) => (
+                      <li key={`i-${i}`} className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs">
+                        <div className="flex justify-between gap-2">
+                          <span className="font-medium text-slate-800">
+                            {item.inventoryLot?.product?.name || `محصول #${item.inventoryLotId}`}
+                          </span>
+                          <span className="text-slate-500">{ITEM_STATUS_FA[item.status] || item.status}</span>
+                        </div>
+                        <p className="mt-1 text-slate-500">
+                          درجه {item.inventoryLot?.qualityGrade} — {item.quantity}{" "}
+                          {item.inventoryLot?.unit || "کیلوگرم"}
+                        </p>
+                      </li>
+                    ))}
+                    {order.requestItems?.map((item, i) => (
+                      <li key={`r-${i}`} className="rounded-lg border border-amber-200 bg-amber-50/50 p-2.5 text-xs">
+                        <span className="font-medium text-amber-900">در انتظار تخصیص — محصول #{item.productId}</span>
+                        <p className="mt-1 text-amber-800/80">
+                          درجه {item.qualityGrade} — {item.quantity} {item.unit || "کیلوگرم"}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 function CartPageContent() {
   const [cart, setCart] = useState({ id: null, items: [] });
+  const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("info");
-  const [supportPhone, setSupportPhone] = useState("");
-  const [showOrders, setShowOrders] = useState(false);
+  const [showOrders, setShowOrders] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
+
+  const productName = useCallback(
+    (id) => products.find((p) => p.id === Number(id))?.name || `محصول #${id}`,
+    [products]
+  );
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store', credentials: 'include' });
-      const d = await res.json();
-      setCart(d.data || { items: [] });
-    } finally { setLoading(false); }
+      const [cartRes, prodRes] = await Promise.all([
+        authFetch(`${API_ENDPOINTS.supplier.cart.base}/me`, { cache: "no-store" }),
+        fetch(API_ENDPOINTS.supplier.products.getAll + "?isOrderable=true", { cache: "no-store" }),
+      ]);
+      const cartData = await cartRes.json();
+      const prodData = await prodRes.json();
+      setCart(cartData.data || { items: [] });
+      setProducts(prodData.data || []);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadOrders = async () => {
     setOrdersLoading(true);
     try {
-      console.log("Loading orders from:", API_ENDPOINTS.farmer.orders.getCustomerOrders);
-      const res = await fetch(`${API_ENDPOINTS.farmer.orders.getCustomerOrders}`, { 
-        cache: 'no-store', 
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      console.log("Orders response status:", res.status);
-      console.log("Orders response headers:", res.headers);
-      
-      if (!res.ok) {
-        console.error("Orders API error:", res.status, res.statusText);
-        const errorText = await res.text();
-        console.error("Orders API error response:", errorText);
-        throw new Error(`API Error: ${res.status} ${res.statusText}`);
-      }
-      
+      const res = await authFetch(API_ENDPOINTS.supplier.orders.getCustomerOrders, { cache: "no-store" });
+      if (!res.ok) throw new Error("orders fetch failed");
       const d = await res.json();
-      console.log("Orders response data:", d);
       setOrders(d.data || []);
-    } catch (error) {
-      console.error("Error loading orders:", error);
+    } catch {
       setOrders([]);
-    } finally { 
-      setOrdersLoading(false); 
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
-  const loadUserInfo = async () => {
-    try {
-      const res = await fetch(`${API_ENDPOINTS.auth.me}`, { 
-        cache: 'no-store', 
-        credentials: 'include' 
-      });
-      const d = await res.json();
-      console.log("User info response:", d);
-      setUserInfo(d.data?.user || null);
-    } catch (error) {
-      console.error("Error loading user info:", error);
-      setUserInfo(null);
-    }
-  };
   useEffect(() => {
     load();
-    loadUserInfo();
-    (async () => {
-      try {
-        const r = await fetch(API_ENDPOINTS.users.getById(2), { cache: 'no-store', credentials: 'include' });
-        const j = await r.json();
-        const u = j?.data || j;
-        if (u && (u.mobile || u.phone)) setSupportPhone(u.mobile || u.phone);
-      } catch {}
-    })();
+    loadOrders();
+    authFetch(API_ENDPOINTS.auth.me, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setUserInfo(d.data?.user || d.data || null))
+      .catch(() => setUserInfo(null));
   }, []);
 
-  const totalItems = useMemo(() => (cart.items||[]).length, [cart]);
+  const items = cart.items || [];
+  const totalItems = items.length;
+  const totalQty = useMemo(
+    () => items.reduce((s, it) => s + parseFloat(it.quantity || 0), 0),
+    [items]
+  );
 
   const remove = async (id) => {
-    await fetch(`${API_ENDPOINTS.farmer.cart.base}/item/${id}`, { method: 'DELETE', credentials: 'include' });
+    await authFetch(`${API_ENDPOINTS.supplier.cart.base}/item/${id}`, { method: "DELETE" });
     load();
   };
+
   const updateQty = async (id, quantity) => {
-    await fetch(`${API_ENDPOINTS.farmer.cart.base}/item/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ quantity: Number(quantity) })
+    await authFetch(`${API_ENDPOINTS.supplier.cart.base}/item/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quantity: Number(quantity) }),
     });
     load();
   };
 
   const checkout = async () => {
     setMsg("");
+    setCheckingOut(true);
     try {
-      const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/checkout`, { method: 'POST', credentials: 'include' });
+      const r = await authFetch(`${API_ENDPOINTS.supplier.cart.base}/checkout`, { method: "POST" });
       const j = await r.json();
-      if (!r.ok || !j?.success) throw new Error(j?.message || 'خطا در ثبت بار');
-      setMsgType('success');
-      setMsg(`بار شما ثبت شد. وضعیت: در انتظار تایید - با شما تماس گرفته می‌شود جهت رزرو شدن بار. شماره پشتیبانی: 09393387148`);
-      load();
-      loadOrders(); // بارگذاری سفارشات بعد از ثبت
-      setShowOrders(true); // نمایش سفارشات
+      if (!r.ok || !j?.success) throw new Error(j?.message || "خطا در ثبت سفارش");
+      setMsgType("success");
+      setMsg(
+        `سفارش شما با موفقیت ثبت شد (شماره ${j.data?.orderId || "—"}). وضعیت: در انتظار تأیید. تیم زارعون برای هماهنگی با شما تماس می‌گیرد. پشتیبانی: ${SUPPORT_PHONE}`
+      );
+      await load();
+      await loadOrders();
+      setShowOrders(true);
     } catch (e) {
-      setMsgType('error'); setMsg(e.message || 'خطای غیرمنتظره در ثبت بار');
+      setMsgType("error");
+      setMsg(e.message || "خطای غیرمنتظره در ثبت سفارش");
+    } finally {
+      setCheckingOut(false);
     }
   };
 
+  const userLabel =
+    userInfo?.firstName && userInfo?.lastName
+      ? `${userInfo.firstName} ${userInfo.lastName}`
+      : userInfo?.username || userInfo?.email || null;
+
   return (
-    <div className="p-2 sm:p-4 max-w-3xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-lg sm:text-xl font-bold">بار</h1>
-        {userInfo && (
-          <div className="text-sm text-slate-600">
-            <span className="font-medium">
-              {userInfo.firstName && userInfo.lastName 
-                ? `${userInfo.firstName} ${userInfo.lastName}`
-                : userInfo.username || userInfo.email || 'کاربر'
-              }
-            </span>
-            {userInfo.roles && userInfo.roles.length > 0 && (
-              <span className="text-xs text-slate-500 block">
-                نقش: {userInfo.roles.map(role => role.nameFa).join(', ')}
-              </span>
-            )}
-          </div>
-        )}
+    <div className="mx-auto min-h-screen max-w-6xl bg-slate-50 px-3 py-4 sm:px-6 sm:py-6">
+      <CartPageNav />
+
+      <div className="mb-6">
+        <h1 className="text-lg font-bold text-slate-900 sm:text-xl">سبد خرید</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          {userLabel ? `${userLabel}، ` : ""}
+          اقلام انتخاب‌شده را بررسی کنید و سفارش را نهایی کنید.
+        </p>
       </div>
-      {loading ? <div className="text-slate-500">در حال بارگذاری...</div> : (
-        <>
-          {(cart.items||[]).length === 0 ? (
-            <div className="text-slate-500">بار شما خالی است.</div>
-          ) : (
-            <div className="space-y-3">
-              {(cart.items||[]).map(it => (
-                <div key={it.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border rounded-lg p-3 bg-white space-y-2 sm:space-y-0">
-                  <div className="text-sm flex-1">
-                    <div className="font-medium">محصول #{it.productId}</div>
-                    <div className="text-slate-600">درجه: {it.qualityGrade}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="number" min="0" step="0.001" className="border rounded px-2 py-1 w-24 sm:w-28 text-sm" value={it.quantity}
-                      onChange={(e)=>updateQty(it.id, e.target.value)} />
-                    <button className="text-rose-600 text-sm" onClick={()=>remove(it.id)}>حذف</button>
-                  </div>
-                </div>
-              ))}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 space-y-2 sm:space-y-0">
-                <div className="text-sm text-slate-600">تعداد آیتم: {totalItems}</div>
-                <button className="w-full sm:w-auto bg-emerald-600 text-white rounded px-4 py-2 text-sm" onClick={checkout}>ثبت بار</button>
-              </div>
-            </div>
-          )}
-          {msg ? (
-            <div className={`mt-4 rounded-2xl border p-4 ${msgType==='success'?'bg-emerald-50 border-emerald-200 text-emerald-800':'bg-rose-50 border-rose-200 text-rose-800'}`}>
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <div className={`w-3 h-3 rounded-full ${msgType==='success'?'bg-emerald-500':'bg-rose-500'}`}></div>
-                <span className="font-medium">{msg}</span>
-              </div>
-            </div>
-          ) : null}
-          <div className="mt-6 space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-medium text-blue-800 mb-2">راهنمای ثبت بار</h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• با زدن &quot;ثبت بار&quot;، بار شما ثبت می‌شود اما رزرو نمی‌شود</li>
-                <li>• تیم پشتیبانی با شما تماس می‌گیرد جهت رزرو شدن بار</li>
-                <li>• وضعیت بار: در انتظار تایید</li>
-                <li>• تماس پشتیبانی: 09393387148</li>
-              </ul>
-            </div>
-            
-            {/* دکمه نمایش سفارشات */}
-            <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <button 
-                onClick={() => {
-                  setShowOrders(!showOrders);
-                  if (!showOrders) loadOrders();
-                }}
-                className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                {showOrders ? 'مخفی کردن سفارشات' : 'مشاهده سفارشات ثبت شده'}
-              </button>
-              <button 
-                onClick={async () => {
-                  try {
-                    const res = await fetch(`${API_ENDPOINTS.farmer.orders.base}/test`, { 
-                      cache: 'no-store', 
-                      credentials: 'include' 
-                    });
-                    const d = await res.json();
-                    console.log("Test endpoint response:", d);
-                    alert(`Test: ${d.message}, User: ${d.user?.id || 'No user'}`);
-                  } catch (error) {
-                    console.error("Test error:", error);
-                    alert(`Test error: ${error.message}`);
-                  }
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
-              >
-                تست API
-              </button>
-              <button 
-                onClick={async () => {
-                  try {
-                    const res = await fetch(`${API_ENDPOINTS.auth.me}`, { 
-                      cache: 'no-store', 
-                      credentials: 'include' 
-                    });
-                    const d = await res.json();
-                    console.log("Auth me response:", d);
-                    alert(`Auth: ${d.success ? 'Success' : 'Failed'}, User: ${d.data?.user?.userId || 'No user'}`);
-                  } catch (error) {
-                    console.error("Auth error:", error);
-                    alert(`Auth error: ${error.message}`);
-                  }
-                }}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
-              >
-                تست Auth
-              </button>
-            </div>
 
-            {/* نمایش سفارشات */}
-            {showOrders && (
-              <div className="mt-6">
-                <h2 className="text-lg font-semibold mb-4">سفارشات ثبت شده</h2>
-                {ordersLoading ? (
-                  <div className="text-slate-500">در حال بارگذاری سفارشات...</div>
-                ) : orders.length === 0 ? (
-                  <div className="text-slate-500 bg-slate-50 p-4 rounded-lg">
-                    هیچ سفارشی ثبت نشده است.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div key={order.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                        <div className="mb-3">
-                          <h3 className="font-medium">سفارش #{order.id}</h3>
-                          <p className="text-sm text-slate-600">
-                            تاریخ: {new Date(order.createdAt).toLocaleDateString('fa-IR')}
-                          </p>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-sm">آیتم‌های سفارش:</h4>
-                          {/* نمایش OrderItems (اگر وجود داشته باشد) */}
-                          {order.items?.map((item, index) => (
-                            <div key={`item-${index}`} className="text-sm bg-slate-50 p-3 rounded border">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <span className="font-medium text-blue-600">آیتم #{index + 1}</span>
-                                  <span className="text-slate-600 mr-2">- {item.inventoryLot?.product?.name || `محصول #${item.inventoryLotId}`}</span>
-                                </div>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  item.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                  item.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                  item.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                                  item.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                                  item.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
-                                  item.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                  item.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                  'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {item.status === 'pending' ? 'در انتظار' :
-                                   item.status === 'approved' ? 'تایید شده' :
-                                   item.status === 'processing' ? 'در حال پردازش' :
-                                   item.status === 'shipped' ? 'ارسال شده' :
-                                   item.status === 'delivered' ? 'تحویل داده شده' :
-                                   item.status === 'cancelled' ? 'لغو شده' :
-                                   item.status === 'rejected' ? 'رد شده' :
-                                   item.status}
-                                </span>
-                              </div>
-                              <div className="text-slate-600">
-                                <span>درجه: {item.inventoryLot?.qualityGrade}</span>
-                                <span className="mr-4"> - مقدار: {item.quantity} {item.inventoryLot?.unit || 'کیلوگرم'}</span>
-                              </div>
-                            </div>
-                          ))}
-                          {/* نمایش OrderRequestItems (درخواست‌های در انتظار) */}
-                          {order.requestItems?.map((item, index) => (
-                            <div key={`request-${index}`} className="text-sm bg-yellow-50 p-3 rounded border border-yellow-200">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <span className="font-medium text-orange-600">درخواست #{index + 1}</span>
-                                  <span className="text-slate-600 mr-2">- محصول #{item.productId}</span>
-                                </div>
-                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  در انتظار تخصیص
-                                </span>
-                              </div>
-                              <div className="text-slate-600">
-                                <span>درجه: {item.qualityGrade}</span>
-                                <span className="mr-4"> - مقدار: {item.quantity} {item.unit || 'کیلوگرم'}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        </div>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-4">
+            {items.length === 0 ? (
+              <div className={inv.empty}>
+                <svg className="mb-3 h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p className="font-semibold text-slate-700">سبد خرید شما خالی است</p>
               </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {items.map((it) => (
+                    <CartItemRow
+                      key={it.id}
+                      item={it}
+                      productName={productName(it.productId)}
+                      onUpdateQty={updateQty}
+                      onRemove={remove}
+                    />
+                  ))}
+                </div>
+
+                {msg ? (
+                  <div
+                    className={`rounded-xl border p-4 text-sm ${
+                      msgType === "success"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                        : "border-rose-200 bg-rose-50 text-rose-900"
+                    }`}
+                    role="status"
+                  >
+                    {msg}
+                  </div>
+                ) : null}
+              </>
             )}
 
-            <div className="flex justify-between items-center">
-              <Link href="/" className="text-blue-600 hover:underline">بازگشت به صفحه اصلی</Link>
-              <Link href="/dashboard" className="text-green-600 hover:underline">داشبورد</Link>
-            </div>
+            <OrderHistory
+              orders={orders}
+              loading={ordersLoading}
+              expanded={showOrders}
+              onToggle={() => {
+                const next = !showOrders;
+                setShowOrders(next);
+                if (next && orders.length === 0 && !ordersLoading) loadOrders();
+              }}
+            />
           </div>
-        </>
+
+          <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+            {items.length > 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <h2 className="mb-4 text-sm font-bold text-slate-800">خلاصه سفارش</h2>
+                <dl className="space-y-2 text-sm">
+                  <div className="flex justify-between text-slate-600">
+                    <dt>تعداد اقلام</dt>
+                    <dd className="font-semibold tabular-nums text-slate-900">{totalItems.toLocaleString("fa-IR")}</dd>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <dt>مجموع مقدار</dt>
+                    <dd className="font-semibold tabular-nums text-slate-900">
+                      {totalQty.toLocaleString("fa-IR")}
+                    </dd>
+                  </div>
+                </dl>
+                <button
+                  type="button"
+                  onClick={checkout}
+                  disabled={checkingOut}
+                  className={`${inv.btnPrimary} mt-5 w-full py-3`}
+                >
+                  {checkingOut ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      در حال ثبت…
+                    </span>
+                  ) : (
+                    "نهایی کردن سفارش"
+                  )}
+                </button>
+                <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-400">
+                  با نهایی کردن، درخواست شما ثبت می‌شود و برای هماهنگی تماس گرفته می‌شود.
+                </p>
+              </div>
+            ) : null}
+
+            <CartGuide />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -328,4 +354,3 @@ export default function CartPage() {
     </ProtectedRoute>
   );
 }
-

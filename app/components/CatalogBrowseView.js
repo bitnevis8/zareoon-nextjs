@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getLocalizedText } from "../utils/localize";
 import CatalogGuidePanel from "./CatalogGuidePanel";
 import MainCategoryGrid from "./MainCategoryGrid";
+import CatalogPdfDownload from "./catalog/CatalogPdfDownload";
 import { sortCatalogItems } from "../utils/productSort";
 import { getProductStockClass } from "../utils/stockUtils";
 
@@ -26,9 +27,9 @@ export default function CatalogBrowseView() {
     (async () => {
       try {
         const [resCats, resAll, resLots] = await Promise.all([
-          fetch(`${API_ENDPOINTS.farmer.products.getAll}?isOrderable=false&parentId=`, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.farmer.products.getAll, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: "no-store" }),
+          fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=`, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
         ]);
         const dc = await resCats.json();
         const dall = await resAll.json();
@@ -52,7 +53,7 @@ export default function CatalogBrowseView() {
 
       setSearching(true);
       try {
-        const res = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: "no-store" });
+        const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: "no-store" });
         const d = await res.json();
         setSearchResults(d.data || []);
       } finally {
@@ -80,6 +81,10 @@ export default function CatalogBrowseView() {
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{t("agriculturalProducts")}</h1>
 
         <p className="text-gray-600 max-w-2xl mx-auto">{t("agriculturalProductsDesc")}</p>
+
+        <div className="flex justify-center">
+          <CatalogPdfDownload scope="full" label={t("downloadCatalogPdf")} />
+        </div>
 
         <div className="relative max-w-md mx-auto">
           <input

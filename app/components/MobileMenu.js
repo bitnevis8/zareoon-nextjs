@@ -12,7 +12,7 @@ export default function MobileMenu() {
   const menuItems = [
     { title: 'داشبورد', href: '/dashboard', protected: true },
     { title: 'سبد خرید', href: '/cart', protected: true },
-    { title: 'تنظیمات', href: '/dashboard/settings', protected: true },
+    { title: 'حساب کاربری', href: '/dashboard/account', protected: true },
   ];
 
   return (

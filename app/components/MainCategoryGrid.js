@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
@@ -26,7 +26,7 @@ export default function MainCategoryGrid({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?isOrderable=false&parentId=`, {
+        const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=`, {
           cache: "no-store",
         });
         const data = await res.json();

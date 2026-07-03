@@ -23,9 +23,42 @@ export function getNumberLocale(language) {
   return "fa-IR";
 }
 
-export function formatLocalizedNumber(value, language) {
+export function formatLocalizedNumber(value, language, options = {}) {
   const numericValue = Number(value || 0);
-  return numericValue.toLocaleString(getNumberLocale(language));
+  return numericValue.toLocaleString(getNumberLocale(language), options);
+}
+
+/** Parse user typing with Persian/Arabic digits into a plain number string. */
+export function parseLocalizedNumberInput(input) {
+  if (input == null || input === "") return "";
+  let s = String(input);
+  s = s.replace(/[۰-۹]/g, (ch) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(ch)));
+  s = s.replace(/[٠-٩]/g, (ch) => String("٠١٢٣٤٥٦٧٨٩".indexOf(ch)));
+  s = s.replace(/[,٬\s]/g, "");
+  return s;
+}
+
+/** Format stored quantity for display in inputs (Persian digits when fa/ar). */
+export function formatQuantityForInput(value, language, maxDecimals = 3) {
+  if (value === "" || value == null) return "";
+  const parsed = parseLocalizedNumberInput(value);
+  const n = parseFloat(parsed);
+  if (!Number.isFinite(n)) return String(value);
+  return n.toLocaleString(getNumberLocale(language), {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+    useGrouping: false,
+  });
+}
+
+export function formatQuantityWithUnit(value, language, unit, maxDecimals = 3) {
+  const n = Number(value || 0);
+  const qty = n.toLocaleString(getNumberLocale(language), {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+    useGrouping: false,
+  });
+  return unit ? `${unit} ${qty}` : qty;
 }
 
 export function formatLocalizedPrice(value, language, t) {

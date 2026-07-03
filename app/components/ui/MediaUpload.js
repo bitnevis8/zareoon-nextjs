@@ -4,11 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { API_ENDPOINTS } from '@/app/config/api';
 import { resolveMediaUrl } from '@/app/utils/mediaUrl';
-
-function authHeaders() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getAuthHeaders } from '@/app/utils/authHeaders';
 
 export default function MediaUpload({
   module = 'products',
@@ -35,7 +31,7 @@ export default function MediaUpload({
       const r = await fetch(url, {
         credentials: 'include',
         cache: 'no-store',
-        headers: authHeaders(),
+        headers: getAuthHeaders(),
       });
       const j = await r.json();
       if (j?.success) setItems(Array.isArray(j.data) ? j.data : []);
@@ -62,7 +58,7 @@ export default function MediaUpload({
       method: 'POST',
       body: form,
       credentials: 'include',
-      headers: authHeaders(),
+      headers: getAuthHeaders(),
     });
     const j = await r.json();
     if (!j?.success) throw new Error(j?.message || 'خطا در آپلود');
@@ -94,7 +90,7 @@ export default function MediaUpload({
       const r = await fetch(API_ENDPOINTS.fileUpload.deleteFile(id), {
         method: 'DELETE',
         credentials: 'include',
-        headers: authHeaders(),
+        headers: getAuthHeaders(),
       });
       const j = await r.json();
       if (j?.success) await load();

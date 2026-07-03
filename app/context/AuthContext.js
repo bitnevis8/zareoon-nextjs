@@ -19,11 +19,24 @@ export function AuthProvider({ children }) {
       console.log("🔍 Checking auth status - token:", localToken ? "exists" : "null", "user:", localUser ? "exists" : "null");
       
       if (localToken && localUser) {
-        // اگر هر دو موجود است، مستقیماً تنظیم کن
-        console.log("🔍 Loading user from localStorage:", JSON.parse(localUser));
-        setUser(JSON.parse(localUser));
+        const parsedUser = JSON.parse(localUser);
+        console.log("🔍 Loading user from localStorage:", parsedUser);
+        setUser(parsedUser);
         setToken(localToken);
         setLoading(false);
+        fetch(API_ENDPOINTS.auth.me, {
+          method: "GET",
+          credentials: "include",
+          headers: localToken ? { Authorization: `Bearer ${localToken}` } : {},
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => {
+            if (data?.success && data.data) {
+              setUser(data.data);
+              localStorage.setItem("user", JSON.stringify(data.data));
+            }
+          })
+          .catch(() => {});
         return;
       }
       

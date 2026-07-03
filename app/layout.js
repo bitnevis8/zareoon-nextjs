@@ -12,11 +12,11 @@ import MobileBottomBar from "./components/MobileBottomBar";
 
 export const metadata = {
   title: {
-    default: "زارعون - بازار و پلتفرم آنلاین کشاورزی",
+    default: "زارعون - بازار آنلاین خرید و فروش",
     template: "%s | زارعون"
   },
-  description: "زارعون؛ بازار آنلاین خرید و فروش محصولات، نهاده‌ها و تجهیزات کشاورزی. جست‌وجو، مقایسه و سفارش از تأمین‌کنندگان معتبر در سراسر کشور.",
-  keywords: ["زارعون", "محصولات کشاورزی", "بازار کشاورزی", "فروش نهاده", "تجهیزات کشاورزی", "خرید عمده", "زراعت", "باغداری", "دام و طیور"],
+  description: "زارعون؛ بازار آنلاین خرید و فروش انواع محصولات و کالاها. جست‌وجو، مقایسه و سفارش از تأمین‌کنندگان معتبر در سراسر کشور.",
+  keywords: ["زارعون", "بازار آنلاین", "خرید و فروش", "تأمین‌کننده", "خرید عمده", "فروش عمده", "بازار کالا"],
   authors: [{ name: "زارعون" }],
   creator: "زارعون",
   publisher: "زارعون",
@@ -30,8 +30,8 @@ export const metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "زارعون - بازار و پلتفرم آنلاین کشاورزی",
-    description: "بازار آنلاین برای خرید و فروش محصولات و نهاده‌های کشاورزی.",
+    title: "زارعون - بازار آنلاین خرید و فروش",
+    description: "بازار آنلاین برای خرید و فروش انواع محصولات و کالاها.",
     url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     siteName: 'زارعون',
     locale: 'fa_IR',
@@ -47,8 +47,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "زارعون - بازار و پلتفرم آنلاین کشاورزی",
-    description: "بازار آنلاین کشاورزی؛ جست‌وجو، مقایسه و سفارش.",
+    title: "زارعون - بازار آنلاین خرید و فروش",
+    description: "بازار آنلاین؛ جست‌وجو، مقایسه و سفارش.",
     images: [(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000') + '/logo.png'],
   },
   robots: {
@@ -86,7 +86,7 @@ export default function RootLayout({ children }) {
               <Header />
 
               {/* Main Content */}
-              <div className="flex-1 pb-[4.25rem] md:pb-0 pt-0 md:pt-0">
+              <div className="flex-1 pb-[4.25rem] lg:pb-0 max-lg:pt-[4.25rem] lg:pt-0">
                 {children}
               </div>
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { Suspense, useEffect, useState, useMemo } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
@@ -7,6 +7,8 @@ import { useAuth } from './context/AuthContext';
 import { useLanguage, siteIntroByLang } from './context/LanguageContext';
 import { getLocalizedText } from './utils/localize';
 import { sortCatalogItems } from './utils/productSort';
+import { authFetch } from './utils/authHeaders';
+import { shouldShowSupplierPanel } from './utils/roles';
 import MainCategoryGrid from './components/MainCategoryGrid';
 import LatestAvailableProductsSection from './components/LatestAvailableProductsSection';
 import ZareoonExclusiveServices from './components/ZareoonExclusiveServices';
@@ -29,14 +31,7 @@ function HomeContent() {
   const auth = useAuth();
   const { language, setLanguage, t, isRTL, isHydrated } = useLanguage();
   
-  // Check user roles for bottom bar
-  const userRoles = auth?.user?.roles?.map(role => role.nameEn) || [];
-  const isFarmer = userRoles.includes('Farmer') || userRoles.includes('farmer');
-  const isSupplier = userRoles.includes('Supplier') || userRoles.includes('supplier');
-  const isBargeCollector = userRoles.includes('BargeCollector') || userRoles.includes('bargeCollector');
-  const isSupervisor = userRoles.includes('Supervisor') || userRoles.includes('supervisor');
-  const isAdmin = userRoles.includes('Administrator') || userRoles.includes('administrator');
-  const canAddProduct = isAdmin || isFarmer || isSupplier || isBargeCollector || isSupervisor;
+  const canAddProduct = shouldShowSupplierPanel(auth?.user);
   
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
@@ -50,9 +45,9 @@ function HomeContent() {
   useEffect(() => {
     (async () => {
       const [resCats, resLots, resAll] = await Promise.all([
-        fetch(`${API_ENDPOINTS.farmer.products.getAll}?isOrderable=false&parentId=`, { cache: 'no-store' }),
-        fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: 'no-store' }),
-        fetch(API_ENDPOINTS.farmer.products.getAll, { cache: 'no-store' }),
+        fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=`, { cache: 'no-store' }),
+        fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: 'no-store' }),
+        fetch(API_ENDPOINTS.supplier.products.getAll, { cache: 'no-store' }),
       ]);
 
       const dc = await resCats.json();
@@ -75,7 +70,7 @@ function HomeContent() {
       if (!query) { setResults([]); return; }
       setSearching(true);
       try {
-        const res = await fetch(`${API_ENDPOINTS.farmer.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: 'no-store' });
+        const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: 'no-store' });
         const d = await res.json();
         setResults(d.data || []);
       } finally {
@@ -89,7 +84,7 @@ function HomeContent() {
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const r = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: 'no-store', credentials: 'include' });
+        const r = await authFetch(`${API_ENDPOINTS.supplier.cart.base}/me`, { cache: 'no-store' });
         const j = await r.json();
         const items = j?.data?.items || [];
         let sum = 0;

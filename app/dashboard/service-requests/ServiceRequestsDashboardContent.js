@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "../../config/api";
 import { useAuth } from "../../context/AuthContext";
+import { isAdmin } from "../../utils/roles";
 import {
   DETAIL_FIELD_LABELS_FA,
   PAYMENT_METHOD_LABELS_FA,
@@ -52,8 +53,7 @@ export default function ServiceRequestsDashboardContent() {
   const [saving, setSaving] = useState(false);
   const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "");
 
-  const roles = (auth?.user?.roles || []).map((r) => (r.nameEn || r.name || "").toLowerCase());
-  const isAdmin = roles.includes("administrator") || roles.includes("admin");
+  const admin = isAdmin(auth?.user);
 
   const loadRequests = async () => {
     try {
@@ -74,12 +74,12 @@ export default function ServiceRequestsDashboardContent() {
   };
 
   useEffect(() => {
-    if (!auth?.loading && !isAdmin) {
+    if (!auth?.loading && !admin) {
       router.replace("/dashboard");
       return;
     }
-    if (isAdmin) loadRequests();
-  }, [auth?.loading, isAdmin, router, typeFilter]);
+    if (admin) loadRequests();
+  }, [auth?.loading, admin, router, typeFilter]);
 
   const openDetail = (item) => {
     setSelected(item);
@@ -129,13 +129,12 @@ export default function ServiceRequestsDashboardContent() {
     );
   }
 
-  if (!isAdmin) return null;
+  if (!admin) return null;
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2">درخواست‌های خدمات بازرگانی</h1>
           <p className="text-sm text-gray-600">مدیریت درخواست‌های ثبت‌شده از صفحه اصلی</p>
         </div>
         <label className="text-sm">

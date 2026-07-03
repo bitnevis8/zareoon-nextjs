@@ -131,7 +131,7 @@ export default function ProductReportPage({ params }) {
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">کل موجودی</div><div className="text-lg font-semibold">{summary.totalQuantity?.toFixed(3)}</div></div>
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">رزرو شده</div><div className="text-lg font-semibold">{summary.reservedQuantity?.toFixed(3)}</div></div>
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">قابل عرضه</div><div className="text-lg font-semibold">{summary.availableQuantity?.toFixed(3)}</div></div>
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد کشاورزان</div><div className="text-lg font-semibold">{summary.uniqueFarmers}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد تأمین‌کننده</div><div className="text-lg font-semibold">{summary.uniqueFarmers}</div></div>
         <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد بارها</div><div className="text-lg font-semibold">{summary.lotsCount}</div></div>
       </div>
 
@@ -146,7 +146,7 @@ export default function ProductReportPage({ params }) {
               <th className="p-2">رزرو</th>
               <th className="p-2">قابل عرضه</th>
               <th className="p-2">تعداد بار</th>
-              <th className="p-2">تعداد کشاورز</th>
+              <th className="p-2">تعداد تأمین‌کننده</th>
             </tr>
           </thead>
           <tbody>
@@ -169,11 +169,11 @@ export default function ProductReportPage({ params }) {
 
       {/* By farmer */}
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <div className="p-3 font-semibold">تجمیع بر اساس کشاورز</div>
+        <div className="p-3 font-semibold">تجمیع بر اساس تأمین‌کننده</div>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">کشاورز</th>
+              <th className="p-2">تأمین‌کننده</th>
               <th className="p-2">کل</th>
               <th className="p-2">رزرو</th>
               <th className="p-2">قابل عرضه</th>

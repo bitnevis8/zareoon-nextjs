@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { authFetch } from "@/app/utils/authHeaders";
 
 export default function CartStatusBanner() {
   const [cartItems, setCartItems] = useState([]);
@@ -12,10 +13,7 @@ export default function CartStatusBanner() {
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const res = await fetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { 
-          cache: 'no-store', 
-          credentials: 'include' 
-        });
+        const res = await authFetch(`${API_ENDPOINTS.supplier.cart.base}/me`, { cache: "no-store" });
         const d = await res.json();
         setCartItems(d.data?.items || []);
       } catch (error) {

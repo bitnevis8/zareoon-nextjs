@@ -20,8 +20,8 @@ export default function CatalogBreadcrumb({ path, language, homeLabel }) {
   if (!path?.length) return null;
 
   return (
-    <nav className="flex flex-wrap items-center gap-1 text-xs sm:text-sm text-slate-500" aria-label="breadcrumb">
-      <Link href="/" className="hover:text-green-700 transition-colors">
+    <nav className="-mx-3 flex items-center gap-1 overflow-x-auto px-3 pb-1 text-xs text-slate-500 sm:mx-0 sm:px-0 sm:text-sm" aria-label="breadcrumb">
+      <Link href="/" className="text-slate-500 transition-colors hover:text-green-700">
         {homeLabel}
       </Link>
       {path.map((node, index) => {
@@ -31,9 +31,9 @@ export default function CatalogBreadcrumb({ path, language, homeLabel }) {
           <span key={node.id} className="inline-flex items-center gap-1">
             <span className="text-slate-300">/</span>
             {isLast ? (
-              <span className="font-medium text-slate-700">{label}</span>
+              <span className="font-medium text-slate-800">{label}</span>
             ) : (
-              <Link href={`/catalog/${node.id}`} className="hover:text-green-700 transition-colors">
+              <Link href={`/catalog/${node.id}`} className="text-slate-500 transition-colors hover:text-green-700">
                 {label}
               </Link>
             )}

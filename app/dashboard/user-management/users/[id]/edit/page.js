@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import AvatarUpload from "@/app/components/ui/AvatarUpload";
+import { ENTITY_TYPE_OPTIONS } from "@/app/data/entityTypes";
 
 const EditUserPage = () => {
   const router = useRouter();
@@ -22,7 +23,8 @@ const EditUserPage = () => {
     businessContactInfo: "",
     password: "",
     roleIds: [],
-    avatar: ""
+    avatar: "",
+    entityType: "individual",
   });
   const [roles, setRoles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -51,6 +53,7 @@ const EditUserPage = () => {
             password: "", // رمز عبور خالی برای ویرایش
             roleIds: roleIds,
             avatar: userData.data.avatar || "",
+            entityType: userData.data.entityType || "individual",
           });
         } else {
           setError(userData.message || "خطا در دریافت اطلاعات کاربر");
@@ -184,6 +187,7 @@ const EditUserPage = () => {
                     currentAvatar={formData.avatar}
                     onUploadSuccess={handleAvatarUpload}
                     userId={id}
+                    variant="classic"
                   />
                 </div>
 
@@ -304,6 +308,30 @@ const EditUserPage = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="entityType" className="block text-sm font-medium text-gray-700 mb-2">
+                      نوع هویت (حقیقی / حقوقی)
+                    </label>
+                    <select
+                      id="entityType"
+                      name="entityType"
+                      value={formData.entityType}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    >
+                      {ENTITY_TYPE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-gray-500">
+                      در حساب عمومی (Account) ذخیره می‌شود — فیلدهای تخصصی از داشبورد صفحه عمومی قابل تکمیل است.
+                    </p>
                   </div>
                 </div>
 

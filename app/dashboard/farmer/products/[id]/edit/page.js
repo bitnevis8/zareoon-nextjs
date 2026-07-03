@@ -22,6 +22,7 @@ export default function EditProductPage({ params }) {
     isOrderable: true,
     supplyCountry: "IR",
     supplyCity: "",
+    description: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,6 +54,7 @@ export default function EditProductPage({ params }) {
             isOrderable: Boolean(it.isOrderable),
             supplyCountry: it.supplyCountry || "IR",
             supplyCity: it.supplyCity || "",
+            description: it.description || "",
           });
         }
       } finally {
@@ -77,6 +79,7 @@ export default function EditProductPage({ params }) {
         isOrderable: Boolean(form.isOrderable),
         supplyCountry: form.supplyCountry || "IR",
         supplyCity: form.supplyCity?.trim() || null,
+        description: form.description?.trim() || null,
       };
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json' };
@@ -121,6 +124,16 @@ export default function EditProductPage({ params }) {
             ))}
           </select>
           <input className="border p-2 rounded" placeholder="شهر عرضه (اختیاری)" value={form.supplyCity} onChange={(e)=>setForm({...form, supplyCity:e.target.value})} />
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-sm font-medium text-gray-700">توضیحات محصول (اختیاری)</label>
+            <textarea
+              className="w-full rounded border p-2 text-sm"
+              rows={4}
+              placeholder="توضیحات کلی محصول که در صفحه کاتالوگ نمایش داده می‌شود"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
           <select className="border p-2 rounded" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})}>
             <option value="">بدون والد (دسته ریشه)</option>
             {categories.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
