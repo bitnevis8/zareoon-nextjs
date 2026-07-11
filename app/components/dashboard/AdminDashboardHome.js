@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { getRoleLabelFa } from "@/app/utils/roles";
 import SimpleBarChart from "./SimpleBarChart";
+import { dash } from "./dashboardTheme";
 
 const ORDER_STATUS_FA = {
   pending: "در انتظار",
@@ -25,16 +26,16 @@ const SERVICE_STATUS_FA = {
 
 function KpiCard({ label, value, hint, tone = "emerald", href }) {
   const tones = {
-    emerald: "border-emerald-100 bg-emerald-50/50 text-emerald-800",
-    sky: "border-sky-100 bg-sky-50/50 text-sky-800",
-    amber: "border-amber-100 bg-amber-50/50 text-amber-900",
-    violet: "border-violet-100 bg-violet-50/50 text-violet-800",
+    emerald: "border-emerald-100 bg-emerald-50/60 text-emerald-900",
+    sky: "border-sky-100 bg-sky-50/60 text-sky-900",
+    amber: "border-amber-100 bg-amber-50/60 text-amber-900",
+    violet: "border-violet-100 bg-violet-50/60 text-violet-900",
   };
   const inner = (
-    <div className={`rounded-2xl border p-4 shadow-sm transition hover:shadow-md ${tones[tone] || tones.emerald}`}>
-      <p className="text-[11px] font-medium text-slate-500 sm:text-xs">{label}</p>
-      <p className="mt-1 text-2xl font-bold tabular-nums sm:text-3xl">{value.toLocaleString("fa-IR")}</p>
-      {hint ? <p className="mt-1 text-xs opacity-80">{hint}</p> : null}
+    <div className={`${dash.card} p-4 transition hover:shadow-md ${tones[tone] || tones.emerald}`}>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums">{value.toLocaleString("fa-IR")}</p>
+      {hint ? <p className="mt-1 text-xs opacity-75">{hint}</p> : null}
     </div>
   );
   return href ? <Link href={href}>{inner}</Link> : inner;
@@ -46,29 +47,33 @@ export default function AdminDashboardHome({ user }) {
   const [orders, setOrders] = useState([]);
   const [lots, setLots] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
+  const [tradeProviders, setTradeProviders] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const [uRes, oRes, lRes, sRes] = await Promise.all([
+        const [uRes, oRes, lRes, sRes, tpRes] = await Promise.all([
           authFetch(API_ENDPOINTS.users.getAll),
           authFetch(API_ENDPOINTS.supplier.orders.getAdminOrders, { cache: "no-store" }),
           authFetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
           authFetch(API_ENDPOINTS.serviceRequests.getAll, { cache: "no-store" }),
+          authFetch(API_ENDPOINTS.tradeServiceProviders.getAll, { cache: "no-store" }),
         ]);
-        const [uData, oData, lData, sData] = await Promise.all([
+        const [uData, oData, lData, sData, tpData] = await Promise.all([
           uRes.json(),
           oRes.json(),
           lRes.json(),
           sRes.json(),
+          tpRes.json(),
         ]);
         if (cancelled) return;
         setUsers(uData?.data || []);
         setOrders(oData?.data || []);
         setLots(lData?.data || []);
         setServiceRequests(sData?.data || []);
+        setTradeProviders(tpData?.data || []);
       } catch (e) {
         console.error("Dashboard stats:", e);
       } finally {
@@ -82,6 +87,7 @@ export default function AdminDashboardHome({ user }) {
 
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
   const pendingServices = serviceRequests.filter((s) => s.status === "pending").length;
+  const pendingProviders = tradeProviders.filter((p) => p.status === "pending").length;
   const activeLots = lots.filter((l) => l.status === "harvested" || l.status === "on_field").length;
 
   const orderChart = useMemo(() => {
@@ -140,14 +146,15 @@ export default function AdminDashboardHome({ user }) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <p className="text-sm text-slate-600">
-          سلام <span className="font-semibold text-slate-900">{user?.firstName}</span>، خلاصه وضعیت سامانه را اینجا ببینید.
+    <div className={dash.page}>
+      <header>
+        <h1 className={dash.pageTitle}>داشبورد مدیریت</h1>
+        <p className={dash.pageSubtitle}>
+          سلام {user?.firstName}، خلاصه وضعیت سامانه را اینجا ببینید.
         </p>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className={dash.gridKpi}>
         <KpiCard label="کاربران" value={users.length} href="/dashboard/user-management/users" tone="violet" />
         <KpiCard
           label="سفارش‌ها"
@@ -170,44 +177,51 @@ export default function AdminDashboardHome({ user }) {
           href="/dashboard/service-requests"
           tone="sky"
         />
+        <KpiCard
+          label="ارائه‌دهندگان"
+          value={tradeProviders.length}
+          hint={`${pendingProviders.toLocaleString("fa-IR")} در انتظار`}
+          href="/dashboard/trade-service-providers"
+          tone="violet"
+        />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className={dash.grid2}>
         <SimpleBarChart title="وضعیت سفارش‌ها" items={orderChart} />
         <SimpleBarChart title="کاربران بر اساس نقش" items={roleChart} />
       </div>
 
       <SimpleBarChart title="درخواست‌های خدمات بازرگانی" items={serviceChart} />
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
-          <h3 className="text-sm font-bold text-slate-800">آخرین سفارش‌ها</h3>
+      <div className={dash.card}>
+        <div className={dash.cardHeader}>
+          <h3 className={dash.cardTitle}>آخرین سفارش‌ها</h3>
           <Link href="/dashboard/order-management" className="text-xs font-medium text-emerald-700 hover:underline">
             مشاهده همه
           </Link>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+        <div className={dash.tableWrap}>
+          <table className={dash.table}>
             <thead>
-              <tr className="bg-slate-50 text-right text-xs text-slate-500">
-                <th className="px-4 py-2.5 font-medium">#</th>
-                <th className="px-4 py-2.5 font-medium">وضعیت</th>
-                <th className="px-4 py-2.5 font-medium">تاریخ</th>
+              <tr className="bg-slate-50">
+                <th className={dash.th}>#</th>
+                <th className={dash.th}>وضعیت</th>
+                <th className={dash.th}>تاریخ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {recentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan={3} className={dash.empty}>
                     سفارشی ثبت نشده
                   </td>
                 </tr>
               ) : (
                 recentOrders.map((o) => (
                   <tr key={o.id} className="hover:bg-slate-50/80">
-                    <td className="px-4 py-2.5 font-mono text-slate-600">{o.id}</td>
-                    <td className="px-4 py-2.5">{ORDER_STATUS_FA[o.status] || o.status}</td>
-                    <td className="px-4 py-2.5 text-slate-500">
+                    <td className={`${dash.td} font-mono text-slate-600`}>{o.id}</td>
+                    <td className={dash.td}>{ORDER_STATUS_FA[o.status] || o.status}</td>
+                    <td className={`${dash.td} text-slate-500`}>
                       {o.createdAt
                         ? new Date(o.createdAt).toLocaleDateString("fa-IR", {
                             month: "short",
@@ -223,19 +237,20 @@ export default function AdminDashboardHome({ user }) {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {[
-          { href: "/dashboard/user-management/users", label: "مدیریت کاربران", icon: "👤" },
-          { href: "/dashboard/supplier/inventory", label: "لیست محصولات", icon: "📦" },
-          { href: "/dashboard/order-management", label: "مدیریت سفارش‌ها", icon: "📋" },
-          { href: "/dashboard/service-requests", label: "درخواست‌های خدمات", icon: "📥" },
+          { href: "/dashboard/user-management/users", label: "مدیریت کاربران" },
+          { href: "/dashboard/supplier/inventory", label: "لیست محصولات" },
+          { href: "/dashboard/order-management", label: "مدیریت سفارش‌ها" },
+          { href: "/dashboard/service-requests", label: "درخواست‌های خدمات" },
+          { href: "/dashboard/trade-service-providers", label: "ارائه‌دهندگان" },
+          { href: "/dashboard/settings", label: "تنظیمات" },
         ].map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50/30"
+            className={`${dash.card} flex h-11 items-center px-4 text-sm font-medium text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50/40`}
           >
-            <span className="text-lg">{link.icon}</span>
             {link.label}
           </Link>
         ))}

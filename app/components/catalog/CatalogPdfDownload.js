@@ -1,22 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/app/context/AuthContext";
 import { generateCatalogPdf } from "@/app/utils/catalogPdf/generateCatalogPdf";
+import { canDownloadCatalogPdf } from "@/app/utils/catalogPdfAccess";
 
 export default function CatalogPdfDownload({
   scope = "full",
   productId,
   categoryId,
   lotId,
+  supplierUserId,
+  productIsOrderable = true,
+  user: userProp,
   label,
   variant = "catalog",
   className = "",
   compact = false,
   block = false,
 }) {
+  const auth = useAuth();
+  const user = userProp ?? auth?.user ?? null;
+  const allowed = canDownloadCatalogPdf({ user, scope, productIsOrderable, supplierUserId });
+
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
+
+  if (!allowed) return null;
 
   const download = async () => {
     setError("");
@@ -28,6 +39,9 @@ export default function CatalogPdfDownload({
         productId,
         categoryId,
         lotId,
+        supplierUserId,
+        productIsOrderable,
+        user,
         onProgress: (p) => {
           if (typeof p === "string" && p.startsWith("page-")) {
             const [, cur, total] = p.split("-");
@@ -39,7 +53,7 @@ export default function CatalogPdfDownload({
       });
     } catch (e) {
       console.error(e);
-      setError("خطا در ساخت PDF. دوباره تلاش کنید.");
+      setError(e?.message || "خطا در ساخت PDF. دوباره تلاش کنید.");
     } finally {
       setLoading(false);
       setProgress("");

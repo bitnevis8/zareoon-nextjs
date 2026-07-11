@@ -1,4 +1,5 @@
 import { fetchCatalogPdfData, buildPdfPages } from "./catalogPdfBuilder";
+import { assertCatalogPdfAccess } from "../catalogPdfAccess";
 
 function slugify(name) {
   return (name || "catalog")
@@ -74,9 +75,20 @@ async function renderPageToCanvas(pageHtml, spec) {
   }
 }
 
-export async function generateCatalogPdf({ scope = "full", productId, categoryId, lotId, onProgress }) {
+export async function generateCatalogPdf({
+  scope = "full",
+  productId,
+  categoryId,
+  lotId,
+  supplierUserId,
+  productIsOrderable = true,
+  user,
+  onProgress,
+}) {
+  assertCatalogPdfAccess({ user, scope, productIsOrderable, supplierUserId });
+
   onProgress?.("loading");
-  const data = await fetchCatalogPdfData({ scope, productId, categoryId, lotId });
+  const data = await fetchCatalogPdfData({ scope, productId, categoryId, lotId, supplierUserId });
 
   onProgress?.("rendering");
   const { pages, spec } = buildPdfPages(data);

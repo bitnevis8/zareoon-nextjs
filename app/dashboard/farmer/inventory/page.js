@@ -170,7 +170,15 @@ export default function InventoryListPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {isAdmin(user) ? (
-            <CatalogPdfDownload scope="full" label="دانلود PDF کاتالوگ" variant="dashboard" />
+            <CatalogPdfDownload scope="full" label="دانلود PDF کاتالوگ" variant="dashboard" user={user} />
+          ) : isOwnScope && user?.id ? (
+            <CatalogPdfDownload
+              scope="supplier-own"
+              supplierUserId={user.id}
+              label="دانلود کاتالوگ محصولات من"
+              variant="dashboard"
+              user={user}
+            />
           ) : null}
           <Link href={isOwnScope ? "/dashboard/supplier/inventory/create?scope=own" : "/dashboard/supplier/inventory/create"} className={inv.btnPrimary}>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

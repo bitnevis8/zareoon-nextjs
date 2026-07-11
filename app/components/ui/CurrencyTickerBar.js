@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CALENDAR_MODES, formatCalendar } from "@/app/utils/calendars";
+import CategoryMegaMenu from "@/app/components/CategoryMegaMenu";
 
 function formatPrice(value) {
   if (value == null) return "—";
@@ -53,6 +53,28 @@ function TickerStrip({ rates }) {
         ))}
       </div>
     </>
+  );
+}
+
+function ExchangeRatesButton() {
+  const router = useRouter();
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        router.push("/exchange-rates");
+      }}
+      className="z-10 flex h-full shrink-0 items-center gap-1.5 border-r border-emerald-200/80 bg-emerald-50/90 px-2.5 transition hover:bg-emerald-100/90 sm:gap-2 sm:px-3"
+      aria-label="نرخ ارز و مبدل ارز"
+    >
+      <span className="text-sm sm:text-base" aria-hidden>
+        💱
+      </span>
+      <span className="whitespace-nowrap text-[10px] font-bold text-emerald-900 sm:text-xs">نرخ ارز</span>
+    </button>
   );
 }
 
@@ -146,12 +168,7 @@ export default function CurrencyTickerBar() {
       role="region"
       aria-label="نرخ ارز روز"
     >
-      <Link
-        href="/exchange-rates"
-        className="z-10 flex shrink-0 items-center border-l border-emerald-200/80 bg-emerald-600 px-3 text-xs font-extrabold text-white shadow-sm sm:px-4 sm:text-sm"
-      >
-        نرخ ارز
-      </Link>
+      <CategoryMegaMenu />
 
       <div
         dir="ltr"
@@ -167,6 +184,7 @@ export default function CurrencyTickerBar() {
         </div>
       </div>
 
+      <ExchangeRatesButton />
       <CalendarBadge />
     </div>
   );

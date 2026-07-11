@@ -1,4 +1,8 @@
+import { L1_CATEGORY_IDS, LEGACY_SERVICE_TYPE_MAP } from "./tradeServicesCatalog";
+
+/** All valid L1 ids plus legacy slugs kept for older links and stored requests */
 export const SERVICE_TYPES = [
+  ...L1_CATEGORY_IDS,
   "trade",
   "logistics",
   "customs",
@@ -9,23 +13,32 @@ export const SERVICE_TYPES = [
   "documents",
 ];
 
+export function normalizeServiceType(type) {
+  return LEGACY_SERVICE_TYPE_MAP[type] || type;
+}
+
 export function isValidServiceType(type) {
   return SERVICE_TYPES.includes(type);
 }
+
+const genericTradeFields = [
+  { name: "originCountry", type: "text", labelKey: "srFormOriginCountry" },
+  { name: "destinationCountry", type: "text", labelKey: "srFormDestinationCountry" },
+  { name: "serviceScope", type: "textarea", labelKey: "srFormServiceScope" },
+];
 
 /** @typedef {{ name: string, type: 'text'|'textarea'|'select'|'number', labelKey: string, options?: {value:string,labelKey:string}[], required?: boolean }} FormField */
 
 /** @type {Record<string, { showTradeType?: boolean, extraFields: FormField[] }>} */
 export const serviceRequestFormConfig = {
-  trade: {
+  "import-export": {
     showTradeType: true,
     extraFields: [
-      { name: "originCountry", type: "text", labelKey: "srFormOriginCountry" },
-      { name: "destinationCountry", type: "text", labelKey: "srFormDestinationCountry" },
+      ...genericTradeFields,
       { name: "incoterm", type: "text", labelKey: "srFormIncoterm" },
     ],
   },
-  logistics: {
+  "intl-logistics": {
     showTradeType: true,
     extraFields: [
       {
@@ -37,6 +50,7 @@ export const serviceRequestFormConfig = {
           { value: "air", labelKey: "srFormTransportAir" },
           { value: "road", labelKey: "srFormTransportRoad" },
           { value: "rail", labelKey: "srFormTransportRail" },
+          { value: "multimodal", labelKey: "srFormTransportMultimodal" },
         ],
       },
       { name: "originLocation", type: "text", labelKey: "srFormOriginLocation" },
@@ -44,7 +58,7 @@ export const serviceRequestFormConfig = {
       { name: "cargoWeight", type: "text", labelKey: "srFormCargoWeight" },
     ],
   },
-  customs: {
+  "customs-clearance": {
     showTradeType: true,
     extraFields: [
       { name: "portOfEntry", type: "text", labelKey: "srFormPortOfEntry" },
@@ -52,7 +66,7 @@ export const serviceRequestFormConfig = {
       { name: "declarationType", type: "text", labelKey: "srFormDeclarationType" },
     ],
   },
-  finance: {
+  "intl-finance": {
     showTradeType: true,
     extraFields: [
       {
@@ -69,7 +83,7 @@ export const serviceRequestFormConfig = {
       { name: "bankName", type: "text", labelKey: "srFormBankName" },
     ],
   },
-  inspection: {
+  "inspection-standards": {
     showTradeType: true,
     extraFields: [
       { name: "inspectionType", type: "text", labelKey: "srFormInspectionType" },
@@ -77,7 +91,7 @@ export const serviceRequestFormConfig = {
       { name: "inspectionLocation", type: "text", labelKey: "srFormInspectionLocation" },
     ],
   },
-  insurance: {
+  "insurance-risk": {
     showTradeType: true,
     extraFields: [
       { name: "insuranceCoverage", type: "text", labelKey: "srFormInsuranceCoverage" },
@@ -85,13 +99,50 @@ export const serviceRequestFormConfig = {
       { name: "routeDescription", type: "textarea", labelKey: "srFormRouteDescription" },
     ],
   },
-  consulting: {
+  "legal-trade": {
+    showTradeType: false,
+    extraFields: [
+      { name: "contractType", type: "text", labelKey: "srFormContractType" },
+      { name: "jurisdiction", type: "text", labelKey: "srFormJurisdiction" },
+      { name: "legalTopic", type: "textarea", labelKey: "srFormLegalTopic" },
+    ],
+  },
+  "market-development": {
+    showTradeType: false,
+    extraFields: [
+      { name: "targetMarket", type: "text", labelKey: "srFormTargetMarket" },
+      { name: "marketingGoal", type: "textarea", labelKey: "srFormMarketingGoal" },
+    ],
+  },
+  "packaging-prep": {
+    showTradeType: true,
+    extraFields: [
+      { name: "productType", type: "text", labelKey: "srFormProductType" },
+      { name: "packagingRequirements", type: "textarea", labelKey: "srFormPackagingRequirements" },
+    ],
+  },
+  "specialized-trade": {
     showTradeType: false,
     extraFields: [
       { name: "targetMarket", type: "text", labelKey: "srFormTargetMarket" },
       { name: "consultationTopic", type: "textarea", labelKey: "srFormConsultationTopic" },
     ],
   },
+  // Legacy aliases — same configs as mapped L1 categories
+  trade: {
+    showTradeType: true,
+    extraFields: [
+      { name: "originCountry", type: "text", labelKey: "srFormOriginCountry" },
+      { name: "destinationCountry", type: "text", labelKey: "srFormDestinationCountry" },
+      { name: "incoterm", type: "text", labelKey: "srFormIncoterm" },
+    ],
+  },
+  logistics: { showTradeType: true, extraFields: [] },
+  customs: { showTradeType: true, extraFields: [] },
+  finance: { showTradeType: true, extraFields: [] },
+  inspection: { showTradeType: true, extraFields: [] },
+  insurance: { showTradeType: true, extraFields: [] },
+  consulting: { showTradeType: false, extraFields: [] },
   documents: {
     showTradeType: true,
     extraFields: [
@@ -101,7 +152,39 @@ export const serviceRequestFormConfig = {
   },
 };
 
+// Fix circular reference for legacy aliases — assign after object is fully defined
+serviceRequestFormConfig.logistics.extraFields =
+  serviceRequestFormConfig["intl-logistics"].extraFields;
+serviceRequestFormConfig.customs.extraFields =
+  serviceRequestFormConfig["customs-clearance"].extraFields;
+serviceRequestFormConfig.finance.extraFields = serviceRequestFormConfig["intl-finance"].extraFields;
+serviceRequestFormConfig.inspection.extraFields =
+  serviceRequestFormConfig["inspection-standards"].extraFields;
+serviceRequestFormConfig.insurance.extraFields =
+  serviceRequestFormConfig["insurance-risk"].extraFields;
+serviceRequestFormConfig.consulting.extraFields =
+  serviceRequestFormConfig["specialized-trade"].extraFields;
+
+export function getServiceRequestConfig(serviceType) {
+  const normalized = normalizeServiceType(serviceType);
+  return (
+    serviceRequestFormConfig[serviceType] ||
+    serviceRequestFormConfig[normalized] ||
+    serviceRequestFormConfig["import-export"]
+  );
+}
+
 export const SERVICE_TYPE_LABELS_FA = {
+  "import-export": "خدمات واردات و صادرات",
+  "intl-logistics": "حمل‌ونقل و لجستیک بین‌المللی",
+  "customs-clearance": "گمرک و ترخیص کالا",
+  "intl-finance": "خدمات مالی و پرداخت بین‌المللی",
+  "inspection-standards": "بازرسی و استاندارد",
+  "insurance-risk": "بیمه و مدیریت ریسک",
+  "legal-trade": "خدمات حقوقی و قراردادهای تجاری",
+  "market-development": "بازاریابی و توسعه بازار",
+  "packaging-prep": "بسته‌بندی و آماده‌سازی کالا",
+  "specialized-trade": "خدمات تجاری تخصصی",
   trade: "واردات و صادرات",
   logistics: "حمل‌ونقل بین‌المللی",
   customs: "ترخیص و امور گمرکی",
@@ -116,6 +199,7 @@ export const DETAIL_FIELD_LABELS_FA = {
   originCountry: "کشور مبدأ",
   destinationCountry: "کشور مقصد",
   incoterm: "اینکوترمز",
+  serviceScope: "دامنه خدمات درخواستی",
   transportMode: "روش حمل",
   originLocation: "مبدأ حمل",
   destinationLocation: "مقصد حمل",
@@ -133,6 +217,12 @@ export const DETAIL_FIELD_LABELS_FA = {
   routeDescription: "مسیر حمل",
   targetMarket: "بازار هدف",
   consultationTopic: "موضوع مشاوره",
+  contractType: "نوع قرارداد",
+  jurisdiction: "قانون حاکم / حوزه قضایی",
+  legalTopic: "موضوع حقوقی",
+  marketingGoal: "هدف بازاریابی",
+  productType: "نوع کالا",
+  packagingRequirements: "الزامات بسته‌بندی",
   requiredDocuments: "اسناد موردنیاز",
   shipmentDeadline: "مهلت ارسال",
 };
@@ -142,6 +232,7 @@ export const TRANSPORT_MODE_LABELS_FA = {
   air: "هوایی",
   road: "زمینی",
   rail: "ریلی",
+  multimodal: "ترکیبی",
 };
 
 export const PAYMENT_METHOD_LABELS_FA = {

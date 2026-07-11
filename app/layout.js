@@ -1,14 +1,10 @@
-import { Suspense } from "react";
 import "./globals.css";
-import Footer from "./components/ui/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import { LanguageProvider } from "./context/LanguageContext";
-import Header from "./components/ui/Header/Header";
-import ClientSideWrapper from "./components/ui/ClientSideWrapper";
 import StructuredData from "./components/StructuredData";
-import GlobalSidebar from "./components/ui/GlobalSidebar";
-import MobileBottomBar from "./components/MobileBottomBar";
+import AppToaster from "./components/ui/AppToaster";
+import SiteChrome from "./components/ui/SiteChrome";
 
 export const metadata = {
   title: {
@@ -77,34 +73,13 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl" data-theme="taganeh" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col bg-gray-50">
+      <body className="min-h-dvh flex flex-col bg-slate-50 antialiased">
         <StructuredData />
         <LanguageProvider>
+          <AppToaster />
           <AuthProvider>
             <SidebarProvider>
-              {/* Header */}
-              <Header />
-
-              {/* Main Content */}
-              <div className="flex-1 pb-[4.25rem] lg:pb-0 max-lg:pt-[4.25rem] lg:pt-0">
-                {children}
-              </div>
-
-              {/* Footer */}
-              <Footer />
-
-              {/* Global Sidebar - Available on all pages for logged-in users */}
-              <ClientSideWrapper>
-                <GlobalSidebar />
-              </ClientSideWrapper>
-
-              {/* Mobile Bottom Bar - Available on all pages */}
-              <ClientSideWrapper>
-                <Suspense fallback={null}>
-                  <MobileBottomBar />
-                </Suspense>
-              </ClientSideWrapper>
-
+              <SiteChrome>{children}</SiteChrome>
             </SidebarProvider>
           </AuthProvider>
         </LanguageProvider>

@@ -534,7 +534,7 @@ function supplierImagePageHtml(src, imageMap, logo, lot) {
   `;
 }
 
-export async function fetchCatalogPdfData({ scope = "full", productId, categoryId, lotId }) {
+export async function fetchCatalogPdfData({ scope = "full", productId, categoryId, lotId, supplierUserId }) {
   const [allProducts, allLots] = await Promise.all([
     fetchJson(API_ENDPOINTS.supplier.products.getAll),
     fetchJson(API_ENDPOINTS.supplier.inventoryLots.getAll),
@@ -581,6 +581,12 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
   } else if (scope === "category" && categoryId) {
     const ids = collectDescendantIds(products, categoryId);
     targetProducts = products.filter((p) => ids.has(p.id) && p.isOrderable);
+  } else if (scope === "supplier-own" && supplierUserId != null) {
+    const farmerId = Number(supplierUserId);
+    const ownProductIds = new Set(
+      lots.filter((l) => Number(l.farmerId) === farmerId).map((l) => Number(l.productId))
+    );
+    targetProducts = products.filter((p) => ownProductIds.has(p.id));
   } else {
     targetProducts = products.filter((p) => p.isOrderable);
   }
@@ -588,7 +594,10 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
   targetProducts = targetProducts.sort((a, b) => (a.name || "").localeCompare(b.name || "", "fa"));
 
   for (const product of targetProducts) {
-    const productLots = lots.filter((l) => Number(l.productId) === Number(product.id));
+    let productLots = lots.filter((l) => Number(l.productId) === Number(product.id));
+    if (scope === "supplier-own" && supplierUserId != null) {
+      productLots = productLots.filter((l) => Number(l.farmerId) === Number(supplierUserId));
+    }
     const withStock = productLots.filter((l) => lotAvailable(l) > 0);
     const lotsToExport = withStock.length ? withStock : productLots.slice(0, 5);
 
@@ -606,6 +615,7 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
   let title = "کاتالوگ محصولات زارعون";
   if (scope === "product" && productId) title = productMap.get(Number(productId))?.name || title;
   else if (scope === "category" && categoryId) title = productMap.get(Number(categoryId))?.name || title;
+  else if (scope === "supplier-own") title = "کاتالوگ محصولات من";
 
   const imageMap = await preloadImages(allImageUrls);
 

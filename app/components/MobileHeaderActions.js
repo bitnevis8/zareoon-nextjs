@@ -6,6 +6,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import LoginRequiredMessage from "./LoginRequiredMessage";
 import SearchModal from "./SearchModal";
+import HeaderNotificationBell from "./ui/Header/HeaderNotificationBell";
+import HeaderMessagesIcon from "./ui/Header/HeaderMessagesIcon";
 
 const iconBtnClass =
   "inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors";
@@ -68,9 +70,13 @@ export default function MobileHeaderActions() {
         </button>
 
         {showUser ? (
-          <Link href="/cart" className={iconBtnClass} aria-label={t("cart")} title={t("cart")} prefetch>
-            <CartIcon />
-          </Link>
+          <>
+            <HeaderMessagesIcon buttonClass={iconBtnClass} />
+            <HeaderNotificationBell buttonClass={iconBtnClass} />
+            <Link href="/cart" className={iconBtnClass} aria-label={t("cart")} title={t("cart")} prefetch>
+              <CartIcon />
+            </Link>
+          </>
         ) : (
           <LoginRequiredMessage>
             <button type="button" className={iconBtnClass} aria-label={t("cart")} title={t("cart")}>

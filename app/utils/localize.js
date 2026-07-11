@@ -6,6 +6,9 @@ export function getLocalizedText(entity, language, fallbackKey = "name") {
     if (entity.englishName) return entity.englishName;
   }
   if (language === "ar" && entity.arabicName) return entity.arabicName;
+  if (language === "tr" && entity.turkishName) return entity.turkishName;
+  if (language === "fi" && entity.finnishName) return entity.finnishName;
+  if ((language === "tr" || language === "fi") && entity.englishName) return entity.englishName;
   return entity[fallbackKey] || "";
 }
 
@@ -20,6 +23,8 @@ export function getNumberLocale(language) {
   if (language === "en") return "en-US";
   if (language === "ru") return "ru-RU";
   if (language === "ar") return "ar-EG";
+  if (language === "tr") return "tr-TR";
+  if (language === "fi") return "fi-FI";
   return "fa-IR";
 }
 

@@ -9,6 +9,9 @@ import LoginRequiredMessage from '../../LoginRequiredMessage';
 import MobileHeaderActions from '../../MobileHeaderActions';
 import LanguageSwitcher from './LanguageSwitcher';
 import CurrencyTickerBar from '../CurrencyTickerBar';
+import HeaderNotificationBell from './HeaderNotificationBell';
+import HeaderMessagesIcon from './HeaderMessagesIcon';
+import { useTailwindBreakpoint } from '../../../hooks/useTailwindBreakpoint';
 
 const headerIconBtnClass =
   'inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors';
@@ -26,6 +29,7 @@ function CartIcon() {
 export default function Header() {
   const { user, loading } = useAuth() || { user: null, loading: true };
   const { t, isRTL, isHydrated } = useLanguage();
+  const tailwindBp = useTailwindBreakpoint();
   const showUser = isHydrated && !loading ? user : null;
   const layoutRtl = !isHydrated || isRTL;
 
@@ -60,6 +64,12 @@ export default function Header() {
                       />
                       <div className="text-right leading-tight ps-0.5 min-w-0">
                         <h1 className="text-lg sm:text-2xl font-bold text-slate-800 whitespace-nowrap">
+                          <span
+                            className="me-1.5 align-middle text-xs font-mono font-semibold uppercase tracking-wide text-emerald-600 sm:text-sm"
+                            title="Tailwind breakpoint"
+                          >
+                            {tailwindBp}
+                          </span>
                           {t('siteName')}
                         </h1>
                         <div className="mt-0.5 hidden md:block">
@@ -75,6 +85,12 @@ export default function Header() {
                     <>
                       <div className="text-left leading-tight pe-0.5 min-w-0">
                         <h1 className="text-lg sm:text-2xl font-bold text-slate-800 whitespace-nowrap">
+                          <span
+                            className="me-1.5 align-middle text-xs font-mono font-semibold uppercase tracking-wide text-emerald-600 sm:text-sm"
+                            title="Tailwind breakpoint"
+                          >
+                            {tailwindBp}
+                          </span>
                           {t('siteName')}
                         </h1>
                         <div className="mt-0.5 hidden md:block">
@@ -98,21 +114,25 @@ export default function Header() {
                 </Link>
               </div>
 
-              <nav className="flex items-center gap-2 shrink-0">
+              <nav className="flex items-center gap-2 shrink-0 overflow-visible">
                 <LanguageSwitcher buttonClass={headerIconBtnClass} />
                 <MobileHeaderActions />
 
                 <div className="hidden md:flex items-center gap-2">
                   {showUser ? (
-                    <Link
-                      href="/cart"
-                      className={headerIconBtnClass}
-                      aria-label={t('cart')}
-                      title={t('cart')}
-                      prefetch={true}
-                    >
-                      <CartIcon />
-                    </Link>
+                    <>
+                      <HeaderMessagesIcon buttonClass={headerIconBtnClass} />
+                      <HeaderNotificationBell buttonClass={headerIconBtnClass} />
+                      <Link
+                        href="/cart"
+                        className={headerIconBtnClass}
+                        aria-label={t('cart')}
+                        title={t('cart')}
+                        prefetch={true}
+                      >
+                        <CartIcon />
+                      </Link>
+                    </>
                   ) : (
                     <LoginRequiredMessage>
                       <button type="button" className={headerIconBtnClass} aria-label={t('cart')} title={t('cart')}>

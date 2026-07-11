@@ -291,6 +291,8 @@ export default function CatalogItemPage({ params }) {
             scope={item.isOrderable ? "product" : "category"}
             productId={item.isOrderable ? productIdNum : undefined}
             categoryId={!item.isOrderable ? productIdNum : undefined}
+            productIsOrderable={item.isOrderable}
+            user={user}
             label={t("downloadCatalogPdf")}
             compact
             className="shrink-0 self-start sm:self-center"

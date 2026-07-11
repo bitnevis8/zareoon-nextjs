@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { API_ENDPOINTS } from "../config/api";
-import { getExclusiveServicesContent } from "../data/zareoonExclusiveServices";
-import { serviceRequestFormConfig } from "../data/serviceRequestForms";
+import { getCategoryById } from "../data/tradeServicesCatalog";
+import { getServiceRequestConfig, normalizeServiceType } from "../data/serviceRequestForms";
 
 const commonInitial = {
   fullName: "",
@@ -22,7 +22,7 @@ const commonInitial = {
 };
 
 function buildInitialForm(serviceType) {
-  const config = serviceRequestFormConfig[serviceType];
+  const config = getServiceRequestConfig(serviceType);
   const details = {};
   for (const field of config?.extraFields || []) {
     details[field.name] = "";
@@ -34,12 +34,12 @@ export default function ServiceRequestForm({ serviceType }) {
   const { t, isRTL, language } = useLanguage();
   const auth = useAuth();
   const router = useRouter();
-  const config = serviceRequestFormConfig[serviceType];
+  const normalizedType = normalizeServiceType(serviceType);
+  const config = getServiceRequestConfig(serviceType);
 
   const serviceMeta = useMemo(() => {
-    const content = getExclusiveServicesContent(language);
-    return content.items.find((item) => item.id === serviceType);
-  }, [language, serviceType]);
+    return getCategoryById(language, normalizedType);
+  }, [language, normalizedType]);
 
   const [form, setForm] = useState(() => buildInitialForm(serviceType));
   const [loading, setLoading] = useState(false);
@@ -91,7 +91,7 @@ export default function ServiceRequestForm({ serviceType }) {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          serviceType,
+          serviceType: normalizedType,
           fullName: form.fullName,
           company: form.company,
           phone: form.phone,

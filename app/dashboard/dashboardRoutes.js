@@ -82,6 +82,10 @@ export function buildDashboardBreadcrumbs(pathname, searchParams) {
       trail: [{ label: "مدیریت تامین" }, { label: "ترتیب نمایش" }],
     },
     {
+      match: "/dashboard/trade-service-providers",
+      trail: [{ label: "خدمات بازرگانی" }, { label: "ارائه‌دهندگان خدمات" }],
+    },
+    {
       match: "/dashboard/service-requests",
       trail: [{ label: "خدمات بازرگانی" }, { label: "مدیریت درخواست‌ها" }],
     },
@@ -103,11 +107,41 @@ export function buildDashboardBreadcrumbs(pathname, searchParams) {
     },
     {
       match: "/dashboard/settings",
-      trail: [{ label: "تنظیمات" }],
+      trail: [{ label: "خدمات بازرگانی" }, { label: "تنظیمات" }],
     },
     {
       match: "/dashboard/lc-requests",
       trail: [{ label: "خدمات بازرگانی" }, { label: "درخواست‌های LC" }],
+    },
+    {
+      match: "/dashboard/submit-request",
+      trail: [{ label: "متقاضی" }, { label: "ثبت درخواست" }],
+    },
+    {
+      match: "/dashboard/applicant-requests",
+      trail: [{ label: "متقاضی" }, { label: "درخواست‌های من" }],
+    },
+    {
+      match: /^\/dashboard\/applicant-requests\/\d+/,
+      trail: [
+        { href: "/dashboard/applicant-requests", label: "درخواست‌های من" },
+        { label: "جزئیات درخواست" },
+      ],
+    },
+    {
+      match: "/dashboard/service-provider-profile",
+      trail: [{ label: "ارائه‌دهنده خدمات" }, { label: "پروفایل شرکت من" }],
+    },
+    {
+      match: "/dashboard/incoming-requests",
+      trail: [{ label: "درخواست‌های متقاضیان" }],
+    },
+    {
+      match: /^\/dashboard\/incoming-requests\/\d+/,
+      trail: [
+        { href: "/dashboard/incoming-requests", label: "درخواست‌های متقاضیان" },
+        { label: "جزئیات" },
+      ],
     },
   ];
 

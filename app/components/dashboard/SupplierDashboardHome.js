@@ -5,6 +5,7 @@ import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import SimpleBarChart from "./SimpleBarChart";
+import { dash } from "./dashboardTheme";
 
 export default function SupplierDashboardHome({ user }) {
   const [loading, setLoading] = useState(true);
@@ -52,25 +53,26 @@ export default function SupplierDashboardHome({ user }) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 sm:p-5">
-        <p className="text-sm text-slate-700">
-          {user?.firstName} عزیز، وضعیت محصولات و سفارشات خود را از اینجا پیگیری کنید.
+    <div className={dash.page}>
+      <header>
+        <h1 className={dash.pageTitle}>داشبورد فروشنده</h1>
+        <p className={dash.pageSubtitle}>
+          {user?.firstName} عزیز، محصولات خود را عرضه کنید و سفارشات خریداران را پیگیری کنید.
         </p>
-      </div>
+      </header>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className={`${dash.card} p-4`}>
           <p className="text-xs text-slate-500">محصولات من</p>
-          <p className="mt-1 text-2xl font-bold text-emerald-700">{lots.length.toLocaleString("fa-IR")}</p>
+          <p className="mt-1 text-2xl font-semibold text-emerald-700">{lots.length.toLocaleString("fa-IR")}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-slate-500">سفارشات مشتری</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{orders.length.toLocaleString("fa-IR")}</p>
+        <div className={`${dash.card} p-4`}>
+          <p className="text-xs text-slate-500">سفارشات خریداران</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-800">{orders.length.toLocaleString("fa-IR")}</p>
         </div>
-        <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-1">
+        <div className={`${dash.card} col-span-2 p-4 sm:col-span-1`}>
           <p className="text-xs text-slate-500">در انتظار</p>
-          <p className="mt-1 text-2xl font-bold text-amber-700">
+          <p className="mt-1 text-2xl font-semibold text-amber-700">
             {orders.filter((o) => o.status === "pending").length.toLocaleString("fa-IR")}
           </p>
         </div>
@@ -81,21 +83,21 @@ export default function SupplierDashboardHome({ user }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <Link
           href="/dashboard/supplier/inventory?scope=own"
-          className="rounded-xl border border-slate-200 bg-white p-4 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+          className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
         >
           محصولات من
         </Link>
         <Link
           href="/dashboard/supplier/inventory/create?scope=own"
-          className="rounded-xl border border-slate-200 bg-white p-4 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+          className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
         >
           ثبت محصول
         </Link>
         <Link
           href="/dashboard/supplier/orders?scope=own"
-          className="rounded-xl border border-slate-200 bg-white p-4 text-center text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+          className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
         >
-          سفارشات مشتری
+          سفارشات خریداران
         </Link>
       </div>
     </div>

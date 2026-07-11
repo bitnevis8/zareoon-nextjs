@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from "../config/api";
 import { useLanguage } from "../context/LanguageContext";
 import { getLocalizedText } from "../utils/localize";
 import { sortCatalogItems } from "../utils/productSort";
+import { getMainCategoryIcon, isMainRootCategory } from "../utils/mainCategoryIcons";
 
 function ChevronIcon({ className = "" }) {
   return (
@@ -106,35 +107,40 @@ export default function CategoryDrillDownMenu({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[10002] lg:hidden" role="dialog" aria-modal="true" aria-label={t("categoriesShort")}>
+    <div
+      className="fixed inset-0 z-[10002] lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("categoriesShort")}
+    >
       <button
         type="button"
-        className="absolute inset-0 bg-black/45 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
         onClick={onClose}
         aria-label={t("closeMenu")}
       />
 
-      <aside className="absolute inset-y-0 right-0 flex w-[min(100%,20rem)] flex-col bg-white shadow-2xl">
-        <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-3.5">
+      <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-2xl">
+        <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-3 sm:px-4">
           {canGoBack ? (
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-xl px-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
             >
               <ChevronIcon className={isRTL ? "" : "rotate-180"} />
               {t("back")}
             </button>
           ) : (
-            <span className="w-[4.5rem]" aria-hidden />
+            <span className="w-16 shrink-0" aria-hidden />
           )}
-          <h2 className={`flex-1 truncate text-base font-bold text-slate-900 ${isRTL ? "text-right" : "text-left"}`}>
+          <h2 className="min-w-0 flex-1 truncate text-base font-bold text-slate-900 sm:text-lg">
             {current.title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50"
             aria-label={t("closeMenu")}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -143,28 +149,34 @@ export default function CategoryDrillDownMenu({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {loading ? (
-            <div className="space-y-2 p-3">
+            <div className="space-y-2 p-3 sm:p-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100" />
+                <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100" />
               ))}
             </div>
           ) : items.length > 0 ? (
-            <ul className="divide-y divide-slate-100 p-2">
+            <ul className="space-y-1.5 p-2 sm:p-3">
               {items.map((item) => {
                 const label = getLocalizedText(item, language);
                 const drillable = hasChildren(item.id);
+                const showRootIcon = current.parentId == null && isMainRootCategory(item);
                 return (
                   <li key={item.id}>
                     <button
                       type="button"
                       onClick={() => handleItemClick(item)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3.5 text-sm font-medium text-slate-800 transition hover:bg-slate-50 active:bg-slate-100 ${
+                      className={`flex w-full min-h-[48px] items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-200 hover:bg-slate-50 active:bg-slate-100 sm:text-[15px] ${
                         isRTL ? "text-right" : "text-left"
                       }`}
                     >
-                      <span className="flex-1 truncate">{label}</span>
+                      {showRootIcon ? (
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-xl">
+                          {getMainCategoryIcon(item)}
+                        </span>
+                      ) : null}
+                      <span className="min-w-0 flex-1 leading-snug">{label}</span>
                       {drillable ? (
                         <ChevronIcon className={isRTL ? "rotate-180" : ""} />
                       ) : null}
@@ -174,11 +186,13 @@ export default function CategoryDrillDownMenu({ isOpen, onClose }) {
               })}
             </ul>
           ) : (
-            <p className="px-4 py-10 text-center text-sm text-slate-500">{t("noCategoryRegistered")}</p>
+            <p className="px-4 py-12 text-center text-sm text-slate-500 sm:text-base">
+              {t("noCategoryRegistered")}
+            </p>
           )}
         </div>
 
-        <div className="border-t border-slate-100 px-4 py-3 text-center text-[11px] text-slate-400">
+        <div className="shrink-0 border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500 sm:text-sm">
           {t("browseByCategoryHint")}
         </div>
       </aside>

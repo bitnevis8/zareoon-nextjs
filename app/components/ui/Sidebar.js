@@ -1,96 +1,147 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import { isAdmin, isCustomer, shouldShowSupplierPanel } from '@/app/utils/roles';
-import { AccountNavSubtitle } from '@/app/utils/accountNav';
-import Image from 'next/image';
+import { isAdmin, shouldShowSupplierPanel } from '@/app/utils/roles';
+import { useDashboardPersona } from '@/app/context/DashboardPersonaContext';
+import { useMyTradeServiceProvider } from '@/app/hooks/useMyTradeServiceProvider';
+import DashboardPersonaSwitcher from '@/app/components/dashboard/DashboardPersonaSwitcher';
 
 const adminMenuSections = [
   {
     title: 'مدیریت کاربران',
-    icon: '👤',
     submenu: [
-      { title: 'لیست کاربران', path: '/dashboard/user-management/users', icon: '🧑‍💼' },
-      { title: 'لیست نقش‌ها', path: '/dashboard/user-management/roles', icon: '🛡️' },
+      { title: 'لیست کاربران', path: '/dashboard/user-management/users' },
+      { title: 'لیست نقش‌ها', path: '/dashboard/user-management/roles' },
     ],
   },
   {
     title: 'مدیریت تامین',
-    icon: '🌾',
     submenu: [
-      { title: 'دسته‌بندی محصولات', path: '/dashboard/supplier/products', icon: '🗂️' },
-      { title: 'ویژگی‌های محصولات', path: '/dashboard/supplier/attributes', icon: '🔖' },
-      { title: 'لیست محصولات', path: '/dashboard/supplier/inventory', icon: '📦' },
-      { title: 'افزودن محصول جدید', path: '/dashboard/supplier/inventory/create', icon: '➕' },
-      { title: 'مدیریت لیست سفارش‌ها', path: '/dashboard/order-management', icon: '📋' },
-      { title: 'ترتیب نمایش', path: '/dashboard/homepage-order', icon: '↕️' },
+      { title: 'دسته‌بندی محصولات', path: '/dashboard/supplier/products' },
+      { title: 'ویژگی‌های محصولات', path: '/dashboard/supplier/attributes' },
+      { title: 'لیست محصولات', path: '/dashboard/supplier/inventory' },
+      { title: 'افزودن محصول', path: '/dashboard/supplier/inventory/create' },
+      { title: 'مدیریت سفارش‌ها', path: '/dashboard/order-management' },
+      { title: 'ترتیب نمایش', path: '/dashboard/homepage-order' },
     ],
   },
   {
-    title: 'خدمات بازرگانی',
-    icon: '🏢',
+    title: 'مدیریت خدمات',
     submenu: [
-      { title: 'مدیریت درخواست‌ها', path: '/dashboard/service-requests', icon: '📥' },
-      { title: 'دسته‌بندی خدمات', path: '/dashboard/service-categories', icon: '🗂️' },
+      { title: 'مدیریت درخواست‌ها', path: '/dashboard/service-requests' },
+      { title: 'ارائه‌دهندگان خدمات', path: '/dashboard/trade-service-providers' },
+      { title: 'دسته‌بندی خدمات', path: '/dashboard/service-categories' },
+      { title: 'تنظیمات', path: '/dashboard/settings' },
     ],
   },
 ];
 
-const supplierMenuLinks = [
-  { title: 'صفحه عمومی من', path: '/dashboard/supplier-profile', icon: '🪪' },
-  { title: 'محصولات من', path: '/dashboard/supplier/inventory?scope=own', icon: '📦' },
-  { title: 'افزودن محصول', path: '/dashboard/supplier/inventory/create?scope=own', icon: '➕' },
-  { title: 'سفارشات مشتری', path: '/dashboard/supplier/orders?scope=own', icon: '📋' },
+const sellerIncomingLink = { title: 'درخواست‌های متقاضیان', path: '/dashboard/incoming-requests' };
+
+const sellerMenuLinksFull = [
+  sellerIncomingLink,
+  { title: 'صفحه عمومی من', path: '/dashboard/supplier-profile' },
+  { title: 'محصولات من', path: '/dashboard/supplier/inventory?scope=own' },
+  { title: 'عرضه محصول', path: '/dashboard/supplier/inventory/create?scope=own' },
+  { title: 'سفارشات خریداران', path: '/dashboard/supplier/orders?scope=own' },
 ];
 
-function SectionDivider({ label }) {
+const sellerMenuLinksStart = [
+  { title: 'شروع فروشندگی', path: '/dashboard/supplier-profile' },
+];
+
+const servicesMenuLinksDefault = [
+  { title: 'فهرست خدمات', path: '/trade-services' },
+  { title: 'عضویت ارائه‌دهنده', path: '/trade-services/register' },
+  { title: 'درخواست همکاری', path: '/service-request/import-export' },
+];
+
+function buildServicesMenuLinks(provider) {
+  if (!provider) return servicesMenuLinksDefault;
+
+  const links = [{ title: 'پروفایل شرکت من', path: '/dashboard/service-provider-profile' }];
+
+  if (provider.status === 'approved') {
+    links.unshift({
+      title: 'صفحه عمومی شرکت',
+      path: `/trade-services/provider/${provider.id}`,
+    });
+  }
+
+  links.push(
+    { title: 'درخواست‌های متقاضیان', path: '/dashboard/incoming-requests' },
+    { title: 'فهرست خدمات', path: '/trade-services' },
+  );
+
+  return links;
+}
+
+const applicantMenuLinks = [
+  { title: 'ثبت درخواست', path: '/dashboard/submit-request' },
+  { title: 'درخواست‌های من', path: '/dashboard/applicant-requests' },
+  { title: 'مرور محصولات', path: '/catalog/browse' },
+  { title: 'سبد خرید', path: '/cart' },
+];
+
+const primaryLinks = [{ title: 'داشبورد', path: '/dashboard' }];
+
+function NavItem({ href, label, active, onClick, nested = false }) {
   return (
-    <div className="flex items-center gap-3 py-3" role="separator" aria-label={label}>
-      <span className="shrink-0 text-[11px] font-bold tracking-wide text-slate-500">{label}</span>
-      <div
-        className="h-px min-w-0 flex-1 bg-gradient-to-l from-slate-300/90 via-slate-200 to-transparent"
-        aria-hidden
-      />
-    </div>
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`flex h-9 items-center rounded-md px-3 text-[13px] font-medium transition-colors ${
+        nested ? 'mr-3' : ''
+      } ${
+        active
+          ? 'bg-emerald-50 text-emerald-800'
+          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+      }`}
+    >
+      <span className={`ml-2 h-1.5 w-1.5 shrink-0 rounded-full ${active ? 'bg-emerald-600' : 'bg-slate-300'}`} />
+      {label}
+    </Link>
   );
 }
 
-function SubmenuBlock({ item, openMenu, onToggle, onSubClick, isActive, onLinkClick }) {
-  const expanded = openMenu === item.title;
+function SectionLabel({ children }) {
+  return (
+    <p className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+      {children}
+    </p>
+  );
+}
+
+function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick }) {
+  const expanded = openMenu === section.title;
+  const sectionActive = section.submenu.some((item) => isActive(item.path));
 
   return (
-    <div className="space-y-1" onClick={(e) => e.stopPropagation()}>
+    <div className="px-2">
       <button
         type="button"
-        onClick={(e) => onToggle(item.title, e)}
-        className={`flex w-full items-center justify-between rounded-lg p-3 text-sm transition-colors hover:bg-gray-100 ${
-          expanded ? 'bg-gray-100' : ''
+        onClick={() => onToggle(section.title)}
+        className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-[13px] font-medium transition-colors ${
+          sectionActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
         }`}
       >
-        <div className="flex items-center">
-          <span className="ml-2 text-lg">{item.icon}</span>
-          <span className="font-medium">{item.title}</span>
-        </div>
-        <span className="text-lg text-slate-500">{expanded ? '▼' : '▶'}</span>
+        <span>{section.title}</span>
+        <span className="text-xs text-slate-400">{expanded ? '−' : '+'}</span>
       </button>
-
       {expanded ? (
-        <div className="mr-4 mt-1 space-y-1" onClick={(e) => e.stopPropagation()}>
-          {item.submenu.map((subItem) => (
-            <Link
-              key={subItem.path}
-              href={subItem.path}
-              onClick={onSubClick}
-              className={`flex items-center rounded-lg p-3 text-sm transition-colors hover:bg-gray-100 ${
-                isActive(subItem.path) ? 'bg-emerald-50 text-emerald-900' : ''
-              }`}
-            >
-              <span className="ml-2 text-lg text-slate-500">{subItem.icon}</span>
-              <span className="font-medium">{subItem.title}</span>
-            </Link>
+        <div className="mt-0.5 space-y-0.5 border-r border-slate-200 pr-1">
+          {section.submenu.map((item) => (
+            <NavItem
+              key={item.path}
+              href={item.path}
+              label={item.title}
+              active={isActive(item.path)}
+              onClick={onLinkClick}
+              nested
+            />
           ))}
         </div>
       ) : null}
@@ -98,118 +149,146 @@ function SubmenuBlock({ item, openMenu, onToggle, onSubClick, isActive, onLinkCl
   );
 }
 
-function NavLink({ item, isActive, onClick }) {
-  return (
-    <Link
-      href={item.path}
-      onClick={onClick}
-      className={`flex items-center rounded-lg p-3 text-sm transition-colors hover:bg-gray-100 ${
-        isActive(item.path) ? 'bg-gray-100' : ''
-      }`}
-    >
-      <span className="ml-2 text-lg text-slate-500">{item.icon}</span>
-      <span className="font-medium text-slate-800">{item.title}</span>
-    </Link>
-  );
-}
-
 export default function Sidebar({ onLinkClick }) {
   const pathname = usePathname();
-  const [openMenu, setOpenMenu] = useState(null);
   const auth = useAuth();
   const user = auth?.user;
+  const { isApplicantView, isSellerView, isServicesView, canSwitchPersona } = useDashboardPersona();
 
-  const showSupplier = shouldShowSupplierPanel(user);
+  const canSell = shouldShowSupplierPanel(user);
   const showAdmin = isAdmin(user);
-  const showCart = isCustomer(user) && !showAdmin && !showSupplier;
+  const showApplicantNav = isApplicantView;
+  const showSellerNav = isSellerView;
+  const showServicesNav = isServicesView;
+  const sellerMenuLinks = canSell ? sellerMenuLinksFull : sellerMenuLinksStart;
+  const { provider: myServiceProvider } = useMyTradeServiceProvider(isServicesView && !!user);
+  const servicesMenuLinks = useMemo(
+    () => buildServicesMenuLinks(myServiceProvider),
+    [myServiceProvider]
+  );
+  const servicesSectionLabel = myServiceProvider ? 'ارائه‌دهنده خدمات' : 'خدمات بازرگانی';
 
-  const handleSubmenuToggle = (title, event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setOpenMenu(openMenu === title ? null : title);
-  };
-
-  const handleSubmenuItemClick = () => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      onLinkClick();
-    }
-  };
+  const [openMenu, setOpenMenu] = useState(null);
 
   const isActive = (path) => {
     const pathOnly = path.split('?')[0];
+    if (pathOnly === '/dashboard') return pathname === '/dashboard';
     return pathname === pathOnly || pathname.startsWith(`${pathOnly}/`);
   };
 
-  const submenuProps = {
-    openMenu,
-    onToggle: handleSubmenuToggle,
-    onSubClick: handleSubmenuItemClick,
-    isActive,
-    onLinkClick,
+  useEffect(() => {
+    if (!showAdmin) return;
+    const match = adminMenuSections.find((section) =>
+      section.submenu.some((item) => {
+        const pathOnly = item.path.split('?')[0];
+        return pathname === pathOnly || pathname.startsWith(`${pathOnly}/`);
+      })
+    );
+    if (match) setOpenMenu(match.title);
+  }, [pathname, showAdmin]);
+
+  const toggleMenu = (title) => {
+    setOpenMenu((prev) => (prev === title ? null : title));
   };
 
   return (
-    <aside className="block h-screen w-full border-r border-gray-200 bg-white p-4 text-slate-800">
-      {user ? (
-        <div className="-mx-4 mb-4 border-b border-slate-200 bg-white px-4 pb-3 pt-1">
-          <div className="flex items-center gap-2.5">
-            <Image
-              src="/images/logo.png"
-              alt="زارعون"
-              width={40}
-              height={40}
-              className="h-10 w-10 shrink-0 rounded border border-slate-200 object-contain"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="text-base font-bold text-slate-800">زارعون</p>
-              <AccountNavSubtitle user={user} className="mt-0.5" />
-            </div>
-          </div>
+    <div>
+      {canSwitchPersona ? (
+        <div className="border-b border-slate-200 px-3 py-3">
+          <DashboardPersonaSwitcher />
         </div>
       ) : null}
 
-      <div className="mb-4 flex justify-end md:hidden">
-        <button
-          type="button"
-          onClick={onLinkClick}
-          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
-          aria-label="بستن منو"
-        >
-          <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+      <nav className="space-y-0.5 px-2 py-3">
+        <div className="space-y-0.5">
+          {primaryLinks.map((item) => (
+            <NavItem
+              key={item.path}
+              href={item.path}
+              label={item.title}
+              active={isActive(item.path)}
+              onClick={onLinkClick}
+            />
+          ))}
+        </div>
 
-      <nav className="space-y-1">
-        {/* داشبورد */}
-        <NavLink item={{ title: 'داشبورد', path: '/dashboard', icon: '🏠' }} isActive={isActive} onClick={onLinkClick} />
-        <NavLink item={{ title: 'پیام‌ها', path: '/dashboard/messages', icon: '💬' }} isActive={isActive} onClick={onLinkClick} />
-
-        {/* لینک‌های تأمین‌کننده */}
-        {showSupplier
-          ? supplierMenuLinks.map((item) => (
-              <NavLink key={item.path} item={item} isActive={isActive} onClick={onLinkClick} />
-            ))
-          : null}
-
-        {/* خط جداکننده + بخش مدیریت */}
-        {showAdmin ? (
+        {showApplicantNav ? (
           <>
-            <SectionDivider label="مدیریت" />
-            <div className="space-y-1">
-              {adminMenuSections.map((section) => (
-                <SubmenuBlock key={section.title} item={section} {...submenuProps} />
+            <SectionLabel>متقاضی</SectionLabel>
+            <div className="space-y-0.5">
+              {applicantMenuLinks.map((item) => (
+                <NavItem
+                  key={item.path}
+                  href={item.path}
+                  label={item.title}
+                  active={isActive(item.path)}
+                  onClick={onLinkClick}
+                />
               ))}
             </div>
           </>
         ) : null}
 
-        {/* کاربر معمولی */}
-        {showCart ? (
-          <NavLink item={{ title: 'سبد خرید', path: '/cart', icon: '🧺' }} isActive={isActive} onClick={onLinkClick} />
+        {showSellerNav ? (
+          <>
+            <SectionLabel>فروشنده</SectionLabel>
+            <div className="space-y-0.5">
+              {sellerMenuLinks.map((item) => (
+                <NavItem
+                  key={item.path}
+                  href={item.path}
+                  label={item.title}
+                  active={isActive(item.path)}
+                  onClick={onLinkClick}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {showServicesNav ? (
+          <>
+            <SectionLabel>{servicesSectionLabel}</SectionLabel>
+            <div className="space-y-0.5">
+              {servicesMenuLinks.map((item) => (
+                <NavItem
+                  key={item.path}
+                  href={item.path}
+                  label={item.title}
+                  active={isActive(item.path)}
+                  onClick={onLinkClick}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {showAdmin ? (
+          <>
+            <SectionLabel>مدیریت</SectionLabel>
+            {adminMenuSections.map((section) => (
+              <SubmenuBlock
+                key={section.title}
+                section={section}
+                openMenu={openMenu}
+                onToggle={toggleMenu}
+                isActive={isActive}
+                onLinkClick={onLinkClick}
+              />
+            ))}
+          </>
         ) : null}
       </nav>
-    </aside>
+
+      <div className="border-t border-slate-200 px-4 py-3">
+        <Link
+          href="/"
+          onClick={onLinkClick}
+          className="flex h-9 items-center justify-center rounded-md border border-slate-200 text-xs font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+        >
+          بازگشت به سایت
+        </Link>
+      </div>
+    </div>
   );
 }

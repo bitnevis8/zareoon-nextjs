@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "../../../context/LanguageContext";
-
-const LANGUAGES = [
-  { code: "fa", label: "فارسی" },
-  { code: "en", label: "English" },
-  { code: "ru", label: "Русский" },
-];
+import { SITE_LANGUAGES } from "../../../config/siteLanguages";
 
 function GlobeIcon() {
   return (
@@ -25,11 +21,17 @@ function GlobeIcon() {
 export default function LanguageSwitcher({ buttonClass }) {
   const { language, setLanguage, t } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState(null);
   const ref = useRef(null);
+  const buttonRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      const target = e.target;
+      if (ref.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -43,14 +45,88 @@ export default function LanguageSwitcher({ buttonClass }) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const updatePosition = () => {
+      const button = buttonRef.current;
+      if (!button) return;
+
+      const rect = button.getBoundingClientRect();
+      const menuWidth = 176;
+      const gap = 8;
+      const viewportPadding = 8;
+      let left = rect.left;
+
+      if (left + menuWidth > window.innerWidth - viewportPadding) {
+        left = window.innerWidth - menuWidth - viewportPadding;
+      }
+      if (left < viewportPadding) left = viewportPadding;
+
+      setMenuStyle({
+        top: rect.bottom + gap,
+        left,
+        width: menuWidth,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
+
   const pick = (code) => {
     setLanguage(code);
     setOpen(false);
   };
 
+  const menu =
+    open && menuStyle ? (
+      <ul
+        ref={menuRef}
+        role="listbox"
+        aria-label={t("selectLanguage")}
+        style={menuStyle}
+        className="fixed z-[10050] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
+      >
+        {SITE_LANGUAGES.map((item) => {
+          const active = item.code === language;
+          return (
+            <li key={item.code} role="option" aria-selected={active}>
+              <button
+                type="button"
+                onClick={() => pick(item.code)}
+                className={`flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-sm transition ${
+                  active
+                    ? "bg-emerald-50 font-semibold text-emerald-800"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <span className="truncate">{item.label}</span>
+                {active ? (
+                  <svg className="h-4 w-4 shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : null}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    ) : null;
+
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative shrink-0">
       <button
+        ref={buttonRef}
         type="button"
         className={buttonClass}
         onClick={() => setOpen((v) => !v)}
@@ -62,41 +138,7 @@ export default function LanguageSwitcher({ buttonClass }) {
         <GlobeIcon />
       </button>
 
-      {open ? (
-        <ul
-          role="listbox"
-          aria-label={t("selectLanguage")}
-          className="absolute end-0 top-full z-[10001] mt-2 min-w-[10.5rem] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
-        >
-          {LANGUAGES.map((item) => {
-            const active = item.code === language;
-            return (
-              <li key={item.code} role="option" aria-selected={active}>
-                <button
-                  type="button"
-                  onClick={() => pick(item.code)}
-                  className={`flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-sm transition ${
-                    active
-                      ? "bg-emerald-50 font-semibold text-emerald-800"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  {active ? (
-                    <svg className="h-4 w-4 shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  ) : null}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+      {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
     </div>
   );
 }

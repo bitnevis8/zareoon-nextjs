@@ -18,7 +18,7 @@ export default function DashboardBreadcrumb() {
 
   return (
     <nav
-      className="mb-4 flex min-h-[2rem] flex-wrap items-center gap-1 border-b border-slate-200/80 pb-3 text-xs text-slate-500 sm:text-sm"
+      className="mb-5 flex min-h-[1.75rem] flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-slate-500"
       aria-label="مسیر صفحه"
     >
       {crumbs.map((crumb, index) => {

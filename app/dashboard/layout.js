@@ -1,24 +1,28 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import Sidebar from '../components/ui/Sidebar';
-import DashboardBreadcrumb from '../components/dashboard/DashboardBreadcrumb';
+import DashboardBreadcrumb from "../components/dashboard/DashboardBreadcrumb";
+import DashboardShell from "../components/dashboard/DashboardShell";
 import { useAuth } from "../context/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
+import { DashboardPersonaProvider } from "../context/DashboardPersonaContext";
 
-function DashboardLayoutContent({ children }) {
-  const [emailVerificationCode, setEmailVerificationCode] = useState("");
-  const [verificationError, setVerificationError] = useState(null);
-  const [verificationSuccess, setVerificationSuccess] = useState(null);
-  const [resendLoading, setResendLoading] = useState(false);
-
-  const auth = useAuth();
-  const { user, loading, setUser } = auth || { user: null, loading: false, setUser: undefined };
-
+function EmailVerificationBanner({
+  user,
+  setUser,
+  emailVerificationCode,
+  setEmailVerificationCode,
+  verificationError,
+  setVerificationError,
+  verificationSuccess,
+  setVerificationSuccess,
+  resendLoading,
+  setResendLoading,
+}) {
   const handleVerifyEmail = async () => {
     setVerificationError(null);
     setVerificationSuccess(null);
-    if (!user || !user.email) {
+    if (!user?.email) {
       setVerificationError("اطلاعات کاربر یا ایمیل در دسترس نیست.");
       return;
     }
@@ -30,9 +34,7 @@ function DashboardLayoutContent({ children }) {
     try {
       const response = await fetch("/api/auth/verify-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email, code: emailVerificationCode }),
       });
       const data = await response.json();
@@ -45,8 +47,6 @@ function DashboardLayoutContent({ children }) {
     } catch (error) {
       console.error("Error verifying email:", error);
       setVerificationError("خطا در ارتباط با سرور.");
-    } finally {
-      setResendLoading(false);
     }
   };
 
@@ -54,7 +54,7 @@ function DashboardLayoutContent({ children }) {
     setResendLoading(true);
     setVerificationError(null);
     setVerificationSuccess(null);
-    if (!user || !user.email) {
+    if (!user?.email) {
       setVerificationError("اطلاعات کاربر یا ایمیل در دسترس نیست.");
       setResendLoading(false);
       return;
@@ -63,9 +63,7 @@ function DashboardLayoutContent({ children }) {
     try {
       const response = await fetch("/api/auth/resend-email-code", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
       });
       const data = await response.json();
@@ -82,91 +80,104 @@ function DashboardLayoutContent({ children }) {
     }
   };
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (setUser) setUser(null);
-    if (typeof window !== 'undefined') localStorage.clear();
-    window.location.href = "/";
-  };
+  return (
+    <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4" role="alert">
+      <p className="text-sm font-semibold text-amber-900">ایمیل شما تأیید نشده است</p>
+      <p className="mt-1 text-xs leading-6 text-amber-800">
+        کد ارسال‌شده به {user.email} را وارد کنید.
+      </p>
+
+      {verificationError ? (
+        <p className="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          {verificationError}
+        </p>
+      ) : null}
+      {verificationSuccess ? (
+        <p className="mt-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+          {verificationSuccess}
+        </p>
+      ) : null}
+
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <input
+          type="text"
+          placeholder="کد تأیید"
+          className="h-9 flex-1 rounded-md border border-amber-200 bg-white px-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+          value={emailVerificationCode || ""}
+          onChange={(e) => setEmailVerificationCode(e.target.value)}
+        />
+        <button
+          type="button"
+          onClick={handleVerifyEmail}
+          className="h-9 rounded-md bg-amber-600 px-4 text-sm font-medium text-white hover:bg-amber-700"
+        >
+          تأیید ایمیل
+        </button>
+        <button
+          type="button"
+          onClick={handleResendCode}
+          disabled={resendLoading}
+          className="h-9 rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        >
+          {resendLoading ? "..." : "ارسال مجدد"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DashboardLayoutContent({ children }) {
+  const [emailVerificationCode, setEmailVerificationCode] = useState("");
+  const [verificationError, setVerificationError] = useState(null);
+  const [verificationSuccess, setVerificationSuccess] = useState(null);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  const auth = useAuth();
+  const { user, loading, setUser } = auth || { user: null, loading: false, setUser: undefined };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex min-h-dvh items-center justify-center bg-slate-100">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
       </div>
     );
   }
 
+  const alert =
+    user && user.email && !user.isEmailVerified ? (
+      <EmailVerificationBanner
+        user={user}
+        setUser={setUser}
+        emailVerificationCode={emailVerificationCode}
+        setEmailVerificationCode={setEmailVerificationCode}
+        verificationError={verificationError}
+        setVerificationError={setVerificationError}
+        verificationSuccess={verificationSuccess}
+        setVerificationSuccess={setVerificationSuccess}
+        resendLoading={resendLoading}
+        setResendLoading={setResendLoading}
+      />
+    ) : null;
+
+  const breadcrumb = (
+    <Suspense fallback={<div className="mb-4 h-6 animate-pulse rounded bg-slate-200" />}>
+      <DashboardBreadcrumb />
+    </Suspense>
+  );
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Desktop Sidebar - Always visible on desktop */}
-      <aside className="hidden md:block w-64 flex-shrink-0 bg-white border-r border-gray-200">
-        <Sidebar onLinkClick={() => {}} />
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-slate-50">
-        <div className="mx-auto max-w-7xl p-4 md:p-6 pb-20 md:pb-6">
-        <Suspense fallback={<div className="mb-4 h-8 animate-pulse rounded bg-slate-200" />}>
-          <DashboardBreadcrumb />
-        </Suspense>
-        {/* دکمه خروج به منوی هدر منتقل شد */}
-        {user && user.email && !user.isEmailVerified && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-            <p className="font-bold">ایمیل شما تایید نشده است!</p>
-            <p className="text-sm">لطفا کد تایید ارسال شده به ایمیل خود ({user.email}) را وارد کنید تا حساب کاربری شما فعال شود.</p>
-            
-            {verificationError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-3">
-                {verificationError}
-              </div>
-            )}
-            {verificationSuccess && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-3">
-                {verificationSuccess}
-              </div>
-            )}
-
-            <div className="mt-4 flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 rtl:space-x-reverse">
-              <input
-                type="text"
-                placeholder="کد تایید را وارد کنید"
-                className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                value={emailVerificationCode || ""}
-                onChange={(e) => setEmailVerificationCode(e.target.value)}
-              />
-              <button
-                onClick={handleVerifyEmail}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out"
-              >
-                تایید ایمیل
-              </button>
-              <button
-                onClick={handleResendCode}
-                disabled={resendLoading}
-                className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out"
-              >
-                {resendLoading ? "در حال ارسال..." : "ارسال مجدد کد"}
-              </button>
-            </div>
-          </div>
-        )}
-        {children}
-        </div>
-      </main>
-    </div>
+    <DashboardShell breadcrumb={breadcrumb} alert={alert}>
+      {children}
+    </DashboardShell>
   );
 }
 
 export default function DashboardLayout({ children }) {
   return (
     <ProtectedRoute>
-      <DashboardLayoutContent>
-        {children}
-      </DashboardLayoutContent>
+      <DashboardPersonaProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </DashboardPersonaProvider>
     </ProtectedRoute>
   );
 }

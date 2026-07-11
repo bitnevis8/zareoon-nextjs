@@ -12,12 +12,9 @@ import { shouldShowSupplierPanel } from './utils/roles';
 import MainCategoryGrid from './components/MainCategoryGrid';
 import LatestAvailableProductsSection from './components/LatestAvailableProductsSection';
 import ZareoonExclusiveServices from './components/ZareoonExclusiveServices';
-
-const languageOptions = [
-  { code: "fa", label: "فارسی", shortLabel: "FA", icon: "IR" },
-  { code: "en", label: "English", shortLabel: "EN", icon: "EN" },
-  { code: "ru", label: "Русский", shortLabel: "RU", icon: "RU" },
-];
+import BuyerSellerPortal from './components/BuyerSellerPortal';
+import LanguageFlag from './components/ui/LanguageFlag';
+import { SITE_LANGUAGES, SITE_INTRO_ORDER, isRtlLanguage } from './config/siteLanguages';
 
 export default function Home() {
   return (
@@ -106,32 +103,31 @@ function HomeContent() {
   return (
     <main className="max-w-6xl mx-auto px-3 sm:px-6 pt-4 pb-1 lg:pb-4 space-y-6 lg:space-y-8 overflow-x-hidden">
       <section className="text-center space-y-6 lg:space-y-10">
-        <div className="flex justify-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/95 px-3 py-2 shadow-sm">
-            {languageOptions.map((option) => {
+        <div className="flex justify-center px-1">
+          <div className="w-full max-w-3xl overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="inline-flex min-w-min flex-wrap items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/95 px-3 py-2 shadow-sm">
+            {SITE_LANGUAGES.map((option) => {
               const isActive = language === option.code;
               return (
                 <button
                   key={option.code}
                   type="button"
                   onClick={() => setLanguage(option.code)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs sm:text-sm font-medium transition-all ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-medium transition-all ${
                     isActive
                       ? "border-green-600 bg-green-600 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                   aria-pressed={isActive}
+                  aria-label={option.label}
                   title={option.label}
                 >
-                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
-                    isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
-                  }`}>
-                    {option.icon}
-                  </span>
-                  <span>{option.shortLabel}</span>
+                  <LanguageFlag countryCode={option.countryCode} />
+                  <span className="tracking-wide">{option.shortLabel}</span>
                 </button>
               );
             })}
+            </div>
           </div>
         </div>
         <div className="mb-2">
@@ -177,38 +173,30 @@ function HomeContent() {
             </div>
           )}
         </div>
-        <div className="mx-auto max-w-[46.2rem] space-y-1.5 px-2" suppressHydrationWarning>
-          <p
-            className={`text-sm sm:text-base leading-7 ${
-              !isHydrated || language === "fa"
-                ? "font-medium text-slate-700"
-                : "text-slate-500"
-            }`}
-          >
-            {siteIntroByLang.fa}
-          </p>
-          <p
-            className={`text-xs sm:text-sm leading-6 ${
-              isHydrated && language === "en"
-                ? "font-medium text-slate-700"
-                : "text-slate-500"
-            }`}
-            dir="ltr"
-            suppressHydrationWarning
-          >
-            {siteIntroByLang.en}
-          </p>
-          <p
-            className={`text-xs sm:text-sm leading-6 ${
-              isHydrated && language === "ru"
-                ? "font-medium text-slate-700"
-                : "text-slate-500"
-            }`}
-            dir="ltr"
-            suppressHydrationWarning
-          >
-            {siteIntroByLang.ru}
-          </p>
+        <div className="mx-auto w-full max-w-4xl space-y-1.5 px-1" suppressHydrationWarning>
+          {SITE_INTRO_ORDER.map((code) => {
+            const isActive = language === code;
+            const rtl = isRtlLanguage(code);
+            return (
+              <div
+                key={code}
+                className="flex w-full justify-center overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                <p
+                  dir={rtl ? "rtl" : "ltr"}
+                  lang={code}
+                  className={`whitespace-nowrap text-center ${
+                    isActive
+                      ? "text-sm sm:text-base font-medium text-slate-700"
+                      : "text-xs sm:text-sm text-slate-500"
+                  }`}
+                  suppressHydrationWarning
+                >
+                  {siteIntroByLang[code]}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
         <MainCategoryGrid
@@ -227,9 +215,8 @@ function HomeContent() {
           />
         </div>
 
-        <div className="w-full max-w-5xl mx-auto mt-5">
-          <ZareoonExclusiveServices />
-        </div>
+        <BuyerSellerPortal className="w-full max-w-5xl mx-auto mt-5" />
+        <ZareoonExclusiveServices className="w-full max-w-5xl mx-auto mt-5" />
       </section>
 
 

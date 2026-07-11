@@ -1,12 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatCalendar, formatFetchedAt, CALENDAR_MODES } from "@/app/utils/calendars";
 
-function formatPrice(value) {
-  if (value == null) return "—";
-  return value.toLocaleString("fa-IR");
+function formatPrice(value, maximumFractionDigits = 0) {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return value.toLocaleString("fa-IR", { maximumFractionDigits });
+}
+
+function parseAmount(raw) {
+  const normalized = String(raw || "")
+    .replace(/,/g, "")
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .trim();
+  const n = Number(normalized);
+  return Number.isFinite(n) ? n : 0;
 }
 
 function ChangeBadge({ direction, percent }) {
@@ -19,6 +29,116 @@ function ChangeBadge({ direction, percent }) {
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${cls}`}>
       {arrow} {abs}٪
     </span>
+  );
+}
+
+function CurrencyConverter({ rates }) {
+  const currencies = useMemo(
+    () => [{ code: "IRR", label: "ریال ایران", price: 1 }, ...rates.filter((r) => r.price != null)],
+    [rates]
+  );
+
+  const [fromCode, setFromCode] = useState("USD");
+  const [toCode, setToCode] = useState("IRR");
+  const [amount, setAmount] = useState("1");
+
+  useEffect(() => {
+    if (rates.length && !rates.some((r) => r.code === fromCode)) {
+      setFromCode(rates[0].code);
+    }
+  }, [rates, fromCode]);
+
+  const conversion = useMemo(() => {
+    const value = parseAmount(amount);
+    const from = currencies.find((c) => c.code === fromCode);
+    const to = currencies.find((c) => c.code === toCode);
+    if (!from?.price || !to?.price || value <= 0) return null;
+
+    const inIrr = fromCode === "IRR" ? value : value * from.price;
+    const result = toCode === "IRR" ? inIrr : inIrr / to.price;
+    const rate = fromCode === toCode ? 1 : from.price / to.price;
+
+    return { result, rate, inIrr };
+  }, [amount, fromCode, toCode, currencies]);
+
+  const swap = () => {
+    setFromCode(toCode);
+    setToCode(fromCode);
+  };
+
+  if (!currencies.length) return null;
+
+  return (
+    <section className="mb-8 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm sm:p-6">
+      <h2 className="text-lg font-bold text-slate-900">مبدل ارز</h2>
+      <p className="mt-1 text-sm text-slate-600">تبدیل بین ارزهای نمایش‌داده‌شده بر اساس آخرین نرخ بازار</p>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-end">
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600">مبلغ مبدأ</label>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="mb-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold tabular-nums text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            dir="ltr"
+          />
+          <select
+            value={fromCode}
+            onChange={(e) => setFromCode(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-800 focus:border-emerald-400 focus:outline-none"
+          >
+            {currencies.map((c) => (
+              <option key={`from-${c.code}`} value={c.code}>
+                {c.label} ({c.code})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="button"
+          onClick={swap}
+          className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-lg text-emerald-800 transition hover:bg-emerald-100 lg:mb-1"
+          aria-label="جابجایی ارز مبدأ و مقصد"
+          title="جابجایی"
+        >
+          ⇄
+        </button>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600">نتیجه</label>
+          <div
+            className="mb-2 flex min-h-[46px] w-full items-center rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-sm font-bold tabular-nums text-emerald-950"
+            dir="ltr"
+          >
+            {conversion ? formatPrice(conversion.result, conversion.result < 1 ? 6 : 2) : "—"}
+          </div>
+          <select
+            value={toCode}
+            onChange={(e) => setToCode(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-800 focus:border-emerald-400 focus:outline-none"
+          >
+            {currencies.map((c) => (
+              <option key={`to-${c.code}`} value={c.code}>
+                {c.label} ({c.code})
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {conversion && fromCode !== toCode ? (
+        <p className="mt-4 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-700">
+          <span className="font-semibold text-slate-900">۱ {fromCode}</span>
+          <span className="mx-1">≈</span>
+          <span className="font-bold tabular-nums text-emerald-800" dir="ltr">
+            {formatPrice(conversion.rate, conversion.rate < 0.01 ? 6 : 4)} {toCode}
+          </span>
+        </p>
+      ) : null}
+    </section>
   );
 }
 
@@ -120,30 +240,35 @@ export default function ExchangeRatesPage() {
         ) : error && data.length === 0 ? (
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-800">{error}</div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {data.map((rate) => (
-              <article
-                key={rate.code}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md"
-              >
-                <div className="min-w-0">
-                  <h2 className="font-bold text-slate-900">{rate.label}</h2>
-                  <p className="text-xs text-slate-500">{rate.code}</p>
-                </div>
-                <div className="text-left" dir="ltr">
-                  <div className="flex items-baseline justify-end gap-1.5 text-lg font-extrabold tabular-nums text-slate-900">
-                    <span className="text-xs font-normal text-slate-500">تومان</span>
-                    <span>{formatPrice(rate.price)}</span>
+          <>
+            <CurrencyConverter rates={data} />
+
+            <h2 className="mb-4 text-lg font-bold text-slate-900">نرخ لحظه‌ای ارزها</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {data.map((rate) => (
+                <article
+                  key={rate.code}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md"
+                >
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-slate-900">{rate.label}</h3>
+                    <p className="text-xs text-slate-500">{rate.code}</p>
                   </div>
-                  <ChangeBadge direction={rate.direction} percent={rate.changePercent} />
-                </div>
-              </article>
-            ))}
-          </div>
+                  <div className="text-left" dir="ltr">
+                    <div className="flex items-baseline justify-end gap-1.5 text-lg font-extrabold tabular-nums text-slate-900">
+                      <span className="text-xs font-normal text-slate-500">ریال</span>
+                      <span>{formatPrice(rate.price)}</span>
+                    </div>
+                    <ChangeBadge direction={rate.direction} percent={rate.changePercent} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
         )}
 
         <p className="mt-8 text-center text-xs text-slate-400">
-          نرخ‌ها هر ۵ دقیقه از منبع رسمی به‌روز می‌شوند. برای معامله از قیمت نهایی هماهنگ‌شده استفاده کنید.
+          نرخ‌ها هر ۵ دقیقه از منبع رسمی به‌روز می‌شوند. مبدل بر اساس همین نرخ‌ها محاسبه می‌شود.
         </p>
       </div>
     </div>

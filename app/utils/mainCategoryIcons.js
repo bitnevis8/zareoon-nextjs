@@ -1,15 +1,41 @@
+/** Icons for top-level catalog roots (by stable product id). */
+const MAIN_ROOT_ICONS_BY_ID = {
+  900001: "🌾", // محصولات کشاورزی
+  900002: "🍽️", // مواد غذایی و نوشیدنی (فرآورده — نه میوه خام)
+  900003: "🧪", // فلزات، مواد معدنی و مواد شیمیایی
+  900004: "⚙️", // ماشین‌آلات و تجهیزات صنعتی
+  900005: "🏗️", // ساختمان و مصالح ساختمانی
+  900006: "🔌", // لوازم خانگی و الکترونیک
+  900007: "👗", // پوشاک، نساجی و مد
+  900008: "👜", // کیف، کفش و محصولات چرمی
+  900009: "⚽", // ورزش، بازی، هدایا و کودک
+  900010: "🧴", // آرایشی، بهداشتی و سلامت
+  900011: "🚗", // خودرو و قطعات
+  900012: "📦", // سایر کالاها و محصولات عمومی
+};
+
+/** Fallback when lookup by id is unavailable (legacy slugs). */
 const MAIN_CATEGORY_ICONS = {
   agriculture: "🌾",
-  "food-products": "🍽",
+  "food-products": "🍽️",
+  "root-900002": "🍽️",
+  "root-900003": "🧪",
   "chemical-petrochemical": "🧪",
   "metals-mining": "⛏",
-  "building-materials": "🏗",
-  "machinery": "⚙",
-  "electric-electronics": "💡",
+  "root-900004": "⚙️",
+  machinery: "⚙️",
+  "root-900005": "🏗️",
+  "building-materials": "🏗️",
+  "root-900006": "🔌",
+  "electric-electronics": "🔌",
+  "root-900007": "👗",
+  "apparel-textiles": "👗",
+  "root-900008": "👜",
+  "root-900009": "⚽",
+  "root-900010": "🧴",
+  "cosmetics-hygiene": "🧴",
   "auto-parts": "🚗",
-  "apparel-textiles": "👕",
   "home-decor": "🏠",
-  "cosmetics-hygiene": "💄",
   "other-goods": "🎁",
 };
 
@@ -24,6 +50,7 @@ export function isMainRootCategory(item) {
 
 export function getMainCategoryIcon(item) {
   if (!item) return "📦";
+  if (MAIN_ROOT_ICONS_BY_ID[item.id]) return MAIN_ROOT_ICONS_BY_ID[item.id];
   return MAIN_CATEGORY_ICONS[item.slug] || "📦";
 }
 
