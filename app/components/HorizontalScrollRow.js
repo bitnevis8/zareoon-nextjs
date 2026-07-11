@@ -74,9 +74,9 @@ function ScrollDots({ page, pageCount, onSelect, isRTL }) {
 
 const ARROW_STYLES = {
   center:
-    "absolute top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-green-600/20 bg-white/60 text-green-700 shadow-sm backdrop-blur-md transition-all hover:border-green-600/35 hover:bg-white/80 disabled:pointer-events-none disabled:opacity-0",
+    "absolute top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-green-600/20 bg-white/80 text-green-700 shadow-sm backdrop-blur-md transition-all sm:h-8 sm:w-8 sm:bg-white/60 hover:border-green-600/35 hover:bg-white/80 disabled:pointer-events-none disabled:opacity-0",
   bottom:
-    "absolute bottom-1.5 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-emerald-700/15 bg-emerald-50/50 text-emerald-800 shadow-sm backdrop-blur-md transition-all hover:border-emerald-700/30 hover:bg-emerald-50/70 disabled:pointer-events-none disabled:opacity-0",
+    "absolute bottom-1 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-emerald-700/15 bg-emerald-50/70 text-emerald-800 shadow-sm backdrop-blur-md transition-all sm:h-8 sm:w-8 sm:bg-emerald-50/50 hover:border-emerald-700/30 hover:bg-emerald-50/70 disabled:pointer-events-none disabled:opacity-0",
 };
 
 export default function HorizontalScrollRow({
@@ -211,11 +211,11 @@ export default function HorizontalScrollRow({
       <div
         ref={ref}
         dir={isRTL ? "rtl" : "ltr"}
-        className={`product-scroll-row flex gap-3 overflow-x-auto snap-x snap-mandatory ${
+        className={`product-scroll-row flex gap-2.5 overflow-x-auto snap-x snap-mandatory sm:gap-3 ${
           showArrows && scrollable
             ? arrowPlacement === "bottom"
-              ? "pb-9"
-              : "px-9 pb-1"
+              ? "pb-10 sm:pb-9"
+              : "px-2 pb-1 sm:px-9"
             : "pb-1"
         }`}
       >

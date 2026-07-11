@@ -11,25 +11,24 @@ import { useIsDashboardRoute } from "@/app/hooks/useIsDashboardRoute";
 export default function SiteChrome({ children }) {
   const isDashboard = useIsDashboardRoute();
 
-  if (isDashboard) {
-    return (
-      <>
-        <Header />
-        <div className="flex min-h-0 flex-1 flex-col max-lg:pt-[4.25rem]">{children}</div>
-      </>
-    );
-  }
-
   return (
     <>
       <Header />
-      <main className="flex flex-1 flex-col pb-[4.25rem] max-lg:pt-[4.25rem] lg:pb-0 lg:pt-0">
-        {children}
-      </main>
-      <Footer />
-      <ClientSideWrapper>
-        <GlobalSidebar />
-      </ClientSideWrapper>
+      {isDashboard ? (
+        <div className="flex min-h-0 flex-1 flex-col max-lg:pt-[var(--site-mobile-top-chrome)] max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
+          {children}
+        </div>
+      ) : (
+        <main className="flex flex-1 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom))] max-lg:pt-[var(--site-mobile-top-chrome)] lg:pb-0 lg:pt-0">
+          {children}
+        </main>
+      )}
+      {!isDashboard ? <Footer className="hidden lg:block" /> : null}
+      {!isDashboard ? (
+        <ClientSideWrapper>
+          <GlobalSidebar />
+        </ClientSideWrapper>
+      ) : null}
       <ClientSideWrapper>
         <Suspense fallback={null}>
           <MobileBottomBar />

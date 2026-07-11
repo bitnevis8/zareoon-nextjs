@@ -58,7 +58,7 @@ function isCategoryNode(p) {
   return !p.isOrderable;
 }
 
-export default function ApplicantRequestForm({ onSubmitted, compact = false }) {
+export default function ApplicantRequestForm({ onSubmitted, compact = false, initialRequestType = "" }) {
   const auth = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
@@ -105,6 +105,12 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false }) {
     setPhone((prev) => prev || user.mobile || user.phone || "");
     setCompany((prev) => prev || user.companyName || "");
   }, [user]);
+
+  useEffect(() => {
+    if (initialRequestType !== "product" && initialRequestType !== "service") return;
+    setRequestType(initialRequestType);
+    setStep(2);
+  }, [initialRequestType]);
 
   const l1ProductCategories = useMemo(
     () => productCategories.filter((p) => isRootCategory(p) && isCategoryNode(p)),

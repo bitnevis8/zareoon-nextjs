@@ -5,7 +5,6 @@ import DashboardBreadcrumb from "../components/dashboard/DashboardBreadcrumb";
 import DashboardShell from "../components/dashboard/DashboardShell";
 import { useAuth } from "../context/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { DashboardPersonaProvider } from "../context/DashboardPersonaContext";
 
 function EmailVerificationBanner({
   user,
@@ -175,9 +174,7 @@ function DashboardLayoutContent({ children }) {
 export default function DashboardLayout({ children }) {
   return (
     <ProtectedRoute>
-      <DashboardPersonaProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
-      </DashboardPersonaProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </ProtectedRoute>
   );
 }

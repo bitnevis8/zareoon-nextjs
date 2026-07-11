@@ -32,25 +32,29 @@ function CategoryHubIcon({ name }) {
 function HubCategoryCard({ category, isVip, vipMessage, t }) {
   if (isVip) {
     return (
-      <article className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-amber-200/80 bg-gradient-to-br from-white via-amber-50/30 to-emerald-50/20 p-5 shadow-[0_8px_32px_rgba(180,83,9,0.08)] transition hover:-translate-y-0.5 hover:border-amber-300 sm:col-span-2">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-200 bg-white shadow-sm">
+      <article className="group relative col-span-2 flex flex-col overflow-hidden rounded-xl border-2 border-amber-200/80 bg-gradient-to-br from-white via-amber-50/30 to-emerald-50/20 p-3.5 shadow-[0_8px_32px_rgba(180,83,9,0.08)] transition hover:-translate-y-0.5 hover:border-amber-300 sm:rounded-2xl sm:p-5">
+        <div className="mb-3 flex items-start justify-between gap-2 sm:mb-4 sm:gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-200 bg-white shadow-sm sm:h-12 sm:w-12 sm:rounded-2xl">
             <CategoryHubIcon name={category.icon} />
           </div>
-          <span className="rounded-full bg-amber-300 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-950">
+          <span className="rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-black uppercase text-amber-950">
             VIP
           </span>
         </div>
-        <h2 className="mb-2 text-lg font-black text-slate-900">{category.title}</h2>
-        <p className="mb-3 flex-1 text-sm leading-7 text-slate-600">{category.description}</p>
+        <h2 className="mb-1.5 text-sm font-black leading-5 text-slate-900 sm:mb-2 sm:text-lg sm:leading-normal">
+          {category.title}
+        </h2>
+        <p className="mb-2 line-clamp-2 flex-1 text-xs leading-5 text-slate-600 sm:mb-3 sm:line-clamp-none sm:text-sm sm:leading-7">
+          {category.description}
+        </p>
         {vipMessage ? (
-          <p className="mb-4 rounded-xl border border-amber-200/70 bg-amber-50 px-3 py-2.5 text-xs leading-6 text-amber-950">
+          <p className="mb-3 rounded-xl border border-amber-200/70 bg-amber-50 px-2.5 py-2 text-[11px] leading-5 text-amber-950 sm:mb-4 sm:px-3 sm:py-2.5 sm:text-xs sm:leading-6">
             {vipMessage}
           </p>
         ) : null}
         <Link
           href={`/trade-services/${category.id}`}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+          className="inline-flex min-h-9 w-full items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 sm:min-h-0 sm:px-4 sm:py-2.5 sm:text-sm"
         >
           {t("tradeServicesExploreCta")}
         </Link>
@@ -59,16 +63,20 @@ function HubCategoryCard({ category, isVip, vipMessage, t }) {
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_12px_32px_rgba(6,95,70,0.1)]">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_12px_32px_rgba(6,95,70,0.1)] sm:rounded-2xl sm:p-5">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 transition group-hover:opacity-100" />
-      <div className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white">
+      <div className="relative mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white sm:mb-4 sm:h-11 sm:w-11">
         <CategoryHubIcon name={category.icon} />
       </div>
-      <h2 className="relative mb-2 text-base font-bold text-slate-900">{category.title}</h2>
-      <p className="relative mb-4 flex-1 text-sm leading-7 text-slate-600">{category.description}</p>
+      <h2 className="relative mb-1.5 text-sm font-bold leading-5 text-slate-900 sm:mb-2 sm:text-base sm:leading-normal">
+        {category.title}
+      </h2>
+      <p className="relative mb-3 line-clamp-2 flex-1 text-xs leading-5 text-slate-600 sm:mb-4 sm:line-clamp-none sm:text-sm sm:leading-7">
+        {category.description}
+      </p>
       <Link
         href={`/trade-services/${category.id}`}
-        className="relative inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+        className="relative inline-flex min-h-9 w-full items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 sm:min-h-0 sm:px-4 sm:py-2.5 sm:text-sm"
       >
         {t("tradeServicesExploreCta")}
       </Link>
@@ -115,7 +123,7 @@ export default function TradeServicesHubPage() {
         </p>
       </header>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
         {content.categories.map((category) => {
           const isVip = !!vipCategories[category.id]?.enabled;
           const vipMessage = resolveVipCategoryMessage(vipCategories, category.id, language, t);

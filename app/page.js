@@ -8,7 +8,6 @@ import { useLanguage, siteIntroByLang } from './context/LanguageContext';
 import { getLocalizedText } from './utils/localize';
 import { sortCatalogItems } from './utils/productSort';
 import { authFetch } from './utils/authHeaders';
-import { shouldShowSupplierPanel } from './utils/roles';
 import MainCategoryGrid from './components/MainCategoryGrid';
 import LatestAvailableProductsSection from './components/LatestAvailableProductsSection';
 import ZareoonExclusiveServices from './components/ZareoonExclusiveServices';
@@ -18,7 +17,7 @@ import { SITE_LANGUAGES, SITE_INTRO_ORDER, isRtlLanguage } from './config/siteLa
 
 export default function Home() {
   return (
-    <Suspense fallback={<main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 animate-pulse min-h-[40vh]" />}>
+    <Suspense fallback={<main className="page-shell py-8 animate-pulse min-h-[40vh]" />}>
       <HomeContent />
     </Suspense>
   );
@@ -26,10 +25,8 @@ export default function Home() {
 
 function HomeContent() {
   const auth = useAuth();
-  const { language, setLanguage, t, isRTL, isHydrated } = useLanguage();
-  
-  const canAddProduct = shouldShowSupplierPanel(auth?.user);
-  
+  const { language, setLanguage, t, isRTL } = useLanguage();
+
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [inventoryLots, setInventoryLots] = useState([]);
@@ -37,7 +34,6 @@ function HomeContent() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [cartTotalQty, setCartTotalQty] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -58,11 +54,10 @@ function HomeContent() {
       setAllProducts(allProductsList);
       setLoading(false);
     })();
-  }, []);
+  }, [language]);
 
-  // simple debounced search across products/categories
   useEffect(() => {
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const query = q.trim();
       if (!query) { setResults([]); return; }
       setSearching(true);
@@ -74,10 +69,9 @@ function HomeContent() {
         setSearching(false);
       }
     }, 300);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [q]);
 
-  // Load cart info
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -86,14 +80,13 @@ function HomeContent() {
         const items = j?.data?.items || [];
         let sum = 0;
         for (const it of items) {
-          const q = parseFloat(it.quantity || 0);
-          if (Number.isFinite(q)) sum += q;
+          const qty = parseFloat(it.quantity || 0);
+          if (Number.isFinite(qty)) sum += qty;
         }
-        setCartTotalQty(sum);
       } catch {}
     };
     fetchCart();
-  }, []);
+  }, [auth?.user]);
 
   const sortedCategories = useMemo(
     () => sortCatalogItems(categories, language),
@@ -101,11 +94,14 @@ function HomeContent() {
   );
 
   return (
-    <main className="max-w-6xl mx-auto px-3 sm:px-6 pt-4 pb-1 lg:pb-4 space-y-6 lg:space-y-8 overflow-x-hidden">
-      <section className="text-center space-y-6 lg:space-y-10">
-        <div className="flex justify-center px-1">
-          <div className="w-full max-w-3xl overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="inline-flex min-w-min flex-wrap items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/95 px-3 py-2 shadow-sm">
+    <main className="page-shell pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4 section-stack">
+      <section className="text-center space-y-4 sm:space-y-6 lg:space-y-8">
+        <div className="flex justify-center max-lg:mt-1">
+          <div
+            className="inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/95 px-2 py-2 shadow-sm sm:gap-2 sm:rounded-full sm:px-3"
+            role="group"
+            aria-label="Language"
+          >
             {SITE_LANGUAGES.map((option) => {
               const isActive = language === option.code;
               return (
@@ -113,7 +109,7 @@ function HomeContent() {
                   key={option.code}
                   type="button"
                   onClick={() => setLanguage(option.code)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-medium transition-all ${
+                  className={`inline-flex min-h-[3.25rem] min-w-[3.25rem] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-semibold leading-none transition-all sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:py-2 sm:text-sm ${
                     isActive
                       ? "border-green-600 bg-green-600 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -122,79 +118,89 @@ function HomeContent() {
                   aria-label={option.label}
                   title={option.label}
                 >
-                  <LanguageFlag countryCode={option.countryCode} />
+                  <LanguageFlag countryCode={option.countryCode} className="h-5 w-7 sm:h-4 sm:w-6" />
                   <span className="tracking-wide">{option.shortLabel}</span>
                 </button>
               );
             })}
-            </div>
           </div>
         </div>
-        <div className="mb-2">
-        <Image
-      src="/images/logo.png"
-      alt={t("siteName")}
-      width={800}   // w-96 = 384px
-      height={800}
-      className="mx-auto object-contain w-80"
-      priority
-    />
+
+        <div className="px-2">
+          <Image
+            src="/images/logo.png"
+            alt={t("siteName")}
+            width={800}
+            height={800}
+            className="mx-auto h-auto w-40 object-contain sm:w-56 md:w-64 lg:w-72"
+            priority
+          />
         </div>
-        <div className="relative max-w-xl mx-auto w-full px-2">
+
+        <div className="relative mx-auto w-full max-w-xl px-1 sm:px-2">
           <input
-            className="w-full border rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full min-h-11 rounded-full border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:px-5 sm:text-sm"
             placeholder={t("searchPlaceholder")}
             value={q}
-            onChange={(e)=>setQ(e.target.value)}
+            onChange={(e) => setQ(e.target.value)}
+            enterKeyHint="search"
+            autoComplete="off"
           />
-          {q && (
-            <div className={`absolute z-10 left-0 right-0 mt-2 bg-white border rounded-xl shadow max-h-80 overflow-auto ${isRTL ? "text-right" : "text-left"}`}>
+          {q ? (
+            <div
+              className={`absolute z-20 inset-x-0 mt-2 max-h-[min(20rem,55vh)] overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+            >
               {searching ? (
-                <div className="p-4">
-                  <div className="space-y-3">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <div key={index} className="flex items-center justify-between px-4 py-2 animate-pulse">
-                        <div className="h-4 bg-gray-300 rounded w-32"></div>
-                        <div className="h-5 bg-gray-300 rounded w-12"></div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="space-y-2 p-3">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="flex items-center justify-between px-3 py-2.5 animate-pulse">
+                      <div className="h-4 w-32 rounded bg-slate-200" />
+                      <div className="h-4 w-12 rounded bg-slate-200" />
+                    </div>
+                  ))}
                 </div>
               ) : results.length ? (
                 results.map((it) => (
-                  <Link key={it.id} href={`/catalog/${it.id}`} className="flex items-center justify-between px-4 py-2 hover:bg-slate-50">
-                    <div className="text-sm font-medium text-slate-800">{getLocalizedText(it, language)}</div>
-                    <span className="text-xs text-slate-400">{it.isOrderable ? t("product") : t("category")}</span>
+                  <Link
+                    key={it.id}
+                    href={`/catalog/${it.id}`}
+                    className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition hover:bg-slate-50 active:bg-slate-100"
+                  >
+                    <div className="min-w-0 flex-1 text-sm font-medium leading-snug text-slate-800 break-words">
+                      {getLocalizedText(it, language)}
+                    </div>
+                    <span className="shrink-0 text-xs text-slate-400">
+                      {it.isOrderable ? t("product") : t("category")}
+                    </span>
                   </Link>
                 ))
               ) : (
-                <div className="p-3 text-sm text-slate-500">{t("nothingFound")}</div>
+                <div className="p-4 text-sm text-slate-500">{t("nothingFound")}</div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
-        <div className="mx-auto w-full max-w-4xl space-y-1.5 px-1" suppressHydrationWarning>
+
+        <div className="mx-auto w-full max-w-3xl space-y-1 px-2" suppressHydrationWarning>
           {SITE_INTRO_ORDER.map((code) => {
             const isActive = language === code;
             const rtl = isRtlLanguage(code);
             return (
-              <div
+              <p
                 key={code}
-                className="flex w-full justify-center overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                dir={rtl ? "rtl" : "ltr"}
+                lang={code}
+                className={`text-pretty text-center leading-relaxed ${
+                  isActive
+                    ? "text-sm font-medium text-slate-700 sm:text-base"
+                    : "text-xs text-slate-500 sm:text-sm"
+                }`}
+                suppressHydrationWarning
               >
-                <p
-                  dir={rtl ? "rtl" : "ltr"}
-                  lang={code}
-                  className={`whitespace-nowrap text-center ${
-                    isActive
-                      ? "text-sm sm:text-base font-medium text-slate-700"
-                      : "text-xs sm:text-sm text-slate-500"
-                  }`}
-                  suppressHydrationWarning
-                >
-                  {siteIntroByLang[code]}
-                </p>
-              </div>
+                {siteIntroByLang[code]}
+              </p>
             );
           })}
         </div>
@@ -202,11 +208,11 @@ function HomeContent() {
         <MainCategoryGrid
           categories={sortedCategories}
           loading={loading}
-          className="w-full max-w-5xl mx-auto"
+          className="w-full"
           id="product-categories"
         />
 
-        <div id="latest-available" className="w-full max-w-5xl mx-auto mt-4">
+        <div id="latest-available" className="w-full scroll-mt-20">
           <LatestAvailableProductsSection
             inventoryLots={inventoryLots}
             allProducts={allProducts}
@@ -215,11 +221,9 @@ function HomeContent() {
           />
         </div>
 
-        <BuyerSellerPortal className="w-full max-w-5xl mx-auto mt-5" />
-        <ZareoonExclusiveServices className="w-full max-w-5xl mx-auto mt-5" />
+        <BuyerSellerPortal className="w-full" />
+        <ZareoonExclusiveServices className="w-full" />
       </section>
-
-
     </main>
   );
 }

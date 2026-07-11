@@ -12,7 +12,7 @@ import {
   groupAvailableProducts,
 } from "../utils/availableProducts";
 
-const CARD_CLASS = "shrink-0 w-[128px] sm:w-[148px] snap-start";
+const CARD_CLASS = "shrink-0 w-[7.75rem] min-[380px]:w-[8.25rem] sm:w-[8.75rem] md:w-[9.25rem] snap-start";
 
 export default function LatestAvailableProductsSection({
   inventoryLots,
@@ -62,7 +62,7 @@ export default function LatestAvailableProductsSection({
 
   const isGlassVariant = variant === "homepage" || variant === "catalog";
   const sectionShellClass = isGlassVariant
-    ? "relative overflow-hidden rounded-2xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50/55 via-white/40 to-slate-50/35 p-4 shadow-[0_8px_30px_rgba(16,185,129,0.08)] backdrop-blur-md sm:p-5"
+    ? "relative overflow-hidden rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50/55 via-white/40 to-slate-50/35 p-3 shadow-[0_8px_30px_rgba(16,185,129,0.08)] backdrop-blur-md sm:rounded-2xl sm:p-5"
     : "";
 
   return (
@@ -81,13 +81,17 @@ export default function LatestAvailableProductsSection({
       ) : null}
 
       <div className="relative">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">
-        <h2 className={`text-lg lg:text-xl font-extrabold text-slate-900 ${isRTL ? "text-right" : "text-left"}`}>
+      <div className="mb-3 flex flex-col gap-3 px-0.5 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <h2
+          className={`text-base font-extrabold leading-snug text-slate-900 sm:text-lg lg:text-xl ${
+            isRTL ? "text-right" : "text-left"
+          }`}
+        >
           {sectionTitle}
         </h2>
         {showGroupToggle ? (
-          <label className="inline-flex cursor-pointer items-center gap-2.5 select-none">
-            <span className="text-xs sm:text-sm text-slate-600">{t("groupByCategory")}</span>
+          <label className="inline-flex w-full cursor-pointer items-center justify-between gap-3 select-none sm:w-auto sm:justify-start">
+            <span className="text-xs text-slate-600 sm:text-sm">{t("groupByCategory")}</span>
             <span className="relative inline-flex h-6 w-11 shrink-0 items-center">
               <input
                 type="checkbox"

@@ -37,7 +37,7 @@ export default function GlobalSidebar() {
           className="fixed inset-0 bg-black bg-opacity-50" 
           onClick={closeSidebar}
         />
-        <aside className={`fixed top-[4.25rem] right-0 z-[10001] h-[calc(100%-4.25rem)] w-80 overflow-y-auto bg-white shadow-xl transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <aside className={`fixed top-[var(--site-mobile-top-chrome)] right-0 z-[10001] h-[calc(100%-var(--site-mobile-top-chrome))] w-80 overflow-y-auto bg-white shadow-xl transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <Sidebar onLinkClick={closeSidebar} />
         </aside>
       </div>

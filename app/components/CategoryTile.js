@@ -41,7 +41,7 @@ export default function CategoryTile({
   return (
     <Link
       href={href || `/catalog/${item.id}`}
-      className={`group flex flex-col items-center rounded-2xl border bg-white p-3 sm:p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-green-300 hover:shadow-md ${stockClass}`}
+      className={`group flex min-h-[7.5rem] flex-col items-center rounded-xl border bg-white p-2.5 shadow-sm transition-all active:scale-[0.98] sm:min-h-0 sm:rounded-2xl sm:p-3 md:p-4 hover:-translate-y-0.5 hover:border-green-300 hover:shadow-md ${stockClass}`}
     >
       <div
         className={`flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-50 to-slate-100 border border-slate-100 ${
@@ -69,7 +69,11 @@ export default function CategoryTile({
       </div>
 
       <div className="mt-2 w-full text-center">
-        <div className={`font-semibold text-slate-800 leading-snug ${compact ? "text-xs" : "text-xs sm:text-sm"}`}>
+        <div
+          className={`line-clamp-2 font-semibold leading-snug text-slate-800 ${
+            compact ? "text-[11px]" : "text-[11px] sm:text-xs md:text-sm"
+          }`}
+        >
           {label}
         </div>
         {badge ? <div className="mt-1 text-[10px] text-slate-500">{badge}</div> : null}

@@ -3,15 +3,15 @@
 /** @typedef {{ eyebrow: string, title: string, subtitle: string, providerHint: string, providerRegisterNote: string, categories: TradeServiceCategory[] }} TradeServicesLocale */
 
 const SHARED_CATEGORY_IDS = [
+  "inspection-standards",
+  "packaging-prep",
   "import-export",
   "intl-logistics",
   "customs-clearance",
   "intl-finance",
-  "inspection-standards",
   "insurance-risk",
   "legal-trade",
   "market-development",
-  "packaging-prep",
   "specialized-trade",
 ];
 
@@ -687,7 +687,12 @@ export const sampleTradeServiceProviders = {
 };
 
 export function getTradeServicesContent(language) {
-  return tradeServicesContent[language] || tradeServicesContent.en || tradeServicesContent.fa;
+  const content = tradeServicesContent[language] || tradeServicesContent.en || tradeServicesContent.fa;
+  const order = new Map(SHARED_CATEGORY_IDS.map((id, index) => [id, index]));
+  const categories = [...content.categories].sort(
+    (a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999)
+  );
+  return { ...content, categories };
 }
 
 export function getL1Categories(language) {

@@ -2,6 +2,7 @@ import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { DashboardPersonaProvider } from "./context/DashboardPersonaContext";
 import StructuredData from "./components/StructuredData";
 import AppToaster from "./components/ui/AppToaster";
 import SiteChrome from "./components/ui/SiteChrome";
@@ -78,9 +79,11 @@ export default function RootLayout({ children }) {
         <LanguageProvider>
           <AppToaster />
           <AuthProvider>
-            <SidebarProvider>
-              <SiteChrome>{children}</SiteChrome>
-            </SidebarProvider>
+            <DashboardPersonaProvider>
+              <SidebarProvider>
+                <SiteChrome>{children}</SiteChrome>
+              </SidebarProvider>
+            </DashboardPersonaProvider>
           </AuthProvider>
         </LanguageProvider>
       </body>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,12 +23,13 @@ function ChevronIcon({ className = "" }) {
   );
 }
 
-export default function CategoryDrillDownMenu({ isOpen, onClose }) {
+export default function CategoryDrillDownMenu({ isOpen, onClose, rootTitle }) {
   const router = useRouter();
   const { t, isRTL, language } = useLanguage();
   const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [stack, setStack] = useState([{ parentId: null, title: t("categoriesShort") }]);
+  const menuRootTitle = rootTitle || t("categoriesShort");
+  const [stack, setStack] = useState([{ parentId: null, title: menuRootTitle }]);
 
   const current = stack[stack.length - 1];
   const canGoBack = stack.length > 1;
@@ -56,9 +57,9 @@ export default function CategoryDrillDownMenu({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!isOpen) {
-      setStack([{ parentId: null, title: t("categoriesShort") }]);
+      setStack([{ parentId: null, title: menuRootTitle }]);
     }
-  }, [isOpen, t]);
+  }, [isOpen, menuRootTitle]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -111,7 +112,7 @@ export default function CategoryDrillDownMenu({ isOpen, onClose }) {
       className="fixed inset-0 z-[10002] lg:hidden"
       role="dialog"
       aria-modal="true"
-      aria-label={t("categoriesShort")}
+      aria-label={menuRootTitle}
     >
       <button
         type="button"

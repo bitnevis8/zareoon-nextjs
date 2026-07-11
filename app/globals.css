@@ -110,6 +110,29 @@ body {
   background: #555;
 }
 
+/* Mobile-first layout helpers */
+:root {
+  --site-mobile-top-chrome: 7.75rem;
+}
+
+@layer utilities {
+  .page-shell {
+    @apply mx-auto w-full max-w-6xl overflow-x-hidden px-4 sm:px-6;
+  }
+
+  .site-mobile-top-offset {
+    padding-top: var(--site-mobile-top-chrome);
+  }
+
+  .touch-target {
+    @apply min-h-11 min-w-11;
+  }
+
+  .section-stack {
+    @apply space-y-5 sm:space-y-6 lg:space-y-8;
+  }
+}
+
 .product-scroll-row {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
@@ -41,11 +41,14 @@ export default function MainCategoryGrid({
     };
   }, [categoriesProp, loadingProp, language]);
 
+  const gridClass =
+    "grid grid-cols-2 gap-2.5 min-[380px]:grid-cols-3 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6";
+
   if (loading) {
     return (
-      <div className={`grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 ${className}`}>
+      <div className={`${gridClass} ${className}`}>
         {Array.from({ length: 12 }).map((_, index) => (
-          <div key={index} className="animate-pulse rounded-2xl border bg-white p-3 sm:p-4">
+          <div key={index} className="animate-pulse rounded-2xl border bg-white p-2.5 sm:p-4">
             <div className="aspect-square rounded-xl bg-slate-200" />
             <div className="mx-auto mt-2 h-3 w-3/4 rounded bg-slate-200" />
           </div>
@@ -58,8 +61,10 @@ export default function MainCategoryGrid({
 
   return (
     <section id={id} className={className}>
-      <h2 className="mb-3 text-center text-base font-bold text-slate-800 sm:text-lg">{t("productCategories")}</h2>
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+      <h2 className="mb-3 px-1 text-center text-base font-bold text-slate-800 sm:mb-4 sm:text-lg">
+        {t("productCategories")}
+      </h2>
+      <div className={gridClass}>
         {categories.map((category) => (
           <CategoryTile key={category.id} item={category} language={language} />
         ))}

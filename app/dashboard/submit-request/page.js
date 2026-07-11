@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import ApplicantRequestForm from "@/app/components/dashboard/ApplicantRequestForm";
 import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { DASHBOARD_PERSONAS } from "@/app/utils/dashboardPersona";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 
-function SubmitRequestContent() {
+function SubmitRequestInner() {
   const { setPersona } = useDashboardPersona();
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type");
+  const initialRequestType = typeParam === "service" || typeParam === "product" ? typeParam : "";
 
   useEffect(() => {
     setPersona(DASHBOARD_PERSONAS.APPLICANT);
@@ -23,7 +27,7 @@ function SubmitRequestContent() {
           فروشندگان یا ارائه‌دهندگان مرتبط از طریق اعلان مطلع می‌شوند.
         </p>
       </header>
-      <ApplicantRequestForm compact />
+      <ApplicantRequestForm compact initialRequestType={initialRequestType} />
     </div>
   );
 }
@@ -31,7 +35,9 @@ function SubmitRequestContent() {
 export default function SubmitRequestPage() {
   return (
     <ProtectedRoute>
-      <SubmitRequestContent />
+      <Suspense fallback={<div className={`${dash.page} animate-pulse`}>در حال بارگذاری…</div>}>
+        <SubmitRequestInner />
+      </Suspense>
     </ProtectedRoute>
   );
 }

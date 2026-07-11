@@ -18,7 +18,7 @@ function JoinBannerPattern({ gridId }) {
   );
 }
 
-function NetworkIcon({ className = "h-7 w-7" }) {
+function NetworkIcon({ className = "h-6 w-6" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
       <circle cx="12" cy="5" r="2.5" />
@@ -35,36 +35,32 @@ export default function TradeServicesJoinBanner({ className = "" }) {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950 via-emerald-800 to-teal-900 shadow-[0_16px_48px_rgba(6,78,59,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}
+      className={`relative overflow-hidden rounded-xl border border-emerald-700/20 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(6,78,59,0.18)] sm:rounded-2xl sm:shadow-[0_16px_48px_rgba(6,78,59,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}
     >
       <JoinBannerPattern gridId={patternId} />
       <div
-        className="pointer-events-none absolute -left-12 -top-16 h-48 w-48 rounded-full bg-emerald-400/20 blur-3xl"
+        className="pointer-events-none absolute -left-12 -top-16 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl sm:h-48 sm:w-48"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -bottom-20 end-0 h-56 w-56 rounded-full bg-amber-300/10 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-y-0 start-0 w-1 bg-gradient-to-b from-amber-300/80 via-emerald-300/40 to-transparent"
+        className="pointer-events-none absolute -bottom-16 end-0 h-40 w-40 rounded-full bg-teal-300/15 blur-3xl sm:-bottom-20 sm:h-56 sm:w-56"
         aria-hidden
       />
 
       <div
-        className={`relative flex flex-col items-center gap-5 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:px-8 sm:py-7 ${
-          isRTL ? "sm:text-right" : "sm:text-left"
-        } text-center`}
+        className={`relative flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:px-8 sm:py-7 ${
+          isRTL ? "text-right sm:text-right" : "text-left sm:text-left"
+        }`}
       >
-        <div className={`flex max-w-3xl flex-col items-center gap-4 sm:flex-row sm:items-center ${isRTL ? "sm:flex-row-reverse" : ""}`}>
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] backdrop-blur-sm">
-            <NetworkIcon />
+        <div className={`flex items-start gap-3 sm:max-w-3xl sm:items-center sm:gap-4 ${isRTL ? "sm:flex-row-reverse" : ""}`}>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-emerald-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-sm sm:h-14 sm:w-14 sm:rounded-2xl">
+            <NetworkIcon className="h-5 w-5 sm:h-7 sm:w-7" />
           </div>
-          <div className="space-y-1.5">
-            <p className="inline-flex items-center rounded-full border border-amber-200/25 bg-amber-400/15 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-amber-100 sm:text-[11px]">
+          <div className="min-w-0 space-y-1 sm:space-y-1.5">
+            <p className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-emerald-50 sm:px-2.5 sm:text-[11px]">
               {t("tradeServicesJoinBadge")}
             </p>
-            <p className="text-sm font-medium leading-7 text-emerald-50/95 sm:text-[15px] sm:leading-8">
+            <p className="text-xs font-medium leading-6 text-emerald-50/95 sm:text-[15px] sm:leading-8">
               {t("tradeServicesJoinBanner")}
             </p>
           </div>
@@ -72,11 +68,11 @@ export default function TradeServicesJoinBanner({ className = "" }) {
 
         <AuthRequiredButton
           href="/trade-services/register"
-          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-white to-emerald-50 px-5 py-3 text-sm font-bold text-emerald-900 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition hover:from-amber-50 hover:to-white hover:shadow-[0_6px_28px_rgba(251,191,36,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/60 disabled:opacity-60"
+          className="group inline-flex min-h-10 w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/15 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-60 sm:min-h-11 sm:w-auto sm:rounded-xl sm:bg-gradient-to-b sm:from-white sm:to-emerald-50 sm:px-5 sm:py-3 sm:text-sm sm:text-emerald-900 sm:shadow-[0_4px_20px_rgba(0,0,0,0.15)] sm:hover:from-amber-50 sm:hover:to-white sm:hover:shadow-[0_6px_28px_rgba(251,191,36,0.25)] sm:focus-visible:ring-amber-300/60"
         >
           {t("tradeProviderRegisterCta")}
           <svg
-            className={`h-4 w-4 text-emerald-700 transition group-hover:translate-x-0.5 ${isRTL ? "rotate-180 group-hover:-translate-x-0.5" : ""}`}
+            className={`h-3.5 w-3.5 transition group-hover:translate-x-0.5 sm:h-4 sm:w-4 sm:text-emerald-700 ${isRTL ? "rotate-180 group-hover:-translate-x-0.5" : ""}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
