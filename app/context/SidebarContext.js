@@ -8,27 +8,25 @@ export function SidebarProvider({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close sidebar when navigating to a different page
+  // Close sidebar on navigation unless a mobile menu open was requested
   useEffect(() => {
-    console.log('Pathname changed, closing sidebar:', pathname);
+    if (typeof window !== "undefined" && sessionStorage.getItem("openMobileSidebar") === "1") {
+      sessionStorage.removeItem("openMobileSidebar");
+      setIsSidebarOpen(true);
+      return;
+    }
     setIsSidebarOpen(false);
   }, [pathname]);
 
   const toggleSidebar = useCallback(() => {
-    console.log('Toggling sidebar, current state:', isSidebarOpen);
-    setIsSidebarOpen(prev => {
-      console.log('Previous state:', prev, 'New state:', !prev);
-      return !prev;
-    });
-  }, [isSidebarOpen]);
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
 
   const closeSidebar = useCallback(() => {
-    console.log('Closing sidebar');
     setIsSidebarOpen(false);
   }, []);
 
   const openSidebar = useCallback(() => {
-    console.log('Opening sidebar');
     setIsSidebarOpen(true);
   }, []);
 

@@ -49,23 +49,17 @@ export default function ServiceCategoriesPage() {
                 صفحه عمومی دسته
               </Link>
               <Link
-                href={`/service-request/${service.id}`}
+                href={`/trade-services/register?category=${service.id}`}
                 className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
                 target="_blank"
               >
-                فرم درخواست همکاری
+                عضویت ارائه‌دهنده
               </Link>
               <Link
                 href={`/dashboard/trade-service-providers?category=${service.id}`}
                 className="text-xs font-semibold text-slate-600 hover:text-slate-900"
               >
                 ارائه‌دهندگان این دسته
-              </Link>
-              <Link
-                href={`/dashboard/service-requests?type=${service.id}`}
-                className="text-xs font-semibold text-slate-600 hover:text-slate-900"
-              >
-                درخواست‌های این دسته
               </Link>
             </div>
           </div>

@@ -99,7 +99,7 @@ export default function Header() {
               </Link>
             </div>
 
-            <nav className="flex items-center gap-2 shrink-0 overflow-visible">
+            <nav className="flex items-center gap-2 shrink-0 overflow-visible ms-auto">
               <LanguageSwitcher buttonClass={headerIconBtnClass} />
               <MobileHeaderActions />
 

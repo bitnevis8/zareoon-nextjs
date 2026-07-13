@@ -297,17 +297,11 @@ export default function TradeServicesCategoryView({ categoryId }) {
               {!isVipCategory ? (
                 <AuthRequiredButton
                   href={`/trade-services/register?category=${category.id}`}
-                  className="inline-flex min-h-[44px] items-center rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur-sm transition hover:bg-white/20 disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50"
                 >
                   {t("tradeProviderRegisterCta")}
                 </AuthRequiredButton>
               ) : null}
-              <Link
-                href={`/service-request/${category.id}`}
-                className="inline-flex min-h-[44px] items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50"
-              >
-                {t("tradeServicesCooperationCta")}
-              </Link>
               </div>
             </div>
           </div>
@@ -339,13 +333,12 @@ export default function TradeServicesCategoryView({ categoryId }) {
           </h2>
           <div className="flex flex-wrap gap-2">
             {category.children.map((child) => (
-              <Link
+              <span
                 key={child.id}
-                href={`/service-request/${category.id}?sub=${child.id}`}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-900"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
               >
                 {child.title}
-              </Link>
+              </span>
             ))}
           </div>
         </section>

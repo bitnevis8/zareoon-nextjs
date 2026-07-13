@@ -12,6 +12,7 @@ import {
   localizeUnit,
   parseLocalizedNumberInput,
 } from "../../utils/localize";
+import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
 import Link from "next/link";
 import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplier } from "../../utils/catalogLotSupplier";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
@@ -56,7 +57,10 @@ export default function CatalogLotOfferCard({
   const gradeLabel = getLocalizedLotLabel(lot, language, t);
   const unitLabel = localizeUnit(lot.unit || productUnit || "-", language);
   const statusLabel = localizeStatus(lot.status, t);
-  const lotDescription = (lot.description || "").trim();
+  const display = getLotDisplayForLanguage(lot, language);
+  const lotDescription = display.description;
+  const lotHashtags = display.hashtags;
+  const customTitle = display.title;
   const supplier = getLotSupplierDisplay(lot, t);
   const supplierProfileUrl = getLotSupplierProfileUrl(lot);
 
@@ -122,6 +126,11 @@ export default function CatalogLotOfferCard({
       <div className={bodyClass}>
         <div className={scrollableClass}>
         <div className={embedded ? "p-5 pb-0" : "px-4 py-1"}>
+          {customTitle ? (
+            <div className={`border-b border-slate-100 ${embedded ? "pb-3" : "py-3"}`}>
+              <p className={`text-base font-bold leading-snug ${catalogText.heading}`}>{customTitle}</p>
+            </div>
+          ) : null}
           <div className={`border-b border-slate-100 ${embedded ? "pb-4" : "py-3"}`}>
             <p className={`mb-1 font-medium ${embedded ? "text-sm" : "text-xs"} ${catalogText.muted}`}>{t("priceSectionTitle")}</p>
             {lot.tieredPricing?.length > 0 ? (
@@ -148,9 +157,9 @@ export default function CatalogLotOfferCard({
           </div>
         ) : null}
 
-        {Array.isArray(lot.hashtags) && lot.hashtags.length > 0 ? (
+        {Array.isArray(lotHashtags) && lotHashtags.length > 0 ? (
           <div className={`flex flex-wrap gap-1.5 border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
-            {lot.hashtags.map((tag) => (
+            {lotHashtags.map((tag) => (
               <span key={tag} className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
                 #{tag}
               </span>

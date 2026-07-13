@@ -1,26 +1,80 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import AsyncSelect from "react-select/async";
 import LotLocationPicker from "@/app/components/ui/LotLocationPicker";
 import AttributeFields from "@/app/components/ui/AttributeFields";
-import { Field, Section } from "./Field";
+import { Field } from "./Field";
 import TieredPricingEditor from "./TieredPricingEditor";
+import ProductCatalogPicker from "./ProductCatalogPicker";
 import { inv, selectStyles } from "../inventoryTheme";
-import { QUALITY_GRADES } from "../inventoryConstants";
+import { QUALITY_GRADES, EMPTY_TIER } from "../inventoryConstants";
 import { isSupplier } from "@/app/utils/roles";
-import HashtagInput from "@/app/components/ui/HashtagInput";
+import InventoryMediaDraftUpload from "./InventoryMediaDraftUpload";
+import InventoryDisplayDetailsEditor from "./InventoryDisplayDetailsEditor";
+import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/PersianNumberInput";
+import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
+import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
+import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
+
+function StepBlock({ step, title, children }) {
+  return (
+    <section className="border-b border-slate-100 pb-4 last:border-b-0 last:pb-0">
+      <div className="mb-3 flex items-center gap-2">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800">
+          {step}
+        </span>
+        <h3 className="text-sm font-bold text-slate-900">{title}</h3>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function PricingModeSwitch({ mode, onChange }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+      <div className="grid grid-cols-2 gap-0.5">
+        <button
+          type="button"
+          onClick={() => onChange("simple")}
+          className={`rounded-md px-2 py-1.5 text-center text-xs font-semibold transition ${
+            mode === "simple"
+              ? "bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-200"
+              : "text-slate-600 hover:bg-white/70"
+          }`}
+        >
+          معمولی
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange("tiered")}
+          className={`rounded-md px-2 py-1.5 text-center text-xs font-semibold transition ${
+            mode === "tiered"
+              ? "bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-200"
+              : "text-slate-600 hover:bg-white/70"
+          }`}
+        >
+          پلکانی
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function InventoryCreatePanel({
   form,
   setForm,
   products,
+  catalogItems,
+  catalogLoading,
+  catalogError,
+  onRetryCatalog,
   user,
   farmerNameMap,
   attributeDefs,
   attributeValues,
   setAttributeValues,
-  showTieredPricing,
-  setShowTieredPricing,
   loadProductOptions,
   loadFarmerOptions,
   t,
@@ -29,163 +83,257 @@ export default function InventoryCreatePanel({
   onAddTier,
   onRemoveTier,
   onUpdateTier,
+  pendingImages = [],
+  pendingVideos = [],
+  onPendingImagesChange,
+  onPendingVideosChange,
 }) {
   const supplier = isSupplier(user);
+  const exchangeRates = useExchangeRatesMap();
+  const priceCurrencyLabel = getCurrencyDefinition(form.priceCurrency).shortLabel;
+  const [pricingMode, setPricingMode] = useState(
+    () => (form.tieredPricing?.length > 0 ? "tiered" : "simple")
+  );
+
+  useEffect(() => {
+    if (!form.productId && !form.totalQuantity && !form.price && !form.tieredPricing?.length) {
+      setPricingMode("simple");
+    }
+  }, [form.productId, form.totalQuantity, form.price, form.tieredPricing]);
+
+  const handlePricingModeChange = (mode) => {
+    setPricingMode(mode);
+    if (mode === "simple") {
+      setForm((f) => ({ ...f, tieredPricing: [] }));
+    } else {
+      setForm((f) => ({
+        ...f,
+        price: "",
+        tieredPricing: f.tieredPricing?.length ? f.tieredPricing : [{ ...EMPTY_TIER }],
+      }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (pricingMode === "simple" && !String(form.price || "").trim()) {
+      alert("لطفاً قیمت واحد را وارد کنید یا «قیمت‌گذاری پلکانی» را انتخاب کنید.");
+      return;
+    }
+    if (pricingMode === "tiered") {
+      if (!form.tieredPricing?.length) {
+        alert("حداقل یک سطح قیمت برای قیمت‌گذاری پلکانی تعریف کنید.");
+        return;
+      }
+      const invalid = form.tieredPricing.some(
+        (tier) => !String(tier.minQuantity || "").trim() || !String(tier.pricePerUnit || "").trim()
+      );
+      if (invalid) {
+        alert("برای هر سطح، حداقل مقدار و قیمت واحد را پر کنید.");
+        return;
+      }
+    }
+    onSubmit(e);
+  };
 
   return (
-    <Section
-      title="ثبت موجودی جدید"
-      desc="محصول، مقدار، قیمت و جزئیات را وارد کنید"
-    >
-      <form onSubmit={onSubmit} className="space-y-6">
-        <div>
-          <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-700">۱</span>
-            انتخاب محصول
-          </h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="محصول" className="sm:col-span-2">
-              <AsyncSelect
-                cacheOptions
-                styles={selectStyles}
-                defaultOptions={products.map((p) => ({ value: p.id, label: p.name }))}
-                loadOptions={loadProductOptions}
-                placeholder="جستجو و انتخاب محصول…"
-                noOptionsMessage={() => "موردی یافت نشد"}
-                onChange={(opt) => setForm({ ...form, productId: opt?.value || "" })}
-                value={
-                  form.productId
-                    ? {
-                        value: form.productId,
-                        label: products.find((p) => p.id === Number(form.productId))?.name || `#${form.productId}`,
-                      }
-                    : null
-                }
-              />
-            </Field>
-            {!supplier ? (
-              <Field label="تامین‌کننده" className="sm:col-span-2">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">ثبت موجودی جدید</h2>
+        <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">
+          نوع محصول را انتخاب کنید و جزئیات موجودی را تکمیل کنید
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4 px-3 py-3 sm:space-y-5 sm:px-4 sm:py-4">
+        <StepBlock step="۱" title="انتخاب نوع محصول">
+          <ProductCatalogPicker
+            catalogItems={catalogItems}
+            catalogLoading={catalogLoading}
+            catalogError={catalogError}
+            onRetryCatalog={onRetryCatalog}
+            fallbackProducts={products}
+            selectedProductId={form.productId}
+            onSelectProduct={(id) => setForm({ ...form, productId: id || "" })}
+            loadProductOptions={loadProductOptions}
+          />
+          {!supplier ? (
+            <div className="mt-3">
+              <Field label="تأمین‌کننده" compact>
                 <AsyncSelect
                   cacheOptions
                   styles={selectStyles}
                   defaultOptions
                   loadOptions={loadFarmerOptions}
-                  placeholder="انتخاب تامین‌کننده…"
+                  placeholder="انتخاب تأمین‌کننده…"
                   noOptionsMessage={() => "موردی یافت نشد"}
-                  onChange={(opt) => setForm({ ...form, farmerId: opt?.value || "", farmerLabel: opt?.label || "" })}
+                  onChange={(opt) =>
+                    setForm({ ...form, farmerId: opt?.value || "", farmerLabel: opt?.label || "" })
+                  }
                   value={
                     form.farmerId
                       ? {
                           value: form.farmerId,
-                          label: form.farmerLabel || farmerNameMap.get(Number(form.farmerId)) || `#${form.farmerId}`,
+                          label:
+                            form.farmerLabel ||
+                            farmerNameMap.get(Number(form.farmerId)) ||
+                            `#${form.farmerId}`,
                         }
                       : null
                   }
                 />
               </Field>
-            ) : null}
-          </div>
-        </div>
+            </div>
+          ) : null}
+        </StepBlock>
 
-        <div>
-          <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-700">۲</span>
-            موجودی و قیمت
-          </h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="واحد">
-              <input className={inv.input} placeholder="kg, تن…" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+        <StepBlock step="۲" title="موجودی و قیمت">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <Field label="واحد" compact>
+              <input
+                className={inv.inputCompact}
+                placeholder="kg، تن…"
+                value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })}
+              />
             </Field>
-            <Field label="درجه کیفیت">
-              <select className={inv.select} value={form.qualityGrade} onChange={(e) => setForm({ ...form, qualityGrade: e.target.value })}>
+            <Field label="درجه کیفیت" compact>
+              <select
+                className={inv.selectCompact}
+                value={form.qualityGrade}
+                onChange={(e) => setForm({ ...form, qualityGrade: e.target.value })}
+              >
                 {QUALITY_GRADES.map((g) => (
-                  <option key={g} value={g}>{g}</option>
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
                 ))}
               </select>
             </Field>
-            <Field label="وضعیت">
-              <select className={inv.select} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+            <Field label="وضعیت" compact>
+              <select
+                className={inv.selectCompact}
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+              >
                 <option value="harvested">{t("statusHarvested")}</option>
                 <option value="on_field">{t("statusOnField")}</option>
                 <option value="reserved">{t("statusReserved")}</option>
                 <option value="sold">{t("statusSold")}</option>
               </select>
             </Field>
-            <Field label="مقدار کل">
-              <input type="number" className={inv.input} value={form.totalQuantity} onChange={(e) => setForm({ ...form, totalQuantity: e.target.value })} />
+            <Field label="مقدار کل" compact>
+              <PersianNumberInput
+                className={inv.inputCompact}
+                value={form.totalQuantity}
+                onChange={(v) => setForm({ ...form, totalQuantity: v })}
+              />
             </Field>
-            <Field label="قیمت (تومان)">
-              <input type="number" className={inv.input} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-            </Field>
-            <Field label="حداقل سفارش">
-              <input type="number" className={inv.input} value={form.minimumOrderQuantity} onChange={(e) => setForm({ ...form, minimumOrderQuantity: e.target.value })} />
+            <Field label="حداقل سفارش" className="col-span-2 sm:col-span-1" compact>
+              <PersianNumberInput
+                className={inv.inputCompact}
+                value={form.minimumOrderQuantity}
+                onChange={(v) => setForm({ ...form, minimumOrderQuantity: v })}
+              />
             </Field>
           </div>
-        </div>
 
-        <div>
-          <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-700">۳</span>
-            جزئیات نمایش در کاتالوگ
-          </h3>
-          <div className="space-y-4">
-            <Field label="توضیحات" hint="در صفحه محصول برای خریدار نمایش داده می‌شود">
-              <textarea className={inv.textarea} rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <div className="mt-3 space-y-2.5 border-t border-slate-100 pt-3">
+            <Field label="نوع قیمت" compact>
+              <PricingModeSwitch mode={pricingMode} onChange={handlePricingModeChange} />
             </Field>
-            <HashtagInput
-              value={form.hashtags}
-              onChange={(hashtags) => setForm({ ...form, hashtags })}
-              label="هشتگ محصول"
+
+            {pricingMode === "simple" ? (
+              <Field label={`قیمت واحد (${priceCurrencyLabel})`} compact>
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start">
+                  <div className="min-w-0 flex-1">
+                    <PersianPriceInput
+                      className={inv.inputCompact}
+                      value={form.price}
+                      onChange={(v) => setForm({ ...form, price: v })}
+                      currency={form.priceCurrency}
+                      exchangeRates={exchangeRates}
+                      placeholder="مثلاً ۵۰٬۰۰۰"
+                    />
+                  </div>
+                  <PriceCurrencySelect
+                    className="w-full sm:w-[8.5rem]"
+                    value={form.priceCurrency}
+                    onChange={(priceCurrency) => setForm({ ...form, priceCurrency })}
+                  />
+                </div>
+              </Field>
+            ) : (
+              <TieredPricingEditor
+                tiers={form.tieredPricing}
+                unit={form.unit}
+                priceCurrency={form.priceCurrency}
+                exchangeRates={exchangeRates}
+                onPriceCurrencyChange={(priceCurrency) => setForm({ ...form, priceCurrency })}
+                onAdd={onAddTier}
+                onRemove={onRemoveTier}
+                onUpdate={onUpdateTier}
+              />
+            )}
+          </div>
+        </StepBlock>
+
+        <StepBlock step="۳" title="جزئیات نمایش">
+          <div className="space-y-3">
+            <InventoryDisplayDetailsEditor
+              value={form.displayContent}
+              onChange={(displayContent) => setForm({ ...form, displayContent })}
             />
-            <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-              <LotLocationPicker
-                latitude={form.latitude}
-                longitude={form.longitude}
-                locationLabel={form.locationLabel}
-                onLocationLabelChange={(v) => setForm({ ...form, locationLabel: v })}
-                onPositionChange={({ latitude, longitude }) =>
-                  setForm({
-                    ...form,
-                    latitude: latitude != null ? String(latitude) : "",
-                    longitude: longitude != null ? String(longitude) : "",
-                  })
-                }
+            <div className="rounded-lg border border-slate-200 bg-slate-50/40 p-2.5 sm:p-3">
+              <InventoryMediaDraftUpload
+                images={pendingImages}
+                videos={pendingVideos}
+                onImagesChange={onPendingImagesChange}
+                onVideosChange={onPendingVideosChange}
               />
             </div>
+          </div>
+        </StepBlock>
+
+        <StepBlock step="۴" title="موقعیت و مشخصات">
+          <div className="space-y-3">
+            <LotLocationPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              locationLabel={form.locationLabel}
+              onLocationLabelChange={(v) => setForm({ ...form, locationLabel: v })}
+              onPositionChange={({ latitude, longitude }) =>
+                setForm({
+                  ...form,
+                  latitude: latitude != null ? String(latitude) : "",
+                  longitude: longitude != null ? String(longitude) : "",
+                })
+              }
+            />
             {attributeDefs.length > 0 ? (
-              <div>
-                <p className="mb-2 text-sm font-semibold text-slate-700">مشخصات فنی و بسته‌بندی</p>
-                <AttributeFields defs={attributeDefs} values={attributeValues} onChange={(id, val) => setAttributeValues((v) => ({ ...v, [id]: val }))} />
+              <div className="rounded-lg border border-slate-200 p-2.5 sm:p-3">
+                <p className="mb-2 text-xs font-semibold text-slate-700">مشخصات فنی</p>
+                <AttributeFields
+                  defs={attributeDefs}
+                  values={attributeValues}
+                  onChange={(id, val) => setAttributeValues((v) => ({ ...v, [id]: val }))}
+                  compact
+                />
               </div>
             ) : null}
           </div>
-        </div>
+        </StepBlock>
 
-        <div>
+        <div className="sticky bottom-0 -mx-3 border-t border-slate-100 bg-white/95 px-3 py-2.5 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-1">
           <button
-            type="button"
-            onClick={() => setShowTieredPricing(!showTieredPricing)}
-            className="mb-3 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 sm:w-auto"
+            type="submit"
+            disabled={saving}
+            className={`${inv.btnPrimaryBlock} sm:mr-auto sm:w-auto sm:min-w-[140px] sm:px-6 sm:py-2.5`}
           >
-            <span className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-700">۴</span>
-              قیمت‌گذاری پلکانی (اختیاری)
-            </span>
-            <svg className={`h-4 w-4 transition ${showTieredPricing ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {showTieredPricing ? (
-            <TieredPricingEditor tiers={form.tieredPricing} unit={form.unit} onAdd={onAddTier} onRemove={onRemoveTier} onUpdate={onUpdateTier} />
-          ) : null}
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
-          <button type="submit" disabled={saving} className={inv.btnPrimaryBlock + " sm:w-auto sm:min-w-[160px]"}>
-            {saving ? "در حال ثبت…" : "افزودن محصول"}
+            {saving ? "در حال ثبت…" : "ثبت موجودی"}
           </button>
         </div>
       </form>
-    </Section>
+    </div>
   );
 }

@@ -4,13 +4,28 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import ApplicantRequestContactActions from "@/app/components/dashboard/ApplicantRequestContactActions";
+import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 
+const PAGE_COPY = {
+  seller: {
+    title: "مشاهده نیازمندی‌ها به محصولات من",
+    subtitle: "درخواست‌هایی که متقاضیان ثبت کرده‌اند و با محصولاتی که شما عرضه می‌کنید هم‌خوان هستند",
+  },
+  services: {
+    title: "مشاهده نیازمندی‌ها به خدمات من",
+    subtitle: "درخواست‌هایی که متقاضیان ثبت کرده‌اند و با خدماتی که شما ارائه می‌دهید هم‌خوان هستند",
+  },
+};
+
 function IncomingRequestsListContent() {
+  const { isSellerView } = useDashboardPersona();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const copy = isSellerView ? PAGE_COPY.seller : PAGE_COPY.services;
 
   useEffect(() => {
     authFetch(`${API_ENDPOINTS.applicantRequests.notifications}?limit=50`, {
@@ -24,8 +39,8 @@ function IncomingRequestsListContent() {
   return (
     <div className={dash.page}>
       <header className="mb-6">
-        <h1 className={dash.pageTitle}>درخواست‌های متقاضیان</h1>
-        <p className={dash.pageSubtitle}>درخواست‌هایی که در دسته محصولات یا خدمات شما ثبت شده‌اند</p>
+        <h1 className={dash.pageTitle}>{copy.title}</h1>
+        <p className={dash.pageSubtitle}>{copy.subtitle}</p>
       </header>
 
       {loading ? (

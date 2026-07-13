@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useLanguage } from "../context/LanguageContext";
 import HorizontalScrollRow from "./HorizontalScrollRow";
 import AvailableProductCompactCard from "./AvailableProductCompactCard";
@@ -15,9 +16,10 @@ import {
 const CARD_CLASS = "shrink-0 w-[7.75rem] min-[380px]:w-[8.25rem] sm:w-[8.75rem] md:w-[9.25rem] snap-start";
 
 export default function LatestAvailableProductsSection({
-  inventoryLots,
-  allProducts,
-  loading = false,
+  inventoryLots: inventoryLotsProp,
+  allProducts: allProductsProp,
+  loading: loadingProp = false,
+  autoFetch = false,
   scopeCategoryId = null,
   scopeCategoryName = null,
   title,
@@ -27,6 +29,40 @@ export default function LatestAvailableProductsSection({
 }) {
   const { language, t, isRTL } = useLanguage();
   const [groupByCategory, setGroupByCategory] = useState(false);
+  const [fetchedLots, setFetchedLots] = useState([]);
+  const [fetchedProducts, setFetchedProducts] = useState([]);
+  const [fetchLoading, setFetchLoading] = useState(autoFetch);
+
+  useEffect(() => {
+    if (!autoFetch) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const [resLots, resAll] = await Promise.all([
+          fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" }),
+        ]);
+        const [dl, dAll] = await Promise.all([resLots.json(), resAll.json()]);
+        if (!cancelled) {
+          setFetchedLots(dl.data || []);
+          setFetchedProducts(dAll.data || []);
+        }
+      } catch {
+        // Non-blocking: section shows empty state if fetch fails.
+      } finally {
+        if (!cancelled) setFetchLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [autoFetch]);
+
+  const inventoryLots = autoFetch ? fetchedLots : inventoryLotsProp || [];
+  const allProducts = autoFetch ? fetchedProducts : allProductsProp || [];
+  const loading = autoFetch ? fetchLoading : loadingProp;
 
   const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
 

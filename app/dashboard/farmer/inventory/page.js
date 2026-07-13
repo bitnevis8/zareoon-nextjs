@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
@@ -20,6 +20,7 @@ import { inv } from "./inventoryTheme";
 import { INITIAL_FORM, EMPTY_TIER } from "./inventoryConstants";
 import { useInventoryLots } from "./hooks/useInventoryLots";
 import { filterAndSortLots, countActiveFilters, loadAttributeDefsForProduct, saveLotAttributeValues } from "./inventoryUtils";
+import { hydrateDisplayContent, displayContentToApiPayload } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
 
 export default function InventoryListPage() {
   const searchParams = useSearchParams();
@@ -69,17 +70,15 @@ export default function InventoryListPage() {
     setViewOpen(false);
     setSelectedLot(lot);
     setEditForm({
-      englishName: lot.englishName || "",
-      arabicName: lot.arabicName || "",
-      russianName: lot.russianName || "",
+      displayContent: hydrateDisplayContent(lot),
       unit: lot.unit || "",
       qualityGrade: lot.qualityGrade || "",
       totalQuantity: String(lot.totalQuantity ?? ""),
       price: lot.price == null ? "" : String(lot.price),
+      priceCurrency: lot.priceCurrency || lot.price_currency || "TOMAN",
       minimumOrderQuantity: lot.minimumOrderQuantity ? String(lot.minimumOrderQuantity) : "",
       tieredPricing: lot.tieredPricing || [],
       status: lot.status || "harvested",
-      description: lot.description || "",
       locationLabel: lot.locationLabel || "",
       latitude: lot.latitude != null ? String(lot.latitude) : "",
       longitude: lot.longitude != null ? String(lot.longitude) : "",
@@ -99,21 +98,20 @@ export default function InventoryListPage() {
     if (!selectedLot) return;
     setEditSaving(true);
     try {
+      const displayFields = displayContentToApiPayload(editForm.displayContent);
       const payload = {
         unit: editForm.unit || null,
-        englishName: editForm.englishName || null,
-        arabicName: editForm.arabicName || null,
-        russianName: editForm.russianName || null,
         qualityGrade: editForm.qualityGrade || null,
         totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
         price: editForm.price !== "" ? Number(editForm.price) : null,
+        priceCurrency: editForm.priceCurrency || "TOMAN",
         minimumOrderQuantity: editForm.minimumOrderQuantity ? Number(editForm.minimumOrderQuantity) : null,
         tieredPricing: editForm.tieredPricing.length > 0 ? editForm.tieredPricing : null,
         status: editForm.status || null,
-        description: editForm.description?.trim() || null,
         locationLabel: editForm.locationLabel?.trim() || null,
         latitude: editForm.latitude !== "" && editForm.latitude != null ? Number(editForm.latitude) : null,
         longitude: editForm.longitude !== "" && editForm.longitude != null ? Number(editForm.longitude) : null,
+        ...displayFields,
       };
       await fetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
         method: "PUT",
@@ -184,7 +182,7 @@ export default function InventoryListPage() {
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
           </svg>
-          افزودن محصول
+          ثبت موجودی جدید
           </Link>
         </div>
       </div>
@@ -223,8 +221,11 @@ export default function InventoryListPage() {
               {items.length === 0 ? "اولین بار خود را ثبت کنید" : "فیلترها را تغییر دهید یا جستجو را پاک کنید"}
             </p>
             {items.length === 0 ? (
-              <Link href="/dashboard/supplier/inventory/create" className={`${inv.btnPrimary} mt-4`}>
-                افزودن محصول
+              <Link
+                href={isOwnScope ? "/dashboard/supplier/inventory/create?scope=own" : "/dashboard/supplier/inventory/create"}
+                className={`${inv.btnPrimary} mt-4`}
+              >
+                ثبت موجودی جدید
               </Link>
             ) : (
               <button type="button" className={`${inv.btnSecondary} mt-4`} onClick={() => setFilters(DEFAULT_FILTERS)}>

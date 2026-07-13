@@ -321,7 +321,7 @@ export default function DashboardSettingsPage() {
                           </details>
                           <div className="mt-4 border-t border-slate-100 pt-4">
                             <p className="mb-2 text-xs font-semibold text-slate-600">
-                              تصویر بنر (بالای دکمه «درخواست همکاری»)
+                              تصویر بنر (بالای دکمه «عضویت ارائه‌دهنده»)
                             </p>
                             {cfg.bannerImage ? (
                               <div className="relative mb-3 h-20 w-full max-w-xs overflow-hidden rounded-lg border border-slate-200 bg-white">

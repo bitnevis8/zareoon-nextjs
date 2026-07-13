@@ -1,23 +1,28 @@
 "use client";
 
-export default function AttributeFields({ defs = [], values = {}, onChange, className = "" }) {
+export default function AttributeFields({ defs = [], values = {}, onChange, className = "", compact = false }) {
   if (!defs.length) return null;
 
+  const labelClass = compact ? "mb-0.5 text-xs font-medium text-slate-600" : "mb-1 text-sm font-medium text-gray-700";
+  const inputClass = compact
+    ? "rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-100"
+    : "rounded-lg border border-gray-300 p-2.5 text-sm";
+
   return (
-    <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 ${className}`}>
+    <div className={`grid grid-cols-1 gap-2 sm:grid-cols-2 ${className}`}>
       {defs.map((def) => (
         <div key={def.id} className="flex flex-col">
-          <label className="mb-1 text-sm font-medium text-gray-700">{def.name}</label>
+          <label className={labelClass}>{def.name}</label>
           {def.type === "number" ? (
             <input
               type="number"
-              className="rounded-lg border border-gray-300 p-2.5 text-sm"
+              className={inputClass}
               value={values[def.id] ?? ""}
               onChange={(e) => onChange(def.id, e.target.value)}
             />
           ) : def.type === "boolean" ? (
             <select
-              className="rounded-lg border border-gray-300 p-2.5 text-sm"
+              className={inputClass}
               value={values[def.id] ?? ""}
               onChange={(e) => onChange(def.id, e.target.value)}
             >
@@ -28,13 +33,13 @@ export default function AttributeFields({ defs = [], values = {}, onChange, clas
           ) : def.type === "date" ? (
             <input
               type="date"
-              className="rounded-lg border border-gray-300 p-2.5 text-sm"
+              className={inputClass}
               value={values[def.id] ?? ""}
               onChange={(e) => onChange(def.id, e.target.value)}
             />
           ) : def.type === "select" && Array.isArray(def.options) ? (
             <select
-              className="rounded-lg border border-gray-300 p-2.5 text-sm"
+              className={inputClass}
               value={values[def.id] ?? ""}
               onChange={(e) => onChange(def.id, e.target.value)}
             >
@@ -47,7 +52,7 @@ export default function AttributeFields({ defs = [], values = {}, onChange, clas
             </select>
           ) : (
             <input
-              className="rounded-lg border border-gray-300 p-2.5 text-sm"
+              className={inputClass}
               value={values[def.id] ?? ""}
               onChange={(e) => onChange(def.id, e.target.value)}
             />

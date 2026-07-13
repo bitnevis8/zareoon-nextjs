@@ -252,7 +252,10 @@ export default function ExchangeRatesPage() {
                 >
                   <div className="min-w-0">
                     <h3 className="font-bold text-slate-900">{rate.label}</h3>
-                    <p className="text-xs text-slate-500">{rate.code}</p>
+                    <p className="text-xs text-slate-500">
+                      {rate.code}
+                      {rate.kind === "crypto" ? " · رمزارز" : null}
+                    </p>
                   </div>
                   <div className="text-left" dir="ltr">
                     <div className="flex items-baseline justify-end gap-1.5 text-lg font-extrabold tabular-nums text-slate-900">

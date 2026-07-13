@@ -383,7 +383,7 @@ export default function CategoryMegaMenu() {
     [
       "flex w-full items-center gap-2 text-right transition-colors duration-100",
       "rounded-lg px-2 py-2 max-lg:min-h-[44px] max-lg:border max-lg:py-2.5",
-      "lg:rounded-md lg:px-2 lg:py-1.5 lg:gap-1.5",
+      "lg:rounded-md lg:px-2.5 lg:py-2 lg:gap-2",
       "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50",
       active
         ? "max-lg:border-emerald-600 max-lg:bg-emerald-600 max-lg:text-white lg:bg-emerald-600 lg:text-white"
@@ -465,7 +465,8 @@ export default function CategoryMegaMenu() {
               ) : (
                 <ul
                   className={[
-                    "grid min-h-0 flex-1 grid-cols-2 gap-1 overflow-y-auto overscroll-y-contain p-1.5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-0 lg:p-1",
+                    "grid min-h-0 flex-1 grid-cols-2 gap-1 overflow-y-auto overscroll-y-contain p-1.5 sm:grid-cols-2",
+                    "lg:grid-cols-1 lg:content-start lg:auto-rows-min lg:gap-1 lg:p-2",
                     "[scrollbar-gutter:stable] [scrollbar-width:thin] [-ms-overflow-style:auto]",
                     "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/80 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400",
                   ].join(" ")}
@@ -594,7 +595,7 @@ export default function CategoryMegaMenu() {
     <>
       <div
         ref={triggerRef}
-        className="relative z-20 shrink-0"
+        className="relative z-20 flex h-full shrink-0 self-stretch"
         onMouseEnter={handleTriggerMouseEnter}
         onMouseLeave={scheduleClose}
       >
@@ -604,7 +605,7 @@ export default function CategoryMegaMenu() {
           aria-expanded={open}
           aria-haspopup="dialog"
           className={[
-            "flex h-full shrink-0 items-center gap-1 border-l border-emerald-950/30 bg-emerald-950 px-2.5 text-[11px] font-bold text-white transition hover:bg-emerald-900 sm:px-3 sm:text-xs",
+            "flex h-full min-h-10 shrink-0 items-center gap-1 border-l border-emerald-950/40 bg-emerald-950 px-2.5 text-[11px] font-bold text-white transition hover:bg-emerald-900 sm:px-3 sm:text-xs",
             open ? "bg-emerald-900 ring-1 ring-inset ring-emerald-400/40" : "",
           ].join(" ")}
         >

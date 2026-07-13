@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useSidebar } from "@/app/context/SidebarContext";
+import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import Link from "next/link";
 import Image from "next/image";
 import Sidebar from "@/app/components/ui/Sidebar";
@@ -13,8 +14,17 @@ function MenuIcon() {
   );
 }
 
+function resolveMobileHeaderTitle({ isApplicantView, isServicesView, isSellerView }) {
+  if (isServicesView) return "خدمات بازرگانی";
+  if (isApplicantView) return "متقاضی";
+  if (isSellerView) return "فروشنده";
+  return "داشبورد";
+}
+
 export default function DashboardShell({ breadcrumb, alert, children }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { openSidebar } = useSidebar();
+  const { isApplicantView, isServicesView, isSellerView } = useDashboardPersona();
+  const mobileHeaderTitle = resolveMobileHeaderTitle({ isApplicantView, isServicesView, isSellerView });
 
   return (
     <div className="flex min-h-0 flex-1 bg-slate-100">
@@ -25,33 +35,13 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
         </div>
       </aside>
 
-      {/* Mobile drawer */}
-      <div
-        className={`fixed inset-0 z-50 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
-        aria-hidden={!mobileOpen}
-      >
-        <button
-          type="button"
-          className={`absolute inset-0 bg-slate-900/40 transition-opacity ${mobileOpen ? "opacity-100" : "opacity-0"}`}
-          onClick={() => setMobileOpen(false)}
-          aria-label="بستن منو"
-        />
-        <aside
-          className={`absolute top-0 bottom-0 right-0 w-[21rem] max-w-[92vw] overflow-y-auto border-l border-slate-200 bg-white shadow-xl transition-transform duration-200 ${
-            mobileOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <Sidebar onLinkClick={() => setMobileOpen(false)} />
-        </aside>
-      </div>
-
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
         <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 md:hidden">
           <button
             type="button"
-            onClick={() => setMobileOpen(true)}
+            onClick={() => openSidebar()}
             className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100"
             aria-label="باز کردن منو"
           >
@@ -65,7 +55,7 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
               height={32}
               className="h-8 w-8 shrink-0 rounded border border-slate-200 object-contain"
             />
-            <span className="truncate text-sm font-semibold text-slate-800">داشبورد</span>
+            <span className="truncate text-sm font-semibold text-slate-800">{mobileHeaderTitle}</span>
           </Link>
           <Link
             href="/"

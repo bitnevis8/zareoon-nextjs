@@ -7,8 +7,10 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { API_ENDPOINTS } from "../config/api";
 import { getL1Categories } from "../data/tradeServicesCatalog";
+import { authFetch } from "../utils/authHeaders";
 import { showToast } from "../utils/toast";
 import TradeProviderServicePicker from "./TradeProviderServicePicker";
+import ServiceProviderOnboardingIntro from "./ServiceProviderOnboardingIntro";
 import { resolveVipCategoryMessage } from "@/app/utils/vipCategoryHelpers";
 
 const initialForm = {
@@ -67,8 +69,10 @@ export default function TradeProviderRegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillCategory = searchParams.get("category") || "";
+  const startForm = searchParams.get("start") === "1";
 
   const categories = useMemo(() => getL1Categories(language), [language]);
+  const [introAccepted, setIntroAccepted] = useState(startForm);
   const [form, setForm] = useState(initialForm);
   const [selectedServices, setSelectedServices] = useState([]);
   const [vipCategories, setVipCategories] = useState({});
@@ -189,10 +193,9 @@ export default function TradeProviderRegisterForm() {
         subcategoryIds: selectedServices.map((s) => s.subcategoryId),
       };
 
-      const response = await fetch(API_ENDPOINTS.tradeServiceProviders.create, {
+      const response = await authFetch(API_ENDPOINTS.tradeServiceProviders.create, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(payload),
       });
       const data = await response.json();
@@ -205,6 +208,9 @@ export default function TradeProviderRegisterForm() {
       showToast.success(data.message || t("tradeProviderRegisterSuccess"));
       setSuccessMessage(data.message || t("tradeProviderRegisterSuccess"));
       setSuccess(true);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("trade-provider-mine-updated"));
+      }
     } catch {
       setError(t("lcFormSubmitError"));
       showToast.error(t("lcFormSubmitError"));
@@ -223,25 +229,31 @@ export default function TradeProviderRegisterForm() {
 
   if (success) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-10" dir={isRTL ? "rtl" : "ltr"}>
-        <div className="space-y-4 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white px-6 py-8 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700">
+      <main
+        className="flex min-h-[70vh] items-center justify-center bg-gradient-to-b from-emerald-50/40 via-white to-slate-50/80 px-4 py-10"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div className="w-full max-w-md space-y-6 rounded-2xl border border-emerald-200/80 bg-white px-6 py-8 text-center shadow-lg sm:px-8 sm:py-10">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-700">
             ✓
           </div>
-          <h1 className="text-xl font-bold text-slate-900">{t("lcFormSuccessTitle")}</h1>
-          <p className="text-sm leading-7 text-slate-600">{successMessage || t("tradeProviderRegisterSuccess")}</p>
-          <div className="flex flex-wrap justify-center gap-2 pt-2">
+          <div className="space-y-2">
+            <h1 className="text-xl font-black text-slate-900 sm:text-2xl">{t("lcFormSuccessTitle")}</h1>
+            <p className="text-sm leading-7 text-slate-600">{successMessage || t("tradeProviderRegisterSuccess")}</p>
+            <p className="text-xs leading-6 text-slate-500">{t("tradeProviderSuccessHint")}</p>
+          </div>
+          <div className="flex flex-col gap-2.5 pt-1">
             <Link
-              href="/trade-services"
-              className="inline-flex rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800"
+              href="/dashboard"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white transition hover:bg-emerald-800"
             >
-              {t("tradeServicesBrowseCta")}
+              {t("tradeProviderSuccessGoDashboard")}
             </Link>
             <Link
               href="/"
-              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
-              {t("home")}
+              {t("tradeProviderSuccessGoHome")}
             </Link>
           </div>
         </div>
@@ -250,6 +262,26 @@ export default function TradeProviderRegisterForm() {
   }
 
   const isCompany = form.entityType === "company";
+
+  if (!introAccepted) {
+    return (
+      <main className="min-h-[70vh] bg-gradient-to-b from-emerald-50/40 via-white to-slate-50/80 pb-10" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="mx-auto max-w-2xl px-4 pt-8 sm:px-6 sm:pt-10">
+          <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-900">
+            ← {t("dashboard")}
+          </Link>
+          <div className="mt-5">
+            <ServiceProviderOnboardingIntro
+              onAccept={() => setIntroAccepted(true)}
+              showBrowseLink={false}
+              showDeclineButton
+              declineHref="/dashboard"
+            />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-[70vh] bg-gradient-to-b from-emerald-50/40 via-white to-slate-50/80 pb-10" dir={isRTL ? "rtl" : "ltr"}>

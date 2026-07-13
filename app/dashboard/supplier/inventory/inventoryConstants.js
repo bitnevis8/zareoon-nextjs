@@ -1,19 +1,18 @@
+import { createEmptyDisplayContent } from "./utils/inventoryDisplayLocales";
+
 export const INITIAL_FORM = {
   productId: "",
   farmerId: "",
   farmerLabel: "",
-  englishName: "",
-  arabicName: "",
-  russianName: "",
   unit: "kg",
   qualityGrade: "درجه 1",
   totalQuantity: "",
   price: "",
+  priceCurrency: "TOMAN",
   minimumOrderQuantity: "",
   tieredPricing: [],
   status: "harvested",
-  description: "",
-  hashtags: [],
+  displayContent: createEmptyDisplayContent(),
   locationLabel: "",
   latitude: "",
   longitude: "",

@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { buildDashboardBreadcrumbs } from "@/app/dashboard/dashboardRoutes";
 
 export default function DashboardBreadcrumb() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isSellerView, isServicesView } = useDashboardPersona();
 
   const crumbs = useMemo(
-    () => buildDashboardBreadcrumbs(pathname, searchParams),
-    [pathname, searchParams]
+    () => buildDashboardBreadcrumbs(pathname, searchParams, { isSellerView, isServicesView }),
+    [pathname, searchParams, isSellerView, isServicesView]
   );
 
   if (!crumbs.length) return null;

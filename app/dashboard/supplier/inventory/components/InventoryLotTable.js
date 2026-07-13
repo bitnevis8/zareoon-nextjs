@@ -2,6 +2,7 @@
 
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import { localizeStatus } from "@/app/utils/localize";
+import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
 
 export default function InventoryLotTable({ items, products, farmerNameMap, t, onView, onEdit, onMedia, onDelete }) {
@@ -45,7 +46,9 @@ export default function InventoryLotTable({ items, products, farmerNameMap, t, o
                   {x.tieredPricing?.length > 0 ? (
                     <TieredPricingDisplay tieredPricing={x.tieredPricing} unit={x.unit} />
                   ) : x.price ? (
-                    <span className="font-semibold text-emerald-700">{parseFloat(x.price).toLocaleString("fa-IR")} تومان</span>
+                    <span className="font-semibold text-emerald-700">
+                      {formatPriceWithCurrency(x.price, x.priceCurrency || x.price_currency)}
+                    </span>
                   ) : (
                     <span className="text-slate-400">—</span>
                   )}

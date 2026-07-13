@@ -11,7 +11,7 @@ function normalizeHashtagInput(raw) {
     .replace(/\s+/g, "");
 }
 
-export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS, label = "هشتگ‌ها" }) {
+export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS, label = "هشتگ‌ها", compact = false }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const tags = Array.isArray(value) ? value : [];
@@ -46,14 +46,14 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
 
   return (
     <div>
-      <label className="mb-1 block text-xs font-semibold text-slate-600">
+      <label className={`mb-1 block font-semibold text-slate-600 ${compact ? "text-xs" : "text-xs"}`}>
         {label} ({tags.length}/{max})
       </label>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1">
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"
+            className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800"
           >
             #{tag}
             <button
@@ -68,22 +68,22 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
         ))}
       </div>
       {tags.length < max ? (
-        <div className="mt-2 flex gap-2">
+        <div className={`flex gap-1.5 ${compact ? "mt-1.5" : "mt-2"}`}>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="مثلاً خرما"
-            className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
           />
           <button
             type="button"
             onClick={addTag}
             disabled={!normalizeHashtagInput(input)}
-            className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 disabled:opacity-40"
+            className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-800 disabled:opacity-40"
           >
-            افزودن
+            +
           </button>
         </div>
       ) : null}

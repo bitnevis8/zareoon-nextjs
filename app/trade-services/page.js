@@ -7,6 +7,7 @@ import { getTradeServicesContent } from "@/app/data/tradeServicesCatalog";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { resolveVipCategoryMessage } from "@/app/utils/vipCategoryHelpers";
 import TradeServicesJoinBanner from "@/app/components/TradeServicesJoinBanner";
+import ZareoonEscrowFeature from "@/app/components/ZareoonEscrowFeature";
 
 function CategoryHubIcon({ name }) {
   const className = "h-6 w-6 text-emerald-700";
@@ -63,8 +64,8 @@ function HubCategoryCard({ category, isVip, vipMessage, t }) {
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_12px_32px_rgba(6,95,70,0.1)] sm:rounded-2xl sm:p-5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 transition group-hover:opacity-100" />
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-emerald-100/90 bg-white/95 p-3.5 shadow-[0_2px_14px_rgba(6,78,59,0.06)] transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_12px_32px_rgba(6,95,70,0.12)] sm:rounded-2xl sm:p-5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-60" />
       <div className="relative mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white sm:mb-4 sm:h-11 sm:w-11">
         <CategoryHubIcon name={category.icon} />
       </div>
@@ -113,7 +114,7 @@ export default function TradeServicesHubPage() {
         </Link>
       </nav>
 
-      <header className="mb-8 overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 p-5 text-white sm:p-7">
+      <header className="overflow-hidden rounded-t-2xl border border-b-0 border-emerald-100 bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 p-5 text-white sm:p-7">
         <p className="mb-2 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-50">
           {content.eyebrow}
         </p>
@@ -123,20 +124,38 @@ export default function TradeServicesHubPage() {
         </p>
       </header>
 
-      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
-        {content.categories.map((category) => {
-          const isVip = !!vipCategories[category.id]?.enabled;
-          const vipMessage = resolveVipCategoryMessage(vipCategories, category.id, language, t);
-          return (
-            <HubCategoryCard
-              key={category.id}
-              category={category}
-              isVip={isVip}
-              vipMessage={vipMessage}
-              t={t}
-            />
-          );
-        })}
+      <div className="mb-6 overflow-hidden rounded-b-2xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50/70 via-white to-emerald-50/40 shadow-[0_12px_32px_rgba(6,78,59,0.08)]">
+        <div className="space-y-4 p-3 sm:space-y-5 sm:p-4 lg:p-5">
+          <ZareoonEscrowFeature />
+
+          <div className="overflow-hidden rounded-xl border border-emerald-100 bg-white/90 shadow-sm">
+            <div className={`border-b border-emerald-100 bg-emerald-50/80 px-3 py-3 sm:px-5 sm:py-3.5 ${isRTL ? "text-right" : "text-left"}`}>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700 sm:text-[11px]">
+                {t("tradeServicesSectionLabel")}
+              </p>
+              <h2 className="mt-0.5 text-sm font-bold text-emerald-950 sm:text-base">
+                {t("tradeServicesCategoriesTitle")}
+              </h2>
+              <p className="mt-1 text-xs leading-6 text-emerald-800/80">{t("tradeServicesCategoriesDesc")}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 p-3 sm:gap-4 sm:p-4 lg:grid-cols-3">
+              {content.categories.map((category) => {
+                const isVip = !!vipCategories[category.id]?.enabled;
+                const vipMessage = resolveVipCategoryMessage(vipCategories, category.id, language, t);
+                return (
+                  <HubCategoryCard
+                    key={category.id}
+                    category={category}
+                    isVip={isVip}
+                    vipMessage={vipMessage}
+                    t={t}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
       <TradeServicesJoinBanner className="mt-2" />

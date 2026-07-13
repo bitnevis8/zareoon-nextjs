@@ -3,6 +3,8 @@
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
 import { localizeStatus } from "@/app/utils/localize";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
+import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
+import InventoryDisplayContentView from "./InventoryDisplayContentView";
 
 function Row({ label, value }) {
   return (
@@ -50,7 +52,7 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
                 lot.tieredPricing?.length > 0
                   ? "قیمت پلکانی"
                   : lot.price
-                    ? `${parseFloat(lot.price).toLocaleString("fa-IR")} تومان`
+                    ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency)
                     : "—"
               }
             />
@@ -67,22 +69,7 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
             </div>
           ) : null}
 
-          {lot.description ? (
-            <div className="mt-4">
-              <p className="mb-2 text-sm font-semibold text-slate-700">توضیحات</p>
-              <p className="whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">{lot.description}</p>
-            </div>
-          ) : null}
-
-          {Array.isArray(lot.hashtags) && lot.hashtags.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {lot.hashtags.map((tag) => (
-                <span key={tag} className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          ) : null}
+          <InventoryDisplayContentView lot={lot} />
 
           {lot.locationLabel || (lot.latitude && lot.longitude) ? (
             <div className="mt-4">
@@ -106,17 +93,6 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
                     <span className="font-medium text-slate-900">{a.value}</span>
                   </div>
                 ))}
-              </div>
-            </div>
-          ) : null}
-
-          {(lot.englishName || lot.arabicName || lot.russianName) ? (
-            <div className="mt-4">
-              <p className="mb-2 text-sm font-semibold text-slate-700">نام‌های چندزبانه</p>
-              <div className="space-y-1 text-sm text-slate-600">
-                {lot.englishName ? <p>EN: {lot.englishName}</p> : null}
-                {lot.arabicName ? <p>AR: {lot.arabicName}</p> : null}
-                {lot.russianName ? <p>RU: {lot.russianName}</p> : null}
               </div>
             </div>
           ) : null}

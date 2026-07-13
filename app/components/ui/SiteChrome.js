@@ -24,11 +24,9 @@ export default function SiteChrome({ children }) {
         </main>
       )}
       {!isDashboard ? <Footer className="hidden lg:block" /> : null}
-      {!isDashboard ? (
-        <ClientSideWrapper>
-          <GlobalSidebar />
-        </ClientSideWrapper>
-      ) : null}
+      <ClientSideWrapper>
+        <GlobalSidebar />
+      </ClientSideWrapper>
       <ClientSideWrapper>
         <Suspense fallback={null}>
           <MobileBottomBar />

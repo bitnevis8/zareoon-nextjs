@@ -4,8 +4,11 @@ import LotLocationPicker from "@/app/components/ui/LotLocationPicker";
 import AttributeFields from "@/app/components/ui/AttributeFields";
 import { Field } from "./Field";
 import TieredPricingEditor from "./TieredPricingEditor";
+import InventoryDisplayDetailsEditor from "./InventoryDisplayDetailsEditor";
 import { inv } from "../inventoryTheme";
-import HashtagInput from "@/app/components/ui/HashtagInput";
+import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/PersianNumberInput";
+import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
+import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
 
 const GRADES = ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"];
 
@@ -25,6 +28,8 @@ export default function InventoryEditModal({
   onRemoveTier,
   onUpdateTier,
 }) {
+  const exchangeRates = useExchangeRatesMap();
+
   if (!lot) return null;
 
   return (
@@ -66,41 +71,39 @@ export default function InventoryEditModal({
                   </select>
                 </Field>
                 <Field label="مقدار کل">
-                  <input type="number" className={inv.input} value={form.totalQuantity} onChange={(e) => setForm({ ...form, totalQuantity: e.target.value })} />
+                  <PersianNumberInput className={inv.input} value={form.totalQuantity} onChange={(v) => setForm({ ...form, totalQuantity: v })} />
                 </Field>
-                <Field label="قیمت (تومان)">
-                  <input type="number" className={inv.input} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+                <Field label="قیمت">
+                  <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start">
+                    <div className="min-w-0 flex-1">
+                      <PersianPriceInput
+                        className={inv.input}
+                        value={form.price}
+                        onChange={(v) => setForm({ ...form, price: v })}
+                        currency={form.priceCurrency}
+                        exchangeRates={exchangeRates}
+                      />
+                    </div>
+                    <PriceCurrencySelect
+                      className="w-full sm:w-[8.5rem]"
+                      value={form.priceCurrency}
+                      onChange={(priceCurrency) => setForm({ ...form, priceCurrency })}
+                    />
+                  </div>
                 </Field>
                 <Field label="حداقل سفارش">
-                  <input type="number" className={inv.input} value={form.minimumOrderQuantity} onChange={(e) => setForm({ ...form, minimumOrderQuantity: e.target.value })} />
+                  <PersianNumberInput className={inv.input} value={form.minimumOrderQuantity} onChange={(v) => setForm({ ...form, minimumOrderQuantity: v })} />
                 </Field>
               </div>
             </div>
 
             <div>
-              <h3 className="mb-3 text-sm font-bold text-slate-800">نام‌های چندزبانه</h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <Field label="انگلیسی">
-                  <input className={inv.input} value={form.englishName} onChange={(e) => setForm({ ...form, englishName: e.target.value })} />
-                </Field>
-                <Field label="عربی">
-                  <input className={inv.input} value={form.arabicName} onChange={(e) => setForm({ ...form, arabicName: e.target.value })} />
-                </Field>
-                <Field label="روسی">
-                  <input className={inv.input} value={form.russianName} onChange={(e) => setForm({ ...form, russianName: e.target.value })} />
-                </Field>
-              </div>
+              <h3 className="mb-3 text-sm font-bold text-slate-800">جزئیات نمایش</h3>
+              <InventoryDisplayDetailsEditor
+                value={form.displayContent}
+                onChange={(displayContent) => setForm({ ...form, displayContent })}
+              />
             </div>
-
-            <Field label="توضیحات (نمایش در صفحه محصول)">
-              <textarea className={inv.textarea} rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            </Field>
-
-            <HashtagInput
-              value={form.hashtags}
-              onChange={(hashtags) => setForm({ ...form, hashtags })}
-              label="هشتگ محصول"
-            />
 
             <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
               <LotLocationPicker
@@ -130,6 +133,9 @@ export default function InventoryEditModal({
               <TieredPricingEditor
                 tiers={form.tieredPricing}
                 unit={form.unit}
+                priceCurrency={form.priceCurrency}
+                exchangeRates={exchangeRates}
+                onPriceCurrencyChange={(priceCurrency) => setForm({ ...form, priceCurrency })}
                 onAdd={onAddTier}
                 onRemove={onRemoveTier}
                 onUpdate={onUpdateTier}

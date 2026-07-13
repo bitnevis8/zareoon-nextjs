@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
@@ -6,8 +6,17 @@ import Image from "next/image";
 import { API_ENDPOINTS } from "../config/api";
 import { getProductStockClass, calculateAvailableStock } from "../utils/stockUtils";
 import { resolveMediaUrl } from "../utils/mediaUrl";
+import { useLanguage } from "../context/LanguageContext";
 
-export default function SearchModal({ isOpen, onClose, allProducts = [], inventoryLots = [] }) {
+export default function SearchModal({
+  isOpen,
+  onClose,
+  allProducts = [],
+  inventoryLots = [],
+  initialQuery = "",
+  onExploreRequest,
+}) {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -17,10 +26,11 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
 
   // Focus on input when modal opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      setSearchQuery(initialQuery || "");
+      if (inputRef.current) inputRef.current.focus();
     }
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   // Handle close with animation
   const handleClose = useCallback(() => {
@@ -280,6 +290,26 @@ export default function SearchModal({ isOpen, onClose, allProducts = [], invento
                 </div>
               )}
             </div>
+          )}
+        </div>
+
+        <div className="border-t border-gray-100 bg-slate-50 px-4 py-3 sm:px-6">
+          {onExploreRequest ? (
+            <button
+              type="button"
+              onClick={() => onExploreRequest(searchQuery)}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+            >
+              {t("searchModalExploreLink")}
+            </button>
+          ) : (
+            <Link
+              href={searchQuery.trim() ? `/search?q=${encodeURIComponent(searchQuery.trim())}` : "/search"}
+              onClick={handleClose}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+            >
+              {t("searchModalExploreLink")}
+            </Link>
           )}
         </div>
       </div>

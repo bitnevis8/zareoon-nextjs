@@ -1,4 +1,4 @@
-﻿// تعیین هوشمند آدرس API بدون نیاز به .env
+// تعیین هوشمند آدرس API بدون نیاز به .env
 const isProduction = process.env.NODE_ENV === 'production';
 
 // تشخیص خودکار سرور واقعی بر اساس دامنه
@@ -332,12 +332,36 @@ export const API_ENDPOINTS = {
     markRead: (id) => `${API_BASE_URL}/applicant-request/notifications/${id}/read`,
     markAllRead: `${API_BASE_URL}/applicant-request/notifications/read-all`,
   },
+  escrow: {
+    rules: `${API_BASE_URL}/escrow/rules`,
+    settings: `${API_BASE_URL}/escrow/settings`,
+    updateSettings: `${API_BASE_URL}/escrow/settings`,
+    updateRule: (id) => `${API_BASE_URL}/escrow/rules/${id}`,
+    calculateDeposit: `${API_BASE_URL}/escrow/calculate-deposit`,
+    agreements: `${API_BASE_URL}/escrow/agreements`,
+    agreement: (id) => `${API_BASE_URL}/escrow/agreements/${id}`,
+    activate: (id) => `${API_BASE_URL}/escrow/agreements/${id}/activate`,
+    paymentIntents: (id) => `${API_BASE_URL}/escrow/agreements/${id}/payment-intents`,
+    confirmPayment: (id) => `${API_BASE_URL}/escrow/agreements/${id}/confirm-payment`,
+    confirmMilestone: (id, milestoneId) =>
+      `${API_BASE_URL}/escrow/agreements/${id}/milestones/${milestoneId}/confirm`,
+    releaseRequests: (id) => `${API_BASE_URL}/escrow/agreements/${id}/release-requests`,
+    approveRelease: (releaseId) => `${API_BASE_URL}/escrow/release-requests/${releaseId}/approve`,
+    refunds: (id) => `${API_BASE_URL}/escrow/agreements/${id}/refunds`,
+    approveRefund: (refundId) => `${API_BASE_URL}/escrow/refunds/${refundId}/approve`,
+    disputes: (id) => `${API_BASE_URL}/escrow/agreements/${id}/disputes`,
+    resolveDispute: (disputeId) => `${API_BASE_URL}/escrow/disputes/${disputeId}/resolve`,
+    disputeMessages: (disputeId) => `${API_BASE_URL}/escrow/disputes/${disputeId}/messages`,
+    cancel: (id) => `${API_BASE_URL}/escrow/agreements/${id}/cancel`,
+  },
   tradeServiceProviders: {
     create: `${API_BASE_URL}/trade-service-provider`,
     mine: `${API_BASE_URL}/trade-service-provider/mine`,
+    updateMine: `${API_BASE_URL}/trade-service-provider/mine`,
     getPublic: `${API_BASE_URL}/trade-service-provider/public`,
     getPublicById: (id) => `${API_BASE_URL}/trade-service-provider/public/${id}`,
     getAll: `${API_BASE_URL}/trade-service-provider`,
+    pendingCount: `${API_BASE_URL}/trade-service-provider/stats/pending-count`,
     getById: (id) => `${API_BASE_URL}/trade-service-provider/${id}`,
     updateStatus: (id) => `${API_BASE_URL}/trade-service-provider/${id}/status`,
   },

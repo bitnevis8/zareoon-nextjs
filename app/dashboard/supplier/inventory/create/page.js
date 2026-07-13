@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -11,7 +11,10 @@ import InventoryCreatePanel from "../components/InventoryCreatePanel";
 import { inv } from "../inventoryTheme";
 import { INITIAL_FORM, EMPTY_TIER } from "../inventoryConstants";
 import { useInventoryLots } from "../hooks/useInventoryLots";
+import { useProductCatalog } from "../hooks/useProductCatalog";
 import { loadAttributeDefsForProduct } from "../inventoryUtils";
+import { displayContentToApiPayload } from "../utils/inventoryDisplayLocales";
+import { uploadMediaFiles } from "@/app/utils/mediaUploadClient";
 
 export default function InventoryCreatePage() {
   const router = useRouter();
@@ -20,16 +23,20 @@ export default function InventoryCreatePage() {
   const { user, allowed, isOwnScope, loading: authLoading } = useRequireSupplierArea(scope);
   const { t } = useLanguage();
   const { products, farmerNameMap, reload } = useInventoryLots(user, isOwnScope);
+  const { catalogItems, catalogLoading, catalogError, reloadCatalog } = useProductCatalog();
 
   const [form, setForm] = useState(INITIAL_FORM);
   const [attributeDefs, setAttributeDefs] = useState([]);
   const [attributeValues, setAttributeValues] = useState({});
   const [saving, setSaving] = useState(false);
-  const [showTieredPricing, setShowTieredPricing] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [pendingImages, setPendingImages] = useState([]);
+  const [pendingVideos, setPendingVideos] = useState([]);
 
   useEffect(() => {
-    const selected = products.find((p) => p.id === Number(form.productId));
+    const selected =
+      catalogItems.find((p) => p.id === Number(form.productId)) ||
+      products.find((p) => p.id === Number(form.productId));
     const categoryId = selected?.parentId ?? selected?.categoryId;
     if (!selected) {
       setAttributeDefs([]);
@@ -37,7 +44,7 @@ export default function InventoryCreatePage() {
       return;
     }
     (async () => {
-      const unique = await loadAttributeDefsForProduct(selected.id, products);
+      const unique = await loadAttributeDefsForProduct(selected.id, catalogItems.length ? catalogItems : products);
       setAttributeDefs(unique);
       setAttributeValues((prev) => {
         const next = { ...prev };
@@ -50,7 +57,7 @@ export default function InventoryCreatePage() {
         return next;
       });
     })();
-  }, [form.productId, products]);
+  }, [form.productId, products, catalogItems]);
 
   const loadProductOptions = async (inputValue) => {
     const q = (inputValue || "").trim();
@@ -77,7 +84,7 @@ export default function InventoryCreatePage() {
   const create = async (e) => {
     e.preventDefault();
     if (!form.productId) {
-      alert("لطفاً محصول را انتخاب کنید");
+      alert("لطفاً نوع محصول را انتخاب کنید");
       return;
     }
     if (!form.totalQuantity) {
@@ -88,6 +95,7 @@ export default function InventoryCreatePage() {
     setSuccessMsg("");
     try {
       const ownFarmer = isOwnScope || isSupplier(user);
+      const displayFields = displayContentToApiPayload(form.displayContent);
       const lotRes = await fetch(API_ENDPOINTS.supplier.inventoryLots.create, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,27 +103,24 @@ export default function InventoryCreatePage() {
           productId: Number(form.productId),
           farmerId: ownFarmer ? Number(user?.userId ?? user?.id) : Number(form.farmerId) || 1,
           unit: form.unit,
-          englishName: form.englishName || null,
-          arabicName: form.arabicName || null,
-          russianName: form.russianName || null,
           qualityGrade: form.qualityGrade,
           totalQuantity: Number(form.totalQuantity),
           price: form.price ? Number(form.price) : null,
+          priceCurrency: form.priceCurrency || "TOMAN",
           minimumOrderQuantity: form.minimumOrderQuantity ? Number(form.minimumOrderQuantity) : null,
           tieredPricing: form.tieredPricing.length > 0 ? form.tieredPricing : null,
           reservedQuantity: 0,
           status: form.status || "harvested",
-          description: form.description?.trim() || null,
-          hashtags: form.hashtags?.length ? form.hashtags : null,
           locationLabel: form.locationLabel?.trim() || null,
           latitude: form.latitude !== "" && form.latitude != null ? Number(form.latitude) : null,
           longitude: form.longitude !== "" && form.longitude != null ? Number(form.longitude) : null,
+          ...displayFields,
         }),
       });
       const lotData = await lotRes.json();
       const lotId = lotData?.data?.id;
       if (lotId && attributeDefs.length > 0) {
-        const entries = Object.entries(attributeValues).filter(([, v]) => v !== undefined && v !== null && String(v).trim() !== "");
+        const entries = Object.entries(attributeValues).filter(([, v]) => v !== undefined && v != null && String(v).trim() !== "");
         for (const [defId, val] of entries) {
           await fetch(API_ENDPOINTS.supplier.attributeValues.create, {
             method: "POST",
@@ -128,11 +133,15 @@ export default function InventoryCreatePage() {
           });
         }
       }
+      if (lotId && (pendingImages.length > 0 || pendingVideos.length > 0)) {
+        await uploadMediaFiles([...pendingImages, ...pendingVideos], lotId);
+      }
       setSuccessMsg("موجودی با موفقیت ثبت شد");
       setForm(INITIAL_FORM);
       setAttributeDefs([]);
       setAttributeValues({});
-      setShowTieredPricing(false);
+      setPendingImages([]);
+      setPendingVideos([]);
       reload();
       setTimeout(
         () => router.push(isOwnScope ? "/dashboard/supplier/inventory?scope=own" : "/dashboard/supplier/inventory"),
@@ -154,23 +163,19 @@ export default function InventoryCreatePage() {
   }
 
   return (
-    <div className={inv.page}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Link
-            href={isOwnScope ? "/dashboard/supplier/inventory?scope=own" : "/dashboard/supplier/inventory"}
-            className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-900"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            بازگشت
-          </Link>
-        </div>
-      </div>
+    <div className={inv.createPage}>
+      <Link
+        href={isOwnScope ? "/dashboard/supplier/inventory?scope=own" : "/dashboard/supplier/inventory"}
+        className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-900 sm:text-sm"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        بازگشت به فهرست
+      </Link>
 
       {successMsg ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800 sm:text-sm">
           {successMsg} — در حال انتقال به لیست…
         </div>
       ) : null}
@@ -179,13 +184,15 @@ export default function InventoryCreatePage() {
         form={form}
         setForm={setForm}
         products={products}
+        catalogItems={catalogItems}
+        catalogLoading={catalogLoading}
+        catalogError={catalogError}
+        onRetryCatalog={reloadCatalog}
         user={user}
         farmerNameMap={farmerNameMap}
         attributeDefs={attributeDefs}
         attributeValues={attributeValues}
         setAttributeValues={setAttributeValues}
-        showTieredPricing={showTieredPricing}
-        setShowTieredPricing={setShowTieredPricing}
         loadProductOptions={loadProductOptions}
         loadFarmerOptions={loadFarmerOptions}
         t={t}
@@ -198,6 +205,10 @@ export default function InventoryCreatePage() {
           tiers[i] = { ...tiers[i], [f]: v };
           setForm({ ...form, tieredPricing: tiers });
         }}
+        pendingImages={pendingImages}
+        pendingVideos={pendingVideos}
+        onPendingImagesChange={setPendingImages}
+        onPendingVideosChange={setPendingVideos}
       />
     </div>
   );

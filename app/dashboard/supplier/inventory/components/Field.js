@@ -2,12 +2,12 @@
 
 import { inv } from "../inventoryTheme";
 
-export function Field({ label, hint, children, className = "" }) {
+export function Field({ label, hint, children, className = "", compact = false }) {
   return (
     <div className={className}>
-      {label ? <label className={inv.label}>{label}</label> : null}
+      {label ? <label className={compact ? inv.labelCompact : inv.label}>{label}</label> : null}
       {children}
-      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
+      {hint ? <p className="mt-0.5 text-[11px] text-slate-500">{hint}</p> : null}
     </div>
   );
 }

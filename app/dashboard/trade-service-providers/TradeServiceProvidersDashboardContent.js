@@ -44,18 +44,24 @@ function resolveServiceLabels(services) {
   });
 }
 
-export default function TradeServiceProvidersDashboardContent() {
+export default function TradeServiceProvidersDashboardContent({
+  variant = "providers",
+  defaultStatusFilter = "",
+}) {
   const auth = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const initialStatus =
+    searchParams.get("status") || (variant === "membership-requests" ? defaultStatusFilter : defaultStatusFilter);
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [status, setStatus] = useState("pending");
   const [saving, setSaving] = useState(false);
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "");
+  const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0 });
 
   const admin = isAdmin(auth?.user);
   const categories = useMemo(() => getL1Categories("fa"), []);
@@ -67,12 +73,22 @@ export default function TradeServiceProvidersDashboardContent() {
       if (statusFilter) params.set("status", statusFilter);
       if (categoryFilter) params.set("categoryId", categoryFilter);
       const query = params.toString() ? `?${params.toString()}` : "";
-      const response = await authFetch(`${API_ENDPOINTS.tradeServiceProviders.getAll}${query}`, {
-        cache: "no-store",
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const [listRes, statsRes] = await Promise.all([
+        authFetch(`${API_ENDPOINTS.tradeServiceProviders.getAll}${query}`, { cache: "no-store" }),
+        authFetch(API_ENDPOINTS.tradeServiceProviders.getAll, { cache: "no-store" }),
+      ]);
+      if (listRes.ok) {
+        const data = await listRes.json();
         setProviders(data.data || []);
+      }
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        const rows = statsData.data || [];
+        const nextStats = { pending: 0, approved: 0, rejected: 0 };
+        rows.forEach((p) => {
+          if (nextStats[p.status] != null) nextStats[p.status] += 1;
+        });
+        setStats(nextStats);
       }
     } catch (error) {
       console.error("Error loading trade providers:", error);
@@ -108,9 +124,17 @@ export default function TradeServiceProvidersDashboardContent() {
       });
       const data = await response.json();
       if (response.ok) {
-        showToast.success(data.message || "به‌روزرسانی شد");
+        showToast.success(
+          statusToSave === "approved"
+            ? "درخواست تأیید شد — صفحه اختصاصی ارائه‌دهنده فعال می‌شود"
+            : data.message || "به‌روزرسانی شد"
+        );
         setSelected(null);
         loadProviders();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("trade-provider-pending-updated"));
+          window.dispatchEvent(new CustomEvent("trade-provider-mine-updated"));
+        }
       } else {
         showToast.error(data.message || "خطا در به‌روزرسانی");
       }
@@ -126,13 +150,14 @@ export default function TradeServiceProvidersDashboardContent() {
     [selected]
   );
 
-  const counts = useMemo(() => {
-    const all = { pending: 0, approved: 0, rejected: 0 };
-    providers.forEach((p) => {
-      if (all[p.status] != null) all[p.status] += 1;
-    });
-    return all;
-  }, [providers]);
+  const counts = stats;
+
+  const pageTitle =
+    variant === "membership-requests" ? "درخواست‌های عضویت ارائه‌دهنده" : "فهرست ارائه‌دهندگان خدمات";
+  const pageSubtitle =
+    variant === "membership-requests"
+      ? "بررسی و تأیید درخواست‌های عضویت — پس از تأیید، صفحه اختصاصی خدمات برای کاربر فعال می‌شود."
+      : "مدیریت ارائه‌دهندگان و وضعیت ثبت‌نام‌ها.";
 
   if (auth?.loading || loading) {
     return (
@@ -148,12 +173,18 @@ export default function TradeServiceProvidersDashboardContent() {
     <div className={dash.page}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className={dash.pageTitle}>ارائه‌دهندگان خدمات</h1>
+          <h1 className={dash.pageTitle}>{pageTitle}</h1>
           <p className={dash.pageSubtitle}>
-            بررسی و تأیید ثبت‌نام —{" "}
-            <Link href="/dashboard/settings" className="font-medium text-emerald-700 hover:underline">
-              تنظیمات تأیید خودکار
-            </Link>
+            {pageSubtitle}{" "}
+            {variant !== "membership-requests" ? (
+              <Link href="/dashboard/settings" className="font-medium text-emerald-700 hover:underline">
+                تنظیمات تأیید خودکار
+              </Link>
+            ) : (
+              <Link href="/dashboard/trade-service-providers" className="font-medium text-emerald-700 hover:underline">
+                فهرست همه ارائه‌دهندگان
+              </Link>
+            )}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
@@ -221,7 +252,7 @@ export default function TradeServiceProvidersDashboardContent() {
               {providers.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-10 text-center text-slate-500">
-                    ثبت‌نامی یافت نشد
+                    {variant === "membership-requests" ? "درخواست تأیید‌نشده‌ای نیست" : "ثبت‌نامی یافت نشد"}
                   </td>
                 </tr>
               ) : (
@@ -242,6 +273,11 @@ export default function TradeServiceProvidersDashboardContent() {
                       >
                         {STATUS_LABELS[item.status] || item.status}
                       </span>
+                      {item.pendingChanges && item.status === "approved" ? (
+                        <span className="mr-1.5 inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800">
+                          ویرایش در انتظار
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-slate-500">
                       {item.createdAt ? new Date(item.createdAt).toLocaleDateString("fa-IR") : "—"}
@@ -342,6 +378,15 @@ export default function TradeServiceProvidersDashboardContent() {
                 <p className="text-xs text-slate-500">بدون حساب کاربری متصل</p>
               )}
 
+              {selected.pendingChanges ? (
+                <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+                  <p className="font-bold">ویرایش صفحه در انتظار تأیید</p>
+                  <p className="mt-1 text-xs leading-6">
+                    کاربر تغییراتی روی صفحه منتشرشده ثبت کرده. با تأیید، تغییرات جایگزین اطلاعات فعلی می‌شود.
+                  </p>
+                </div>
+              ) : null}
+
               <div>
                 <p className="mb-2 text-xs font-semibold text-slate-600">خدمات انتخاب‌شده</p>
                 <div className="flex flex-wrap gap-2">
@@ -364,6 +409,19 @@ export default function TradeServiceProvidersDashboardContent() {
                 <DetailBlock label="خدمات ارائه‌شده" value={selected.servicesOffered} />
               ) : null}
               {selected.notes ? <DetailBlock label="توضیحات متقاضی" value={selected.notes} /> : null}
+
+              {selected.status === "approved" && selected.id ? (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 text-sm">
+                  <p className="text-xs font-semibold text-emerald-800">صفحه اختصاصی</p>
+                  <Link
+                    href={`/trade-services/provider/${selected.id}`}
+                    className="mt-1 inline-block font-medium text-emerald-900 hover:underline"
+                    target="_blank"
+                  >
+                    مشاهده صفحه عمومی ارائه‌دهنده
+                  </Link>
+                </div>
+              ) : null}
 
               <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
                 <label className="block text-sm">

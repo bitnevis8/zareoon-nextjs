@@ -1,5 +1,5 @@
-import ServiceRequestForm from "@/app/components/ServiceRequestForm";
+import { redirect } from "next/navigation";
 
-export default function LcRequestPage() {
-  return <ServiceRequestForm serviceType="finance" />;
+export default function LcRequestRedirectPage() {
+  redirect("/trade-services/intl-finance");
 }

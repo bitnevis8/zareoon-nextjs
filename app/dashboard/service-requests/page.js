@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
-import ServiceRequestsDashboardContent from "./ServiceRequestsDashboardContent";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function ServiceRequestsPage() {
-  return (
-    <Suspense fallback={<div className="flex justify-center items-center h-64 text-gray-600">در حال بارگذاری...</div>}>
-      <ServiceRequestsDashboardContent />
-    </Suspense>
-  );
+export default function ServiceRequestsRedirectPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/dashboard/trade-service-provider-requests");
+  }, [router]);
+  return null;
 }

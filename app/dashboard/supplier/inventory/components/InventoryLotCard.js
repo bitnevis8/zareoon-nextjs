@@ -1,5 +1,7 @@
 "use client";
 
+import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
+
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import { localizeStatus } from "@/app/utils/localize";
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
@@ -80,7 +82,7 @@ export default function InventoryLotCard({
             {lot.tieredPricing?.length > 0 ? (
               <span className="text-sky-700">پلکانی</span>
             ) : lot.price ? (
-              <>{parseFloat(lot.price).toLocaleString("fa-IR")} <span className="text-xs font-normal">تومان</span></>
+              <>{formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency)}</>
             ) : (
               <span className="text-slate-400">—</span>
             )}

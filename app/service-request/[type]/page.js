@@ -1,12 +1,11 @@
-"use client";
+import { redirect } from "next/navigation";
+import { isValidL1CategoryId, LEGACY_SERVICE_TYPE_MAP } from "@/app/data/tradeServicesCatalog";
 
-import { use as usePromise } from "react";
-import { notFound } from "next/navigation";
-import ServiceRequestForm from "@/app/components/ServiceRequestForm";
-import { isValidServiceType } from "@/app/data/serviceRequestForms";
-
-export default function ServiceRequestPage({ params }) {
-  const { type } = usePromise(params);
-  if (!isValidServiceType(type)) notFound();
-  return <ServiceRequestForm serviceType={type} />;
+export default async function ServiceRequestRedirectPage({ params }) {
+  const { type } = await params;
+  const normalized = LEGACY_SERVICE_TYPE_MAP[type] || type;
+  if (isValidL1CategoryId(normalized)) {
+    redirect(`/trade-services/${normalized}`);
+  }
+  redirect("/trade-services");
 }

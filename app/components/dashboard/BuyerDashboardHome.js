@@ -40,7 +40,7 @@ export default function BuyerDashboardHome({ user }) {
           className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
         >
           <p className="text-sm font-bold text-slate-900">خدمات بازرگانی</p>
-          <p className="mt-1 text-xs leading-6 text-slate-600">درخواست همکاری با متخصصان تجارت بین‌الملل</p>
+          <p className="mt-1 text-xs leading-6 text-slate-600">مرور ارائه‌دهندگان خدمات تجارت بین‌الملل</p>
         </Link>
       </div>
     </div>

@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useSidebar } from "../context/SidebarContext";
 import { useDashboardPersona } from "../context/DashboardPersonaContext";
 import { DASHBOARD_PERSONAS } from "../utils/dashboardPersona";
-import { authFetch } from "../utils/authHeaders";
 import CategoryDrillDownMenu from "./CategoryDrillDownMenu";
 
 function UserAvatar({ user, t }) {
@@ -95,36 +95,11 @@ export default function MobileBottomBar() {
   const router = useRouter();
   const auth = useAuth();
   const { t, isRTL } = useLanguage();
+  const { isSidebarOpen, openSidebar } = useSidebar();
   const { setPersona } = useDashboardPersona();
   const user = auth?.user;
   const [requestPickerOpen, setRequestPickerOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
-  const [unreadMessages, setUnreadMessages] = useState(0);
-
-  const fetchUnreadMessages = useCallback(async () => {
-    if (!user) {
-      setUnreadMessages(0);
-      return;
-    }
-    try {
-      const res = await authFetch("/api/messaging/unread-count", { cache: "no-store" });
-      const json = await res.json();
-      if (res.ok) setUnreadMessages(json?.data?.total ?? 0);
-    } catch {
-      /* ignore */
-    }
-  }, [user]);
-
-  useEffect(() => {
-    fetchUnreadMessages();
-    if (!user) return undefined;
-    const interval = setInterval(fetchUnreadMessages, 60000);
-    return () => clearInterval(interval);
-  }, [fetchUnreadMessages, user]);
-
-  const displayName = user
-    ? [user.firstName || user.username, user.lastName].filter(Boolean).join(" ") || t("profile")
-    : t("login");
 
   const goSubmitRequest = (type) => {
     setRequestPickerOpen(false);
@@ -152,78 +127,102 @@ export default function MobileBottomBar() {
     setCategoryMenuOpen(false);
   };
 
-  const buttons = user
-    ? [
-        {
-          id: "account",
-          label: displayName,
-          variant: "avatar",
-          href: "/dashboard",
-          active:
-            pathname.startsWith("/dashboard") &&
-            !pathname.startsWith("/dashboard/messages") &&
-            !pathname.startsWith("/dashboard/submit-request"),
-        },
-        {
-          id: "products",
-          label: t("mobileProductsTab"),
-          icon: "products",
-          onClick: handleProductsClick,
-          active: categoryMenuOpen || pathname.startsWith("/catalog"),
-        },
-        {
-          id: "request",
-          label: t("mobileRequestShort"),
-          icon: "request",
-          onClick: handleRequestClick,
-          active: requestPickerOpen || pathname.startsWith("/dashboard/submit-request"),
-        },
-        {
-          id: "services",
-          label: t("mobileServicesTab"),
-          icon: "services",
-          href: "/trade-services",
-          active: pathname.startsWith("/trade-services"),
-        },
-        {
-          id: "messages",
-          label: t("chatShort"),
-          icon: "messages",
-          href: "/dashboard/messages",
-          active: pathname.startsWith("/dashboard/messages"),
-          badge: unreadMessages,
-        },
-      ]
-    : [
-        {
-          id: "login",
-          label: t("login"),
-          icon: "login",
-          href: "/auth/login",
-          active: pathname.startsWith("/auth"),
-        },
-        {
-          id: "products",
-          label: t("mobileProductsTab"),
-          icon: "products",
-          onClick: handleProductsClick,
-          active: categoryMenuOpen || pathname.startsWith("/catalog"),
-        },
-        {
-          id: "request",
-          label: t("mobileRequestShort"),
-          icon: "request",
-          onClick: handleRequestClick,
-          active: requestPickerOpen,
-        },
-        {
-          id: "services",
-          label: t("mobileServicesTab"),
-          icon: "services",
-          href: "/trade-services",
-          active: pathname.startsWith("/trade-services"),
-        },
-      ];
+  const handleAccountClick = () => {
+    closeOverlays();
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("openMobileSidebar", "1");
+    }
+    if (pathname === "/dashboard") {
+      openSidebar();
+      return;
+    }
+    router.push("/dashboard");
+  };
+
+  const isDashboardActive =
+    pathname.startsWith("/dashboard") &&
+    !pathname.startsWith("/dashboard/messages") &&
+    !pathname.startsWith("/dashboard/submit-request");
+
+  const isSearchActive = pathname.startsWith("/search");
+
+  const loggedInButtons = [
+    {
+      id: "account",
+      label: t("mobileMyZareoon"),
+      variant: "avatar",
+      onClick: handleAccountClick,
+      active: isDashboardActive || isSidebarOpen,
+    },
+    {
+      id: "search",
+      label: t("mobileSearchTab"),
+      icon: "search",
+      href: "/search",
+      active: isSearchActive,
+    },
+    {
+      id: "request",
+      label: t("mobileRequestShort"),
+      icon: "request",
+      onClick: handleRequestClick,
+      active: requestPickerOpen || pathname.startsWith("/dashboard/submit-request"),
+    },
+    {
+      id: "products",
+      label: t("mobileProductsTab"),
+      icon: "products",
+      onClick: handleProductsClick,
+      active: categoryMenuOpen || pathname.startsWith("/catalog"),
+    },
+    {
+      id: "services",
+      label: t("mobileServicesTab"),
+      icon: "services",
+      href: "/trade-services",
+      active: pathname.startsWith("/trade-services"),
+    },
+  ];
+
+  const guestButtons = [
+    {
+      id: "login",
+      label: t("login"),
+      icon: "login",
+      href: "/auth/login",
+      active: pathname.startsWith("/auth"),
+    },
+    {
+      id: "search",
+      label: t("mobileSearchTab"),
+      icon: "search",
+      href: "/search",
+      active: isSearchActive,
+    },
+    {
+      id: "request",
+      label: t("mobileRequestShort"),
+      icon: "request",
+      onClick: handleRequestClick,
+      active: requestPickerOpen,
+    },
+    {
+      id: "products",
+      label: t("mobileProductsTab"),
+      icon: "products",
+      onClick: handleProductsClick,
+      active: categoryMenuOpen || pathname.startsWith("/catalog"),
+    },
+    {
+      id: "services",
+      label: t("mobileServicesTab"),
+      icon: "services",
+      href: "/trade-services",
+      active: pathname.startsWith("/trade-services"),
+    },
+  ];
+
+  const buttons = user ? loggedInButtons : guestButtons;
 
   const getIcon = (iconName) => {
     const iconProps = {
@@ -267,14 +266,14 @@ export default function MobileBottomBar() {
             />
           </svg>
         );
-      case "messages":
+      case "search":
         return (
           <svg {...iconProps}>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M8 10h8M8 14h5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
             />
           </svg>
         );

@@ -1,8 +1,14 @@
-﻿/** برچسب‌های بردکرامپ داشبورد بر اساس مسیر */
+/** برچسب‌های بردکرامپ داشبورد بر اساس مسیر */
 
-export function buildDashboardBreadcrumbs(pathname, searchParams) {
+export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) {
+  const { isSellerView = false, isServicesView = false } = options;
   const scopeOwn = searchParams?.get("scope") === "own";
   const home = { href: "/dashboard", label: "داشبورد" };
+
+  const incomingRequestsLabel = isSellerView
+    ? "مشاهده نیازمندی‌ها به محصولات من"
+    : "مشاهده نیازمندی‌ها به خدمات من";
+  const incomingRequestsSection = isSellerView ? "فروشنده" : "ارائه‌دهنده خدمات";
 
   if (!pathname || pathname === "/dashboard") {
     return [{ label: "داشبورد" }];
@@ -46,13 +52,13 @@ export function buildDashboardBreadcrumbs(pathname, searchParams) {
     {
       match: "/dashboard/supplier/inventory/create",
       trail: scopeOwn
-        ? [{ label: "پنل تأمین‌کننده" }, { label: "افزودن محصول" }]
-        : [{ label: "مدیریت تامین" }, { label: "افزودن محصول" }],
+        ? [{ label: "پنل تأمین‌کننده" }, { label: "ثبت موجودی جدید" }]
+        : [{ label: "مدیریت تامین" }, { label: "ثبت موجودی" }],
     },
     {
       match: "/dashboard/supplier/inventory",
       trail: scopeOwn
-        ? [{ label: "پنل تأمین‌کننده" }, { label: "محصولات من" }]
+        ? [{ label: "پنل تأمین‌کننده" }, { label: "فهرست محصولات من" }]
         : [{ label: "مدیریت تامین" }, { label: "لیست محصولات" }],
     },
     {
@@ -82,12 +88,12 @@ export function buildDashboardBreadcrumbs(pathname, searchParams) {
       trail: [{ label: "مدیریت تامین" }, { label: "ترتیب نمایش" }],
     },
     {
-      match: "/dashboard/trade-service-providers",
-      trail: [{ label: "خدمات بازرگانی" }, { label: "ارائه‌دهندگان خدمات" }],
+      match: "/dashboard/trade-service-provider-requests",
+      trail: [{ label: "مدیریت خدمات" }, { label: "درخواست‌های عضویت" }],
     },
     {
-      match: "/dashboard/service-requests",
-      trail: [{ label: "خدمات بازرگانی" }, { label: "مدیریت درخواست‌ها" }],
+      match: "/dashboard/trade-service-providers",
+      trail: [{ label: "مدیریت خدمات" }, { label: "فهرست ارائه‌دهندگان خدمات" }],
     },
     {
       match: "/dashboard/service-categories",
@@ -110,16 +116,28 @@ export function buildDashboardBreadcrumbs(pathname, searchParams) {
       trail: [{ label: "خدمات بازرگانی" }, { label: "تنظیمات" }],
     },
     {
-      match: "/dashboard/lc-requests",
-      trail: [{ label: "خدمات بازرگانی" }, { label: "درخواست‌های LC" }],
-    },
-    {
       match: "/dashboard/submit-request",
       trail: [{ label: "متقاضی" }, { label: "ثبت درخواست" }],
     },
     {
+      match: "/dashboard/my-orders",
+      trail: [{ label: "متقاضی" }, { label: "سفارشات من" }],
+    },
+    {
       match: "/dashboard/applicant-requests",
       trail: [{ label: "متقاضی" }, { label: "درخواست‌های من" }],
+    },
+    {
+      match: "/dashboard/escrow",
+      trail: [{ label: "تضمین معاملات" }, { label: "قراردادها" }],
+    },
+    {
+      match: "/dashboard/escrow-settings",
+      trail: [{ label: "مدیریت تامین" }, { label: "تنظیمات تضمین معاملات" }],
+    },
+    {
+      match: /^\/dashboard\/escrow\/\d+/,
+      trail: [{ href: "/dashboard/escrow", label: "تضمین معاملات" }, { label: "جزئیات قرارداد" }],
     },
     {
       match: /^\/dashboard\/applicant-requests\/\d+/,
@@ -130,16 +148,16 @@ export function buildDashboardBreadcrumbs(pathname, searchParams) {
     },
     {
       match: "/dashboard/service-provider-profile",
-      trail: [{ label: "ارائه‌دهنده خدمات" }, { label: "پروفایل شرکت من" }],
+      trail: [{ label: "ارائه‌دهنده خدمات" }, { label: "صفحه خدمات من" }],
     },
     {
       match: "/dashboard/incoming-requests",
-      trail: [{ label: "درخواست‌های متقاضیان" }],
+      trail: [{ label: incomingRequestsSection }, { label: incomingRequestsLabel }],
     },
     {
       match: /^\/dashboard\/incoming-requests\/\d+/,
       trail: [
-        { href: "/dashboard/incoming-requests", label: "درخواست‌های متقاضیان" },
+        { href: "/dashboard/incoming-requests", label: incomingRequestsLabel },
         { label: "جزئیات" },
       ],
     },

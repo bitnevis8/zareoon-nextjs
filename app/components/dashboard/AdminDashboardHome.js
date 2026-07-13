@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -16,11 +16,9 @@ const ORDER_STATUS_FA = {
   approved: "تأیید شده",
 };
 
-const SERVICE_STATUS_FA = {
+const PROVIDER_STATUS_FA = {
   pending: "در انتظار",
-  contacted: "تماس گرفته",
-  in_progress: "در حال پیگیری",
-  completed: "تکمیل",
+  approved: "تأیید شده",
   rejected: "رد شده",
 };
 
@@ -46,7 +44,6 @@ export default function AdminDashboardHome({ user }) {
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [lots, setLots] = useState([]);
-  const [serviceRequests, setServiceRequests] = useState([]);
   const [tradeProviders, setTradeProviders] = useState([]);
 
   useEffect(() => {
@@ -54,25 +51,22 @@ export default function AdminDashboardHome({ user }) {
     (async () => {
       setLoading(true);
       try {
-        const [uRes, oRes, lRes, sRes, tpRes] = await Promise.all([
+        const [uRes, oRes, lRes, tpRes] = await Promise.all([
           authFetch(API_ENDPOINTS.users.getAll),
           authFetch(API_ENDPOINTS.supplier.orders.getAdminOrders, { cache: "no-store" }),
           authFetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
-          authFetch(API_ENDPOINTS.serviceRequests.getAll, { cache: "no-store" }),
           authFetch(API_ENDPOINTS.tradeServiceProviders.getAll, { cache: "no-store" }),
         ]);
-        const [uData, oData, lData, sData, tpData] = await Promise.all([
+        const [uData, oData, lData, tpData] = await Promise.all([
           uRes.json(),
           oRes.json(),
           lRes.json(),
-          sRes.json(),
           tpRes.json(),
         ]);
         if (cancelled) return;
         setUsers(uData?.data || []);
         setOrders(oData?.data || []);
         setLots(lData?.data || []);
-        setServiceRequests(sData?.data || []);
         setTradeProviders(tpData?.data || []);
       } catch (e) {
         console.error("Dashboard stats:", e);
@@ -86,7 +80,6 @@ export default function AdminDashboardHome({ user }) {
   }, []);
 
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  const pendingServices = serviceRequests.filter((s) => s.status === "pending").length;
   const pendingProviders = tradeProviders.filter((p) => p.status === "pending").length;
   const activeLots = lots.filter((l) => l.status === "harvested" || l.status === "on_field").length;
 
@@ -116,18 +109,18 @@ export default function AdminDashboardHome({ user }) {
     return Object.entries(counts).map(([label, value]) => ({ label, value, color: "bg-violet-500" }));
   }, [users]);
 
-  const serviceChart = useMemo(() => {
+  const providerChart = useMemo(() => {
     const counts = {};
-    serviceRequests.forEach((s) => {
-      const key = s.status || "pending";
+    tradeProviders.forEach((p) => {
+      const key = p.status || "pending";
       counts[key] = (counts[key] || 0) + 1;
     });
     return Object.entries(counts).map(([key, value]) => ({
-      label: SERVICE_STATUS_FA[key] || key,
+      label: PROVIDER_STATUS_FA[key] || key,
       value,
-      color: "bg-indigo-500",
+      color: key === "pending" ? "bg-amber-500" : key === "approved" ? "bg-emerald-500" : "bg-rose-500",
     }));
-  }, [serviceRequests]);
+  }, [tradeProviders]);
 
   const recentOrders = useMemo(
     () =>
@@ -171,18 +164,15 @@ export default function AdminDashboardHome({ user }) {
           tone="emerald"
         />
         <KpiCard
-          label="درخواست خدمات"
-          value={serviceRequests.length}
-          hint={`${pendingServices.toLocaleString("fa-IR")} جدید`}
-          href="/dashboard/service-requests"
-          tone="sky"
-        />
-        <KpiCard
           label="ارائه‌دهندگان"
           value={tradeProviders.length}
-          hint={`${pendingProviders.toLocaleString("fa-IR")} در انتظار`}
-          href="/dashboard/trade-service-providers"
-          tone="violet"
+          hint={`${pendingProviders.toLocaleString("fa-IR")} در انتظار تأیید`}
+          href={
+            pendingProviders > 0
+              ? "/dashboard/trade-service-provider-requests"
+              : "/dashboard/trade-service-providers"
+          }
+          tone="sky"
         />
       </div>
 
@@ -191,7 +181,7 @@ export default function AdminDashboardHome({ user }) {
         <SimpleBarChart title="کاربران بر اساس نقش" items={roleChart} />
       </div>
 
-      <SimpleBarChart title="درخواست‌های خدمات بازرگانی" items={serviceChart} />
+      <SimpleBarChart title="وضعیت ارائه‌دهندگان خدمات" items={providerChart} />
 
       <div className={dash.card}>
         <div className={dash.cardHeader}>
@@ -242,7 +232,7 @@ export default function AdminDashboardHome({ user }) {
           { href: "/dashboard/user-management/users", label: "مدیریت کاربران" },
           { href: "/dashboard/supplier/inventory", label: "لیست محصولات" },
           { href: "/dashboard/order-management", label: "مدیریت سفارش‌ها" },
-          { href: "/dashboard/service-requests", label: "درخواست‌های خدمات" },
+          { href: "/dashboard/trade-service-provider-requests", label: "درخواست‌های عضویت" },
           { href: "/dashboard/trade-service-providers", label: "ارائه‌دهندگان" },
           { href: "/dashboard/settings", label: "تنظیمات" },
         ].map((link) => (

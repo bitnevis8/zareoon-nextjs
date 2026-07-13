@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "../context/LanguageContext";
 
-const LC_REQUEST_PATH = "/lc-request";
+const LC_SERVICES_PATH = "/trade-services/intl-finance";
 
 function LcMainContent({ t }) {
   return (
@@ -59,7 +59,7 @@ function LcFooterBar({ t, isRTL, rounded = false, asLink = false }) {
 
   if (asLink) {
     return (
-      <Link href={LC_REQUEST_PATH} className={`${className} hover:bg-emerald-900 transition-colors`}>
+      <Link href={LC_SERVICES_PATH} className={`${className} hover:bg-emerald-900 transition-colors`}>
         {inner}
       </Link>
     );
@@ -187,7 +187,7 @@ export default function ZareoonLcAd() {
 
             <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 backdrop-blur px-4 py-3 sm:px-5">
               <Link
-                href={LC_REQUEST_PATH}
+                href={LC_SERVICES_PATH}
                 onClick={closeModal}
                 className="flex w-full items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-900 transition-colors"
               >

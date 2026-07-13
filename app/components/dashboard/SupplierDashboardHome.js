@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -57,17 +57,17 @@ export default function SupplierDashboardHome({ user }) {
       <header>
         <h1 className={dash.pageTitle}>داشبورد فروشنده</h1>
         <p className={dash.pageSubtitle}>
-          {user?.firstName} عزیز، محصولات خود را عرضه کنید و سفارشات خریداران را پیگیری کنید.
+          {user?.firstName} عزیز، محصولات خود را عرضه کنید و سفارشات مشتری را پیگیری کنید.
         </p>
       </header>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className={`${dash.card} p-4`}>
-          <p className="text-xs text-slate-500">محصولات من</p>
+          <p className="text-xs text-slate-500">فهرست محصولات من</p>
           <p className="mt-1 text-2xl font-semibold text-emerald-700">{lots.length.toLocaleString("fa-IR")}</p>
         </div>
         <div className={`${dash.card} p-4`}>
-          <p className="text-xs text-slate-500">سفارشات خریداران</p>
+          <p className="text-xs text-slate-500">سفارشات مشتری</p>
           <p className="mt-1 text-2xl font-semibold text-slate-800">{orders.length.toLocaleString("fa-IR")}</p>
         </div>
         <div className={`${dash.card} col-span-2 p-4 sm:col-span-1`}>
@@ -85,19 +85,19 @@ export default function SupplierDashboardHome({ user }) {
           href="/dashboard/supplier/inventory?scope=own"
           className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
         >
-          محصولات من
+          فهرست محصولات من
         </Link>
         <Link
           href="/dashboard/supplier/inventory/create?scope=own"
           className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
         >
-          ثبت محصول
+          ثبت موجودی جدید
         </Link>
         <Link
           href="/dashboard/supplier/orders?scope=own"
           className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
         >
-          سفارشات خریداران
+          سفارشات مشتری
         </Link>
       </div>
     </div>

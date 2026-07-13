@@ -1,13 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CALENDAR_MODES, formatCalendar } from "@/app/utils/calendars";
 import CategoryMegaMenu from "@/app/components/CategoryMegaMenu";
 
-function formatPrice(value) {
+const FETCH_TIMEOUT_MS = 10_000;
+const REFRESH_MS = 5 * 60 * 1000;
+
+function scheduleDeferredTask(task) {
+  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    return window.requestIdleCallback(task, { timeout: 2500 });
+  }
+  return setTimeout(task, 120);
+}
+
+function cancelDeferredTask(id) {
+  if (typeof window !== "undefined" && "cancelIdleCallback" in window) {
+    window.cancelIdleCallback(id);
+  } else {
+    clearTimeout(id);
+  }
+}
+
+function formatPrice(value, kind = "fiat") {
   if (value == null) return "—";
-  return value.toLocaleString("fa-IR");
+  const digits = kind === "crypto" && value >= 1_000_000 ? 0 : undefined;
+  return value.toLocaleString("fa-IR", digits != null ? { maximumFractionDigits: digits } : undefined);
 }
 
 function ChangeBadge({ direction, percent }) {
@@ -33,7 +52,9 @@ function TickerItem({ rate }) {
       <span className="font-bold text-emerald-800">{rate.label}</span>
       <span className="hidden text-slate-500 sm:inline">({rate.code})</span>
       <span className="hidden text-xs text-slate-500 sm:inline">ریال</span>
-      <span className="text-sm font-extrabold tabular-nums text-slate-900 sm:text-base">{formatPrice(rate.price)}</span>
+      <span className="text-sm font-extrabold tabular-nums text-slate-900 sm:text-base">
+        {formatPrice(rate.price, rate.kind)}
+      </span>
       <ChangeBadge direction={rate.direction} percent={rate.changePercent} />
       <span className="text-emerald-300" aria-hidden>
         |
@@ -98,23 +119,12 @@ function ExchangeRatesButton({ onNavigate }) {
 
 function CalendarBadge() {
   const [modeIndex, setModeIndex] = useState(0);
-  const [now, setNow] = useState(null);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
-
-  if (!now) {
-    return (
-      <div
-        className={`${edgePanelClass} w-[4.5rem] justify-center border-l border-emerald-200/80 lg:border-r lg:border-l-0`}
-      >
-        <span className="h-3 w-12 animate-pulse rounded bg-emerald-200/60 sm:w-16" />
-      </div>
-    );
-  }
 
   const mode = CALENDAR_MODES[modeIndex];
   const cal = formatCalendar(mode, now);
@@ -155,7 +165,7 @@ function TickerBarShell({ children, onNavigateRates }) {
       role="region"
       aria-label="نرخ ارز روز"
     >
-      <div className="hidden shrink-0 lg:block">
+      <div className="hidden h-full shrink-0 self-stretch lg:block">
         <CategoryMegaMenu />
       </div>
 
@@ -170,41 +180,63 @@ function TickerBarShell({ children, onNavigateRates }) {
 export default function CurrencyTickerBar() {
   const router = useRouter();
   const [rates, setRates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetchFailed, setFetchFailed] = useState(false);
+  const abortRef = useRef(null);
 
   const goExchangeRates = () => router.push("/exchange-rates");
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    setLoading(true);
+    setFetchFailed(false);
+
     try {
-      const res = await fetch("/api/exchange-rates", { cache: "no-store" });
+      const res = await fetch("/api/exchange-rates", {
+        cache: "no-store",
+        signal: controller.signal,
+      });
       const json = await res.json();
       if (json.success && json.data?.length) {
         setRates(json.data);
+      } else {
+        setFetchFailed(true);
       }
-    } catch (e) {
-      console.error("Currency ticker:", e);
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error("Currency ticker:", error);
+      }
+      setFetchFailed(true);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    setMounted(true);
-    load();
-    const id = setInterval(load, 5 * 60 * 1000);
-    return () => clearInterval(id);
   }, []);
 
-  if (!mounted || (loading && rates.length === 0)) {
-    return (
-      <TickerBarShell onNavigateRates={goExchangeRates}>
-        <div className="flex min-w-0 flex-1 items-center justify-center px-2">
-          <span className="h-3 w-32 animate-pulse rounded bg-emerald-200/60" />
-        </div>
-      </TickerBarShell>
-    );
-  }
+  useEffect(() => {
+    const deferredId = scheduleDeferredTask(() => {
+      load();
+    });
+    const refreshId = setInterval(load, REFRESH_MS);
+
+    return () => {
+      cancelDeferredTask(deferredId);
+      clearInterval(refreshId);
+      abortRef.current?.abort();
+    };
+  }, [load]);
+
+  const centerLabel = rates.length
+    ? null
+    : loading
+      ? "در حال دریافت نرخ…"
+      : fetchFailed
+        ? "نرخ ارز در دسترس نیست"
+        : "مشاهده نرخ ارز";
 
   return (
     <TickerBarShell onNavigateRates={goExchangeRates}>
@@ -226,9 +258,11 @@ export default function CurrencyTickerBar() {
         <button
           type="button"
           onClick={goExchangeRates}
-          className="flex min-w-0 flex-1 items-center justify-center px-2 text-[10px] font-medium text-slate-500"
+          className={`flex min-w-0 flex-1 items-center justify-center px-2 text-[10px] font-medium sm:text-xs ${
+            fetchFailed ? "text-amber-700" : "text-slate-500"
+          }`}
         >
-          مشاهده نرخ ارز
+          {centerLabel}
         </button>
       )}
     </TickerBarShell>

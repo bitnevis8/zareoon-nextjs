@@ -38,6 +38,10 @@ function SearchIcon() {
  * @typedef {{ key: string, categoryId: string, subcategoryId: string, categoryTitle: string, subcategoryTitle: string }} CatalogService
  */
 
+function getServiceKey(item) {
+  return item.key || `${item.categoryId}:${item.subcategoryId}`;
+}
+
 export default function TradeProviderServicePicker({
   categories,
   selected,
@@ -47,13 +51,14 @@ export default function TradeProviderServicePicker({
   language = "fa",
   t,
   isRTL,
+  catalogClassName = "",
 }) {
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(() =>
     initialExpandedCategoryId ? new Set([initialExpandedCategoryId]) : new Set()
   );
 
-  const selectedKeys = useMemo(() => new Set(selected.map((s) => s.key)), [selected]);
+  const selectedKeys = useMemo(() => new Set(selected.map(getServiceKey)), [selected]);
 
   const filteredCategories = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -80,13 +85,14 @@ export default function TradeProviderServicePicker({
   };
 
   const addService = (item) => {
-    if (selectedKeys.has(item.key)) return;
+    const key = getServiceKey(item);
+    if (selectedKeys.has(key)) return;
     if (vipCategories[item.categoryId]?.enabled) return;
-    onChange([...selected, item]);
+    onChange([...selected, { ...item, key }]);
   };
 
   const removeService = (key) => {
-    onChange(selected.filter((s) => s.key !== key));
+    onChange(selected.filter((s) => getServiceKey(s) !== key));
   };
 
   return (
@@ -102,7 +108,7 @@ export default function TradeProviderServicePicker({
           <div className="flex flex-wrap gap-2">
             {selected.map((item) => (
               <span
-                key={item.key}
+                key={getServiceKey(item)}
                 className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-emerald-200 bg-white py-1 pe-1 ps-3 text-xs shadow-sm"
               >
                 <span className="min-w-0 truncate">
@@ -112,7 +118,7 @@ export default function TradeProviderServicePicker({
                 </span>
                 <button
                   type="button"
-                  onClick={() => removeService(item.key)}
+                  onClick={() => removeService(getServiceKey(item))}
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-red-50 hover:text-red-600"
                   aria-label={t("tradeProviderRemoveService")}
                 >
@@ -139,7 +145,9 @@ export default function TradeProviderServicePicker({
         />
       </div>
 
-      <div className="space-y-2">
+      <div
+        className={`space-y-2 overscroll-contain ${catalogClassName || "max-h-[min(55vh,480px)] overflow-y-auto pe-0.5 lg:max-h-[min(calc(100vh-14rem),560px)]"}`}
+      >
         {filteredCategories.map((category) => {
           const isOpen = expanded.has(category.id) || query.trim().length > 0;
           const selectedInCategory = selected.filter((s) => s.categoryId === category.id).length;
@@ -193,7 +201,7 @@ export default function TradeProviderServicePicker({
 
               {!isVip && isOpen ? (
                 <div className="border-t border-slate-100 px-3 pb-3 pt-2">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {category.children.map((sub) => {
                       const key = `${category.id}:${sub.id}`;
                       const active = selectedKeys.has(key);

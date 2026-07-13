@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "../config/api";
 import { getVipCompanyName } from "@/app/utils/vipCategoryHelpers";
 import TradeServicesJoinBanner from "./TradeServicesJoinBanner";
 import HorizontalScrollRow from "./HorizontalScrollRow";
+import ZareoonEscrowFeature from "./ZareoonEscrowFeature";
 
 function PeopleIcon({ className = "h-4 w-4" }) {
   return (
@@ -147,16 +148,18 @@ function HeaderPattern({ gridId, dotsId }) {
   );
 }
 
-function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel, compact = false }) {
+function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel, compact = false, inSection = false }) {
   return (
     <article
-      className={`group relative flex h-full flex-col overflow-hidden rounded-xl border bg-white transition duration-300 md:hover:-translate-y-1 md:hover:border-emerald-200 md:hover:shadow-[0_12px_32px_rgba(6,95,70,0.1)] ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-xl border bg-white transition duration-300 md:hover:-translate-y-1 md:hover:border-emerald-300 md:hover:shadow-[0_12px_32px_rgba(6,95,70,0.12)] ${
         compact
           ? "min-h-[10.75rem] border-emerald-100/90 p-3 shadow-[0_2px_12px_rgba(6,78,59,0.06)]"
-          : "border-slate-200/80 p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:rounded-2xl sm:p-5"
+          : inSection
+            ? "border-emerald-100/90 p-3.5 shadow-[0_2px_14px_rgba(6,78,59,0.06)] sm:rounded-2xl sm:p-5"
+            : "border-slate-200/80 p-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:rounded-2xl sm:p-5"
       }`}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 transition group-hover:opacity-100" />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 ${inSection ? "opacity-60" : "opacity-0 transition group-hover:opacity-100"}`} />
       <div
         className={`flex items-center justify-between gap-2 ${
           compact ? "mb-2.5" : "mb-2.5 flex-col sm:mb-4 sm:flex-row sm:items-start sm:gap-3"
@@ -251,11 +254,11 @@ export default function ZareoonExclusiveServices({ className = "" }) {
 
   return (
     <section
-      className={`w-full space-y-3 sm:space-y-5 ${className}`}
+      className={`w-full space-y-0 sm:space-y-0 ${className}`}
       aria-labelledby="trade-services-title"
     >
       <div
-        className={`relative overflow-hidden rounded-xl border border-emerald-700/20 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(6,78,59,0.18)] sm:rounded-2xl sm:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_12px_32px_rgba(6,78,59,0.28)] ${isRTL ? "text-right" : "text-left"} px-4 py-4 sm:px-7 sm:py-8`}
+        className={`relative overflow-hidden rounded-t-xl border border-b-0 border-emerald-700/20 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(6,78,59,0.18)] sm:rounded-t-2xl sm:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_12px_32px_rgba(6,78,59,0.28)] ${isRTL ? "text-right" : "text-left"} px-4 py-4 sm:px-7 sm:py-8`}
       >
         <HeaderPattern gridId={gridId} dotsId={dotsId} />
         <div
@@ -294,58 +297,73 @@ export default function ZareoonExclusiveServices({ className = "" }) {
         </div>
       </div>
 
-      <div className="sm:hidden">
-        <div className="overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-[0_2px_16px_rgba(6,78,59,0.07)]">
-          <div className="border-b border-emerald-50 bg-emerald-50/60 px-3 py-2">
-            <p className="text-xs font-bold text-emerald-800">{t("mobileServicesTab")}</p>
-          </div>
-          <div className="px-2 pb-2 pt-2.5">
-            <HorizontalScrollRow isRTL={isRTL} arrowPlacement="bottom" showArrows={false} showDots>
+      <div className="overflow-hidden rounded-b-xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50/70 via-white to-emerald-50/40 shadow-[0_12px_32px_rgba(6,78,59,0.08)] sm:rounded-b-2xl">
+        <div className="space-y-4 p-3 sm:space-y-5 sm:p-4 lg:p-5">
+          <ZareoonEscrowFeature className="!shadow-[0_8px_28px_-12px_rgba(16,185,129,0.18)]" />
+
+          <div className="overflow-hidden rounded-xl border border-emerald-100 bg-white/90 shadow-sm">
+            <div className={`border-b border-emerald-100 bg-emerald-50/80 px-3 py-3 sm:px-5 sm:py-3.5 ${isRTL ? "text-right" : "text-left"}`}>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700 sm:text-[11px]">
+                {t("tradeServicesSectionLabel")}
+              </p>
+              <h3 className="mt-0.5 text-sm font-bold text-emerald-950 sm:text-base">
+                {t("tradeServicesCategoriesTitle")}
+              </h3>
+              <p className="mt-1 text-xs leading-6 text-emerald-800/80">{t("tradeServicesCategoriesDesc")}</p>
+            </div>
+
+            <div className="sm:hidden px-2 pb-2 pt-2.5">
+              <HorizontalScrollRow isRTL={isRTL} arrowPlacement="bottom" showArrows={false} showDots>
+                {content.items.map((item) => {
+                  const count = memberCounts?.[item.id] ?? item.memberCount ?? 0;
+                  const isVip = !!vipCategories[item.id]?.enabled;
+                  const companyName = isVip ? getVipCompanyName(providers, item.id) : null;
+                  return (
+                    <div key={item.id} className="w-[min(70vw,15.5rem)] shrink-0 snap-start">
+                      <CategoryCard
+                        item={item}
+                        count={count}
+                        isVip={isVip}
+                        companyName={companyName}
+                        t={t}
+                        locale={numberLocale}
+                        memberLabel={memberLabel}
+                        compact
+                        inSection
+                      />
+                    </div>
+                  );
+                })}
+              </HorizontalScrollRow>
+            </div>
+
+            <div className="hidden gap-3 p-3 sm:grid sm:grid-cols-2 sm:gap-4 sm:p-4 lg:grid-cols-3 2xl:grid-cols-5">
               {content.items.map((item) => {
                 const count = memberCounts?.[item.id] ?? item.memberCount ?? 0;
                 const isVip = !!vipCategories[item.id]?.enabled;
                 const companyName = isVip ? getVipCompanyName(providers, item.id) : null;
                 return (
-                  <div key={item.id} className="w-[min(70vw,15.5rem)] shrink-0 snap-start">
-                    <CategoryCard
-                      item={item}
-                      count={count}
-                      isVip={isVip}
-                      companyName={companyName}
-                      t={t}
-                      locale={numberLocale}
-                      memberLabel={memberLabel}
-                      compact
-                    />
-                  </div>
+                  <CategoryCard
+                    key={item.id}
+                    item={item}
+                    count={count}
+                    isVip={isVip}
+                    companyName={companyName}
+                    t={t}
+                    locale={numberLocale}
+                    memberLabel={memberLabel}
+                    inSection
+                  />
                 );
               })}
-            </HorizontalScrollRow>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="hidden grid-cols-2 gap-3 sm:grid sm:gap-4 lg:grid-cols-3 2xl:grid-cols-5">
-          {content.items.map((item) => {
-            const count = memberCounts?.[item.id] ?? item.memberCount ?? 0;
-            const isVip = !!vipCategories[item.id]?.enabled;
-            const companyName = isVip ? getVipCompanyName(providers, item.id) : null;
-            return (
-              <CategoryCard
-                key={item.id}
-                item={item}
-                count={count}
-                isVip={isVip}
-                companyName={companyName}
-                t={t}
-                locale={numberLocale}
-                memberLabel={memberLabel}
-              />
-            );
-          })}
-        </div>
-
-      <TradeServicesJoinBanner />
+      <div className="pt-3 sm:pt-5">
+        <TradeServicesJoinBanner />
+      </div>
     </section>
   );
 }

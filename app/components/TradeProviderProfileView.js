@@ -64,6 +64,7 @@ export default function TradeProviderProfileView({ providerId }) {
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
+  const [isOwnerPreview, setIsOwnerPreview] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,10 +76,12 @@ export default function TradeProviderProfileView({ providerId }) {
         if (isNumeric) {
           const res = await fetch(API_ENDPOINTS.tradeServiceProviders.getPublicById(providerId), {
             cache: "no-store",
+            credentials: "include",
           });
           const json = await res.json();
           if (!cancelled && json.success && json.data) {
             setProvider(mapApiProviderRow(json.data, t, language));
+            setIsOwnerPreview(Boolean(json.meta?.isOwnerPreview));
             return;
           }
         }
@@ -140,12 +143,13 @@ export default function TradeProviderProfileView({ providerId }) {
     );
   }
 
-  const cooperationHref = primaryCategory
-    ? `/service-request/${primaryCategory.id}?provider=${provider.id}`
-    : `/trade-services`;
-
   return (
     <div className={`min-h-screen bg-slate-100 ${isRTL ? "text-right" : "text-left"}`} dir={isRTL ? "rtl" : "ltr"}>
+      {isOwnerPreview ? (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-xs font-medium text-amber-900">
+          پیش‌نمایش صفحه شما — پس از تأیید مدیر، در فهرست عمومی خدمات نمایش داده می‌شود.
+        </div>
+      ) : null}
       <section className="relative isolate pb-10">
         {/* Cover — stays behind the profile card */}
         <div className="relative z-0 h-36 overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-900 sm:h-48 md:h-56">
@@ -206,7 +210,6 @@ export default function TradeProviderProfileView({ providerId }) {
                 external
               />
             ) : null}
-            <ContactButton href={cooperationHref} label={t("tradeServicesCooperationCta")} variant="secondary" />
           </div>
         </div>
 

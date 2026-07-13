@@ -1,19 +1,28 @@
-﻿"use client";
-import { Suspense, useEffect, useState, useMemo } from "react";
-import Link from 'next/link';
+"use client";
+import { Suspense, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Image from 'next/image';
 import { API_ENDPOINTS } from './config/api';
 import { useAuth } from './context/AuthContext';
 import { useLanguage, siteIntroByLang } from './context/LanguageContext';
-import { getLocalizedText } from './utils/localize';
-import { sortCatalogItems } from './utils/productSort';
 import { authFetch } from './utils/authHeaders';
 import MainCategoryGrid from './components/MainCategoryGrid';
-import LatestAvailableProductsSection from './components/LatestAvailableProductsSection';
-import ZareoonExclusiveServices from './components/ZareoonExclusiveServices';
-import BuyerSellerPortal from './components/BuyerSellerPortal';
+import QuickSearchBox from './components/QuickSearchBox';
 import LanguageFlag from './components/ui/LanguageFlag';
+import LazyWhenVisible from './components/ui/LazyWhenVisible';
+import SectionSkeleton from './components/ui/SectionSkeleton';
 import { SITE_LANGUAGES, SITE_INTRO_ORDER, isRtlLanguage } from './config/siteLanguages';
+
+const LatestAvailableProductsSection = dynamic(
+  () => import('./components/LatestAvailableProductsSection'),
+  { loading: () => <SectionSkeleton minHeight="14rem" /> }
+);
+const BuyerSellerPortal = dynamic(() => import('./components/BuyerSellerPortal'), {
+  loading: () => <SectionSkeleton minHeight="11rem" className="mt-2" />,
+});
+const ZareoonExclusiveServices = dynamic(() => import('./components/ZareoonExclusiveServices'), {
+  loading: () => <SectionSkeleton minHeight="20rem" className="mt-2" />,
+});
 
 export default function Home() {
   return (
@@ -25,52 +34,7 @@ export default function Home() {
 
 function HomeContent() {
   const auth = useAuth();
-  const { language, setLanguage, t, isRTL } = useLanguage();
-
-  const [categories, setCategories] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
-  const [inventoryLots, setInventoryLots] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
-  const [results, setResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const [resCats, resLots, resAll] = await Promise.all([
-        fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=`, { cache: 'no-store' }),
-        fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: 'no-store' }),
-        fetch(API_ENDPOINTS.supplier.products.getAll, { cache: 'no-store' }),
-      ]);
-
-      const dc = await resCats.json();
-      const dl = await resLots.json();
-      const dAll = await resAll.json();
-      const allProductsList = dAll.data || [];
-      const roots = sortCatalogItems(dc.data || [], language);
-
-      setCategories(roots);
-      setInventoryLots(dl.data || []);
-      setAllProducts(allProductsList);
-      setLoading(false);
-    })();
-  }, [language]);
-
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      const query = q.trim();
-      if (!query) { setResults([]); return; }
-      setSearching(true);
-      try {
-        const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?q=${encodeURIComponent(query)}&limit=20`, { cache: 'no-store' });
-        const d = await res.json();
-        setResults(d.data || []);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [q]);
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -88,17 +52,12 @@ function HomeContent() {
     fetchCart();
   }, [auth?.user]);
 
-  const sortedCategories = useMemo(
-    () => sortCatalogItems(categories, language),
-    [categories, language]
-  );
-
   return (
     <main className="page-shell pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4 section-stack">
       <section className="text-center space-y-4 sm:space-y-6 lg:space-y-8">
         <div className="flex justify-center max-lg:mt-1">
           <div
-            className="inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/95 px-2 py-2 shadow-sm sm:gap-2 sm:rounded-full sm:px-3"
+            className="inline-flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/95 px-1 py-2 shadow-sm sm:gap-2 sm:rounded-full sm:px-3"
             role="group"
             aria-label="Language"
           >
@@ -109,7 +68,7 @@ function HomeContent() {
                   key={option.code}
                   type="button"
                   onClick={() => setLanguage(option.code)}
-                  className={`inline-flex min-h-[3.25rem] min-w-[3.25rem] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-semibold leading-none transition-all sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:py-2 sm:text-sm ${
+                  className={`inline-flex min-h-[3.12rem] min-w-[3.12rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-1 text-[9px] font-semibold leading-none transition-all sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:py-2 sm:text-sm ${
                     isActive
                       ? "border-green-600 bg-green-600 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -118,7 +77,7 @@ function HomeContent() {
                   aria-label={option.label}
                   title={option.label}
                 >
-                  <LanguageFlag countryCode={option.countryCode} className="h-5 w-7 sm:h-4 sm:w-6" />
+                  <LanguageFlag countryCode={option.countryCode} className="h-[1.2rem] w-[1.68rem] sm:h-4 sm:w-6" />
                   <span className="tracking-wide">{option.shortLabel}</span>
                 </button>
               );
@@ -137,53 +96,9 @@ function HomeContent() {
           />
         </div>
 
-        <div className="relative mx-auto w-full max-w-xl px-1 sm:px-2">
-          <input
-            className="w-full min-h-11 rounded-full border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:px-5 sm:text-sm"
-            placeholder={t("searchPlaceholder")}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            enterKeyHint="search"
-            autoComplete="off"
-          />
-          {q ? (
-            <div
-              className={`absolute z-20 inset-x-0 mt-2 max-h-[min(20rem,55vh)] overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg ${
-                isRTL ? "text-right" : "text-left"
-              }`}
-            >
-              {searching ? (
-                <div className="space-y-2 p-3">
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={index} className="flex items-center justify-between px-3 py-2.5 animate-pulse">
-                      <div className="h-4 w-32 rounded bg-slate-200" />
-                      <div className="h-4 w-12 rounded bg-slate-200" />
-                    </div>
-                  ))}
-                </div>
-              ) : results.length ? (
-                results.map((it) => (
-                  <Link
-                    key={it.id}
-                    href={`/catalog/${it.id}`}
-                    className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition hover:bg-slate-50 active:bg-slate-100"
-                  >
-                    <div className="min-w-0 flex-1 text-sm font-medium leading-snug text-slate-800 break-words">
-                      {getLocalizedText(it, language)}
-                    </div>
-                    <span className="shrink-0 text-xs text-slate-400">
-                      {it.isOrderable ? t("product") : t("category")}
-                    </span>
-                  </Link>
-                ))
-              ) : (
-                <div className="p-4 text-sm text-slate-500">{t("nothingFound")}</div>
-              )}
-            </div>
-          ) : null}
-        </div>
+        <QuickSearchBox variant="homepage" />
 
-        <div className="mx-auto w-full max-w-3xl space-y-1 px-2" suppressHydrationWarning>
+        <div className="mx-auto grid w-full max-w-3xl justify-items-center gap-1.5 px-2 text-center" suppressHydrationWarning>
           {SITE_INTRO_ORDER.map((code) => {
             const isActive = language === code;
             const rtl = isRtlLanguage(code);
@@ -192,7 +107,9 @@ function HomeContent() {
                 key={code}
                 dir={rtl ? "rtl" : "ltr"}
                 lang={code}
-                className={`text-pretty text-center leading-relaxed ${
+                className={`w-full max-w-2xl text-balance leading-relaxed ${
+                  rtl ? "max-lg:!text-center" : "text-center"
+                } ${
                   isActive
                     ? "text-sm font-medium text-slate-700 sm:text-base"
                     : "text-xs text-slate-500 sm:text-sm"
@@ -205,24 +122,30 @@ function HomeContent() {
           })}
         </div>
 
-        <MainCategoryGrid
-          categories={sortedCategories}
-          loading={loading}
-          className="w-full"
-          id="product-categories"
-        />
+        <MainCategoryGrid className="w-full" id="product-categories" />
 
-        <div id="latest-available" className="w-full scroll-mt-20">
-          <LatestAvailableProductsSection
-            inventoryLots={inventoryLots}
-            allProducts={allProducts}
-            loading={loading}
-            variant="homepage"
-          />
-        </div>
+        <LazyWhenVisible
+          id="latest-available"
+          className="w-full scroll-mt-20"
+          minHeight="14rem"
+          fallback={<SectionSkeleton minHeight="14rem" />}
+        >
+          <LatestAvailableProductsSection autoFetch variant="homepage" className="w-full" />
+        </LazyWhenVisible>
 
-        <BuyerSellerPortal className="w-full" />
-        <ZareoonExclusiveServices className="w-full" />
+        <LazyWhenVisible
+          minHeight="11rem"
+          fallback={<SectionSkeleton minHeight="11rem" className="mt-2" />}
+        >
+          <BuyerSellerPortal className="w-full" />
+        </LazyWhenVisible>
+
+        <LazyWhenVisible
+          minHeight="20rem"
+          fallback={<SectionSkeleton minHeight="20rem" className="mt-2" />}
+        >
+          <ZareoonExclusiveServices className="w-full" />
+        </LazyWhenVisible>
       </section>
     </main>
   );
