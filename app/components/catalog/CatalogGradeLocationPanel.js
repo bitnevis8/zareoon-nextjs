@@ -14,7 +14,7 @@ export default function CatalogGradeLocationPanel({
   lots = [],
   language,
   t,
-  className = "",
+  className = " ",
   mapVariant = "hero",
   supplyCountry = "IR",
   supplyCity = "",
