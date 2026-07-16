@@ -40,7 +40,7 @@ export default function GlobalSidebar() {
         type="button"
         className="fixed inset-0 bg-black/50"
         onClick={closeSidebar}
-        aria-label={t('close') || 'بستن'}
+        aria-label={t('close')}
       />
       <aside
         className={`fixed top-[var(--site-mobile-top-chrome)] bottom-[calc(3.75rem+env(safe-area-inset-bottom))] right-0 z-[10001] flex w-[min(21rem,92vw)] flex-col overflow-hidden border-l border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out ${
@@ -53,7 +53,7 @@ export default function GlobalSidebar() {
             type="button"
             onClick={closeSidebar}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
-            aria-label={t('close') || 'بستن'}
+            aria-label={t('close')}
           >
             ✕
           </button>

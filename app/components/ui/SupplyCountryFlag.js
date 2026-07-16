@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useLanguage } from "../../context/LanguageContext";
+import { useTranslations } from "next-intl";
 import { countryCodeToFlag, countryCodeToFlagUrl, formatSupplySource } from "../../utils/supplySource";
 
 export default function SupplyCountryFlag({ countryCode = "IR", city = "", className = "" }) {
-  const { language } = useLanguage();
+  const t = useTranslations("shared");
   const [imgFailed, setImgFailed] = useState(false);
   const flagUrl = countryCodeToFlagUrl(countryCode, 40);
-  const label = formatSupplySource({ supplyCountry: countryCode, supplyCity: city }, language);
+  const label = formatSupplySource({ supplyCountry: countryCode, supplyCity: city }, t);
 
   return (
     <span

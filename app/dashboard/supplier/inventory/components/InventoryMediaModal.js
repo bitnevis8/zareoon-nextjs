@@ -1,9 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import MediaUpload from "@/app/components/ui/MediaUpload";
 import { inv } from "../inventoryTheme";
 
 export default function InventoryMediaModal({ lot, productName, onClose }) {
+  const t = useTranslations("inventory");
   if (!lot) return null;
 
   return (
@@ -11,7 +13,7 @@ export default function InventoryMediaModal({ lot, productName, onClose }) {
       <div className={`${inv.modal} ${inv.modalLg}`} onClick={(e) => e.stopPropagation()}>
         <div className={inv.modalHeader}>
           <div>
-            <p className="text-xs text-slate-500">رسانه‌های بار #{lot.id}</p>
+            <p className="text-xs text-slate-500">{t("media.modalTitle", { id: lot.id })}</p>
             <h2 className="text-lg font-bold text-slate-900">{productName}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100">
@@ -23,7 +25,7 @@ export default function InventoryMediaModal({ lot, productName, onClose }) {
 
         <div className={inv.modalBody}>
           <p className="mb-4 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5 text-xs leading-relaxed text-sky-800">
-            تصاویر و ویدیوها در صفحه محصول و گالری درجه نمایش داده می‌شوند. فایل‌ها روی سرور دانلود ذخیره می‌شوند.
+            {t("media.modalHint")}
           </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="rounded-xl border border-slate-200 p-4">
@@ -34,11 +36,11 @@ export default function InventoryMediaModal({ lot, productName, onClose }) {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">تصاویر</p>
-                  <p className="text-xs text-slate-500">چند تصویر قابل آپلود</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("media.images")}</p>
+                  <p className="text-xs text-slate-500">{t("media.imagesHint")}</p>
                 </div>
               </div>
-              <MediaUpload module="inventory" entityId={lot.id} fileType="images" accept="image/*" buttonLabel="آپلود تصویر" />
+              <MediaUpload module="inventory" entityId={lot.id} fileType="images" accept="image/*" buttonLabel={t("media.uploadImage")} />
             </div>
             <div className="rounded-xl border border-slate-200 p-4">
               <div className="mb-3 flex items-center gap-2">
@@ -48,18 +50,18 @@ export default function InventoryMediaModal({ lot, productName, onClose }) {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">ویدیوها</p>
-                  <p className="text-xs text-slate-500">چند ویدیو قابل آپلود</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("media.videos")}</p>
+                  <p className="text-xs text-slate-500">{t("media.videosHint")}</p>
                 </div>
               </div>
-              <MediaUpload module="inventory" entityId={lot.id} fileType="videos" accept="video/*" buttonLabel="آپلود ویدیو" />
+              <MediaUpload module="inventory" entityId={lot.id} fileType="videos" accept="video/*" buttonLabel={t("media.uploadVideo")} />
             </div>
           </div>
         </div>
 
         <div className={inv.modalFooter}>
           <button type="button" onClick={onClose} className={inv.btnPrimary}>
-            تمام
+            {t("media.done")}
           </button>
         </div>
       </div>

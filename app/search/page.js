@@ -1,9 +1,13 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import SearchPageClient from "@/app/components/SearchPageClient";
 
-export const metadata = {
-  title: "جستجو | زارعون",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("search.metadata");
+  return {
+    title: t("title"),
+  };
+}
 
 function SearchFallback() {
   return (

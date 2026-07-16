@@ -1,36 +1,24 @@
 import { parsePersianNumber } from "./persianNumberUtils";
 import { DEFAULT_PRICE_CURRENCY, getCurrencyDefinition } from "./priceCurrencies";
+import i18nData from "./i18nFaData";
 
-const ONES = ["", "یک", "دو", "سه", "چهار", "پنج", "شش", "هفت", "هشت", "نه"];
-const TEENS = [
-  "ده",
-  "یازده",
-  "دوازده",
-  "سیزده",
-  "چهارده",
-  "پانزده",
-  "شانزده",
-  "هفده",
-  "هجده",
-  "نوزده",
-];
-const TENS = ["", "", "بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "هشتاد", "نود"];
-const HUNDREDS = [
-  "",
-  "یکصد",
-  "دویست",
-  "سیصد",
-  "چهارصد",
-  "پانصد",
-  "ششصد",
-  "هفتصد",
-  "هشتصد",
-  "نهصد",
-];
-const SCALES = ["", "هزار", "میلیون", "میلیارد", "تریلیون"];
+const { ones: ONES, teens: TEENS, tens: TENS, hundreds: HUNDREDS, scales: SCALES, zero: ZERO, negative: NEGATIVE, and: AND, oneScale: ONE_SCALE, tomanEquivalent: TOMAN_EQ, currencyEquivalent: CURR_EQ, defaultUnit: DEFAULT_UNIT } = {
+  ones: i18nData.numerals.ones,
+  teens: i18nData.numerals.teens,
+  tens: i18nData.numerals.tens,
+  hundreds: i18nData.numerals.hundreds,
+  scales: i18nData.numerals.scales,
+  zero: i18nData.numerals.zero,
+  negative: i18nData.numerals.negative,
+  and: i18nData.numerals.and,
+  oneScale: i18nData.numerals.oneScale,
+  tomanEquivalent: i18nData.numerals.tomanEquivalent,
+  currencyEquivalent: i18nData.numerals.currencyEquivalent,
+  defaultUnit: i18nData.numerals.defaultUnit,
+};
 
 function joinParts(parts) {
-  return parts.filter(Boolean).join(" و ");
+  return parts.filter(Boolean).join(AND);
 }
 
 function twoDigitWords(n) {
@@ -38,7 +26,7 @@ function twoDigitWords(n) {
   if (n < 20) return TEENS[n - 10];
   const ten = Math.floor(n / 10);
   const one = n % 10;
-  return one ? `${TENS[ten]} و ${ONES[one]}` : TENS[ten];
+  return one ? `${TENS[ten]}${AND}${ONES[one]}` : TENS[ten];
 }
 
 function threeDigitWords(n) {
@@ -51,12 +39,11 @@ function threeDigitWords(n) {
   return joinParts(parts);
 }
 
-/** Convert a positive integer to Persian words. */
 export function numberToPersianWords(input) {
   const num = typeof input === "number" ? input : parsePersianNumber(input);
   if (num == null || !Number.isFinite(num)) return "";
-  if (num === 0) return "صفر";
-  if (num < 0) return `منفی ${numberToPersianWords(Math.abs(num))}`;
+  if (num === 0) return ZERO;
+  if (num < 0) return `${NEGATIVE} ${numberToPersianWords(Math.abs(num))}`;
 
   let remaining = Math.floor(num);
   const groups = [];
@@ -72,7 +59,7 @@ export function numberToPersianWords(input) {
       const scale = SCALES[index];
       const words = threeDigitWords(group);
       if (!scale) return words;
-      if (group === 1) return `یک ${scale}`;
+      if (group === 1) return ONE_SCALE.replace("{scale}", scale);
       return `${words} ${scale}`;
     })
     .filter(Boolean)
@@ -81,17 +68,16 @@ export function numberToPersianWords(input) {
   return joinParts(parts);
 }
 
-/** Price amount → Persian word summary with optional IRR/TOMAN equivalent. */
-export function getPriceWordSummary(amount, currencyCode = DEFAULT_PRICE_CURRENCY, exchangeRates = {}) {
+export function getPriceWordSummary(amount, currencyCode = DEFAULT_PRICE_CURRENCY, exchangeRates = {}, t) {
   const num = typeof amount === "number" ? amount : parsePersianNumber(amount);
   if (num == null || num <= 0) return "";
 
-  const currency = getCurrencyDefinition(currencyCode);
+  const currency = getCurrencyDefinition(currencyCode, t);
   const words = numberToPersianWords(num);
 
   if (currency.code === "TOMAN") {
     const rial = Math.round(num * 10);
-    return `${words} تومان — معادل ${numberToPersianWords(rial)} ریال`;
+    return TOMAN_EQ.replace("{words}", words).replace("{rialWords}", numberToPersianWords(rial));
   }
 
   let summary = `${words} ${currency.wordLabel}`;
@@ -100,14 +86,17 @@ export function getPriceWordSummary(amount, currencyCode = DEFAULT_PRICE_CURRENC
     const rialTotal = Math.round(num * rateInRial);
     const tomanTotal = Math.floor(rialTotal / 10);
     if (tomanTotal > 0) {
-      summary += ` — معادل ${numberToPersianWords(tomanTotal)} تومان (${numberToPersianWords(rialTotal)} ریال)`;
+      summary += CURR_EQ.replace("{tomanWords}", numberToPersianWords(tomanTotal)).replace(
+        "{rialWords}",
+        numberToPersianWords(rialTotal)
+      );
     }
   }
 
   return summary;
 }
 
-export function getQuantityWordSummary(value, unit = "واحد") {
+export function getQuantityWordSummary(value, unit = DEFAULT_UNIT) {
   const num = typeof value === "number" ? value : parsePersianNumber(value);
   if (num == null || num <= 0) return "";
   return `${numberToPersianWords(num)} ${unit}`;

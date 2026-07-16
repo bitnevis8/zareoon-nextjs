@@ -1,14 +1,9 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { isAdmin } from "./roles";
 
-const ENTITY_NAV_BADGES = {
-  individual: "یوزر",
-  company: "کمپانی",
-  trader: "ساپلایر",
-  manufacturer: "ساپلایر",
-  distributor: "کمپانی",
-};
-
-export function resolveAccountNav(user) {
+export function resolveAccountNav(user, t) {
   if (!user) return null;
 
   if (user.accountNav?.navBadge && user.accountNav?.navTitle) {
@@ -20,9 +15,15 @@ export function resolveAccountNav(user) {
     user.username ||
     "";
 
+  const entityBadge = (entityType) => {
+    if (!t) return entityType;
+    const key = `accountNav.${entityType}`;
+    return typeof t.has === "function" && t.has(key) ? t(key) : t("accountNav.user");
+  };
+
   if (user.entityType) {
     return {
-      navBadge: ENTITY_NAV_BADGES[user.entityType] || "یوزر",
+      navBadge: entityBadge(user.entityType),
       navTitle: user.displayName || user.profileSlug || fallbackName,
       entityType: user.entityType,
       profileSlug: user.profileSlug || null,
@@ -30,11 +31,16 @@ export function resolveAccountNav(user) {
   }
 
   if (isAdmin(user)) {
-    return { navBadge: "ادمین", navTitle: fallbackName, entityType: null, profileSlug: null };
+    return {
+      navBadge: t ? t("accountNav.admin") : "admin",
+      navTitle: fallbackName,
+      entityType: null,
+      profileSlug: null,
+    };
   }
 
   return {
-    navBadge: "یوزر",
+    navBadge: t ? t("accountNav.user") : "user",
     navTitle: fallbackName,
     entityType: null,
     profileSlug: null,
@@ -42,7 +48,8 @@ export function resolveAccountNav(user) {
 }
 
 export function AccountNavSubtitle({ user, className = "" }) {
-  const nav = resolveAccountNav(user);
+  const t = useTranslations("shared");
+  const nav = resolveAccountNav(user, t);
   if (!nav?.navTitle) return null;
 
   return (

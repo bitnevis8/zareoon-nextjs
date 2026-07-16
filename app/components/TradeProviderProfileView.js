@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useLanguage } from "@/app/context/LanguageContext";
+import { useLocale, useTranslations } from "next-intl";
+import { isRtlLanguage } from "@/app/config/siteLanguages";
 import { API_ENDPOINTS } from "@/app/config/api";
 import {
   findCatalogService,
@@ -59,6 +60,7 @@ function ContactButton({ href, label, variant = "primary", external }) {
 }
 
 export default function TradeProviderProfileView({ providerId }) {
+  const ts = useTranslations("supplier.tradeProvider");
   const { language, isRTL, t } = useLanguage();
   const section = getTradeServicesContent(language);
   const [provider, setProvider] = useState(null);
@@ -147,7 +149,7 @@ export default function TradeProviderProfileView({ providerId }) {
     <div className={`min-h-screen bg-slate-100 ${isRTL ? "text-right" : "text-left"}`} dir={isRTL ? "rtl" : "ltr"}>
       {isOwnerPreview ? (
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-xs font-medium text-amber-900">
-          پیش‌نمایش صفحه شما — پس از تأیید مدیر، در فهرست عمومی خدمات نمایش داده می‌شود.
+          {ts("ownerPreviewBanner")}
         </div>
       ) : null}
       <section className="relative isolate pb-10">

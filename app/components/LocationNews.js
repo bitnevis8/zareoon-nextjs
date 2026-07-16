@@ -3,38 +3,37 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { API_ENDPOINTS } from '../config/api';
 
-// تابع محاسبه زمان نسبی
-const getRelativeTime = (publishedAt) => {
-  const now = new Date();
-  const published = new Date(publishedAt);
-  const diffInSeconds = Math.floor((now - published) / 1000);
-
-  if (diffInSeconds < 60) {
-    return 'همین الان';
-  } else if (diffInSeconds < 3600) {
-    const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes} دقیقه پیش`;
-  } else if (diffInSeconds < 86400) {
-    const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours} ساعت پیش`;
-  } else if (diffInSeconds < 2592000) {
-    const days = Math.floor(diffInSeconds / 86400);
-    return `${days} روز پیش`;
-  } else if (diffInSeconds < 31536000) {
-    const months = Math.floor(diffInSeconds / 2592000);
-    return `${months} ماه پیش`;
-  } else {
-    const years = Math.floor(diffInSeconds / 31536000);
-    return `${years} سال پیش`;
-  }
-};
-
 export default function LocationNews({ locationId, locationSlug, locationName, locationDisplayName }) {
+  const t = useTranslations('location');
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const getRelativeTime = (publishedAt) => {
+    const now = new Date();
+    const published = new Date(publishedAt);
+    const diffInSeconds = Math.floor((now - published) / 1000);
+
+    if (diffInSeconds < 60) {
+      return t('news.relativeTime.now');
+    }
+    if (diffInSeconds < 3600) {
+      return t('news.relativeTime.minutesAgo', { count: Math.floor(diffInSeconds / 60) });
+    }
+    if (diffInSeconds < 86400) {
+      return t('news.relativeTime.hoursAgo', { count: Math.floor(diffInSeconds / 3600) });
+    }
+    if (diffInSeconds < 2592000) {
+      return t('news.relativeTime.daysAgo', { count: Math.floor(diffInSeconds / 86400) });
+    }
+    if (diffInSeconds < 31536000) {
+      return t('news.relativeTime.monthsAgo', { count: Math.floor(diffInSeconds / 2592000) });
+    }
+    return t('news.relativeTime.yearsAgo', { count: Math.floor(diffInSeconds / 31536000) });
+  };
 
   useEffect(() => {
     const fetchLocationNews = async () => {
@@ -48,18 +47,20 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
         if (data.success) {
           setNews(data.data.articles || []);
         } else {
-          setError(data.message || 'خطا در دریافت اخبار');
+          setError(data.message || t('news.fetchFailed'));
         }
-      } catch (error) {
-        console.error('Error fetching location news:', error);
-        setError('خطا در اتصال به سرور');
+      } catch (err) {
+        console.error('Error fetching location news:', err);
+        setError(t('error.connectionFailed'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchLocationNews();
-  }, [locationId]);
+  }, [locationId, t]);
+
+  const newsTitle = t('news.title', { name: locationName });
 
   if (loading) {
     return (
@@ -68,7 +69,7 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
           <svg className="w-6 h-6 text-blue-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
           </svg>
-          اخبار مربوط به {locationName}
+          {newsTitle}
         </h3>
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
@@ -84,7 +85,7 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
           <svg className="w-6 h-6 text-red-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
-          اخبار مربوط به {locationName}
+          {newsTitle}
         </h3>
         <div className="text-center py-8">
           <div className="text-red-500 mb-4">
@@ -105,13 +106,13 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
           <svg className="w-6 h-6 text-gray-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
           </svg>
-          اخبار مربوط به {locationName}
+          {newsTitle}
         </h3>
         <div className="text-center py-12">
           <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p className="text-gray-500 text-lg">هیچ خبری برای این مکان یافت نشد</p>
+          <p className="text-gray-500 text-lg">{t('news.empty')}</p>
         </div>
       </div>
     );
@@ -123,11 +124,11 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
         <svg className="w-6 h-6 text-blue-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
         </svg>
-        اخبار مربوط به {locationName}
+        {newsTitle}
       </h3>
       
       <div className="space-y-6">
-        {news.map((article, index) => (
+        {news.map((article) => (
           <div key={article.id} className="group hover:bg-gray-50 rounded-lg p-4 transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:shadow-md">
             <div className="flex items-start space-x-4 space-x-reverse">
               {article.imageUrl && (
@@ -169,7 +170,6 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
                 </Link>
               </div>
 
-              {/* اطلاعات منبع و زمان نسبی */}
               <div className="flex-shrink-0 text-left">
                 <div className="flex flex-col items-end space-y-2">
                   {article.agency && (
@@ -196,10 +196,10 @@ export default function LocationNews({ locationId, locationSlug, locationName, l
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-            مشاهده همه اخبار
+            {t('news.viewAll')}
           </Link>
         </div>
       )}
     </div>
   );
-} 
+}

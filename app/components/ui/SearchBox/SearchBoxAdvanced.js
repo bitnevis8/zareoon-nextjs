@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function SearchBoxAdvanced() {
+  const t = useTranslations('home.searchBox');
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
@@ -135,7 +137,7 @@ export default function SearchBoxAdvanced() {
                 setIsOpen(true);
               }}
               onFocus={() => setIsOpen(true)}
-              placeholder="جستجو با تگانه ..."
+              placeholder={t('placeholder')}
               className="w-full px-4 py-3 pr-12 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -197,9 +199,9 @@ export default function SearchBoxAdvanced() {
           </div>
           
           <div className="mt-2 text-sm text-gray-600">
-            {selectedTags.length === 1 
-              ? `نمایش اخبار مرتبط با تگ "${selectedTags[0].name}"`
-              : `نمایش اخبار مرتبط با ${selectedTags.length} تگ انتخاب شده`
+            {selectedTags.length === 1
+              ? t('tagFilterSingle', { name: selectedTags[0].name })
+              : t('tagFilterMulti', { count: selectedTags.length })
             }
           </div>
         </div>
@@ -215,7 +217,7 @@ export default function SearchBoxAdvanced() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
           </svg>
-           دسته‌بندی ساده
+           {t('simpleCategories')}
         </Link>
       </div>
 
@@ -229,12 +231,12 @@ export default function SearchBoxAdvanced() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                در حال جستجو...
+                {t('searching')}
               </div>
             </div>
           ) : filteredArticles.length > 0 ? (
             <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-2 text-right">نتایج اخبار مرتبط:</h3>
+              <h3 className="text-lg font-semibold mb-2 text-right">{t('resultsTitle')}</h3>
               <ul className="space-y-2 text-right">
                 {filteredArticles.map((article) => (
                   <li key={article.id}>
@@ -260,9 +262,9 @@ export default function SearchBoxAdvanced() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ خبری یافت نشد</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noResults')}</h3>
               <p className="text-gray-500">
-                هیچ خبری با تگ‌های انتخاب شده یافت نشد. لطفاً تگ‌های دیگری انتخاب کنید.
+                {t('noResultsHint')}
               </p>
             </div>
           )}

@@ -1,0 +1,518 @@
+[
+  {
+    "id": 10000,
+    "parentId": null,
+    "slug": "agriculture",
+    "name": "محصولات کشاورزی",
+    "englishName": "Agricultural Products",
+    "arabicName": "المنتجات الزراعية",
+    "russianName": "Сельскохозяйственная продукция",
+    "turkishName": "Tarım Ürünleri",
+    "finnishName": "Maataloustuotteet",
+    "urduName": "زرعی مصنوعات",
+    "imageUrl": null,
+    "icon": "sprout",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 1,
+    "homepageSortOrder": 1,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "محصولات کشاورزی"
+      },
+      "en": {
+        "name": "Agricultural Products"
+      },
+      "ar": {
+        "name": "المنتجات الزراعية"
+      },
+      "ru": {
+        "name": "Сельскохозяйственная продукция"
+      },
+      "tr": {
+        "name": "Tarım Ürünleri"
+      },
+      "fi": {
+        "name": "Maataloustuotteet"
+      },
+      "ur": {
+        "name": "زرعی مصنوعات"
+      }
+    }
+  },
+  {
+    "id": 10106,
+    "parentId": null,
+    "slug": "food-beverages",
+    "name": "مواد غذایی و نوشیدنی",
+    "englishName": "Food & Beverages",
+    "arabicName": "الأغذية والمشروبات",
+    "russianName": "Продукты питания и напитки",
+    "turkishName": "Gıda ve İçecekler",
+    "finnishName": "Elintarvikkeet ja juomat",
+    "urduName": "غذائی مصنوعات اور مشروبات",
+    "imageUrl": null,
+    "icon": "utensils",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 2,
+    "homepageSortOrder": 2,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "مواد غذایی و نوشیدنی"
+      },
+      "en": {
+        "name": "Food & Beverages"
+      },
+      "ar": {
+        "name": "الأغذية والمشروبات"
+      },
+      "ru": {
+        "name": "Продукты питания и напитки"
+      },
+      "tr": {
+        "name": "Gıda ve İçecekler"
+      },
+      "fi": {
+        "name": "Elintarvikkeet ja juomat"
+      },
+      "ur": {
+        "name": "غذائی مصنوعات اور مشروبات"
+      }
+    }
+  },
+  {
+    "id": 10175,
+    "parentId": null,
+    "slug": "metals-minerals-chemicals",
+    "name": "فلزات، مواد معدنی و مواد شیمیایی",
+    "englishName": "Metals, Minerals & Chemicals",
+    "arabicName": "المعادن والمواد المعدنية والكيماويات",
+    "russianName": "Металлы, минералы и химическая продукция",
+    "turkishName": "Metaller, Mineraller ve Kimyasallar",
+    "finnishName": "Metallit, mineraalit ja kemikaalit",
+    "urduName": "دھاتیں، معدنیات اور کیمیکلز",
+    "imageUrl": null,
+    "icon": "flask-conical",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 3,
+    "homepageSortOrder": 3,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "فلزات، مواد معدنی و مواد شیمیایی"
+      },
+      "en": {
+        "name": "Metals, Minerals & Chemicals"
+      },
+      "ar": {
+        "name": "المعادن والمواد المعدنية والكيماويات"
+      },
+      "ru": {
+        "name": "Металлы, минералы и химическая продукция"
+      },
+      "tr": {
+        "name": "Metaller, Mineraller ve Kimyasallar"
+      },
+      "fi": {
+        "name": "Metallit, mineraalit ja kemikaalit"
+      },
+      "ur": {
+        "name": "دھاتیں، معدنیات اور کیمیکلز"
+      }
+    }
+  },
+  {
+    "id": 10353,
+    "parentId": null,
+    "slug": "industrial-machinery-equipment",
+    "name": "ماشین‌آلات و تجهیزات صنعتی",
+    "englishName": "Machinery & Industrial Equipment",
+    "arabicName": "الآلات والمعدات الصناعية",
+    "russianName": "Машины и промышленное оборудование",
+    "turkishName": "Makine ve Endüstriyel Ekipman",
+    "finnishName": "Koneet ja teollisuuslaitteet",
+    "urduName": "مشینری اور صنعتی آلات",
+    "imageUrl": null,
+    "icon": "factory",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 4,
+    "homepageSortOrder": 4,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "ماشین‌آلات و تجهیزات صنعتی"
+      },
+      "en": {
+        "name": "Machinery & Industrial Equipment"
+      },
+      "ar": {
+        "name": "الآلات والمعدات الصناعية"
+      },
+      "ru": {
+        "name": "Машины и промышленное оборудование"
+      },
+      "tr": {
+        "name": "Makine ve Endüstriyel Ekipman"
+      },
+      "fi": {
+        "name": "Koneet ja teollisuuslaitteet"
+      },
+      "ur": {
+        "name": "مشینری اور صنعتی آلات"
+      }
+    }
+  },
+  {
+    "id": 10503,
+    "parentId": null,
+    "slug": "construction-building-materials",
+    "name": "ساختمان و مصالح ساختمانی",
+    "englishName": "Construction & Building Materials",
+    "arabicName": "البناء ومواد البناء",
+    "russianName": "Строительство и строительные материалы",
+    "turkishName": "İnşaat ve Yapı Malzemeleri",
+    "finnishName": "Rakentaminen ja rakennusmateriaalit",
+    "urduName": "تعمیرات اور تعمیراتی مواد",
+    "imageUrl": null,
+    "icon": "hard-hat",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 5,
+    "homepageSortOrder": 5,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "ساختمان و مصالح ساختمانی"
+      },
+      "en": {
+        "name": "Construction & Building Materials"
+      },
+      "ar": {
+        "name": "البناء ومواد البناء"
+      },
+      "ru": {
+        "name": "Строительство и строительные материалы"
+      },
+      "tr": {
+        "name": "İnşaat ve Yapı Malzemeleri"
+      },
+      "fi": {
+        "name": "Rakentaminen ja rakennusmateriaalit"
+      },
+      "ur": {
+        "name": "تعمیرات اور تعمیراتی مواد"
+      }
+    }
+  },
+  {
+    "id": 10560,
+    "parentId": null,
+    "slug": "home-appliances-electronics",
+    "name": "لوازم خانگی و الکترونیک",
+    "englishName": "Home Appliances & Electronics",
+    "arabicName": "الأجهزة المنزلية والإلكترونيات",
+    "russianName": "Бытовая техника и электроника",
+    "turkishName": "Ev Aletleri ve Elektronik",
+    "finnishName": "Kodinkoneet ja elektroniikka",
+    "urduName": "گھریلو آلات اور الیکٹرانکس",
+    "imageUrl": null,
+    "icon": "monitor-smartphone",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 6,
+    "homepageSortOrder": 6,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "لوازم خانگی و الکترونیک"
+      },
+      "en": {
+        "name": "Home Appliances & Electronics"
+      },
+      "ar": {
+        "name": "الأجهزة المنزلية والإلكترونيات"
+      },
+      "ru": {
+        "name": "Бытовая техника и электроника"
+      },
+      "tr": {
+        "name": "Ev Aletleri ve Elektronik"
+      },
+      "fi": {
+        "name": "Kodinkoneet ja elektroniikka"
+      },
+      "ur": {
+        "name": "گھریلو آلات اور الیکٹرانکس"
+      }
+    }
+  },
+  {
+    "id": 10592,
+    "parentId": null,
+    "slug": "apparel-textiles-fashion",
+    "name": "پوشاک، نساجی و مد",
+    "englishName": "Apparel, Textiles & Fashion",
+    "arabicName": "الملابس والمنسوجات والموضة",
+    "russianName": "Одежда, текстиль и мода",
+    "turkishName": "Giyim, Tekstil ve Moda",
+    "finnishName": "Vaatteet, tekstiilit ja muoti",
+    "urduName": "ملبوسات، ٹیکسٹائل اور فیشن",
+    "imageUrl": null,
+    "icon": "shirt",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 7,
+    "homepageSortOrder": 7,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "پوشاک، نساجی و مد"
+      },
+      "en": {
+        "name": "Apparel, Textiles & Fashion"
+      },
+      "ar": {
+        "name": "الملابس والمنسوجات والموضة"
+      },
+      "ru": {
+        "name": "Одежда, текстиль и мода"
+      },
+      "tr": {
+        "name": "Giyim, Tekstil ve Moda"
+      },
+      "fi": {
+        "name": "Vaatteet, tekstiilit ja muoti"
+      },
+      "ur": {
+        "name": "ملبوسات، ٹیکسٹائل اور فیشن"
+      }
+    }
+  },
+  {
+    "id": 10620,
+    "parentId": null,
+    "slug": "bags-shoes-leather-products",
+    "name": "کیف، کفش و محصولات چرمی",
+    "englishName": "Bags, Shoes & Leather Products",
+    "arabicName": "الحقائب والأحذية والمنتجات الجلدية",
+    "russianName": "Сумки, обувь и кожаные изделия",
+    "turkishName": "Çanta, Ayakkabı ve Deri Ürünleri",
+    "finnishName": "Laukut, kengät ja nahkatuotteet",
+    "urduName": "بیگز، جوتے اور چمڑے کی مصنوعات",
+    "imageUrl": null,
+    "icon": "briefcase",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 8,
+    "homepageSortOrder": 8,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "کیف، کفش و محصولات چرمی"
+      },
+      "en": {
+        "name": "Bags, Shoes & Leather Products"
+      },
+      "ar": {
+        "name": "الحقائب والأحذية والمنتجات الجلدية"
+      },
+      "ru": {
+        "name": "Сумки, обувь и кожаные изделия"
+      },
+      "tr": {
+        "name": "Çanta, Ayakkabı ve Deri Ürünleri"
+      },
+      "fi": {
+        "name": "Laukut, kengät ja nahkatuotteet"
+      },
+      "ur": {
+        "name": "بیگز، جوتے اور چمڑے کی مصنوعات"
+      }
+    }
+  },
+  {
+    "id": 10640,
+    "parentId": null,
+    "slug": "sports-entertainment-gifts-kids",
+    "name": "ورزش، بازی، هدایا و کودک",
+    "englishName": "Sports, Entertainment, Gifts & Kids",
+    "arabicName": "الرياضة والترفيه والهدايا ومنتجات الأطفال",
+    "russianName": "Спорт, развлечения, подарки и детские товары",
+    "turkishName": "Spor, Eğlence, Hediyeler ve Çocuk Ürünleri",
+    "finnishName": "Urheilu, viihde, lahjat ja lastentuotteet",
+    "urduName": "کھیل، تفریح، تحائف اور بچوں کی مصنوعات",
+    "imageUrl": null,
+    "icon": "gamepad-2",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 9,
+    "homepageSortOrder": 9,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "ورزش، بازی، هدایا و کودک"
+      },
+      "en": {
+        "name": "Sports, Entertainment, Gifts & Kids"
+      },
+      "ar": {
+        "name": "الرياضة والترفيه والهدايا ومنتجات الأطفال"
+      },
+      "ru": {
+        "name": "Спорт, развлечения, подарки и детские товары"
+      },
+      "tr": {
+        "name": "Spor, Eğlence, Hediyeler ve Çocuk Ürünleri"
+      },
+      "fi": {
+        "name": "Urheilu, viihde, lahjat ja lastentuotteet"
+      },
+      "ur": {
+        "name": "کھیل، تفریح، تحائف اور بچوں کی مصنوعات"
+      }
+    }
+  },
+  {
+    "id": 10672,
+    "parentId": null,
+    "slug": "cosmetics-hygiene-health",
+    "name": "آرایشی، بهداشتی و سلامت",
+    "englishName": "Cosmetics, Hygiene & Health",
+    "arabicName": "مستحضرات التجميل والنظافة والصحة",
+    "russianName": "Косметика, гигиена и здоровье",
+    "turkishName": "Kozmetik, Hijyen ve Sağlık",
+    "finnishName": "Kosmetiikka, hygienia ja terveys",
+    "urduName": "کاسمیٹکس، حفظان صحت اور صحت",
+    "imageUrl": null,
+    "icon": "heart-pulse",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 10,
+    "homepageSortOrder": 10,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "آرایشی، بهداشتی و سلامت"
+      },
+      "en": {
+        "name": "Cosmetics, Hygiene & Health"
+      },
+      "ar": {
+        "name": "مستحضرات التجميل والنظافة والصحة"
+      },
+      "ru": {
+        "name": "Косметика, гигиена и здоровье"
+      },
+      "tr": {
+        "name": "Kozmetik, Hijyen ve Sağlık"
+      },
+      "fi": {
+        "name": "Kosmetiikka, hygienia ja terveys"
+      },
+      "ur": {
+        "name": "کاسمیٹکس، حفظان صحت اور صحت"
+      }
+    }
+  },
+  {
+    "id": 10711,
+    "parentId": null,
+    "slug": "automotive-parts",
+    "name": "خودرو و قطعات",
+    "englishName": "Automotive & Parts",
+    "arabicName": "المركبات وقطع الغيار",
+    "russianName": "Автомобили и автозапчасти",
+    "turkishName": "Otomotiv ve Parçaları",
+    "finnishName": "Ajoneuvot ja autonosat",
+    "urduName": "گاڑیاں اور آٹو پارٹس",
+    "imageUrl": null,
+    "icon": "car",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 11,
+    "homepageSortOrder": 11,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "خودرو و قطعات"
+      },
+      "en": {
+        "name": "Automotive & Parts"
+      },
+      "ar": {
+        "name": "المركبات وقطع الغيار"
+      },
+      "ru": {
+        "name": "Автомобили и автозапчасти"
+      },
+      "tr": {
+        "name": "Otomotiv ve Parçaları"
+      },
+      "fi": {
+        "name": "Ajoneuvot ja autonosat"
+      },
+      "ur": {
+        "name": "گاڑیاں اور آٹو پارٹس"
+      }
+    }
+  },
+  {
+    "id": 10774,
+    "parentId": null,
+    "slug": "other-goods-general-products",
+    "name": "سایر کالاها و محصولات عمومی",
+    "englishName": "Other Goods & General Products",
+    "arabicName": "سلع أخرى ومنتجات عامة",
+    "russianName": "Прочие товары и товары общего назначения",
+    "turkishName": "Diğer Mallar ve Genel Ürünler",
+    "finnishName": "Muut tavarat ja yleiset tuotteet",
+    "urduName": "دیگر اشیا اور عمومی مصنوعات",
+    "imageUrl": null,
+    "icon": "boxes",
+    "isOrderable": false,
+    "isActive": true,
+    "sortOrder": 12,
+    "homepageSortOrder": 12,
+    "level": 1,
+    "isLeaf": false,
+    "translations": {
+      "fa": {
+        "name": "سایر کالاها و محصولات عمومی"
+      },
+      "en": {
+        "name": "Other Goods & General Products"
+      },
+      "ar": {
+        "name": "سلع أخرى ومنتجات عامة"
+      },
+      "ru": {
+        "name": "Прочие товары и товары общего назначения"
+      },
+      "tr": {
+        "name": "Diğer Mallar ve Genel Ürünler"
+      },
+      "fi": {
+        "name": "Muut tavarat ja yleiset tuotteet"
+      },
+      "ur": {
+        "name": "دیگر اشیا اور عمومی مصنوعات"
+      }
+    }
+  }
+]

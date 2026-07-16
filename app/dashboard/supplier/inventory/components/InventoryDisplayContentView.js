@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   DISPLAY_LOCALES,
   countFilledDisplayLocales,
@@ -28,6 +29,7 @@ function LocaleTab({ active, label, filled, onClick }) {
 }
 
 export default function InventoryDisplayContentView({ lot }) {
+  const t = useTranslations("inventory");
   const [activeLocale, setActiveLocale] = useState("fa");
   const content = useMemo(() => hydrateDisplayContent(lot), [lot]);
   const localeMeta = getDisplayLocale(activeLocale);
@@ -54,9 +56,9 @@ export default function InventoryDisplayContentView({ lot }) {
     <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-slate-700">جزئیات نمایش</p>
+          <p className="text-sm font-semibold text-slate-700">{t("display.viewTitle")}</p>
           <span className="text-[10px] font-medium text-slate-500">
-            {filledCount.toLocaleString("fa-IR")} زبان
+            {t("display.languagesCount", { count: filledCount.toLocaleString("fa-IR") })}
           </span>
         </div>
         <div className="mt-2 flex flex-wrap gap-1">
@@ -74,12 +76,12 @@ export default function InventoryDisplayContentView({ lot }) {
 
       <div className="space-y-3 p-3">
         {!hasCurrent ? (
-          <p className="text-sm text-slate-500">برای این زبان محتوایی ثبت نشده است.</p>
+          <p className="text-sm text-slate-500">{t("display.noContentForLocale")}</p>
         ) : (
           <>
             {current.title?.trim() ? (
               <div>
-                <p className="mb-1 text-xs font-semibold text-slate-500">عنوان دلخواه</p>
+                <p className="mb-1 text-xs font-semibold text-slate-500">{t("display.customTitle")}</p>
                 <p className="text-sm font-semibold text-slate-900" dir={localeMeta.dir}>
                   {current.title}
                 </p>
@@ -88,7 +90,7 @@ export default function InventoryDisplayContentView({ lot }) {
 
             {current.description?.trim() ? (
               <div>
-                <p className="mb-1 text-xs font-semibold text-slate-500">توضیحات</p>
+                <p className="mb-1 text-xs font-semibold text-slate-500">{t("display.description")}</p>
                 <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700" dir={localeMeta.dir}>
                   {current.description}
                 </p>

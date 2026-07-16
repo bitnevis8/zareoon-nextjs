@@ -22,12 +22,24 @@ export async function proxyTamin(request, backendPath, { method } = {}) {
   }
 
   const url = `${API_ENDPOINTS.tamin.base}${backendPath}${request.nextUrl.search || ""}`;
-  const backendResponse = await fetch(url, init);
-  const responseContentType = backendResponse.headers.get("content-type") || "application/json";
-  const body = await backendResponse.text();
 
-  return new Response(body, {
-    status: backendResponse.status,
-    headers: { "Content-Type": responseContentType },
-  });
+  try {
+    const backendResponse = await fetch(url, init);
+    const responseContentType = backendResponse.headers.get("content-type") || "application/json";
+    const body = await backendResponse.text();
+
+    return new Response(body, {
+      status: backendResponse.status,
+      headers: { "Content-Type": responseContentType },
+    });
+  } catch (error) {
+    const refused = error?.cause?.code === "ECONNREFUSED" || error?.message?.includes("fetch failed");
+    return Response.json(
+      {
+        success: false,
+        message: refused ? "سرور API در دسترس نیست (پورت 3000)" : "خطا در ارتباط با سرور تأمین",
+      },
+      { status: 503 }
+    );
+  }
 }

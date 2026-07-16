@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import HashtagInput from "@/app/components/ui/HashtagInput";
 import { Field } from "./Field";
 import { inv } from "../inventoryTheme";
@@ -33,6 +34,7 @@ function LocaleTab({ active, label, filled, onClick }) {
 }
 
 export default function InventoryDisplayDetailsEditor({ value, onChange }) {
+  const t = useTranslations("inventory");
   const [activeLocale, setActiveLocale] = useState("fa");
 
   const content = value && typeof value === "object" ? value : createEmptyDisplayContent();
@@ -61,10 +63,10 @@ export default function InventoryDisplayDetailsEditor({ value, onChange }) {
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div className="border-b border-slate-100 bg-slate-50/80 px-2.5 py-2 sm:px-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs font-bold text-slate-800">متن و عنوان نمایش</p>
+          <p className="text-xs font-bold text-slate-800">{t("display.editorTitle")}</p>
           {filledCount > 0 ? (
             <span className="text-[10px] font-medium text-slate-500">
-              {filledCount.toLocaleString("fa-IR")} زبان تکمیل‌شده
+              {t("display.languagesFilled", { count: filledCount.toLocaleString("fa-IR") })}
             </span>
           ) : null}
         </div>
@@ -84,38 +86,38 @@ export default function InventoryDisplayDetailsEditor({ value, onChange }) {
       <div className="space-y-3 p-2.5 sm:p-3">
         {activeLocale === "fa" ? (
           <p className="rounded-md border border-emerald-100 bg-emerald-50/60 px-2.5 py-1.5 text-[11px] leading-5 text-emerald-900">
-            زبان پیش‌فرض — این متن‌ها در نمایش فارسی سایت استفاده می‌شوند.
+            {t("display.defaultLocaleHint")}
           </p>
         ) : (
           <p className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] leading-5 text-slate-600">
-            اختیاری — در صورت تکمیل، برای بازدیدکنندگان با زبان {localeMeta.label} نمایش داده می‌شود.
+            {t("display.optionalLocaleHint", { locale: localeMeta.label })}
           </p>
         )}
 
         <Field
-          label="عنوان دلخواه"
+          label={t("display.customTitle")}
           compact
           hint={
             activeLocale === "fa"
-              ? "اگر خالی بماند، نام نوع محصول از کاتالوگ نمایش داده می‌شود."
-              : "عنوان اختصاصی این عرضه به این زبان."
+              ? t("display.titleHintFa")
+              : t("display.titleHintOther")
           }
         >
           <input
             className={inv.inputCompact}
             dir={localeMeta.dir}
-            placeholder={getDisplayTitlePlaceholder(activeLocale)}
+            placeholder={getDisplayTitlePlaceholder(activeLocale, t)}
             value={current.title}
             onChange={(e) => updateCurrent({ title: e.target.value })}
           />
         </Field>
 
-        <Field label="توضیحات" compact>
+        <Field label={t("display.description")} compact>
           <textarea
             className={inv.textareaCompact}
             dir={localeMeta.dir}
             rows={3}
-            placeholder={getDisplayDescriptionPlaceholder(activeLocale)}
+            placeholder={getDisplayDescriptionPlaceholder(activeLocale, t)}
             value={current.description}
             onChange={(e) => updateCurrent({ description: e.target.value })}
           />
@@ -124,7 +126,7 @@ export default function InventoryDisplayDetailsEditor({ value, onChange }) {
         <HashtagInput
           value={current.hashtags}
           onChange={(hashtags) => updateCurrent({ hashtags })}
-          label="هشتگ"
+          label={t("display.hashtag")}
           compact
         />
       </div>

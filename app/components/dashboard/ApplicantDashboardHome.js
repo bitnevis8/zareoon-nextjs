@@ -2,19 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import ApplicantRequestForm from "./ApplicantRequestForm";
 import { dash } from "./dashboardTheme";
 
-const STATUS_LABELS = {
-  open: "باز",
-  closed: "بسته",
-  fulfilled: "برآورده‌شده",
-  cancelled: "لغو‌شده",
-};
-
 function RequestTypeBadge({ type }) {
+  const t = useTranslations("applicant");
   const isProduct = type === "product";
   return (
     <span
@@ -22,12 +17,16 @@ function RequestTypeBadge({ type }) {
         isProduct ? "bg-sky-100 text-sky-800" : "bg-violet-100 text-violet-800"
       }`}
     >
-      {isProduct ? "محصول" : "خدمات"}
+      {isProduct ? t("type.product") : t("type.service")}
     </span>
   );
 }
 
 export default function ApplicantDashboardHome({ user }) {
+  const t = useTranslations("applicant");
+  const tCommon = useTranslations("common");
+
+  const statusLabel = (status) => (t.has(`status.${status}`) ? t(`status.${status}`) : status);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,34 +52,31 @@ export default function ApplicantDashboardHome({ user }) {
   return (
     <div className={dash.page}>
       <header className="mb-6">
-        <h1 className={dash.pageTitle}>داشبورد متقاضی</h1>
-        <p className={dash.pageSubtitle}>
-          {user?.firstName} عزیز، درخواست محصول یا خدمات خود را ثبت کنید تا فروشندگان و ارائه‌دهندگان مرتبط مطلع
-          شوند.
-        </p>
+        <h1 className={dash.pageTitle}>{t("home.title")}</h1>
+        <p className={dash.pageSubtitle}>{t("home.subtitle", { name: user?.firstName || "" })}</p>
       </header>
 
       <ApplicantRequestForm onSubmitted={() => loadRequests()} />
 
       <div className="mt-3">
         <Link href="/dashboard/submit-request" className="text-xs font-semibold text-sky-700 hover:underline">
-          ثبت درخواست جدید ←
+          {t("home.newRequestLink")}
         </Link>
       </div>
 
       <section className="mt-8">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-bold text-slate-900">درخواست‌های من</h2>
+          <h2 className="text-sm font-bold text-slate-900">{t("home.myRequests")}</h2>
           <Link href="/dashboard/applicant-requests" className="text-xs font-semibold text-sky-700 hover:underline">
-            مشاهده همه
+            {t("home.viewAll")}
           </Link>
         </div>
 
         {loading ? (
-          <p className="text-sm text-slate-500">در حال بارگذاری…</p>
+          <p className="text-sm text-slate-500">{tCommon("loading")}</p>
         ) : requests.length === 0 ? (
           <div className={`${dash.card} ${dash.cardBody}`}>
-            <p className="text-sm text-slate-600">هنوز درخواستی ثبت نکرده‌اید.</p>
+            <p className="text-sm text-slate-600">{t("home.noRequests")}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -97,7 +93,7 @@ export default function ApplicantDashboardHome({ user }) {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <RequestTypeBadge type={item.requestType} />
-                    <span className="text-[11px] text-slate-500">{STATUS_LABELS[item.status] || item.status}</span>
+                    <span className="text-[11px] text-slate-500">{statusLabel(item.status)}</span>
                   </div>
                 </div>
               </Link>

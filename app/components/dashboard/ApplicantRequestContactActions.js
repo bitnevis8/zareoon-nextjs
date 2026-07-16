@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 function PhoneIcon({ className = "h-4 w-4" }) {
   return (
@@ -32,6 +33,7 @@ function stopNav(e) {
 }
 
 export default function ApplicantRequestContactActions({ request, compact = false }) {
+  const t = useTranslations("applicant");
   const applicantId = request?.userId || request?.applicant?.id;
   const canCall =
     request?.allowPhoneContact !== false &&
@@ -53,12 +55,12 @@ export default function ApplicantRequestContactActions({ request, compact = fals
       onClick={stopNav}
       onKeyDown={(e) => e.stopPropagation()}
       role="group"
-      aria-label="ارتباط با متقاضی"
+      aria-label={t("contact.ariaLabel")}
     >
       {canCall ? (
         <a href={`tel:${request.phone}`} className={callClass} onClick={stopNav}>
           <PhoneIcon />
-          <span>تماس</span>
+          <span>{t("contact.call")}</span>
         </a>
       ) : null}
       {applicantId ? (
@@ -69,7 +71,7 @@ export default function ApplicantRequestContactActions({ request, compact = fals
           prefetch
         >
           <ChatIcon />
-          <span>چت</span>
+          <span>{t("contact.chat")}</span>
         </Link>
       ) : null}
     </div>

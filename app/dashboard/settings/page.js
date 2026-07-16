@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useRequireAdmin } from "@/app/hooks/useDashboardRole";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 import { API_ENDPOINTS } from "@/app/config/api";
@@ -12,6 +13,7 @@ import { getL1Categories } from "@/app/data/tradeServicesCatalog";
 import { DEFAULT_VIP_MESSAGE } from "@/app/utils/vipCategoryHelpers";
 
 export default function DashboardSettingsPage() {
+  const t = useTranslations("product");
   const { allowed, loading: authLoading } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,7 +45,7 @@ export default function DashboardSettingsPage() {
         }
       } catch (e) {
         console.error(e);
-        if (!cancelled) showToast.error("خطا در بارگذاری تنظیمات");
+        if (!cancelled) showToast.error(t("settings.loadError"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -95,12 +97,12 @@ export default function DashboardSettingsPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "خطا در آپلود");
+        throw new Error(data.message || t("settings.uploadError"));
       }
       setVipBannerImage(categoryId, data.data.downloadUrl);
-      showToast.success("تصویر بنر آپلود شد");
+      showToast.success(t("settings.bannerUploaded"));
     } catch (err) {
-      showToast.error(err.message || "خطا در آپلود تصویر");
+      showToast.error(err.message || t("settings.uploadImageError"));
     } finally {
       setBannerUploading(null);
     }
@@ -167,13 +169,13 @@ export default function DashboardSettingsPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        showToast.success(data.message || "تنظیمات ذخیره شد");
+        showToast.success(data.message || t("settings.saved"));
         if (data.data?.vipTradeCategories) setVipTradeCategories(data.data.vipTradeCategories);
       } else {
-        showToast.error(data.message || "خطا در ذخیره");
+        showToast.error(data.message || t("settings.saveError"));
       }
     } catch {
-      showToast.error("خطا در ذخیره تنظیمات");
+      showToast.error(t("settings.saveSettingsError"));
     } finally {
       setSaving(false);
     }
@@ -190,14 +192,14 @@ export default function DashboardSettingsPage() {
   return (
     <div className={`mx-auto max-w-3xl ${dash.page}`}>
       <header>
-        <h1 className={dash.pageTitle}>تنظیمات سامانه</h1>
-        <p className={dash.pageSubtitle}>پیکربندی رفتار بخش‌های عمومی و داشبورد مدیر</p>
+        <h1 className={dash.pageTitle}>{t("settings.title")}</h1>
+        <p className={dash.pageSubtitle}>{t("settings.subtitle")}</p>
       </header>
 
       <section className={`${dash.card} ${dash.cardBody}`}>
-        <h2 className="text-sm font-bold text-slate-800">خدمات تجارت بین‌الملل</h2>
+        <h2 className="text-sm font-bold text-slate-800">{t("settings.tradeSectionTitle")}</h2>
         <p className="mt-1 text-xs leading-6 text-slate-500">
-          تأیید خودکار ثبت‌نام ارائه‌دهندگان و تعریف بخش‌های VIP اختصاصی.
+          {t("settings.tradeSectionDesc")}
         </p>
 
         <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-emerald-200">
@@ -208,20 +210,20 @@ export default function DashboardSettingsPage() {
             className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
           />
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-slate-800">تأیید خودکار ارائه‌دهندگان</span>
+            <span className="block text-sm font-semibold text-slate-800">{t("settings.autoApproveLabel")}</span>
             <span className="mt-1 block text-xs leading-6 text-slate-500">
               {tradeProvidersAutoApprove
-                ? "فعال: هر ثبت‌نام جدید بلافاصله تأیید می‌شود."
-                : "غیرفعال: مدیر باید هر درخواست را بررسی کند."}
+                ? t("settings.autoApproveOn")
+                : t("settings.autoApproveOff")}
             </span>
           </span>
         </label>
       </section>
 
       <section className={`${dash.card} ${dash.cardBody}`}>
-        <h2 className="text-sm font-bold text-slate-800">بخش‌های VIP</h2>
+        <h2 className="text-sm font-bold text-slate-800">{t("settings.vipSectionTitle")}</h2>
         <p className="mt-1 text-xs leading-6 text-slate-500">
-          هر دسته را VIP کنید تا فقط ارائه‌دهندگان منتخب نمایش داده شوند و عضویت جدید در آن دسته غیرفعال شود.
+          {t("settings.vipSectionDesc")}
         </p>
 
         <div className="mt-4 space-y-4">
@@ -252,7 +254,7 @@ export default function DashboardSettingsPage() {
                 {enabled ? (
                   <div className="mt-3 space-y-4 border-t border-slate-200 pt-3">
                     <div>
-                      <p className="mb-2 text-xs font-semibold text-slate-600">پیام VIP</p>
+                      <p className="mb-2 text-xs font-semibold text-slate-600">{t("settings.vipMessageTitle")}</p>
                       <div className="space-y-2">
                         <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm">
                           <input
@@ -263,7 +265,7 @@ export default function DashboardSettingsPage() {
                             className="mt-1 h-4 w-4 border-slate-300 text-amber-600 focus:ring-amber-500"
                           />
                           <span className="min-w-0 flex-1">
-                            <span className="block font-medium text-slate-800">متن پیش‌فرض</span>
+                            <span className="block font-medium text-slate-800">{t("settings.defaultMessageLabel")}</span>
                             <span className="mt-1 block text-xs leading-6 text-slate-500">
                               {DEFAULT_VIP_MESSAGE.fa}
                             </span>
@@ -277,12 +279,12 @@ export default function DashboardSettingsPage() {
                             onChange={() => setVipMessageMode(cat.id, "custom")}
                             className="mt-1 h-4 w-4 border-slate-300 text-amber-600 focus:ring-amber-500"
                           />
-                          <span className="block font-medium text-slate-800">متن سفارشی</span>
+                          <span className="block font-medium text-slate-800">{t("settings.customMessageLabel")}</span>
                         </label>
                       </div>
                       {cfg.messageMode === "custom" ? (
                         <div className="mt-3 space-y-2">
-                          <label className="block text-xs font-semibold text-slate-600">فارسی</label>
+                          <label className="block text-xs font-semibold text-slate-600">{t("settings.persianLabel")}</label>
                           <textarea
                             rows={3}
                             value={
@@ -292,11 +294,11 @@ export default function DashboardSettingsPage() {
                             }
                             onChange={(e) => setVipCustomMessage(cat.id, "fa", e.target.value)}
                             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            placeholder="مثال: تمامی خدمات این بخش توسط شرکت ... انجام می‌شود."
+                            placeholder={t("settings.customMessagePlaceholder")}
                           />
                           <details className="rounded-lg border border-slate-100 bg-white p-3">
                             <summary className="cursor-pointer text-xs font-semibold text-slate-600">
-                              ترجمه انگلیسی و روسی (اختیاری)
+                              {t("settings.translationsSummary")}
                             </summary>
                             <div className="mt-3 space-y-3">
                               <div>
@@ -321,7 +323,7 @@ export default function DashboardSettingsPage() {
                           </details>
                           <div className="mt-4 border-t border-slate-100 pt-4">
                             <p className="mb-2 text-xs font-semibold text-slate-600">
-                              تصویر بنر (بالای دکمه «عضویت ارائه‌دهنده»)
+                              {t("settings.bannerTitle")}
                             </p>
                             {cfg.bannerImage ? (
                               <div className="relative mb-3 h-20 w-full max-w-xs overflow-hidden rounded-lg border border-slate-200 bg-white">
@@ -344,7 +346,7 @@ export default function DashboardSettingsPage() {
                             />
                             <div className="flex flex-wrap gap-2">
                               <label className="inline-flex cursor-pointer items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                                {bannerUploading === cat.id ? "در حال آپلود..." : "آپلود تصویر"}
+                                {bannerUploading === cat.id ? t("settings.uploading") : t("settings.uploadImage")}
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -363,7 +365,7 @@ export default function DashboardSettingsPage() {
                                   onClick={() => setVipBannerImage(cat.id, null)}
                                   className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
                                 >
-                                  حذف تصویر
+                                  {t("settings.removeImage")}
                                 </button>
                               ) : null}
                             </div>
@@ -373,9 +375,9 @@ export default function DashboardSettingsPage() {
                     </div>
 
                     <div>
-                      <p className="mb-2 text-xs font-semibold text-slate-600">ارائه‌دهندگان انحصاری</p>
+                      <p className="mb-2 text-xs font-semibold text-slate-600">{t("settings.exclusiveProvidersTitle")}</p>
                     {relevantProviders.length === 0 ? (
-                      <p className="text-xs text-slate-400">ارائه‌دهنده تأییدشده‌ای برای این دسته یافت نشد.</p>
+                      <p className="text-xs text-slate-400">{t("settings.noProvidersForCategory")}</p>
                     ) : (
                       <div className="space-y-2">
                         {relevantProviders.map((p) => (
@@ -402,7 +404,7 @@ export default function DashboardSettingsPage() {
       </section>
 
       <button type="button" onClick={save} disabled={saving} className={dash.btnPrimary}>
-        {saving ? "در حال ذخیره..." : "ذخیره تنظیمات"}
+        {saving ? t("settings.saving") : t("settings.saveSettings")}
       </button>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useAuth } from "../context/AuthContext";
 import { useDashboardPersona } from "../context/DashboardPersonaContext";
@@ -15,6 +16,7 @@ function DashboardContent() {
   const { user } = useAuth();
   const { isSellerView, isServicesView } = useDashboardPersona();
   const admin = isAdmin(user);
+  const t = useTranslations("dashboard");
 
   if (admin) {
     return <AdminDashboardHome user={user} />;
@@ -35,9 +37,9 @@ function DashboardContent() {
   return (
     <div className={dash.page}>
       <div className={`${dash.card} ${dash.cardBody}`}>
-        <p className="text-sm text-slate-600">خوش آمدید. از منوی کناری به بخش‌های مورد نیاز بروید.</p>
+        <p className="text-sm text-slate-600">{t("welcomeFallback")}</p>
         <Link href="/catalog/browse" className={`mt-4 ${dash.btnPrimary}`}>
-          مرور محصولات
+          {t("browseProducts")}
         </Link>
       </div>
     </div>

@@ -3,8 +3,11 @@
 import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
 import UserAvatar from "./UserAvatar";
 import { fullName } from "../userUtils";
+import { useTranslations } from "next-intl";
 
 export default function DeleteUserModal({ user, deleting, onConfirm, onCancel }) {
+  const t = useTranslations("users");
+
   if (!user) return null;
 
   return (
@@ -12,7 +15,7 @@ export default function DeleteUserModal({ user, deleting, onConfirm, onCancel })
       <div className={`${inv.modal} sm:max-w-md`}>
         <div className={inv.modalHeader}>
           <h2 id="delete-user-title" className="text-base font-bold text-slate-900">
-            حذف کاربر
+            {t("deleteModal.title")}
           </h2>
           <button type="button" onClick={onCancel} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,18 +28,18 @@ export default function DeleteUserModal({ user, deleting, onConfirm, onCancel })
           <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/50 p-4">
             <UserAvatar user={user} size="md" />
             <div>
-              <p className="font-semibold text-slate-900">{fullName(user)}</p>
-              <p className="text-sm text-slate-500">شناسه #{user.id}</p>
+              <p className="font-semibold text-slate-900">{fullName(user, t("defaultUserName"))}</p>
+              <p className="text-sm text-slate-500">{t("deleteModal.idLabel", { id: user.id })}</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-slate-600">
-            آیا از حذف این کاربر اطمینان دارید؟ این عملیات قابل بازگشت نیست و تمام دسترسی‌های کاربر لغو می‌شود.
+            {t("deleteModal.confirmMessage")}
           </p>
         </div>
 
         <div className={inv.modalFooter}>
           <button type="button" onClick={onCancel} disabled={deleting} className={inv.btnSecondary}>
-            انصراف
+            {t("cancel")}
           </button>
           <button
             type="button"
@@ -47,10 +50,10 @@ export default function DeleteUserModal({ user, deleting, onConfirm, onCancel })
             {deleting ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                در حال حذف…
+                {t("deleteModal.deleting")}
               </>
             ) : (
-              "بله، حذف شود"
+              t("deleteModal.confirmDelete")
             )}
           </button>
         </div>

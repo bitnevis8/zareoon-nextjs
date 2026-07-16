@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export const MAX_HASHTAGS = 3;
 
@@ -11,7 +12,9 @@ function normalizeHashtagInput(raw) {
     .replace(/\s+/g, "");
 }
 
-export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS, label = "هشتگ‌ها", compact = false }) {
+export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS, label, compact = false }) {
+  const t = useTranslations("shared");
+  const resolvedLabel = label ?? t("hashtagInput.defaultLabel");
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const tags = Array.isArray(value) ? value : [];
@@ -20,7 +23,7 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
     const tag = normalizeHashtagInput(input);
     if (!tag) return;
     if (tag.length < 2) {
-      setError("هر هشتگ حداقل ۲ کاراکتر باشد");
+      setError(t("hashtagInput.minLength"));
       return;
     }
     if (tags.includes(tag)) {
@@ -29,7 +32,7 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
       return;
     }
     if (tags.length >= max) {
-      setError(`حداکثر ${max} هشتگ مجاز است`);
+      setError(t("hashtagInput.maxCount", { max }));
       return;
     }
     onChange([...tags, tag]);
@@ -47,7 +50,7 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
   return (
     <div>
       <label className={`mb-1 block font-semibold text-slate-600 ${compact ? "text-xs" : "text-xs"}`}>
-        {label} ({tags.length}/{max})
+        {resolvedLabel} ({tags.length}/{max})
       </label>
       <div className="flex flex-wrap gap-1">
         {tags.map((tag) => (
@@ -58,9 +61,9 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
             #{tag}
             <button
               type="button"
-              onClick={() => onChange(tags.filter((t) => t !== tag))}
+              onClick={() => onChange(tags.filter((item) => item !== tag))}
               className="text-emerald-600 hover:text-emerald-900"
-              aria-label={`حذف ${tag}`}
+              aria-label={t("hashtagInput.removeAria", { tag })}
             >
               ×
             </button>
@@ -74,7 +77,7 @@ export default function HashtagInput({ value = [], onChange, max = MAX_HASHTAGS,
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="مثلاً خرما"
+            placeholder={t("hashtagInput.placeholder")}
             className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
           />
           <button

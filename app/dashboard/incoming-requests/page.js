@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import ApplicantRequestContactActions from "@/app/components/dashboard/ApplicantRequestContactActions";
 import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
@@ -9,23 +10,14 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 
-const PAGE_COPY = {
-  seller: {
-    title: "مشاهده نیازمندی‌ها به محصولات من",
-    subtitle: "درخواست‌هایی که متقاضیان ثبت کرده‌اند و با محصولاتی که شما عرضه می‌کنید هم‌خوان هستند",
-  },
-  services: {
-    title: "مشاهده نیازمندی‌ها به خدمات من",
-    subtitle: "درخواست‌هایی که متقاضیان ثبت کرده‌اند و با خدماتی که شما ارائه می‌دهید هم‌خوان هستند",
-  },
-};
-
 function IncomingRequestsListContent() {
+  const t = useTranslations("applicant");
+  const tCommon = useTranslations("common");
   const { isSellerView } = useDashboardPersona();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const copy = isSellerView ? PAGE_COPY.seller : PAGE_COPY.services;
+  const copyKey = isSellerView ? "incoming.seller" : "incoming.services";
 
   useEffect(() => {
     authFetch(`${API_ENDPOINTS.applicantRequests.notifications}?limit=50`, {
@@ -39,15 +31,15 @@ function IncomingRequestsListContent() {
   return (
     <div className={dash.page}>
       <header className="mb-6">
-        <h1 className={dash.pageTitle}>{copy.title}</h1>
-        <p className={dash.pageSubtitle}>{copy.subtitle}</p>
+        <h1 className={dash.pageTitle}>{t(`${copyKey}.title`)}</h1>
+        <p className={dash.pageSubtitle}>{t(`${copyKey}.subtitle`)}</p>
       </header>
 
       {loading ? (
-        <p className="text-sm text-slate-500">در حال بارگذاری…</p>
+        <p className="text-sm text-slate-500">{tCommon("loading")}</p>
       ) : items.length === 0 ? (
         <div className={`${dash.card} ${dash.cardBody}`}>
-          <p className="text-sm text-slate-600">درخواست جدیدی برای شما ثبت نشده است.</p>
+          <p className="text-sm text-slate-600">{t("incoming.empty")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -69,7 +61,7 @@ function IncomingRequestsListContent() {
                     </div>
                     {!n.readAt ? (
                       <span className="shrink-0 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                        جدید
+                        {t("incoming.newBadge")}
                       </span>
                     ) : null}
                   </div>

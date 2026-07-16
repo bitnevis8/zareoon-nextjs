@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 function ServicesNavItem({ href, label, active, onClick, disabled = false }) {
   if (disabled) {
@@ -35,18 +36,19 @@ export default function SidebarServicesSection({
   isActive,
   onLinkClick,
 }) {
+  const t = useTranslations("layout.sidebar");
   const membershipPath = "/trade-services/register";
 
   return (
     <>
       <p className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-        خدمات بازرگانی
+        {t("tradeServicesSection")}
       </p>
       <div className="space-y-0.5 px-2">
         {!hasProvider ? (
           <ServicesNavItem
             href={membershipPath}
-            label="عضویت در خدمات‌دهندگان"
+            label={t("providerMembership")}
             active={isActive(membershipPath)}
             onClick={onLinkClick}
           />
@@ -54,14 +56,14 @@ export default function SidebarServicesSection({
 
         <ServicesNavItem
           href="/dashboard/service-provider-profile"
-          label="صفحه خدمات من"
+          label={t("myServicesPage")}
           active={isActive("/dashboard/service-provider-profile")}
           onClick={onLinkClick}
           disabled={!hasProvider || loading}
         />
         <ServicesNavItem
           href="/dashboard/supplier/orders?scope=own"
-          label="سفارشات مشتری"
+          label={t("customerOrders")}
           active={isActive("/dashboard/supplier/orders?scope=own")}
           onClick={onLinkClick}
           disabled={!hasProvider || loading}
@@ -71,7 +73,7 @@ export default function SidebarServicesSection({
 
         <ServicesNavItem
           href="/dashboard/incoming-requests"
-          label="مشاهده نیازمندی‌ها به خدمات من"
+          label={t("incomingServiceRequests")}
           active={isActive("/dashboard/incoming-requests")}
           onClick={onLinkClick}
           disabled={!hasProvider || loading}

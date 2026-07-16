@@ -1,6 +1,7 @@
 "use client";
 
 import { Children, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 function ChevronIcon({ direction, className = "h-4 w-4" }) {
   const rotate = direction === "left" ? "rotate-180" : "";
@@ -40,7 +41,7 @@ function getHorizontalScrollState(el, isRTL) {
   };
 }
 
-function ScrollDots({ page, pageCount, onSelect, isRTL }) {
+function ScrollDots({ page, pageCount, onSelect, isRTL, t }) {
   if (pageCount <= 1) return null;
 
   return (
@@ -48,7 +49,7 @@ function ScrollDots({ page, pageCount, onSelect, isRTL }) {
       className="mt-2 flex items-center justify-center gap-1.5"
       dir={isRTL ? "rtl" : "ltr"}
       role="tablist"
-      aria-label="صفحه‌بندی"
+      aria-label={t("pagination")}
     >
       {Array.from({ length: pageCount }).map((_, index) => {
         const active = index === page;
@@ -58,7 +59,7 @@ function ScrollDots({ page, pageCount, onSelect, isRTL }) {
             type="button"
             role="tab"
             aria-selected={active}
-            aria-label={`صفحه ${index + 1}`}
+            aria-label={t("page", { index: index + 1 })}
             onClick={() => onSelect(index)}
             className={`h-2 w-2 rounded-full border transition-all ${
               active
@@ -87,6 +88,7 @@ export default function HorizontalScrollRow({
   showDots = true,
   arrowPlacement = "center",
 }) {
+  const t = useTranslations("home.scroll");
   const ref = useRef(null);
   const [scrollable, setScrollable] = useState(false);
   const [canScrollBack, setCanScrollBack] = useState(false);
@@ -192,7 +194,7 @@ export default function HorizontalScrollRow({
             className={`${arrowClass} ${backPos}`}
             onClick={() => scrollByPage(false)}
             disabled={!canScrollBack}
-            aria-label="اسکرول به عقب"
+            aria-label={t("scrollBack")}
           >
             <ChevronIcon direction={isRTL ? "right" : "left"} />
           </button>
@@ -201,7 +203,7 @@ export default function HorizontalScrollRow({
             className={`${arrowClass} ${forwardPos}`}
             onClick={() => scrollByPage(true)}
             disabled={!canScrollForward}
-            aria-label="اسکرول به جلو"
+            aria-label={t("scrollForward")}
           >
             <ChevronIcon direction={isRTL ? "left" : "right"} />
           </button>
@@ -223,7 +225,7 @@ export default function HorizontalScrollRow({
       </div>
 
       {showDots && scrollable && childCount > 0 ? (
-        <ScrollDots page={page} pageCount={pageCount} onSelect={scrollToPage} isRTL={isRTL} />
+        <ScrollDots page={page} pageCount={pageCount} onSelect={scrollToPage} isRTL={isRTL} t={t} />
       ) : null}
     </div>
   );

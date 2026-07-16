@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { getHierarchicalStock } from '../utils/stockUtils';
 
 export default function HierarchicalStockDisplay({ productId, productName, className = "" }) {
+  const t = useTranslations('home.stock');
   const [stockData, setStockData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,10 +18,10 @@ export default function HierarchicalStockDisplay({ productId, productName, class
         if (data) {
           setStockData(data);
         } else {
-          setError('خطا در دریافت اطلاعات موجودی');
+          setError(t('fetchError'));
         }
       } catch (err) {
-        setError('خطا در دریافت اطلاعات موجودی');
+        setError(t('fetchError'));
         console.error('Error fetching stock data:', err);
       } finally {
         setLoading(false);
@@ -29,7 +31,7 @@ export default function HierarchicalStockDisplay({ productId, productName, class
     if (productId) {
       fetchStockData();
     }
-  }, [productId]);
+  }, [productId, t]);
 
   const formatNumber = (num) => {
     return new Intl.NumberFormat('fa-IR').format(num);
@@ -44,7 +46,7 @@ export default function HierarchicalStockDisplay({ productId, productName, class
 
   const renderBatches = (batches) => {
     if (!batches || batches.length === 0) {
-      return <div className="text-gray-500 text-sm">هیچ بچ موجودی ثبت نشده</div>;
+      return <div className="text-gray-500 text-sm">{t('noBatches')}</div>;
     }
 
     return (
@@ -52,18 +54,19 @@ export default function HierarchicalStockDisplay({ productId, productName, class
         {batches.map((batch, index) => (
           <div key={index} className="bg-gray-50 p-3 rounded-lg">
             <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-700">درجه {batch.grade}</span>
+              <span className="font-medium text-gray-700">{t('grade', { grade: batch.grade })}</span>
               <span className={`font-bold ${getStockClass(batch.availableStock)}`}>
-                {formatNumber(batch.availableStock)} کیلوگرم
+                {formatNumber(batch.availableStock)} {t('kgUnit')}
               </span>
             </div>
             <div className="text-sm text-gray-600 mt-1">
-              کل: {formatNumber(batch.totalStock)} کیلوگرم | 
-              رزرو شده: {formatNumber(batch.reservedStock)} کیلوگرم
+              {t('batchTotal', { amount: formatNumber(batch.totalStock) })}
+              {' | '}
+              {t('batchReserved', { amount: formatNumber(batch.reservedStock) })}
             </div>
             {batch.lots.length > 0 && (
               <div className="mt-2 text-xs text-gray-500">
-                {batch.lots.length} بچ موجود
+                {t('batchCount', { count: batch.lots.length })}
               </div>
             )}
           </div>
@@ -74,7 +77,7 @@ export default function HierarchicalStockDisplay({ productId, productName, class
 
   const renderChildren = (children) => {
     if (!children || children.length === 0) {
-      return <div className="text-gray-500 text-sm">هیچ زیرمجموعه‌ای موجود نیست</div>;
+      return <div className="text-gray-500 text-sm">{t('noSubsets')}</div>;
     }
 
     return (
@@ -84,15 +87,13 @@ export default function HierarchicalStockDisplay({ productId, productName, class
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-medium text-gray-800">{child.product.name}</h4>
               <span className={`font-bold ${getStockClass(child.stock.availableStock)}`}>
-                {formatNumber(child.stock.availableStock)} کیلوگرم
+                {formatNumber(child.stock.availableStock)} {t('kgUnit')}
               </span>
             </div>
-            
+
             {child.product.isOrderable ? (
-              // محصول نهایی - نمایش بچ‌ها
               renderBatches(child.stock.batches)
             ) : (
-              // دسته - نمایش زیرمجموعه‌ها
               renderChildren(child.stock.children)
             )}
           </div>
@@ -105,7 +106,7 @@ export default function HierarchicalStockDisplay({ productId, productName, class
     return (
       <div className={`${className} flex items-center justify-center p-4`}>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span className="mr-2 text-gray-600">در حال بارگذاری...</span>
+        <span className="mr-2 text-gray-600">{t('loading')}</span>
       </div>
     );
   }
@@ -121,7 +122,7 @@ export default function HierarchicalStockDisplay({ productId, productName, class
   if (!stockData) {
     return (
       <div className={`${className} text-gray-500 p-4`}>
-        اطلاعات موجودی در دسترس نیست
+        {t('unavailable')}
       </div>
     );
   }
@@ -130,41 +131,39 @@ export default function HierarchicalStockDisplay({ productId, productName, class
     <div className={`${className} bg-white rounded-lg shadow-sm border border-gray-200 p-6`}>
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
-          موجودی {productName || stockData.product.name}
+          {t('title', { name: productName || stockData.product.name })}
         </h3>
         <div className="flex items-center space-x-4 space-x-reverse">
           <div className="text-center">
             <div className={`text-2xl font-bold ${getStockClass(stockData.stock.availableStock)}`}>
               {formatNumber(stockData.stock.availableStock)}
             </div>
-            <div className="text-sm text-gray-600">کیلوگرم موجود</div>
+            <div className="text-sm text-gray-600">{t('kgAvailable')}</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-semibold text-gray-700">
               {formatNumber(stockData.stock.totalStock)}
             </div>
-            <div className="text-sm text-gray-600">کیلوگرم کل</div>
+            <div className="text-sm text-gray-600">{t('kgTotal')}</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-semibold text-orange-600">
               {formatNumber(stockData.stock.reservedStock)}
             </div>
-            <div className="text-sm text-gray-600">کیلوگرم رزرو</div>
+            <div className="text-sm text-gray-600">{t('kgReserved')}</div>
           </div>
         </div>
       </div>
 
       <div className="border-t pt-4">
         {stockData.product.isOrderable ? (
-          // محصول نهایی - نمایش بچ‌ها
           <div>
-            <h4 className="font-medium text-gray-700 mb-3">بچ‌های موجودی</h4>
+            <h4 className="font-medium text-gray-700 mb-3">{t('batchesTitle')}</h4>
             {renderBatches(stockData.stock.batches)}
           </div>
         ) : (
-          // دسته - نمایش زیرمجموعه‌ها
           <div>
-            <h4 className="font-medium text-gray-700 mb-3">زیرمجموعه‌ها</h4>
+            <h4 className="font-medium text-gray-700 mb-3">{t('subsetsTitle')}</h4>
             {renderChildren(stockData.stock.children)}
           </div>
         )}

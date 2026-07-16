@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
 import UserAvatar from "./UserAvatar";
 import {
@@ -11,10 +12,11 @@ import {
   roleBadgeClass,
 } from "../userUtils";
 
-function VerifyIcon({ verified, label }) {
+function VerifyIcon({ verified, label, t }) {
+  const status = verified ? t("verified") : t("notVerified");
   return (
     <span
-      title={`${label}: ${verified ? "تأیید شده" : "تأیید نشده"}`}
+      title={t("table.verifyTitle", { label, status })}
       className={`inline-flex items-center gap-0.5 text-xs ${verified ? "text-emerald-600" : "text-slate-300"}`}
     >
       {verified ? (
@@ -43,19 +45,23 @@ function ActionBtn({ onClick, className, children, title }) {
 }
 
 export default function UserTable({ users, onView, onEdit, onDelete, onInventory, currentUserId }) {
+  const t = useTranslations("users");
+  const tShared = useTranslations("shared");
+  const emptyValue = t("emptyValue");
+
   return (
     <div className={`${inv.card} hidden lg:block`}>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <th className="px-4 py-3">کاربر</th>
-              <th className="px-4 py-3">تماس</th>
-              <th className="px-4 py-3">نقش‌ها</th>
-              <th className="px-4 py-3">وضعیت</th>
-              <th className="px-4 py-3">تأیید</th>
-              <th className="px-4 py-3">عضویت</th>
-              <th className="px-4 py-3 text-left">عملیات</th>
+              <th className="px-4 py-3">{t("table.user")}</th>
+              <th className="px-4 py-3">{t("table.contact")}</th>
+              <th className="px-4 py-3">{t("table.roles")}</th>
+              <th className="px-4 py-3">{t("table.status")}</th>
+              <th className="px-4 py-3">{t("table.verification")}</th>
+              <th className="px-4 py-3">{t("table.membership")}</th>
+              <th className="px-4 py-3 text-left">{t("table.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -70,9 +76,9 @@ export default function UserTable({ users, onView, onEdit, onDelete, onInventory
                       <UserAvatar user={user} size="sm" />
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-slate-900">
-                          {fullName(user)}
+                          {fullName(user, t("defaultUserName"))}
                           {isSelf ? (
-                            <span className="mr-1.5 text-[10px] font-normal text-slate-400">(شما)</span>
+                            <span className="mr-1.5 text-[10px] font-normal text-slate-400">{t("table.you")}</span>
                           ) : null}
                         </p>
                         <p className="font-mono text-xs text-slate-400">#{user.id}</p>
@@ -82,20 +88,20 @@ export default function UserTable({ users, onView, onEdit, onDelete, onInventory
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-mono text-slate-800" dir="ltr">
-                      {user.mobile || "—"}
+                      {user.mobile || emptyValue}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-slate-500" dir="ltr">
-                      {user.email || "—"}
+                      {user.email || emptyValue}
                     </p>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex max-w-[200px] flex-wrap gap-1">
                       {roles.length === 0 ? (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">{emptyValue}</span>
                       ) : (
                         roles.map((role) => (
                           <span key={role.id || role.name} className={roleBadgeClass(role.name)}>
-                            {getRoleLabel(role)}
+                            {getRoleLabel(role, tShared)}
                           </span>
                         ))
                       )}
@@ -107,38 +113,38 @@ export default function UserTable({ users, onView, onEdit, onDelete, onInventory
                         user.isActive !== false ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
                       }`}
                     >
-                      {user.isActive !== false ? "فعال" : "غیرفعال"}
+                      {user.isActive !== false ? t("active") : t("inactive")}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <VerifyIcon verified={user.isEmailVerified} label="ایمیل" />
-                      <VerifyIcon verified={user.isMobileVerified} label="موبایل" />
+                      <VerifyIcon verified={user.isEmailVerified} label={t("table.email")} t={t} />
+                      <VerifyIcon verified={user.isMobileVerified} label={t("table.mobile")} t={t} />
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-600">{formatDate(user.createdAt)}</td>
+                  <td className="px-4 py-3 text-xs text-slate-600">{formatDate(user.createdAt, emptyValue)}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-0.5">
-                      <ActionBtn onClick={() => onView(user)} className={inv.btnView} title="مشاهده">
+                      <ActionBtn onClick={() => onView(user)} className={inv.btnView} title={t("view")}>
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                       </ActionBtn>
-                      <ActionBtn onClick={() => onEdit(user)} className={inv.btnEdit} title="ویرایش">
+                      <ActionBtn onClick={() => onEdit(user)} className={inv.btnEdit} title={t("edit")}>
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </ActionBtn>
                       {isSupplierUser(user) && onInventory ? (
-                        <ActionBtn onClick={() => onInventory(user)} className={inv.btnMedia} title="محصولات">
+                        <ActionBtn onClick={() => onInventory(user)} className={inv.btnMedia} title={t("table.products")}>
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                           </svg>
                         </ActionBtn>
                       ) : null}
                       {!isSelf ? (
-                        <ActionBtn onClick={() => onDelete(user)} className={inv.btnDanger} title="حذف">
+                        <ActionBtn onClick={() => onDelete(user)} className={inv.btnDanger} title={t("delete")}>
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>

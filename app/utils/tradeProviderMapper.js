@@ -4,6 +4,7 @@ import {
   resolveLocalizedField,
   sampleTradeServiceProviders,
 } from "@/app/data/tradeServicesCatalog";
+import i18nData from "./i18nFaData";
 
 export function findSampleProviderById(providerId) {
   for (const [categoryId, list] of Object.entries(sampleTradeServiceProviders)) {
@@ -37,7 +38,7 @@ export function mapApiProviderRow(row, t, language) {
     email: row.email || null,
     logoUrl: row.logoUrl || null,
     entityType:
-      row.entityType === "individual" ? t("tradeProviderEntityIndividual") : t("tradeProviderEntityCompany"),
+      row.entityType === "individual" ? t("entityIndividual") : t("entityCompany"),
     entityTypeKey: row.entityType === "individual" ? "individual" : "company",
     routes: row.countriesRoutes || null,
     services,
@@ -96,7 +97,7 @@ export function mapSampleProviderEntry(provider, categoryId, language, t) {
 }
 
 export function getProviderInitials(name) {
-  if (!name) return "؟";
+  if (!name) return i18nData.numerals.unknownInitial;
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`;
   return name.slice(0, 2);

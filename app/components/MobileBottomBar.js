@@ -11,9 +11,11 @@ import { useSidebar } from "../context/SidebarContext";
 import { useDashboardPersona } from "../context/DashboardPersonaContext";
 import { DASHBOARD_PERSONAS } from "../utils/dashboardPersona";
 import CategoryDrillDownMenu from "./CategoryDrillDownMenu";
+import { useTranslations } from "next-intl";
+import { useNavigationLoading } from "../context/NavigationLoadingContext";
 
-function UserAvatar({ user, t }) {
-  const initial = (user.firstName?.[0] || user.username?.[0] || "ک").toUpperCase();
+function UserAvatar({ user, t, avatarFallbackInitial }) {
+  const initial = (user.firstName?.[0] || user.username?.[0] || avatarFallbackInitial).toUpperCase();
 
   if (user.avatar) {
     return (
@@ -95,8 +97,10 @@ export default function MobileBottomBar() {
   const router = useRouter();
   const auth = useAuth();
   const { t, isRTL } = useLanguage();
+  const tLayout = useTranslations("layout");
   const { isSidebarOpen, openSidebar } = useSidebar();
   const { setPersona } = useDashboardPersona();
+  const { start: startNavLoading } = useNavigationLoading();
   const user = auth?.user;
   const [requestPickerOpen, setRequestPickerOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
@@ -104,6 +108,7 @@ export default function MobileBottomBar() {
   const goSubmitRequest = (type) => {
     setRequestPickerOpen(false);
     const target = `/dashboard/submit-request?type=${type}`;
+    startNavLoading();
     if (!user) {
       router.push(`/auth/login?returnUrl=${encodeURIComponent(target)}`);
       return;
@@ -136,6 +141,7 @@ export default function MobileBottomBar() {
       openSidebar();
       return;
     }
+    startNavLoading();
     router.push("/dashboard");
   };
 
@@ -302,7 +308,7 @@ export default function MobileBottomBar() {
     if (button.variant === "avatar" && user) {
       return (
         <>
-          <UserAvatar user={user} t={t} />
+          <UserAvatar user={user} t={t} avatarFallbackInitial={tLayout("avatarFallbackInitial")} />
           <span className="max-w-[4.25rem] truncate text-center text-[9px] leading-tight sm:text-[10px]">
             {button.label}
           </span>

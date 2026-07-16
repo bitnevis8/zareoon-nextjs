@@ -2,25 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
-import { getRoleLabelFa } from "@/app/utils/roles";
+import { getRoleLabel } from "@/app/utils/roles";
 import SimpleBarChart from "./SimpleBarChart";
 import { dash } from "./dashboardTheme";
-
-const ORDER_STATUS_FA = {
-  pending: "در انتظار",
-  reserved: "رزرو شده",
-  completed: "تکمیل‌شده",
-  cancelled: "لغو شده",
-  approved: "تأیید شده",
-};
-
-const PROVIDER_STATUS_FA = {
-  pending: "در انتظار",
-  approved: "تأیید شده",
-  rejected: "رد شده",
-};
 
 function KpiCard({ label, value, hint, tone = "emerald", href }) {
   const tones = {
@@ -40,11 +27,19 @@ function KpiCard({ label, value, hint, tone = "emerald", href }) {
 }
 
 export default function AdminDashboardHome({ user }) {
+  const t = useTranslations("dashboard");
+  const tShared = useTranslations("shared");
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [lots, setLots] = useState([]);
   const [tradeProviders, setTradeProviders] = useState([]);
+
+  const orderStatusLabel = (status) =>
+    t.has(`adminHome.orderStatus.${status}`) ? t(`adminHome.orderStatus.${status}`) : status;
+
+  const providerStatusLabel = (status) =>
+    t.has(`adminHome.providerStatus.${status}`) ? t(`adminHome.providerStatus.${status}`) : status;
 
   useEffect(() => {
     let cancelled = false;
@@ -90,24 +85,25 @@ export default function AdminDashboardHome({ user }) {
       counts[key] = (counts[key] || 0) + 1;
     });
     return Object.entries(counts).map(([key, value]) => ({
-      label: ORDER_STATUS_FA[key] || key,
+      label: orderStatusLabel(key),
       value,
       color: key === "pending" ? "bg-amber-500" : key === "completed" ? "bg-emerald-500" : "bg-sky-500",
     }));
-  }, [orders]);
+  }, [orders, t]);
 
   const roleChart = useMemo(() => {
     const counts = {};
+    const noRoleLabel = t("adminHome.noRole");
     users.forEach((u) => {
       const roles = u.userRoles?.length ? u.userRoles : u.roles || [];
       roles.forEach((r) => {
-        const label = getRoleLabelFa(r);
+        const label = getRoleLabel(r, tShared);
         counts[label] = (counts[label] || 0) + 1;
       });
-      if (!roles.length) counts["بدون نقش"] = (counts["بدون نقش"] || 0) + 1;
+      if (!roles.length) counts[noRoleLabel] = (counts[noRoleLabel] || 0) + 1;
     });
     return Object.entries(counts).map(([label, value]) => ({ label, value, color: "bg-violet-500" }));
-  }, [users]);
+  }, [users, t, tShared]);
 
   const providerChart = useMemo(() => {
     const counts = {};
@@ -116,11 +112,11 @@ export default function AdminDashboardHome({ user }) {
       counts[key] = (counts[key] || 0) + 1;
     });
     return Object.entries(counts).map(([key, value]) => ({
-      label: PROVIDER_STATUS_FA[key] || key,
+      label: providerStatusLabel(key),
       value,
       color: key === "pending" ? "bg-amber-500" : key === "approved" ? "bg-emerald-500" : "bg-rose-500",
     }));
-  }, [tradeProviders]);
+  }, [tradeProviders, t]);
 
   const recentOrders = useMemo(
     () =>
@@ -128,6 +124,18 @@ export default function AdminDashboardHome({ user }) {
         .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
         .slice(0, 5),
     [orders]
+  );
+
+  const quickLinks = useMemo(
+    () => [
+      { href: "/dashboard/user-management/users", label: t("userManagement") },
+      { href: "/dashboard/supplier/inventory", label: t("inventoryList") },
+      { href: "/dashboard/order-management", label: t("orderManagement") },
+      { href: "/dashboard/trade-service-provider-requests", label: t("providerRequests") },
+      { href: "/dashboard/trade-service-providers", label: t("adminHome.quickLinks.providers") },
+      { href: "/dashboard/settings", label: t("settings") },
+    ],
+    [t]
   );
 
   if (loading) {
@@ -141,32 +149,30 @@ export default function AdminDashboardHome({ user }) {
   return (
     <div className={dash.page}>
       <header>
-        <h1 className={dash.pageTitle}>داشبورد مدیریت</h1>
-        <p className={dash.pageSubtitle}>
-          سلام {user?.firstName}، خلاصه وضعیت سامانه را اینجا ببینید.
-        </p>
+        <h1 className={dash.pageTitle}>{t("adminHome.title")}</h1>
+        <p className={dash.pageSubtitle}>{t("adminHome.subtitle", { name: user?.firstName || "" })}</p>
       </header>
 
       <div className={dash.gridKpi}>
-        <KpiCard label="کاربران" value={users.length} href="/dashboard/user-management/users" tone="violet" />
+        <KpiCard label={t("adminHome.kpi.users")} value={users.length} href="/dashboard/user-management/users" tone="violet" />
         <KpiCard
-          label="سفارش‌ها"
+          label={t("adminHome.kpi.orders")}
           value={orders.length}
-          hint={`${pendingOrders.toLocaleString("fa-IR")} در انتظار`}
+          hint={t("adminHome.kpi.pendingOrders", { count: pendingOrders.toLocaleString("fa-IR") })}
           href="/dashboard/order-management"
           tone="amber"
         />
         <KpiCard
-          label="محصولات فعال"
+          label={t("adminHome.kpi.activeProducts")}
           value={activeLots}
-          hint={`از ${lots.length.toLocaleString("fa-IR")} بار`}
+          hint={t("adminHome.kpi.lotsHint", { count: lots.length.toLocaleString("fa-IR") })}
           href="/dashboard/supplier/inventory"
           tone="emerald"
         />
         <KpiCard
-          label="ارائه‌دهندگان"
+          label={t("adminHome.kpi.providers")}
           value={tradeProviders.length}
-          hint={`${pendingProviders.toLocaleString("fa-IR")} در انتظار تأیید`}
+          hint={t("adminHome.kpi.pendingProviders", { count: pendingProviders.toLocaleString("fa-IR") })}
           href={
             pendingProviders > 0
               ? "/dashboard/trade-service-provider-requests"
@@ -177,17 +183,17 @@ export default function AdminDashboardHome({ user }) {
       </div>
 
       <div className={dash.grid2}>
-        <SimpleBarChart title="وضعیت سفارش‌ها" items={orderChart} />
-        <SimpleBarChart title="کاربران بر اساس نقش" items={roleChart} />
+        <SimpleBarChart title={t("adminHome.charts.orderStatus")} items={orderChart} />
+        <SimpleBarChart title={t("adminHome.charts.usersByRole")} items={roleChart} />
       </div>
 
-      <SimpleBarChart title="وضعیت ارائه‌دهندگان خدمات" items={providerChart} />
+      <SimpleBarChart title={t("adminHome.charts.providerStatus")} items={providerChart} />
 
       <div className={dash.card}>
         <div className={dash.cardHeader}>
-          <h3 className={dash.cardTitle}>آخرین سفارش‌ها</h3>
+          <h3 className={dash.cardTitle}>{t("adminHome.recentOrders.title")}</h3>
           <Link href="/dashboard/order-management" className="text-xs font-medium text-emerald-700 hover:underline">
-            مشاهده همه
+            {t("adminHome.recentOrders.viewAll")}
           </Link>
         </div>
         <div className={dash.tableWrap}>
@@ -195,22 +201,22 @@ export default function AdminDashboardHome({ user }) {
             <thead>
               <tr className="bg-slate-50">
                 <th className={dash.th}>#</th>
-                <th className={dash.th}>وضعیت</th>
-                <th className={dash.th}>تاریخ</th>
+                <th className={dash.th}>{t("adminHome.recentOrders.status")}</th>
+                <th className={dash.th}>{t("adminHome.recentOrders.date")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {recentOrders.length === 0 ? (
                 <tr>
                   <td colSpan={3} className={dash.empty}>
-                    سفارشی ثبت نشده
+                    {t("adminHome.recentOrders.empty")}
                   </td>
                 </tr>
               ) : (
                 recentOrders.map((o) => (
                   <tr key={o.id} className="hover:bg-slate-50/80">
                     <td className={`${dash.td} font-mono text-slate-600`}>{o.id}</td>
-                    <td className={dash.td}>{ORDER_STATUS_FA[o.status] || o.status}</td>
+                    <td className={dash.td}>{orderStatusLabel(o.status)}</td>
                     <td className={`${dash.td} text-slate-500`}>
                       {o.createdAt
                         ? new Date(o.createdAt).toLocaleDateString("fa-IR", {
@@ -228,14 +234,7 @@ export default function AdminDashboardHome({ user }) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          { href: "/dashboard/user-management/users", label: "مدیریت کاربران" },
-          { href: "/dashboard/supplier/inventory", label: "لیست محصولات" },
-          { href: "/dashboard/order-management", label: "مدیریت سفارش‌ها" },
-          { href: "/dashboard/trade-service-provider-requests", label: "درخواست‌های عضویت" },
-          { href: "/dashboard/trade-service-providers", label: "ارائه‌دهندگان" },
-          { href: "/dashboard/settings", label: "تنظیمات" },
-        ].map((link) => (
+        {quickLinks.map((link) => (
           <Link
             key={link.href}
             href={link.href}

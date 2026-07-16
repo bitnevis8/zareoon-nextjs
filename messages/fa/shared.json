@@ -1,0 +1,268 @@
+{
+  "roles": {
+    "super_admin": "مدیر کل",
+    "admin": "مدیر",
+    "employee": "کارمند",
+    "supplier": "تأمین‌کننده",
+    "farmer": "تأمین‌کننده",
+    "customer": "کاربر معمولی",
+    "loader": "تأمین‌کننده",
+    "driver": "کارمند",
+    "administrator": "مدیر"
+  },
+  "accountNav": {
+    "individual": "یوزر",
+    "company": "کمپانی",
+    "trader": "ساپلایر",
+    "manufacturer": "ساپلایر",
+    "distributor": "کمپانی",
+    "admin": "ادمین",
+    "user": "یوزر"
+  },
+  "currencies": {
+    "TOMAN": {
+      "label": "تومان",
+      "shortLabel": "تومان",
+      "wordLabel": "تومان"
+    },
+    "USD": {
+      "label": "دلار آمریکا",
+      "shortLabel": "دلار",
+      "wordLabel": "دلار آمریکا"
+    },
+    "AED": {
+      "label": "درهم امارات",
+      "shortLabel": "درهم",
+      "wordLabel": "درهم امارات"
+    },
+    "EUR": {
+      "label": "یورو",
+      "shortLabel": "یورو",
+      "wordLabel": "یورو"
+    },
+    "GBP": {
+      "label": "پوند انگلیس",
+      "shortLabel": "پوند",
+      "wordLabel": "پوند انگلیس"
+    },
+    "TRY": {
+      "label": "لیر ترکیه",
+      "shortLabel": "لیر",
+      "wordLabel": "لیر ترکیه"
+    },
+    "SAR": {
+      "label": "ریال عربستان",
+      "shortLabel": "ریال سعودی",
+      "wordLabel": "ریال عربستان"
+    },
+    "CNY": {
+      "label": "یوان چین",
+      "shortLabel": "یوان",
+      "wordLabel": "یوان چین"
+    },
+    "RUB": {
+      "label": "روبل روسیه",
+      "shortLabel": "روبل",
+      "wordLabel": "روبل روسیه"
+    },
+    "CAD": {
+      "label": "دلار کانادا",
+      "shortLabel": "دلار کانادا",
+      "wordLabel": "دلار کانادا"
+    },
+    "CHF": {
+      "label": "فرانک سوئیس",
+      "shortLabel": "فرانک",
+      "wordLabel": "فرانک سوئیس"
+    },
+    "JPY": {
+      "label": "ین ژاپن",
+      "shortLabel": "ین",
+      "wordLabel": "ین ژاپن"
+    },
+    "AUD": {
+      "label": "دلار استرالیا",
+      "shortLabel": "دلار استرالیا",
+      "wordLabel": "دلار استرالیا"
+    },
+    "USDT": {
+      "label": "تتر (USDT)",
+      "shortLabel": "USDT",
+      "wordLabel": "تتر"
+    },
+    "BTC": {
+      "label": "بیت‌کوین",
+      "shortLabel": "BTC",
+      "wordLabel": "بیت‌کوین"
+    },
+    "ETH": {
+      "label": "اتریوم",
+      "shortLabel": "ETH",
+      "wordLabel": "اتریوم"
+    }
+  },
+  "priceCurrencySelect": {
+    "ariaLabel": "واحد پول"
+  },
+  "stock": {
+    "empty": "بدون موجودی",
+    "emptyRange": "۰ کیلوگرم",
+    "low": "موجودی کم",
+    "lowRange": "زیر ۵ تن",
+    "medium": "موجودی متوسط",
+    "mediumRange": "۵ تا ۲۰ تن",
+    "high": "موجودی زیاد",
+    "highRange": "بالای ۲۰ تن",
+    "legendTitle": "رنگ کارت‌ها بر اساس میزان موجودی (کیلوگرم) است:",
+    "legendAriaLabel": "راهنمای رنگ موجودی"
+  },
+  "supplyCountries": {
+    "IR": "ایران",
+    "AE": "امارات",
+    "SA": "عربستان",
+    "IQ": "عراق",
+    "TR": "ترکیه",
+    "OM": "عمان",
+    "QA": "قطر",
+    "KW": "کویت",
+    "PK": "پاکستان",
+    "AF": "افغانستان",
+    "US": "آمریکا",
+    "RU": "روسیه"
+  },
+  "supplySource": {
+    "withCity": "{country}، {city}"
+  },
+  "entityTypes": {
+    "individual": "شخص حقیقی",
+    "company": "شرکت (شخص حقوقی)",
+    "trader": "تاجر مستقل",
+    "manufacturer": "تولیدکننده / کارگاه",
+    "distributor": "پخش‌کننده"
+  },
+  "vip": {
+    "inspectionStandardsCompany": "آریا فولاد قرن"
+  },
+  "attributeFields": {
+    "yes": "بلی",
+    "no": "خیر"
+  },
+  "documentUpload": {
+    "invalidFormat": "فرمت فایل {name} مجاز نیست",
+    "fileTooLarge": "حجم فایل {name} نباید بیشتر از 5 مگابایت باشد",
+    "uploadSuccess": "مدرک {name} با موفقیت آپلود شد",
+    "uploadError": "خطا در آپلود مدرک",
+    "deleteSuccess": "مدرک با موفقیت حذف شد",
+    "deleteError": "خطا در حذف مدرک",
+    "uploading": "در حال آپلود...",
+    "selectDocuments": "انتخاب مدارک",
+    "hint": "PDF, Word, تصاویر - حداکثر 5 مگابایت",
+    "uploadedTitle": "مدارک آپلود شده:",
+    "view": "مشاهده",
+    "delete": "حذف"
+  },
+  "mediaUpload": {
+    "defaultButtonLabel": "آپلود رسانه",
+    "loadError": "خطا در بارگذاری فایل‌ها",
+    "uploadError": "خطا در آپلود",
+    "deleteConfirm": "حذف فایل؟",
+    "deleteError": "خطا در حذف",
+    "deleteFileError": "خطا در حذف فایل",
+    "saveProductFirst": "ابتدا محصول را ذخیره کنید، سپس رسانه آپلود کنید.",
+    "uploading": "در حال آپلود...",
+    "noFilesYet": "هنوز فایلی آپلود نشده",
+    "delete": "حذف"
+  },
+  "shareButton": {
+    "title": "اشتراک‌گذاری",
+    "telegram": "تلگرام",
+    "whatsapp": "واتساپ",
+    "eitaa": "ایتا",
+    "rubika": "روبیکا",
+    "twitter": "توییتر",
+    "copyLink": "کپی لینک",
+    "linkCopied": "لینک کپی شد!"
+  },
+  "tieredPricing": {
+    "levelsCount": "{count} سطح",
+    "title": "قیمت‌گذاری پلکانی",
+    "level": "سطح {index}",
+    "from": "از:",
+    "to": "تا:",
+    "unlimited": "نامحدود",
+    "hint": "💡 قیمت بر اساس مقدار سفارش محاسبه می‌شود"
+  },
+  "inventoryPricing": {
+    "calcError": "خطا در محاسبه قیمت",
+    "serverError": "خطا در ارتباط با سرور",
+    "inventoryInfo": "اطلاعات موجودی",
+    "grade": "درجه: {grade}",
+    "totalStock": "موجودی کل:",
+    "availableStock": "موجودی قابل فروش:",
+    "minOrder": "حداقل سفارش: {quantity} {unit}",
+    "orderQuantity": "مقدار سفارش ({unit})",
+    "quantityPlaceholder": "مقدار مورد نظر را وارد کنید",
+    "calculating": "محاسبه...",
+    "calculatePrice": "محاسبه قیمت",
+    "quantityExceedsStock": "مقدار درخواستی بیشتر از موجودی است",
+    "calculatedPrice": "قیمت محاسبه شده:",
+    "pricePerUnit": "قیمت هر {unit}: {price} تومان",
+    "quantity": "مقدار: {quantity} {unit}",
+    "priceTier": "دسته قیمتی: {description}",
+    "pricingType": "نوع قیمت‌گذاری: {type}",
+    "pricingTypeTiered": "پلکانی",
+    "pricingTypeSimple": "ساده",
+    "tierTableTitle": "جدول قیمت‌گذاری پلکانی",
+    "quantityRange": "محدوده مقدار",
+    "pricePerUnitHeader": "قیمت هر {unit}",
+    "description": "توضیحات"
+  },
+  "hashtagInput": {
+    "defaultLabel": "هشتگ‌ها",
+    "minLength": "هر هشتگ حداقل ۲ کاراکتر باشد",
+    "maxCount": "حداکثر {max} هشتگ مجاز است",
+    "removeAria": "حذف {tag}",
+    "placeholder": "مثلاً خرما"
+  },
+  "lotLocationPicker": {
+    "fullscreenTitle": "نمایش تمام‌صفحه",
+    "fullscreenAria": "نمایش تمام‌صفحه",
+    "closeFullscreenAria": "بستن نقشه تمام‌صفحه",
+    "close": "بستن",
+    "delete": "حذف",
+    "hintCompact": "برای انتخاب دقیق‌تر، نقشه را تمام‌صفحه کنید",
+    "hintExpanded": "روی نقشه کلیک کنید یا جستجو کنید",
+    "locationLabel": "عنوان موقعیت",
+    "locationPlaceholder": "مثلاً انبار، مزرعه، محل بارگیری",
+    "defaultMarkerName": "موقعیت",
+    "modalTitle": "انتخاب موقعیت روی نقشه",
+    "modalHint": "کلیک کنید یا جستجو کنید — Esc برای بستن",
+    "confirmLocation": "تأیید موقعیت"
+  },
+  "map": {
+    "zoomIn": "بزرگ‌نمایی",
+    "zoomOut": "کوچک‌نمایی",
+    "positionDefault": "موقعیت {index}",
+    "selectedPosition": "موقعیت انتخاب‌شده"
+  },
+  "searchBox": {
+    "placeholderOverlay": "جستجوی مکان…",
+    "placeholderDefault": "جستجوی مکان..."
+  },
+  "currencyTicker": {
+    "zeroPercent": "۰٪",
+    "rial": "ریال",
+    "ratesAria": "نرخ ارز و مبدل ارز",
+    "ratesLabel": "نرخ ارز",
+    "calendarGregorian": "میلادی",
+    "calendarHijri": "قمری",
+    "calendarShamsi": "شمسی",
+    "calendarClickHint": "{full} — کلیک: {next}",
+    "calendarAria": "تقویم {label}",
+    "regionAria": "نرخ ارز روز",
+    "loadingRates": "در حال دریافت نرخ…",
+    "ratesUnavailable": "نرخ ارز در دسترس نیست",
+    "viewRates": "مشاهده نرخ ارز",
+    "viewRatesDetails": "مشاهده جزئیات نرخ ارز"
+  }
+}

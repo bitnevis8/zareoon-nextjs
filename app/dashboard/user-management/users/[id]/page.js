@@ -2,9 +2,11 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function EditUser({ params }) {
+  const t = useTranslations("users");
   const router = useRouter();
   const userId = use(params).id;
   const [roles, setRoles] = useState([]);
@@ -22,7 +24,6 @@ export default function EditUser({ params }) {
   });
 
   useEffect(() => {
-    // دریافت اطلاعات کاربر و لیست نقش‌ها
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -30,41 +31,39 @@ export default function EditUser({ params }) {
 
         const [userResponse, rolesResponse] = await Promise.all([
           fetch(API_ENDPOINTS.users.getById(userId)),
-          fetch(API_ENDPOINTS.roles.getAll)
+          fetch(API_ENDPOINTS.roles.getAll),
         ]);
 
         if (!userResponse.ok || !rolesResponse.ok) {
-          throw new Error("خطا در دریافت اطلاعات");
+          throw new Error(t("editUser.fetchError"));
         }
 
         const [userData, rolesData] = await Promise.all([
           userResponse.json(),
-          rolesResponse.json()
+          rolesResponse.json(),
         ]);
 
         if (userData.success) {
           const { password, ...userInfo } = userData.data;
-          // تبدیل مقادیر null به رشته خالی
           const sanitizedUserInfo = Object.fromEntries(
             Object.entries(userInfo).map(([key, value]) => [key, value ?? ""])
           );
-          // Map roles to roleIds array
           setFormData({
             ...sanitizedUserInfo,
-            roleIds: userData.data.roles ? userData.data.roles.map(role => role.id) : [],
+            roleIds: userData.data.roles ? userData.data.roles.map((role) => role.id) : [],
           });
         } else {
-          throw new Error(userData.message || "خطا در دریافت اطلاعات کاربر");
+          throw new Error(userData.message || t("editUser.fetchUserError"));
         }
 
         if (rolesData.success) {
           setRoles(rolesData.data || []);
         } else {
-          throw new Error(rolesData.message || "خطا در دریافت لیست نقش‌ها");
+          throw new Error(rolesData.message || t("editUser.fetchRolesError"));
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError(error.message || "خطا در ارتباط با سرور");
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.message || t("serverError"));
       } finally {
         setLoading(false);
       }
@@ -73,27 +72,25 @@ export default function EditUser({ params }) {
     if (userId) {
       fetchData();
     }
-  }, [userId]);
+  }, [userId, t]);
 
   const handleChange = (e) => {
     const { name, value, options } = e.target;
 
     setFormData((prev) => {
       if (name === "roleIds") {
-        // Handle multiple selections for roleIds
         const selectedRoles = Array.from(options)
-          .filter(option => option.selected)
-          .map(option => parseInt(option.value, 10));
+          .filter((option) => option.selected)
+          .map((option) => parseInt(option.value, 10));
         return {
           ...prev,
           [name]: selectedRoles,
         };
-      } else {
-        return {
-          ...prev,
-          [name]: value,
-        };
       }
+      return {
+        ...prev,
+        [name]: value,
+      };
     });
   };
 
@@ -112,7 +109,7 @@ export default function EditUser({ params }) {
       });
 
       if (!response.ok) {
-        throw new Error("خطا در ارسال درخواست");
+        throw new Error(t("editUser.sendError"));
       }
 
       const data = await response.json();
@@ -120,11 +117,11 @@ export default function EditUser({ params }) {
       if (data.success) {
         router.push("/dashboard/user-management/users");
       } else {
-        throw new Error(data.message || "خطا در ویرایش کاربر");
+        throw new Error(data.message || t("editUser.updateError"));
       }
-    } catch (error) {
-      console.error("Error updating user:", error);
-      setError(error.message || "خطا در ارتباط با سرور");
+    } catch (err) {
+      console.error("Error updating user:", err);
+      setError(err.message || t("serverError"));
     } finally {
       setLoading(false);
     }
@@ -149,7 +146,7 @@ export default function EditUser({ params }) {
             onClick={() => router.back()}
             className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
           >
-            بازگشت
+            {t("back")}
           </button>
         </div>
       </div>
@@ -159,13 +156,13 @@ export default function EditUser({ params }) {
   return (
     <div className="p-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">ویرایش کاربر</h1>
+        <h1 className="text-2xl font-bold mb-6">{t("editUser.title")}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نام
+                {t("form.firstName")}
               </label>
               <input
                 type="text"
@@ -179,7 +176,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نام خانوادگی
+                {t("form.lastName")}
               </label>
               <input
                 type="text"
@@ -193,7 +190,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                ایمیل
+                {t("form.email")}
               </label>
               <input
                 type="email"
@@ -206,7 +203,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                موبایل
+                {t("form.mobile")}
               </label>
               <input
                 type="tel"
@@ -219,7 +216,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                تلفن ثابت
+                {t("form.phone")}
               </label>
               <input
                 type="tel"
@@ -232,7 +229,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نام کاربری
+                {t("form.username")}
               </label>
               <input
                 type="text"
@@ -245,7 +242,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                رمز عبور (خالی بگذارید اگر نمی‌خواهید تغییر کند)
+                {t("form.passwordOptional")}
               </label>
               <input
                 type="password"
@@ -258,7 +255,7 @@ export default function EditUser({ params }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نقش‌ها
+                {t("form.roles")}
               </label>
               <select
                 name="roleIds"
@@ -283,18 +280,18 @@ export default function EditUser({ params }) {
               onClick={() => router.back()}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
-              انصراف
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
             >
-              {loading ? "در حال ذخیره..." : "ذخیره تغییرات"}
+              {loading ? t("form.saving") : t("form.saveChanges")}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-} 
+}

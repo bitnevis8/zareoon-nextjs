@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { API_ENDPOINTS } from '../../config/api';
 // Removed LocationNews box
 import ZoomableImage from '../../components/ui/ZoomableImage/ZoomableImage';
@@ -8,6 +11,7 @@ import TemperatureOnly from '../../components/TemperatureOnly';
 import WikidataMap from '../../components/WikidataMap';
 
 export default function LocationDetailPageClient({ locationData, breadcrumb }) {
+  const t = useTranslations('location');
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
   const [wikiLoading, setWikiLoading] = useState(true);
@@ -89,9 +93,9 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">مکان یافت نشد</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">{t('notFound.locationTitle')}</h1>
           <Link href="/location" className="text-blue-600 hover:text-blue-800">
-            بازگشت به صفحه مکان‌ها
+            {t('notFound.backToLocations')}
           </Link>
         </div>
       </div>
@@ -100,15 +104,9 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
 
   // تعیین عنوان بر اساس نوع تقسیمات
   const getChildrenTitle = () => {
-    switch (locationData.divisionType) {
-      case 0: return 'استان‌ها';
-      case 1: return 'شهرستان‌ها';
-      case 2: return 'بخش‌ها';
-      case 3: return 'دهستان‌ها';
-      case 4: return 'شهرها';
-      case 5: return 'آبادی‌ها';
-      default: return 'زیرمجموعه‌ها';
-    }
+    const dt = locationData.divisionType;
+    const titleKey = dt >= 0 && dt <= 5 ? `childrenTitles.${dt}` : 'childrenTitles.default';
+    return t(titleKey);
   };
 
   return (
@@ -217,7 +215,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="absolute top-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors z-10"
-                            title="مشاهده در ویکی‌پدیا"
+                            title={t('viewOnWikipedia')}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +265,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                                   onClick={() => setIsTextExpanded(false)}
                                   className="bg-cyan-100 text-cyan-600 px-4 py-2 rounded-md text-sm hover:bg-cyan-200 transition-colors shadow-md"
                                 >
-                                  بستن
+                                  {t('close')}
                                 </button>
                               </div>
                             </div>
@@ -280,7 +278,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                                     onClick={handleReadMore}
                                     className="inline-block mr-1 text-blue-600 font-bold px-2 py-0.5 rounded text-xs hover:bg-blue-100 transition-colors"
                                   >
-                                    ادامه متن
+                                    {t('readMore')}
                                   </button>
                                 </>
                               ) : (
@@ -291,7 +289,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                         </div>
                       ) : (
                         <div className="bg-blue-50 rounded-lg p-4 mb-4 h-80 flex items-center justify-center">
-                          <p className="text-gray-500 text-sm">اطلاعات ویکی‌پدیا موجود نیست</p>
+                          <p className="text-gray-500 text-sm">{t('noWikiInfo')}</p>
                         </div>
                       )}
                       
@@ -307,7 +305,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                               <svg className="w-5 h-5 text-red-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                               </svg>
-                              <span className="text-gray-700">جمعیت: <strong>{locationData.population.toLocaleString()} نفر</strong></span>
+                              <span className="text-gray-700">{t('population', { count: locationData.population.toLocaleString() })}</span>
                             </div>
                           )}
                           {locationData.area && (
@@ -315,7 +313,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                               <svg className="w-5 h-5 text-green-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
-                              <span className="text-gray-700">مساحت: <strong>{locationData.area.toLocaleString()} کیلومتر مربع</strong></span>
+                              <span className="text-gray-700">{t('area', { area: locationData.area.toLocaleString() })}</span>
                             </div>
                           )}
                           {locationData.latitude && locationData.longitude && (
@@ -323,7 +321,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                               <svg className="w-5 h-5 text-blue-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                               </svg>
-                              <span className="text-gray-700">مختصات: <strong>{locationData.latitude.toFixed(4)}, {locationData.longitude.toFixed(4)}</strong></span>
+                              <span className="text-gray-700">{t('coordinates', { lat: locationData.latitude.toFixed(4), lng: locationData.longitude.toFixed(4) })}</span>
                             </div>
                           )}
                         </div>
@@ -359,7 +357,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                     onClick={() => setShowAllChildren(!showAllChildren)}
                     className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    {showAllChildren ? 'نمایش کمتر' : 'نمایش بیشتر'}
+                    {showAllChildren ? t('showLess') : t('showMore')}
                   </button>
                 )}
               </div>
@@ -368,7 +366,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                 <div className="flex justify-center py-8">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                    <p className="text-xs text-gray-500">در حال بارگذاری...</p>
+                    <p className="text-xs text-gray-500">{t('loadingChildren')}</p>
                   </div>
                 </div>
               ) : (
@@ -387,7 +385,7 @@ export default function LocationDetailPageClient({ locationData, breadcrumb }) {
                       </div>
                       {child.population && (
                         <div className="text-xs text-gray-500 mt-1">
-                          {child.population.toLocaleString()} نفر
+                          {t('populationShort', { count: child.population.toLocaleString() })}
                         </div>
                       )}
                     </Link>

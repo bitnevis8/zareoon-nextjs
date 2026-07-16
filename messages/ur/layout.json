@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "titleDefault": "",
+    "titleTemplate": "",
+    "description": "",
+    "keywords": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "creator": "",
+    "openGraphTitle": "",
+    "openGraphDescription": "",
+    "openGraphImageAlt": "",
+    "twitterTitle": "",
+    "twitterDescription": ""
+  },
+  "avatarFallbackInitial": "",
+  "userFallback": "",
+  "sidebar": {
+    "tradeServicesSection": "",
+    "providerMembership": "",
+    "myServicesPage": "",
+    "customerOrders": "",
+    "incomingServiceRequests": "",
+    "myShopUrl": "",
+    "configureShopUrl": ""
+  },
+  "emailVerification": {
+    "title": "",
+    "prompt": "",
+    "codePlaceholder": "",
+    "verifyButton": "",
+    "resend": "",
+    "resending": "",
+    "errorUserEmailUnavailable": "",
+    "errorCodeRequired": "",
+    "errorVerifyFailed": "",
+    "errorServer": "",
+    "errorResendFailed": ""
+  }
+}

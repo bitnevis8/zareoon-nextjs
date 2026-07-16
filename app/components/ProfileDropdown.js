@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { AccountNavSubtitle } from '../utils/accountNav';
 import UserProfileMenu from './UserProfileMenu';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ export default function ProfileDropdown() {
   const router = useRouter();
   const auth = useAuth();
   const { t, isRTL } = useLanguage();
+  const tLayout = useTranslations('layout');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,7 +76,7 @@ export default function ProfileDropdown() {
               className="h-8 w-8 rounded-full object-cover"
             />
           ) : (
-            (user.firstName?.[0] || user.username?.[0] || 'ک').toUpperCase()
+            (user.firstName?.[0] || user.username?.[0] || tLayout('avatarFallbackInitial')).toUpperCase()
           )}
         </div>
       </button>
@@ -118,7 +120,7 @@ export default function ProfileDropdown() {
                     className="h-12 w-12 rounded-full object-cover"
                   />
                 ) : (
-                  (user.firstName?.[0] || user.username?.[0] || 'ک').toUpperCase()
+                  (user.firstName?.[0] || user.username?.[0] || tLayout('avatarFallbackInitial')).toUpperCase()
                 )}
               </div>
               <div className="min-w-0 flex-1">

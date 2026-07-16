@@ -1,14 +1,31 @@
+import i18nData from "./i18nFaData";
 import { getLocalizedLotLabel, localizeGrade } from "./localize";
 
-export const GRADE_ORDER = ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"];
+export const GRADE_ORDER = i18nData.gradeOrder;
 
 export function normalizeQualityGrade(val) {
-  const v = (val || "").toString().trim();
-  if (GRADE_ORDER.slice(0, 5).includes(v)) return v;
-  if (v === "درجه یک") return "درجه 1";
-  if (v === "درجه دو") return "درجه 2";
-  if (v === "درجه سه") return "درجه 3";
-  return "سایر";
+  return normalizeGradeKey(val);
+}
+
+export function normalizeGradeKey(value) {
+  const v = String(value || "").trim();
+  if (i18nData.gradeAliases[v]) return i18nData.gradeAliases[v];
+  if (GRADE_ORDER.includes(v)) return v;
+  return i18nData.otherGrade;
+}
+
+export function compareGrades(a, b) {
+  const aNorm = normalizeGradeKey(a);
+  const bNorm = normalizeGradeKey(b);
+  const ai = GRADE_ORDER.indexOf(aNorm);
+  const bi = GRADE_ORDER.indexOf(bNorm);
+  if (ai !== bi) return ai - bi;
+  if (aNorm === i18nData.otherGrade && bNorm === i18nData.otherGrade && a !== b) return a.localeCompare(b, "fa");
+  return 0;
+}
+
+export function sortGrades(grades) {
+  return [...grades].sort(compareGrades);
 }
 
 /** Unique key per actual quality grade (e.g. جامبو and درجه 1 stay separate). */
@@ -25,14 +42,14 @@ export function getGradeDisplayLabel(lots = [], language, t) {
 
 export function sortGradeKeys(keys = []) {
   return [...keys].sort((a, b) => {
-    const aNorm = normalizeQualityGrade(a);
-    const bNorm = normalizeQualityGrade(b);
+    const aNorm = normalizeGradeKey(a);
+    const bNorm = normalizeGradeKey(b);
     const aIdx = GRADE_ORDER.indexOf(aNorm);
     const bIdx = GRADE_ORDER.indexOf(bNorm);
     const aRank = aIdx >= 0 ? aIdx : 100;
     const bRank = bIdx >= 0 ? bIdx : 100;
     if (aRank !== bRank) return aRank - bRank;
-    if (aNorm === "سایر" && bNorm === "سایر" && a !== b) return a.localeCompare(b, "fa");
+    if (aNorm === i18nData.otherGrade && bNorm === i18nData.otherGrade && a !== b) return a.localeCompare(b, "fa");
     return a.localeCompare(b, "fa");
   });
 }

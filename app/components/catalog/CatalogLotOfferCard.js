@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import TieredPricingDisplay from "../ui/TieredPricingDisplay";
 import {
   formatLocalizedNumber,
@@ -38,7 +39,6 @@ function DetailRow({ label, value, highlight = false }) {
 export default function CatalogLotOfferCard({
   lot,
   language,
-  t,
   lotMediaPreview,
   openMediaGallery,
   lotQtyById,
@@ -51,6 +51,7 @@ export default function CatalogLotOfferCard({
   embedded = false,
   fillHeight = false,
 }) {
+  const t = useTranslations("catalog");
   const preview = lotMediaPreview.get(lot.id) || [];
   const coverUrl = resolveMediaUrl(lot.coverImageUrl);
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
@@ -62,6 +63,7 @@ export default function CatalogLotOfferCard({
   const lotHashtags = display.hashtags;
   const customTitle = display.title;
   const supplier = getLotSupplierDisplay(lot, t);
+  const supplierUser = getLotSupplier(lot);
   const supplierProfileUrl = getLotSupplierProfileUrl(lot);
 
   const slides = useMemo(
@@ -183,7 +185,10 @@ export default function CatalogLotOfferCard({
         {getLotSupplier(lot) && (supplier.mobile || supplier.name) ? (
           <div className={`border-t border-dashed border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
             <p className={`mb-2 text-xs ${catalogText.muted}`}>{t("supplier")}</p>
-            <div className="flex items-center justify-between gap-3">
+            <p className="mb-2 text-[11px] leading-5 text-slate-500">
+              ارتباط مستقیم با فروشنده — زارعون طرف معامله نیست.
+            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
               {supplier.name ? (
                 supplierProfileUrl ? (
                   <Link href={supplierProfileUrl} className={`font-semibold text-emerald-700 hover:underline ${catalogText.heading}`}>
@@ -195,11 +200,25 @@ export default function CatalogLotOfferCard({
               ) : (
                 <span />
               )}
-              {supplier.mobile ? (
-                <span dir="ltr" className={`shrink-0 font-mono text-sm tracking-wide ${catalogText.body}`}>
-                  {supplier.mobile}
-                </span>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-2">
+                {supplier.mobile ? (
+                  <a
+                    href={`tel:${String(supplier.mobile).replace(/\s/g, "")}`}
+                    dir="ltr"
+                    className="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
+                  >
+                    {supplier.mobile}
+                  </a>
+                ) : null}
+                {supplierUser?.id ? (
+                  <Link
+                    href={`/dashboard/messages?u=${supplierUser.id}`}
+                    className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    پیام
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : null}
@@ -244,7 +263,7 @@ export default function CatalogLotOfferCard({
               inputMode="decimal"
               dir="ltr"
               className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3.5 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
-              placeholder={language === "fa" || language === "ar" ? "۰" : "0"}
+              placeholder={t("qtyPlaceholder")}
               value={formatQuantityForInput(lotQtyById[lot.id] ?? "", language)}
               onChange={(e) =>
                 setLotQtyById((prev) => ({

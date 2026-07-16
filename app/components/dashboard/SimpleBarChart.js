@@ -1,13 +1,17 @@
 "use client";
 
-export default function SimpleBarChart({ title, items, emptyLabel = "داده‌ای نیست" }) {
+import { useTranslations } from "next-intl";
+
+export default function SimpleBarChart({ title, items, emptyLabel }) {
+  const t = useTranslations("home.simpleBarChart");
+  const label = emptyLabel ?? t("empty");
   const max = Math.max(...items.map((i) => i.value), 1);
 
   return (
     <div className="rounded-lg border border-slate-200/90 bg-white p-4 shadow-sm md:p-5">
       {title ? <h3 className="mb-4 text-sm font-semibold text-slate-800">{title}</h3> : null}
       {items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-slate-400">{emptyLabel}</p>
+        <p className="py-6 text-center text-sm text-slate-400">{label}</p>
       ) : (
         <ul className="space-y-3">
           {items.map((item) => (

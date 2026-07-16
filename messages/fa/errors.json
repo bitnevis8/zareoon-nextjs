@@ -1,0 +1,7 @@
+{
+  "fetchClasses": "خطا در دریافت کلاس‌ها",
+  "fetchTags": "خطا در دریافت تگ‌ها",
+  "fetchExchangeRates": "خطا در دریافت نرخ ارز",
+  "uploadFailed": "خطا در آپلود",
+  "catalogPdfForbidden": "شما مجاز به دانلود این کاتالوگ نیستید."
+}

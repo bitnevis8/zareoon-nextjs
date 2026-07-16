@@ -1,0 +1,413 @@
+{
+  "menuTitle": "",
+  "pageTitle": "",
+  "tagline": "",
+  "settingsTitle": "",
+  "depositLabel": "",
+  "createSuccess": "",
+  "createFormTitle": "",
+  "newContract": "",
+  "emptyList": "",
+  "userFallback": "",
+  "genericHint": "",
+  "defaultStatusTitle": "",
+  "roles": {
+    "buyer": "",
+    "seller": "",
+    "admin": ""
+  },
+  "agreementStatus": {
+    "draft": "",
+    "awaiting_payment": "",
+    "funds_locked": "",
+    "in_progress": "",
+    "partially_released": "",
+    "fully_released": "",
+    "refunded": "",
+    "cancelled": "",
+    "expired": "",
+    "disputed": "",
+    "completed": ""
+  },
+  "milestoneStatus": {
+    "pending": "",
+    "in_review": "",
+    "approved": "",
+    "released": "",
+    "cancelled": ""
+  },
+  "releaseStatus": {
+    "pending": "",
+    "approved": "",
+    "completed": "",
+    "rejected": "",
+    "cancelled": ""
+  },
+  "refundStatus": {
+    "pending": "",
+    "approved": "",
+    "completed": "",
+    "rejected": ""
+  },
+  "disputeStatus": {
+    "filed": "",
+    "under_review": "",
+    "resolved_buyer": "",
+    "resolved_seller": "",
+    "resolved_split": "",
+    "closed": "",
+    "withdrawn": ""
+  },
+  "ledgerType": {
+    "deposit_lock": "",
+    "platform_fee": "",
+    "release_to_seller": "",
+    "refund_to_buyer": "",
+    "adjustment": ""
+  },
+  "workflowSteps": {
+    "draft": {
+      "label": "",
+      "desc": ""
+    },
+    "awaiting_payment": {
+      "label": "",
+      "desc": ""
+    },
+    "funds_locked": {
+      "label": "",
+      "desc": ""
+    },
+    "in_progress": {
+      "label": "",
+      "desc": ""
+    },
+    "completed": {
+      "label": "",
+      "desc": ""
+    }
+  },
+  "statusGuides": {
+    "draft": {
+      "title": "",
+      "bodyAdmin": "",
+      "bodyBuyer": "",
+      "bodySeller": "",
+      "bodyDefault": ""
+    },
+    "awaiting_payment": {
+      "title": "",
+      "bodyBuyer": "",
+      "bodyDefault": ""
+    },
+    "funds_locked": {
+      "title": "",
+      "bodyDefault": ""
+    },
+    "in_progress": {
+      "title": "",
+      "bodyDefault": ""
+    },
+    "partially_released": {
+      "title": "",
+      "bodyDefault": ""
+    },
+    "disputed": {
+      "title": "",
+      "bodyDefault": ""
+    },
+    "completed": {
+      "title": "",
+      "bodyDefault": ""
+    },
+    "cancelled": {
+      "title": "",
+      "bodyDefault": ""
+    }
+  },
+  "actions": {
+    "activate": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": ""
+    },
+    "createPaymentIntent": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": ""
+    },
+    "confirmPaymentDemo": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": "",
+      "badge": ""
+    },
+    "requestRelease": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": ""
+    },
+    "cancel": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": ""
+    },
+    "openDispute": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": ""
+    },
+    "requestRefund": {
+      "title": "",
+      "shortLabel": "",
+      "description": "",
+      "who": "",
+      "variant": ""
+    }
+  },
+  "list": {
+    "closeForm": "",
+    "newContract": "",
+    "loading": "",
+    "emptyTitle": "",
+    "emptyHint": "",
+    "createFirst": "",
+    "listAria": "",
+    "buyer": "",
+    "seller": "",
+    "dealTotal": "",
+    "locked": "",
+    "released": ""
+  },
+  "search": {
+    "placeholder": "",
+    "clearAria": "",
+    "minChars": "",
+    "searching": "",
+    "hint": "",
+    "noResults": "",
+    "buyerHint": "",
+    "sellerHint": ""
+  },
+  "form": {
+    "createTitle": "",
+    "partiesTitle": "",
+    "partiesHint": "",
+    "buyerYou": "",
+    "sellerYou": "",
+    "buyer": "",
+    "seller": "",
+    "partySelfNote": "",
+    "dealDetails": "",
+    "dealTitle": "",
+    "dealTitlePlaceholder": "",
+    "totalAmount": "",
+    "description": "",
+    "descriptionPlaceholder": "",
+    "holdSectionTitle": "",
+    "holdSectionHint": "",
+    "holdModes": {
+      "auto": {
+        "label": "",
+        "desc": ""
+      },
+      "percent": {
+        "label": "",
+        "desc": ""
+      },
+      "full": {
+        "label": "",
+        "desc": ""
+      },
+      "custom_amount": {
+        "label": "",
+        "desc": ""
+      }
+    },
+    "percentOfDeal": "",
+    "percentRange": "",
+    "lockAmount": "",
+    "milestonesTitle": "",
+    "milestonePreset": "",
+    "buyerApproval": "",
+    "sellerConfirmation": "",
+    "summaryTitle": "",
+    "currency": "",
+    "dealCurrency": "",
+    "depositPreview": "",
+    "depositPercentOfDeal": "",
+    "platformFee": "",
+    "calculatingDeposit": "",
+    "summaryHint": "",
+    "submitting": "",
+    "submit": "",
+    "footerNote": "",
+    "loginRequired": "",
+    "partiesRequired": "",
+    "samePartyError": "",
+    "createSuccess": "",
+    "createError": "",
+    "genericError": ""
+  },
+  "currencies": {
+    "IRR": {
+      "label": "",
+      "shortLabel": "",
+      "hint": ""
+    },
+    "USD": {
+      "label": "",
+      "shortLabel": "",
+      "hint": ""
+    },
+    "EUR": {
+      "label": "",
+      "shortLabel": "",
+      "hint": ""
+    },
+    "AED": {
+      "label": "",
+      "shortLabel": "",
+      "hint": ""
+    },
+    "TRY": {
+      "label": "",
+      "shortLabel": "",
+      "hint": ""
+    }
+  },
+  "events": {
+    "agreement_created": "",
+    "awaiting_payment": "",
+    "payment_intent_created": "",
+    "payment_confirmed_funds_locked": "",
+    "milestone_confirmed": "",
+    "release_requested": "",
+    "funds_released": "",
+    "agreement_completed": "",
+    "refund_requested": "",
+    "refund_completed": "",
+    "dispute_opened": "",
+    "dispute_resolved": "",
+    "agreement_cancelled": ""
+  },
+  "detail": {
+    "loading": "",
+    "loadFailed": "",
+    "notFound": "",
+    "backToList": "",
+    "backLink": "",
+    "you": "",
+    "workflowTitle": "",
+    "availableRelease": "",
+    "nextActions": "",
+    "yourRole": "",
+    "noDirectAction": "",
+    "milestonesTitle": "",
+    "milestonesHint": "",
+    "noMilestones": "",
+    "releasesTitle": "",
+    "approveRelease": "",
+    "disputeSection": "",
+    "disputeHint": "",
+    "disputePlaceholder": "",
+    "fileDispute": "",
+    "disputeItem": "",
+    "adminResolveHint": "",
+    "adminNotesPlaceholder": "",
+    "resolveDispute": "",
+    "refundItem": "",
+    "approveRefund": "",
+    "contractInfo": "",
+    "expiresAt": "",
+    "platformFeeLabel": "",
+    "timeline": "",
+    "noEvents": "",
+    "ledgerTitle": "",
+    "ledgerHint": "",
+    "ledgerColType": "",
+    "ledgerColAmount": "",
+    "ledgerColNote": "",
+    "actionAllowedFor": "",
+    "actionBusy": "",
+    "buyerConfirm": "",
+    "buyerConfirmed": "",
+    "buyerConfirmTitle": "",
+    "sellerConfirm": "",
+    "sellerConfirmed": "",
+    "sellerConfirmTitle": "",
+    "operationFailed": "",
+    "done": "",
+    "resolveOptions": {
+      "seller": "",
+      "buyer": "",
+      "split": "",
+      "closed": ""
+    },
+    "dialogs": {
+      "cancel": {
+        "title": "",
+        "description": "",
+        "confirm": "",
+        "reasonRequired": "",
+        "placeholder": ""
+      },
+      "release": {
+        "title": "",
+        "description": "",
+        "confirm": "",
+        "amountLabel": "",
+        "noteLabel": "",
+        "notePlaceholder": "",
+        "amountRequired": "",
+        "defaultReason": ""
+      },
+      "refund": {
+        "title": "",
+        "description": "",
+        "confirm": "",
+        "reasonRequired": "",
+        "placeholder": ""
+      }
+    }
+  },
+  "settings": {
+    "subtitle": "",
+    "contractsLink": "",
+    "loadError": "",
+    "loading": "",
+    "defaultDeposit": "",
+    "defaultPercent": "",
+    "minPercent": "",
+    "maxPercent": "",
+    "platformFee": "",
+    "allowFullHold": "",
+    "allowCustom": "",
+    "releasePolicy": "",
+    "releaseNeedsBuyer": "",
+    "sellerCanRequest": "",
+    "sellerReleaseNeedsBuyer": "",
+    "defaultMilestone": "",
+    "verifiedSeller": "",
+    "verifiedHint": "",
+    "verifiedPercent": "",
+    "saveVerifiedRule": "",
+    "verifiedSaved": "",
+    "saving": "",
+    "save": "",
+    "saved": "",
+    "saveError": ""
+  }
+}

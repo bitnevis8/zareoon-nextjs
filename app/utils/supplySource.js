@@ -1,22 +1,26 @@
-export const SUPPLY_COUNTRIES = [
-  { code: "IR", nameFa: "ایران", nameEn: "Iran", nameRu: "Иран" },
-  { code: "AE", nameFa: "امارات", nameEn: "UAE", nameRu: "ОАЭ" },
-  { code: "SA", nameFa: "عربستان", nameEn: "Saudi Arabia", nameRu: "Саудовская Аравия" },
-  { code: "IQ", nameFa: "عراق", nameEn: "Iraq", nameRu: "Ирак" },
-  { code: "TR", nameFa: "ترکیه", nameEn: "Turkey", nameRu: "Турция" },
-  { code: "OM", nameFa: "عمان", nameEn: "Oman", nameRu: "Оман" },
-  { code: "QA", nameFa: "قطر", nameEn: "Qatar", nameRu: "Катар" },
-  { code: "KW", nameFa: "کویت", nameEn: "Kuwait", nameRu: "Кувейт" },
-  { code: "PK", nameFa: "پاکستان", nameEn: "Pakistan", nameRu: "Пакистан" },
-  { code: "AF", nameFa: "افغانستان", nameEn: "Afghanistan", nameRu: "Афганистан" },
-  { code: "US", nameFa: "آمریکا", nameEn: "United States", nameRu: "США" },
-  { code: "RU", nameFa: "روسیه", nameEn: "Russia", nameRu: "Россия" },
+export const SUPPLY_COUNTRY_CODES = [
+  "IR",
+  "AE",
+  "SA",
+  "IQ",
+  "TR",
+  "OM",
+  "QA",
+  "KW",
+  "PK",
+  "AF",
+  "US",
+  "RU",
 ];
 
-const countryByCode = Object.fromEntries(SUPPLY_COUNTRIES.map((c) => [c.code, c]));
+/** @deprecated use SUPPLY_COUNTRY_CODES */
+export const SUPPLY_COUNTRIES = SUPPLY_COUNTRY_CODES.map((code) => ({ code }));
+
+const countryCodeSet = new Set(SUPPLY_COUNTRY_CODES);
 
 export function getCountryByCode(code) {
-  return countryByCode[String(code || "IR").toUpperCase()] || countryByCode.IR;
+  const normalized = String(code || "IR").toUpperCase();
+  return countryCodeSet.has(normalized) ? { code: normalized } : { code: "IR" };
 }
 
 export function countryCodeToFlag(code) {
@@ -33,16 +37,25 @@ export function countryCodeToFlagUrl(code, width = 40) {
   return `https://flagcdn.com/w${width}/${normalized}.png`;
 }
 
-export function getSupplyCountryName(code, language = "fa") {
-  const country = getCountryByCode(code);
-  if (language === "en") return country.nameEn;
-  if (language === "ru") return country.nameRu;
-  return country.nameFa;
+export function getSupplyCountryName(code, t) {
+  const normalized = getCountryByCode(code).code;
+  if (!t) return normalized;
+  const key = `supplyCountries.${normalized}`;
+  return typeof t.has === "function" && t.has(key) ? t(key) : t(key);
 }
 
-export function formatSupplySource(product, language = "fa") {
+export function getSupplyCountryOptions(t) {
+  return SUPPLY_COUNTRY_CODES.map((code) => ({
+    code,
+    label: getSupplyCountryName(code, t),
+  }));
+}
+
+export function formatSupplySource(product, t) {
   if (!product) return "";
-  const countryName = getSupplyCountryName(product.supplyCountry, language);
+  const countryName = getSupplyCountryName(product.supplyCountry, t);
   const city = String(product.supplyCity || "").trim();
-  return city ? `${countryName}، ${city}` : countryName;
+  if (!city) return countryName;
+  if (t) return t("supplySource.withCity", { country: countryName, city });
+  return `${countryName}، ${city}`;
 }

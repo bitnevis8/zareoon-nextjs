@@ -2,21 +2,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { dash } from "./dashboardTheme";
 import { useMyTradeServiceProvider } from "@/app/hooks/useMyTradeServiceProvider";
 import ServiceProviderOnboardingIntro from "@/app/components/ServiceProviderOnboardingIntro";
 
 export default function TradeServicesDashboardHome({ user }) {
+  const t = useTranslations("dashboard");
   const router = useRouter();
   const { provider, hasProvider, loading } = useMyTradeServiceProvider(!!user);
 
   return (
     <div className={dash.page}>
       <header>
-        <h1 className={dash.pageTitle}>خدمات بازرگانی</h1>
-        <p className={dash.pageSubtitle}>
-          {user?.firstName} عزیز، خدمات تجارت بین‌الملل را ارائه دهید یا در فهرست خدمات جستجو کنید.
-        </p>
+        <h1 className={dash.pageTitle}>{t("tradeServicesHome.title")}</h1>
+        <p className={dash.pageSubtitle}>{t("tradeServicesHome.subtitle", { name: user?.firstName || "" })}</p>
       </header>
 
       {!loading && !hasProvider ? (
@@ -35,9 +35,9 @@ export default function TradeServicesDashboardHome({ user }) {
               href="/dashboard/service-provider-profile"
               className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
             >
-              <p className="text-sm font-bold text-slate-900">صفحه خدمات من</p>
+              <p className="text-sm font-bold text-slate-900">{t("tradeServicesHome.myServicesPage.title")}</p>
               <p className="mt-1 text-xs leading-6 text-slate-600">
-                {provider.displayName} — مشاهده و ویرایش صفحه اختصاصی خدمات
+                {t("tradeServicesHome.myServicesPage.desc", { name: provider.displayName })}
               </p>
             </Link>
             {provider.status === "approved" ? (
@@ -45,23 +45,23 @@ export default function TradeServicesDashboardHome({ user }) {
                 href={`/trade-services/provider/${provider.id}`}
                 className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
               >
-                <p className="text-sm font-bold text-slate-900">صفحه اختصاصی من</p>
-                <p className="mt-1 text-xs leading-6 text-slate-600">نمایش عمومی پروفایل در فهرست خدمات</p>
+                <p className="text-sm font-bold text-slate-900">{t("tradeServicesHome.publicProfile.title")}</p>
+                <p className="mt-1 text-xs leading-6 text-slate-600">{t("tradeServicesHome.publicProfile.desc")}</p>
               </Link>
             ) : null}
             <Link
               href="/dashboard/supplier/orders?scope=own"
               className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
             >
-              <p className="text-sm font-bold text-slate-900">سفارشات مشتریان</p>
-              <p className="mt-1 text-xs leading-6 text-slate-600">پیگیری سفارشات ثبت‌شده توسط مشتریان</p>
+              <p className="text-sm font-bold text-slate-900">{t("tradeServicesHome.customerOrders.title")}</p>
+              <p className="mt-1 text-xs leading-6 text-slate-600">{t("tradeServicesHome.customerOrders.desc")}</p>
             </Link>
             <Link
               href="/dashboard/incoming-requests"
               className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
             >
-              <p className="text-sm font-bold text-slate-900">مشاهده نیازمندی‌ها به خدمات من</p>
-              <p className="mt-1 text-xs leading-6 text-slate-600">درخواست‌های متقاضیان مرتبط با خدمات شما</p>
+              <p className="text-sm font-bold text-slate-900">{t("tradeServicesHome.incomingRequests.title")}</p>
+              <p className="mt-1 text-xs leading-6 text-slate-600">{t("tradeServicesHome.incomingRequests.desc")}</p>
             </Link>
           </>
         ) : null}
@@ -70,15 +70,15 @@ export default function TradeServicesDashboardHome({ user }) {
           href="/trade-services"
           className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
         >
-          <p className="text-sm font-bold text-slate-900">فهرست خدمات</p>
-          <p className="mt-1 text-xs leading-6 text-slate-600">مرور شرکت‌ها و متخصصان خدمات بازرگانی</p>
+          <p className="text-sm font-bold text-slate-900">{t("tradeServicesHome.catalog.title")}</p>
+          <p className="mt-1 text-xs leading-6 text-slate-600">{t("tradeServicesHome.catalog.desc")}</p>
         </Link>
         <Link
           href="/dashboard/messages"
           className={`${dash.card} ${dash.cardBody} transition hover:border-emerald-200 hover:bg-emerald-50/30`}
         >
-          <p className="text-sm font-bold text-slate-900">پیام‌ها</p>
-          <p className="mt-1 text-xs leading-6 text-slate-600">پیگیری گفتگو با ارائه‌دهندگان و متقاضیان</p>
+          <p className="text-sm font-bold text-slate-900">{t("tradeServicesHome.messages.title")}</p>
+          <p className="mt-1 text-xs leading-6 text-slate-600">{t("tradeServicesHome.messages.desc")}</p>
         </Link>
       </div>
     </div>

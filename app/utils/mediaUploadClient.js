@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/app/config/api";
 import { getAuthHeaders } from "@/app/utils/authHeaders";
+import { apiError } from "@/app/utils/apiErrors";
 
 export async function uploadMediaFile(file, entityId, module = "inventory") {
   const inferredType = file.type.startsWith("video/") ? "videos" : "images";
@@ -16,7 +17,7 @@ export async function uploadMediaFile(file, entityId, module = "inventory") {
     headers: getAuthHeaders(),
   });
   const j = await r.json();
-  if (!j?.success) throw new Error(j?.message || "خطا در آپلود");
+  if (!j?.success) throw new Error(j?.message || apiError("uploadFailed"));
   return j.data;
 }
 

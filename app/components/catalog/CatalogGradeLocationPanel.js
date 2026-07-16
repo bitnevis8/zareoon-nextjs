@@ -1,7 +1,7 @@
 "use client";
 
-import CatalogLocationMap from "./CatalogLocationMap";
-import { getLocalizedLotLabel } from "../../utils/localize";
+import { useTranslations } from "next-intl";
+import CatalogLocationMap from "./CatalogLocationMap";import { getLocalizedLotLabel } from "../../utils/localize";
 import { getLotSupplierDisplay } from "../../utils/catalogLotSupplier";
 
 function hasValidCoords(lot) {
@@ -13,13 +13,13 @@ function hasValidCoords(lot) {
 export default function CatalogGradeLocationPanel({
   lots = [],
   language,
-  t,
   className = " ",
   mapVariant = "hero",
   supplyCountry = "IR",
   supplyCity = "",
   showSupplierSubtitle = false,
 }) {
+  const t = useTranslations("catalog");
   const located = lots.filter(hasValidCoords);
   if (!located.length) return null;
 
@@ -42,7 +42,6 @@ export default function CatalogGradeLocationPanel({
             longitude={lot.longitude}
             label={lot.locationLabel || t("loadingLocationDefault")}
             subtitle={subtitle}
-            t={t}
             variant={mapVariant}
             supplyCountry={supplyCountry}
             supplyCity={supplyCity}

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProductCardMedia from "../ui/ProductCardMedia";
 import SupplyCountryFlag from "../ui/SupplyCountryFlag";
 import { getLocalizedText, localizeUnit } from "../../utils/localize";
@@ -11,7 +12,6 @@ import { catalogBadge, catalogSurface, catalogText } from "./catalogTheme";
 export default function CatalogProductHero({
   item,
   language,
-  t,
   productMedia = [],
   productIdNum,
   openMediaGallery,
@@ -19,6 +19,7 @@ export default function CatalogProductHero({
   cartUnit = "",
   hideMediaOnMobile = false,
 }) {
+  const t = useTranslations("catalog");
   const title = getLocalizedText(item, language) || "";
   const slides = useMemo(
     () => buildMediaSlides({ product: item, media: productMedia, title }),

@@ -1,9 +1,11 @@
 "use client";
-import { useEffect, useMemo, useState, use as usePromise } from "react";
+import { useCallback, useEffect, useMemo, useState, use as usePromise } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function ProductReportPage({ params }) {
+  const t = useTranslations("product");
   const { id } = usePromise(params);
   const productId = Number(id);
 
@@ -41,17 +43,30 @@ export default function ProductReportPage({ params }) {
     })();
   }, [productId]);
 
-  // ثابت‌ها و نرمال‌سازی درجه‌ها برای گزارش‌دهی دقیق
-  const GRADE_COLUMNS = useMemo(() => ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی", "سایر"], []);
-  const normalizeGrade = (gradeValue) => {
+  const GRADE_COLUMNS = useMemo(() => [
+    t('grades.export'),
+    t('grades.grade1'),
+    t('grades.grade2'),
+    t('grades.grade3'),
+    t('grades.waste'),
+    t('grades.other'),
+  ], [t]);
+
+  const normalizeGrade = useCallback((gradeValue) => {
     const value = (gradeValue || "").toString().trim();
-    if (["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"].includes(value)) return value;
-    // نگاشت نسخه‌های قدیمی
-    if (value === "درجه یک") return "درجه 1";
-    if (value === "درجه دو") return "درجه 2";
-    if (value === "درجه سه") return "درجه 3";
-    return "سایر";
-  };
+    const canonical = [
+      t('grades.export'),
+      t('grades.grade1'),
+      t('grades.grade2'),
+      t('grades.grade3'),
+      t('grades.waste'),
+    ];
+    if (canonical.includes(value)) return value;
+    if (value === t('grades.legacy1')) return t('grades.grade1');
+    if (value === t('grades.legacy2')) return t('grades.grade2');
+    if (value === t('grades.legacy3')) return t('grades.grade3');
+    return t('grades.other');
+  }, [t]);
 
   const userIdToName = useMemo(() => {
     const map = new Map();
@@ -84,7 +99,7 @@ export default function ProductReportPage({ params }) {
   const byGrade = useMemo(() => {
     const map = new Map();
     for (const l of filteredLots) {
-      const key = l.qualityGrade || "نامشخص";
+      const key = l.qualityGrade || t('grades.unknown');
       if (!map.has(key)) map.set(key, { grade: key, total: 0, reserved: 0, count: 0, farmerIds: new Set() });
       const row = map.get(key);
       row.total += parseFloat(l.totalQuantity || 0);
@@ -93,7 +108,7 @@ export default function ProductReportPage({ params }) {
       row.farmerIds.add(l.farmerId);
     }
     return Array.from(map.values()).map(r => ({ ...r, farmers: r.farmerIds.size, available: r.total - r.reserved }));
-  }, [filteredLots]);
+  }, [filteredLots, t]);
 
   const byFarmer = useMemo(() => {
     const map = new Map();
@@ -117,36 +132,36 @@ export default function ProductReportPage({ params }) {
       available: r.total - r.reserved,
       name: userIdToName.get(r.farmerId) || `#${r.farmerId}`,
     }));
-  }, [filteredLots, userIdToName, GRADE_COLUMNS]);
+  }, [filteredLots, userIdToName, GRADE_COLUMNS, normalizeGrade]);
+
+  const productTitle = product?.name || (loading ? t('ellipsis') : `#${productId}`);
 
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">گزارش تجمیعی محصول: {product?.name || (loading ? "..." : `#${productId}`)}</h1>
-        <Link href="/dashboard/farmer/products" className="text-blue-600">بازگشت به محصولات</Link>
+        <h1 className="text-xl font-bold">{t('report.title', { name: productTitle })}</h1>
+        <Link href="/dashboard/farmer/products" className="text-blue-600">{t('report.backToProducts')}</Link>
       </div>
 
-      {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">کل موجودی</div><div className="text-lg font-semibold">{summary.totalQuantity?.toFixed(3)}</div></div>
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">رزرو شده</div><div className="text-lg font-semibold">{summary.reservedQuantity?.toFixed(3)}</div></div>
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">قابل عرضه</div><div className="text-lg font-semibold">{summary.availableQuantity?.toFixed(3)}</div></div>
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد تأمین‌کننده</div><div className="text-lg font-semibold">{summary.uniqueFarmers}</div></div>
-        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">تعداد بارها</div><div className="text-lg font-semibold">{summary.lotsCount}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">{t('report.totalInventory')}</div><div className="text-lg font-semibold">{summary.totalQuantity?.toFixed(3)}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">{t('report.reserved')}</div><div className="text-lg font-semibold">{summary.reservedQuantity?.toFixed(3)}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">{t('report.available')}</div><div className="text-lg font-semibold">{summary.availableQuantity?.toFixed(3)}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">{t('report.supplierCount')}</div><div className="text-lg font-semibold">{summary.uniqueFarmers}</div></div>
+        <div className="bg-white rounded-md shadow p-3"><div className="text-xs text-slate-500">{t('report.lotCount')}</div><div className="text-lg font-semibold">{summary.lotsCount}</div></div>
       </div>
 
-      {/* By grade */}
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <div className="p-3 font-semibold">تجمیع بر اساس درجه کیفی</div>
+        <div className="p-3 font-semibold">{t('report.byGradeTitle')}</div>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">درجه</th>
-              <th className="p-2">کل</th>
-              <th className="p-2">رزرو</th>
-              <th className="p-2">قابل عرضه</th>
-              <th className="p-2">تعداد بار</th>
-              <th className="p-2">تعداد تأمین‌کننده</th>
+              <th className="p-2">{t('report.colGrade')}</th>
+              <th className="p-2">{t('report.colTotal')}</th>
+              <th className="p-2">{t('report.colReserved')}</th>
+              <th className="p-2">{t('report.colAvailable')}</th>
+              <th className="p-2">{t('report.colLotCount')}</th>
+              <th className="p-2">{t('report.supplierCount')}</th>
             </tr>
           </thead>
           <tbody>
@@ -161,23 +176,22 @@ export default function ProductReportPage({ params }) {
               </tr>
             ))}
             {!byGrade.length && !loading ? (
-              <tr><td className="p-2 text-slate-500" colSpan={6}>موردی یافت نشد.</td></tr>
+              <tr><td className="p-2 text-slate-500" colSpan={6}>{t('notFound')}</td></tr>
             ) : null}
           </tbody>
         </table>
       </div>
 
-      {/* By farmer */}
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <div className="p-3 font-semibold">تجمیع بر اساس تأمین‌کننده</div>
+        <div className="p-3 font-semibold">{t('report.bySupplierTitle')}</div>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">تأمین‌کننده</th>
-              <th className="p-2">کل</th>
-              <th className="p-2">رزرو</th>
-              <th className="p-2">قابل عرضه</th>
-              <th className="p-2">تعداد بار</th>
+              <th className="p-2">{t('report.colSupplier')}</th>
+              <th className="p-2">{t('report.colTotal')}</th>
+              <th className="p-2">{t('report.colReserved')}</th>
+              <th className="p-2">{t('report.colAvailable')}</th>
+              <th className="p-2">{t('report.colLotCount')}</th>
               {GRADE_COLUMNS.map((gc) => (
                 <th key={gc} className="p-2">{gc}</th>
               ))}
@@ -197,24 +211,23 @@ export default function ProductReportPage({ params }) {
               </tr>
             ))}
             {!byFarmer.length && !loading ? (
-              <tr><td className="p-2 text-slate-500" colSpan={5 + GRADE_COLUMNS.length}>موردی یافت نشد.</td></tr>
+              <tr><td className="p-2 text-slate-500" colSpan={5 + GRADE_COLUMNS.length}>{t('notFound')}</td></tr>
             ) : null}
           </tbody>
         </table>
       </div>
 
-      {/* Order history */}
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <div className="p-3 font-semibold">تاریخچه سفارش‌های این محصول</div>
+        <div className="p-3 font-semibold">{t('report.orderHistoryTitle')}</div>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">سفارش</th>
-              <th className="p-2">تاریخ</th>
-              <th className="p-2">مشتری</th>
-              <th className="p-2">درجه</th>
-              <th className="p-2">مقدار</th>
-              <th className="p-2">وضعیت</th>
+              <th className="p-2">{t('report.colOrder')}</th>
+              <th className="p-2">{t('report.colDate')}</th>
+              <th className="p-2">{t('report.colCustomer')}</th>
+              <th className="p-2">{t('report.colGrade')}</th>
+              <th className="p-2">{t('report.colQuantity')}</th>
+              <th className="p-2">{t('report.colStatus')}</th>
             </tr>
           </thead>
           <tbody>
@@ -229,23 +242,22 @@ export default function ProductReportPage({ params }) {
               </tr>
             ))}
             {!history.length && !loading ? (
-              <tr><td className="p-2 text-slate-500" colSpan={6}>سفارشی یافت نشد.</td></tr>
+              <tr><td className="p-2 text-slate-500" colSpan={6}>{t('report.noOrders')}</td></tr>
             ) : null}
           </tbody>
         </table>
       </div>
 
-      {/* Active cart items */}
       <div className="bg-white rounded-md shadow overflow-x-auto">
-        <div className="p-3 font-semibold">سبدهای خرید فعال برای این محصول</div>
+        <div className="p-3 font-semibold">{t('report.activeCartsTitle')}</div>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2">سبد</th>
-              <th className="p-2">تاریخ</th>
-              <th className="p-2">مشتری</th>
-              <th className="p-2">درجه</th>
-              <th className="p-2">مقدار</th>
+              <th className="p-2">{t('report.colCart')}</th>
+              <th className="p-2">{t('report.colDate')}</th>
+              <th className="p-2">{t('report.colCustomer')}</th>
+              <th className="p-2">{t('report.colGrade')}</th>
+              <th className="p-2">{t('report.colQuantity')}</th>
             </tr>
           </thead>
           <tbody>
@@ -259,7 +271,7 @@ export default function ProductReportPage({ params }) {
               </tr>
             ))}
             {!cartItems.length && !loading ? (
-              <tr><td className="p-2 text-slate-500" colSpan={5}>موردی وجود ندارد.</td></tr>
+              <tr><td className="p-2 text-slate-500" colSpan={5}>{t('report.noCartItems')}</td></tr>
             ) : null}
           </tbody>
         </table>
@@ -267,4 +279,3 @@ export default function ProductReportPage({ params }) {
     </div>
   );
 }
-

@@ -1,45 +1,29 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import { authFetch } from "@/app/utils/authHeaders";
 import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
 import { CartPageNav, CartGuide, SUPPORT_PHONE } from "./components/CartLayout";
 
-const ORDER_STATUS_FA = {
-  pending: "در انتظار تأیید",
-  reserved: "رزرو شده",
-  completed: "تکمیل‌شده",
-  cancelled: "لغو شده",
-};
-
-const ITEM_STATUS_FA = {
-  pending: "در انتظار",
-  approved: "تأیید شده",
-  processing: "در حال پردازش",
-  shipped: "ارسال شده",
-  delivered: "تحویل شده",
-  cancelled: "لغو شده",
-  rejected: "رد شده",
-};
-
-function CartItemRow({ item, productName, onUpdateQty, onRemove }) {
+function CartItemRow({ item, productName, onUpdateQty, onRemove, t }) {
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-              درجه {item.qualityGrade}
+              {t("grade", { grade: item.qualityGrade })}
             </span>
           </div>
           <h3 className="truncate text-base font-bold text-slate-900">{productName}</h3>
-          <p className="mt-0.5 text-xs text-slate-500">شناسه محصول: {item.productId}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{t("productId", { id: item.productId })}</p>
         </div>
         <div className="flex items-center gap-3">
           <div>
-            <label className="mb-1 block text-[10px] font-semibold uppercase text-slate-400">مقدار</label>
+            <label className="mb-1 block text-[10px] font-semibold uppercase text-slate-400">{t("quantity")}</label>
             <div className="flex items-center gap-1">
               <input
                 type="number"
@@ -49,7 +33,7 @@ function CartItemRow({ item, productName, onUpdateQty, onRemove }) {
                 value={item.quantity}
                 onChange={(e) => onUpdateQty(item.id, e.target.value)}
               />
-              <span className="text-xs text-slate-500">{item.unit || "کیلوگرم"}</span>
+              <span className="text-xs text-slate-500">{item.unit || t("kilogram")}</span>
             </div>
           </div>
           <button
@@ -57,7 +41,7 @@ function CartItemRow({ item, productName, onUpdateQty, onRemove }) {
             onClick={() => onRemove(item.id)}
             className="mt-5 rounded-lg px-2 py-1.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
           >
-            حذف
+            {t("remove")}
           </button>
         </div>
       </div>
@@ -65,7 +49,7 @@ function CartItemRow({ item, productName, onUpdateQty, onRemove }) {
   );
 }
 
-function OrderHistory({ orders, loading, expanded, onToggle }) {
+function OrderHistory({ orders, loading, expanded, onToggle, t }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <button
@@ -73,8 +57,8 @@ function OrderHistory({ orders, loading, expanded, onToggle }) {
         onClick={onToggle}
         className="flex w-full items-center justify-between px-4 py-3.5 text-right sm:px-5"
       >
-        <span className="text-sm font-bold text-slate-800">سفارش‌های من</span>
-        <span className="text-xs text-slate-500">{expanded ? "بستن ▲" : "مشاهده ▼"}</span>
+        <span className="text-sm font-bold text-slate-800">{t("myOrders")}</span>
+        <span className="text-xs text-slate-500">{expanded ? t("collapse") : t("expand")}</span>
       </button>
       {expanded ? (
         <div className="border-t border-slate-100 px-4 py-4 sm:px-5">
@@ -83,15 +67,15 @@ function OrderHistory({ orders, loading, expanded, onToggle }) {
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
             </div>
           ) : orders.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-500">هنوز سفارشی ثبت نکرده‌اید.</p>
+            <p className="py-6 text-center text-sm text-slate-500">{t("noOrdersYet")}</p>
           ) : (
             <div className="space-y-3">
               {orders.map((order) => (
                 <div key={order.id} className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-semibold text-slate-900">سفارش #{order.id}</span>
+                    <span className="font-semibold text-slate-900">{t("orderNumber", { id: order.id })}</span>
                     <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                      {ORDER_STATUS_FA[order.status] || order.status}
+                      {t(`orderStatus.${order.status}`)}
                     </span>
                   </div>
                   <p className="mb-3 text-xs text-slate-500">
@@ -102,21 +86,30 @@ function OrderHistory({ orders, loading, expanded, onToggle }) {
                       <li key={`i-${i}`} className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs">
                         <div className="flex justify-between gap-2">
                           <span className="font-medium text-slate-800">
-                            {item.inventoryLot?.product?.name || `محصول #${item.inventoryLotId}`}
+                            {item.inventoryLot?.product?.name || t("productFallback", { id: item.inventoryLotId })}
                           </span>
-                          <span className="text-slate-500">{ITEM_STATUS_FA[item.status] || item.status}</span>
+                          <span className="text-slate-500">{t(`itemStatus.${item.status}`)}</span>
                         </div>
                         <p className="mt-1 text-slate-500">
-                          درجه {item.inventoryLot?.qualityGrade} — {item.quantity}{" "}
-                          {item.inventoryLot?.unit || "کیلوگرم"}
+                          {t("gradeLine", {
+                            grade: item.inventoryLot?.qualityGrade,
+                            quantity: item.quantity,
+                            unit: item.inventoryLot?.unit || t("kilogram"),
+                          })}
                         </p>
                       </li>
                     ))}
                     {order.requestItems?.map((item, i) => (
                       <li key={`r-${i}`} className="rounded-lg border border-amber-200 bg-amber-50/50 p-2.5 text-xs">
-                        <span className="font-medium text-amber-900">در انتظار تخصیص — محصول #{item.productId}</span>
+                        <span className="font-medium text-amber-900">
+                          {t("pendingAllocation", { productId: item.productId })}
+                        </span>
                         <p className="mt-1 text-amber-800/80">
-                          درجه {item.qualityGrade} — {item.quantity} {item.unit || "کیلوگرم"}
+                          {t("gradeLine", {
+                            grade: item.qualityGrade,
+                            quantity: item.quantity,
+                            unit: item.unit || t("kilogram"),
+                          })}
                         </p>
                       </li>
                     ))}
@@ -132,6 +125,7 @@ function OrderHistory({ orders, loading, expanded, onToggle }) {
 }
 
 function CartPageContent() {
+  const t = useTranslations("cart");
   const [cart, setCart] = useState({ id: null, items: [] });
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -144,8 +138,8 @@ function CartPageContent() {
   const [userInfo, setUserInfo] = useState(null);
 
   const productName = useCallback(
-    (id) => products.find((p) => p.id === Number(id))?.name || `محصول #${id}`,
-    [products]
+    (id) => products.find((p) => p.id === Number(id))?.name || t("productFallback", { id }),
+    [products, t]
   );
 
   const load = async () => {
@@ -214,17 +208,20 @@ function CartPageContent() {
     try {
       const r = await authFetch(`${API_ENDPOINTS.supplier.cart.base}/checkout`, { method: "POST" });
       const j = await r.json();
-      if (!r.ok || !j?.success) throw new Error(j?.message || "خطا در ثبت سفارش");
+      if (!r.ok || !j?.success) throw new Error(j?.message || t("checkoutError"));
       setMsgType("success");
       setMsg(
-        `سفارش شما با موفقیت ثبت شد (شماره ${j.data?.orderId || "—"}). وضعیت: در انتظار تأیید. تیم زارعون برای هماهنگی با شما تماس می‌گیرد. پشتیبانی: ${SUPPORT_PHONE}`
+        t("checkoutSuccess", {
+          orderId: j.data?.orderId || "—",
+          phone: SUPPORT_PHONE,
+        })
       );
       await load();
       await loadOrders();
       setShowOrders(true);
     } catch (e) {
       setMsgType("error");
-      setMsg(e.message || "خطای غیرمنتظره در ثبت سفارش");
+      setMsg(e.message || t("checkoutUnexpectedError"));
     } finally {
       setCheckingOut(false);
     }
@@ -240,10 +237,9 @@ function CartPageContent() {
       <CartPageNav />
 
       <div className="mb-6">
-        <h1 className="text-lg font-bold text-slate-900 sm:text-xl">سبد خرید</h1>
+        <h1 className="text-lg font-bold text-slate-900 sm:text-xl">{t("title")}</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {userLabel ? `${userLabel}، ` : ""}
-          اقلام انتخاب‌شده را بررسی کنید و سفارش را نهایی کنید.
+          {userLabel ? t("subtitleWithName", { name: userLabel }) : t("subtitle")}
         </p>
       </div>
 
@@ -259,7 +255,7 @@ function CartPageContent() {
                 <svg className="mb-3 h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                <p className="font-semibold text-slate-700">سبد خرید شما خالی است</p>
+                <p className="font-semibold text-slate-700">{t("empty")}</p>
               </div>
             ) : (
               <>
@@ -271,6 +267,7 @@ function CartPageContent() {
                       productName={productName(it.productId)}
                       onUpdateQty={updateQty}
                       onRemove={remove}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -299,20 +296,21 @@ function CartPageContent() {
                 setShowOrders(next);
                 if (next && orders.length === 0 && !ordersLoading) loadOrders();
               }}
+              t={t}
             />
           </div>
 
           <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
             {items.length > 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-                <h2 className="mb-4 text-sm font-bold text-slate-800">خلاصه سفارش</h2>
+                <h2 className="mb-4 text-sm font-bold text-slate-800">{t("summaryTitle")}</h2>
                 <dl className="space-y-2 text-sm">
                   <div className="flex justify-between text-slate-600">
-                    <dt>تعداد اقلام</dt>
+                    <dt>{t("itemCount")}</dt>
                     <dd className="font-semibold tabular-nums text-slate-900">{totalItems.toLocaleString("fa-IR")}</dd>
                   </div>
                   <div className="flex justify-between text-slate-600">
-                    <dt>مجموع مقدار</dt>
+                    <dt>{t("totalQuantity")}</dt>
                     <dd className="font-semibold tabular-nums text-slate-900">
                       {totalQty.toLocaleString("fa-IR")}
                     </dd>
@@ -327,14 +325,14 @@ function CartPageContent() {
                   {checkingOut ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      در حال ثبت…
+                      {t("checkingOut")}
                     </span>
                   ) : (
-                    "نهایی کردن سفارش"
+                    t("checkout")
                   )}
                 </button>
                 <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-400">
-                  با نهایی کردن، درخواست شما ثبت می‌شود و برای هماهنگی تماس گرفته می‌شود.
+                  {t("checkoutFooter")}
                 </p>
               </div>
             ) : null}

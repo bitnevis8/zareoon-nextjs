@@ -1,0 +1,141 @@
+{
+  "logoAlt": "لوگو سایت",
+  "news": {
+    "fetchError": "خطا در دریافت اخبار",
+    "statsTitle": "آمار اخبار {location}",
+    "total": "کل اخبار",
+    "today": "اخبار امروز",
+    "week": "اخبار هفته",
+    "month": "اخبار ماه",
+    "loading": "در حال دریافت اخبار...",
+    "empty": "هیچ خبری برای {location} یافت نشد",
+    "latestTitle": "آخرین اخبار {location}",
+    "readMore": "ادامه مطلب →",
+    "viewAll": "مشاهده همه اخبار {location}"
+  },
+  "searchBox": {
+    "placeholder": "جستجو با تگانه ...",
+    "tagFilterSingle": "نمایش اخبار مرتبط با تگ \"{name}\"",
+    "tagFilterMulti": "نمایش اخبار مرتبط با {count} تگ انتخاب شده",
+    "resultsTitle": "نتایج اخبار مرتبط:",
+    "noResults": "هیچ خبری یافت نشد",
+    "noResultsHint": "هیچ خبری با تگ‌های انتخاب شده یافت نشد. لطفاً تگ‌های دیگری انتخاب کنید.",
+    "searching": "در حال جستجو...",
+    "advancedCategories": "دسته‌بندی پیشرفته",
+    "simpleCategories": "دسته‌بندی ساده"
+  },
+  "weather": {
+    "title": "آب و هوا",
+    "fetchError": "خطا در دریافت اطلاعات آب و هوا",
+    "fetchErrorShort": "خطا در دریافت آب و هوا",
+    "connectionError": "خطا در اتصال به سرور",
+    "connectionErrorShort": "خطا در اتصال",
+    "unavailable": "اطلاعات آب و هوا در دسترس نیست",
+    "unknown": "آب و هوا نامشخص",
+    "today": "امروز",
+    "tomorrow": "فردا",
+    "humidity": "رطوبت: {value}%",
+    "wind": "باد: {value} m/s",
+    "minTemp": "کمینه: {value}",
+    "maxTemp": "بیشینه: {value}",
+    "viewMoreDetails": "مشاهده جزئیات بیشتر",
+    "googleSearch": "https://www.google.com/search?q=آب+و+هوا+{city}"
+  },
+  "stock": {
+    "fetchError": "خطا در دریافت اطلاعات موجودی",
+    "unavailable": "اطلاعات موجودی در دسترس نیست",
+    "title": "موجودی {name}",
+    "noBatches": "هیچ بچ موجودی ثبت نشده",
+    "grade": "درجه {grade}",
+    "kgUnit": "کیلوگرم",
+    "batchTotal": "کل: {amount} کیلوگرم",
+    "batchReserved": "رزرو شده: {amount} کیلوگرم",
+    "batchCount": "{count} بچ موجود",
+    "noSubsets": "هیچ زیرمجموعه‌ای موجود نیست",
+    "loading": "در حال بارگذاری...",
+    "kgAvailable": "کیلوگرم موجود",
+    "kgTotal": "کیلوگرم کل",
+    "kgReserved": "کیلوگرم رزرو",
+    "batchesTitle": "بچ‌های موجودی",
+    "subsetsTitle": "زیرمجموعه‌ها"
+  },
+  "scroll": {
+    "pagination": "صفحه‌بندی",
+    "page": "صفحه {index}",
+    "scrollBack": "اسکرول به عقب",
+    "scrollForward": "اسکرول به جلو"
+  },
+  "categorySection": {
+    "empty": "در حال حاضر خبری در این دسته‌بندی وجود ندارد.",
+    "viewAllNews": "مشاهده همه اخبار {title}",
+    "secondsAgo": "چند ثانیه پیش",
+    "minutesAgo": "{count} دقیقه پیش",
+    "hoursAgo": "{count} ساعت پیش",
+    "daysAgo": "{count} روز پیش"
+  },
+  "classHierarchy": {
+    "fetchError": "خطا در دریافت کلاس‌ها",
+    "connectionError": "خطا در اتصال به سرور",
+    "loading": "در حال بارگذاری کلاس‌ها...",
+    "empty": "هیچ کلاسی یافت نشد",
+    "emptyDetail": "در حال حاضر هیچ کلاسی در سیستم موجود نیست.",
+    "title": "دسته‌بندی پیشرفته کلاس‌ها",
+    "subtitle": "کلاس‌های اصلی و زیرمجموعه‌های آن‌ها",
+    "summaryTitle": "خلاصه دسته‌بندی",
+    "mainClasses": "کلاس‌های اصلی",
+    "subClasses": "کلاس‌های فرعی",
+    "totalClasses": "مجموع کلاس‌ها",
+    "childrenCount": "تعداد زیرمجموعه: {count}",
+    "sortOrder": "ترتیب: {order}"
+  },
+  "pricingManager": {
+    "title": "مدیریت قیمت‌گذاری موجودی",
+    "minTierRequired": "حداقل یک سطح قیمت یا حداقل سفارش تعریف کنید",
+    "saveSuccess": "قیمت‌گذاری با موفقیت ذخیره شد",
+    "saveError": "خطا در ذخیره قیمت‌گذاری",
+    "serverError": "خطا در ارتباط با سرور",
+    "productLabel": "محصول:",
+    "productFallback": "محصول {id}",
+    "qualityGradeLabel": "درجه کیفیت:",
+    "unitLabel": "واحد:",
+    "totalStockLabel": "موجودی کل:",
+    "minOrderLabel": "حداقل سفارش ({unit})",
+    "minOrderPlaceholder": "حداقل مقدار سفارش را وارد کنید",
+    "tieredTitle": "قیمت‌گذاری پلکانی",
+    "addTierButton": "+ اضافه کردن سطح قیمت",
+    "noTiersYet": "هنوز سطح قیمتی تعریف نشده است",
+    "addFirstTierHint": "روی دکمه بالا کلیک کنید تا اولین سطح را اضافه کنید",
+    "level": "سطح {index}",
+    "remove": "حذف",
+    "minQty": "حداقل مقدار",
+    "maxQty": "حداکثر مقدار",
+    "unlimitedPlaceholder": "خالی = نامحدود",
+    "pricePerUnit": "قیمت هر {unit}",
+    "description": "توضیحات",
+    "descriptionPlaceholder": "توضیحات اختیاری",
+    "saving": "در حال ذخیره...",
+    "save": "ذخیره قیمت‌گذاری"
+  },
+  "userList": {
+    "deleteConfirm": "آیا از حذف این کاربر اطمینان دارید؟",
+    "deleteError": "خطا در حذف کاربر",
+    "title": "لیست کاربران",
+    "addUser": "افزودن کاربر جدید",
+    "columns": {
+      "id": "شناسه",
+      "username": "نام کاربری",
+      "email": "ایمیل",
+      "firstName": "نام",
+      "lastName": "نام خانوادگی",
+      "personnelNumber": "شماره پرسنلی",
+      "actions": "عملیات"
+    }
+  },
+  "zoomImage": {
+    "closeBackground": "بستن تصویر"
+  },
+  "simpleBarChart": {
+    "empty": "داده‌ای نیست"
+  },
+  "avatarFallbackInitial": "ک"
+}

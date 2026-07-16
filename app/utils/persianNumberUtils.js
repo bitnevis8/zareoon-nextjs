@@ -1,37 +1,31 @@
-const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
-const ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
+import i18nData from "./i18nFaData";
 
-/** Normalize Persian/Arabic digits to ASCII 0-9. */
-export function toEnglishDigits(value) {
-  return String(value ?? "")
-    .replace(/[۰-۹]/g, (d) => String(PERSIAN_DIGITS.indexOf(d)))
-    .replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
-}
-
-/** Format integer with Persian digits and thousand separator (٬). */
-export function formatPersianInteger(value) {
-  const raw = toEnglishDigits(value).replace(/\D/g, "");
-  if (!raw) return "";
-  const num = Number(raw);
-  if (!Number.isFinite(num)) return "";
-  return num.toLocaleString("fa-IR");
-}
-
-/** Parse user input to plain integer string (ASCII digits only). */
-export function parsePersianIntegerInput(value) {
-  const raw = toEnglishDigits(value).replace(/\D/g, "");
-  if (!raw) return "";
-  return String(Number(raw));
-}
-
-/** Parse to number or null. */
-export function parsePersianNumber(value) {
-  const raw = parsePersianIntegerInput(value);
-  if (!raw) return null;
-  const num = Number(raw);
-  return Number.isFinite(num) ? num : null;
-}
+export const PERSIAN_DIGITS = i18nData.persianDigits;
+export const ARABIC_DIGITS = i18nData.arabicDigits;
 
 export function toPersianDigits(value) {
   return String(value ?? "").replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]);
+}
+
+export function parsePersianNumber(input) {
+  if (input == null || input === "") return null;
+  let s = String(input);
+  s = s.replace(/[۰-۹]/g, (ch) => String(PERSIAN_DIGITS.indexOf(ch)));
+  s = s.replace(/[٠-٩]/g, (ch) => String(ARABIC_DIGITS.indexOf(ch)));
+  s = s.replace(/[,٬\s]/g, "");
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function parsePersianIntegerInput(input) {
+  const n = parsePersianNumber(input);
+  if (n == null) return "";
+  return String(Math.trunc(n));
+}
+
+export function formatPersianInteger(value) {
+  if (value === "" || value == null) return "";
+  const n = parsePersianNumber(value);
+  if (n == null) return String(value);
+  return toPersianDigits(Math.trunc(n).toLocaleString("en-US"));
 }

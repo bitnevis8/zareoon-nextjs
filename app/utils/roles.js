@@ -8,18 +8,6 @@ export const ROLE_SLUGS = {
   CUSTOMER: "customer",
 };
 
-export const ROLE_LABELS_FA = {
-  super_admin: "مدیر کل",
-  admin: "مدیر",
-  employee: "کارمند",
-  supplier: "تأمین‌کننده",
-  farmer: "تأمین‌کننده",
-  customer: "کاربر معمولی",
-  loader: "تأمین‌کننده",
-  driver: "کارمند",
-  administrator: "مدیر",
-};
-
 const ADMIN_SLUGS = new Set(["super_admin", "admin", "administrator"]);
 const SUPPLIER_SLUGS = new Set(["supplier", "farmer", "loader"]);
 
@@ -35,9 +23,26 @@ export function getRoleSlugs(user) {
   return (user?.roles || []).map(normalizeRoleSlug).filter(Boolean);
 }
 
-export function getRoleLabelFa(role) {
+export function getRoleLabel(role, t) {
   const slug = normalizeRoleSlug(role);
-  return role?.nameFa || ROLE_LABELS_FA[slug] || role?.nameEn || role?.name || slug;
+  if (role?.nameFa) return role.nameFa;
+  if (t && slug) {
+    const key = `roles.${slug}`;
+    if (typeof t.has === "function" && t.has(key)) return t(key);
+    if (typeof t === "function") {
+      try {
+        return t(key);
+      } catch {
+        /* fall through */
+      }
+    }
+  }
+  return role?.nameEn || role?.name || slug;
+}
+
+/** @deprecated use getRoleLabel(role, t) */
+export function getRoleLabelFa(role, t) {
+  return getRoleLabel(role, t);
 }
 
 export function isSuperAdmin(user) {

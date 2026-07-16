@@ -152,9 +152,18 @@ export default function CategoryDrillDownMenu({ isOpen, onClose, rootTitle }) {
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {loading ? (
-            <div className="space-y-2 p-3 sm:p-4">
+            <div className="space-y-2 p-3 sm:p-4" aria-busy="true">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100" />
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"
+                >
+                  <div className="skeleton-bone h-10 w-10 shrink-0 rounded-xl" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="skeleton-bone h-3.5 w-3/4 rounded-md" />
+                    <div className="skeleton-bone h-2.5 w-1/3 rounded-md opacity-70" />
+                  </div>
+                </div>
               ))}
             </div>
           ) : items.length > 0 ? (

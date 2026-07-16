@@ -1,4 +1,5 @@
 import { compareCatalogItems, getRootCategory } from "./productSort";
+import i18nData from "./i18nFaData";
 
 export function buildProductByIdMap(allProducts) {
   const map = new Map();
@@ -61,7 +62,7 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
       englishName: lot.englishName || null,
       russianName: lot.russianName || null,
       arabicName: lot.arabicName || null,
-      qualityGrade: lot.qualityGrade || "بدون درجه",
+      qualityGrade: lot.qualityGrade || i18nData.noGrade,
       availableQty,
       unit: lot.unit || "kg",
       price: lot.price,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
 
 function isVideoItem(item) {
@@ -53,9 +54,9 @@ export default function CatalogMediaLightbox({
   onIndexChange,
   loading = false,
   titleOverride = "",
-  t,
   isRTL = true,
 }) {
+  const t = useTranslations("catalog");
   const touchStartX = useRef(null);
   const [zoomed, setZoomed] = useState(false);
 

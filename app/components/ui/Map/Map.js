@@ -2,24 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import "leaflet/dist/leaflet.css";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false }
-);
+const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
 
 const ChangeView = dynamic(
   () =>
@@ -73,45 +62,7 @@ const MapEvents = dynamic(
   { ssr: false }
 );
 
-const MapZoomControls = dynamic(
-  () =>
-    import("react-leaflet").then((mod) => {
-      const { useMap } = mod;
-
-      return function MapZoomControlsInner({ minZoom = 3, maxZoom = 18 }) {
-        const map = useMap();
-
-        const zoomIn = () => map.setZoom(Math.min(map.getZoom() + 1, maxZoom));
-        const zoomOut = () => map.setZoom(Math.max(map.getZoom() - 1, minZoom));
-
-        return (
-          <div className="leaflet-bottom leaflet-left !bottom-3 !left-3">
-            <div className="leaflet-control flex flex-col gap-1 !border-0 !bg-transparent !shadow-none">
-              <button
-                type="button"
-                onClick={zoomIn}
-                title="بزرگ‌نمایی"
-                aria-label="بزرگ‌نمایی"
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-base font-bold text-slate-700 shadow-md ring-1 ring-slate-200 transition hover:bg-emerald-50 hover:text-emerald-800 active:scale-95"
-              >
-                +
-              </button>
-              <button
-                type="button"
-                onClick={zoomOut}
-                title="کوچک‌نمایی"
-                aria-label="کوچک‌نمایی"
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-base font-bold text-slate-700 shadow-md ring-1 ring-slate-200 transition hover:bg-emerald-50 hover:text-emerald-800 active:scale-95"
-              >
-                −
-              </button>
-            </div>
-          </div>
-        );
-      };
-    }),
-  { ssr: false }
-);
+const MapZoomControls = dynamic(() => import("./MapZoomControls"), { ssr: false });
 
 export default function Map({
   center = [35.7219, 51.3347],
@@ -129,6 +80,7 @@ export default function Map({
   maxZoom = 18,
   scrollWheelZoom = true,
 }) {
+  const t = useTranslations("shared");
   const [selectedPosition, setSelectedPosition] = useState(null);
 
   useEffect(() => {
@@ -177,13 +129,13 @@ export default function Map({
               click: () => onMarkerClick?.(marker),
             }}
           >
-            <Popup>{marker.name || `موقعیت ${index + 1}`}</Popup>
+            <Popup>{marker.name || t("map.positionDefault", { index: index + 1 })}</Popup>
           </Marker>
         ))}
 
         {selectedPosition ? (
           <Marker position={selectedPosition}>
-            <Popup>موقعیت انتخاب‌شده</Popup>
+            <Popup>{t("map.selectedPosition")}</Popup>
           </Marker>
         ) : null}
 

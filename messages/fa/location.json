@@ -1,0 +1,59 @@
+{
+  "loading": "در حال بارگذاری مکان‌ها…",
+  "loadingChildren": "در حال بارگذاری…",
+  "notFound": {
+    "title": "اطلاعات مکان یافت نشد",
+    "locationTitle": "مکان یافت نشد",
+    "backHome": "بازگشت به صفحه اصلی",
+    "backToLocations": "بازگشت به صفحه مکان‌ها"
+  },
+  "error": {
+    "title": "خطا",
+    "fetchFailed": "خطا در دریافت داده‌ها",
+    "connectionFailed": "خطا در اتصال به سرور"
+  },
+  "provinces": "استان‌ها",
+  "population": "جمعیت: {count} نفر",
+  "populationShort": "{count} نفر",
+  "coordinates": "مختصات: {lat}, {lng}",
+  "coordinatesLabel": "مختصات:",
+  "area": "مساحت: {area} کیلومتر مربع",
+  "viewOnWikipedia": "مشاهده در ویکی‌پدیا",
+  "close": "بستن",
+  "readMore": "ادامه متن",
+  "noWikiInfo": "اطلاعات ویکی‌پدیا موجود نیست",
+  "showLess": "نمایش کمتر",
+  "showMore": "نمایش بیشتر",
+  "childrenTitles": {
+    "0": "استان‌ها",
+    "1": "شهرستان‌ها",
+    "2": "بخش‌ها",
+    "3": "دهستان‌ها",
+    "4": "شهرها",
+    "5": "آبادی‌ها",
+    "default": "زیرمجموعه‌ها"
+  },
+  "news": {
+    "title": "اخبار مربوط به {name}",
+    "fetchFailed": "خطا در دریافت اخبار",
+    "empty": "هیچ خبری برای این مکان یافت نشد",
+    "viewAll": "مشاهده همه اخبار",
+    "relativeTime": {
+      "now": "همین الان",
+      "minutesAgo": "{count} دقیقه پیش",
+      "hoursAgo": "{count} ساعت پیش",
+      "daysAgo": "{count} روز پیش",
+      "monthsAgo": "{count} ماه پیش",
+      "yearsAgo": "{count} سال پیش"
+    }
+  },
+  "tags": {
+    "title": "تگ‌های مرتبط",
+    "empty": "تگ مرتبطی برای این لوکیشن یافت نشد",
+    "testData": "تست داده‌ها"
+  },
+  "iran": {
+    "countryName": "کشور ایران",
+    "matchToken": "ایران"
+  }
+}

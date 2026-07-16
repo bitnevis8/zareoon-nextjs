@@ -1,16 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { apiError } from "@/app/utils/apiErrors";
 
 export async function GET() {
   try {
-    // Backend articles module removed. Return empty list for now.
     return NextResponse.json({ classes: [], success: true });
-  } catch (error) {
-    return NextResponse.json(
-      { 
-        error: 'خطا در دریافت کلاس‌ها', 
-        success: false
-      },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: apiError("fetchClasses"), success: false }, { status: 500 });
   }
-} 
+}

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRequireAdmin } from "@/app/hooks/useDashboardRole";
 import { getTradeServicesContent } from "@/app/data/tradeServicesCatalog";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 
 export default function ServiceCategoriesPage() {
+  const t = useTranslations("product");
   const { allowed, loading } = useRequireAdmin();
   const services = getTradeServicesContent("fa").categories;
 
@@ -20,10 +22,8 @@ export default function ServiceCategoriesPage() {
   return (
     <div className={dash.page}>
       <header>
-        <h1 className={dash.pageTitle}>دسته‌بندی خدمات بازرگانی</h1>
-        <p className={dash.pageSubtitle}>
-          ده دسته اصلی «خدمات بازرگانی و تجارت بین‌الملل»
-        </p>
+        <h1 className={dash.pageTitle}>{t("serviceCategories.title")}</h1>
+        <p className={dash.pageSubtitle}>{t("serviceCategories.subtitle")}</p>
       </header>
 
       <div className="space-y-3">
@@ -37,7 +37,7 @@ export default function ServiceCategoriesPage() {
             </div>
             <p className="text-sm leading-relaxed text-slate-600">{service.description}</p>
             <p className="mt-2 text-xs text-slate-500">
-              {service.children.length} زیرخدمت:{" "}
+              {t("serviceCategories.subserviceCount", { count: service.children.length })}{" "}
               {service.children.map((c) => c.title).join(" · ")}
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
@@ -46,20 +46,20 @@ export default function ServiceCategoriesPage() {
                 className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
                 target="_blank"
               >
-                صفحه عمومی دسته
+                {t("serviceCategories.publicCategoryPage")}
               </Link>
               <Link
                 href={`/trade-services/register?category=${service.id}`}
                 className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
                 target="_blank"
               >
-                عضویت ارائه‌دهنده
+                {t("serviceCategories.providerMembership")}
               </Link>
               <Link
                 href={`/dashboard/trade-service-providers?category=${service.id}`}
                 className="text-xs font-semibold text-slate-600 hover:text-slate-900"
               >
-                ارائه‌دهندگان این دسته
+                {t("serviceCategories.categoryProviders")}
               </Link>
             </div>
           </div>

@@ -1,93 +1,95 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { API_ENDPOINTS } from '@/app/config/api';
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function EditRolePage({ params }) {
+  const t = useTranslations("users");
   const router = useRouter();
   const { id } = params;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [role, setRole] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    nameEn: '',
-    nameFa: '',
-    description: ''
+    name: "",
+    nameEn: "",
+    nameFa: "",
+    description: "",
   });
-
-  useEffect(() => {
-    fetchRole();
-  }, [id, fetchRole]);
 
   const fetchRole = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(API_ENDPOINTS.roles.getById(id), {
-        credentials: 'include',
+        credentials: "include",
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
-        throw new Error('خطا در دریافت اطلاعات نقش');
+        throw new Error(t("roles.fetchRoleError"));
       }
 
       const result = await response.json();
       if (result.success) {
         setRole(result.data);
         setFormData({
-          name: result.data.name || '',
-          nameEn: result.data.nameEn || '',
-          nameFa: result.data.nameFa || '',
-          description: result.data.description || ''
+          name: result.data.name || "",
+          nameEn: result.data.nameEn || "",
+          nameFa: result.data.nameFa || "",
+          description: result.data.description || "",
         });
       } else {
-        throw new Error(result.message || 'خطا در دریافت اطلاعات نقش');
+        throw new Error(result.message || t("roles.fetchRoleError"));
       }
-    } catch (error) {
-      console.error('خطا در دریافت نقش:', error);
-      alert('خطا در دریافت اطلاعات نقش: ' + error.message);
+    } catch (err) {
+      console.error("Error fetching role:", err);
+      alert(t("roles.fetchRoleErrorAlert", { message: err.message }));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
+
+  useEffect(() => {
+    fetchRole();
+  }, [fetchRole]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
       const response = await fetch(API_ENDPOINTS.roles.update(id), {
-        method: 'PUT',
-        credentials: 'include',
+        method: "PUT",
+        credentials: "include",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
-        alert('نقش با موفقیت به‌روزرسانی شد');
-        router.push('/dashboard/user-management/roles');
+        alert(t("roles.updateSuccess"));
+        router.push("/dashboard/user-management/roles");
       } else {
-        throw new Error(result.message || 'خطا در به‌روزرسانی نقش');
+        throw new Error(result.message || t("roles.updateError"));
       }
-    } catch (error) {
-      console.error('خطا در به‌روزرسانی نقش:', error);
-      alert('خطا در به‌روزرسانی نقش: ' + error.message);
+    } catch (err) {
+      console.error("Error updating role:", err);
+      alert(t("roles.updateErrorAlert", { message: err.message }));
     } finally {
       setSaving(false);
     }
@@ -98,7 +100,7 @@ export default function EditRolePage({ params }) {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بارگذاری...</p>
+          <p className="text-gray-600">{t("roles.loading")}</p>
         </div>
       </div>
     );
@@ -108,12 +110,12 @@ export default function EditRolePage({ params }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">نقش مورد نظر یافت نشد</p>
+          <p className="text-red-600 mb-4">{t("roles.notFound")}</p>
           <button
-            onClick={() => router.push('/dashboard/user-management/roles')}
+            onClick={() => router.push("/dashboard/user-management/roles")}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            بازگشت به لیست نقش‌ها
+            {t("roles.backToList")}
           </button>
         </div>
       </div>
@@ -123,15 +125,14 @@ export default function EditRolePage({ params }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* هدر صفحه */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">ویرایش نقش</h1>
-              <p className="mt-2 text-gray-600">اطلاعات نقش را ویرایش کنید</p>
+              <h1 className="text-3xl font-bold text-gray-900">{t("roles.editTitle")}</h1>
+              <p className="mt-2 text-gray-600">{t("roles.editSubtitle")}</p>
             </div>
             <button
-              onClick={() => router.push('/dashboard/user-management/roles')}
+              onClick={() => router.push("/dashboard/user-management/roles")}
               className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,14 +142,12 @@ export default function EditRolePage({ params }) {
           </div>
         </div>
 
-        {/* فرم ویرایش */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <form onSubmit={handleSubmit} className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* نام نقش (انگلیسی) */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  نام نقش (انگلیسی) *
+                  {t("roles.nameEnLabel")}
                 </label>
                 <input
                   type="text"
@@ -158,14 +157,13 @@ export default function EditRolePage({ params }) {
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="مثال: admin"
+                  placeholder={t("roles.namePlaceholder")}
                 />
               </div>
 
-              {/* نام نقش (فارسی) */}
               <div>
                 <label htmlFor="nameFa" className="block text-sm font-medium text-gray-700 mb-2">
-                  نام نقش (فارسی) *
+                  {t("roles.nameFaLabel")}
                 </label>
                 <input
                   type="text"
@@ -175,14 +173,13 @@ export default function EditRolePage({ params }) {
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="مثال: مدیر سیستم"
+                  placeholder={t("roles.nameFaPlaceholder")}
                 />
               </div>
 
-              {/* نام نمایشی انگلیسی */}
               <div>
                 <label htmlFor="nameEn" className="block text-sm font-medium text-gray-700 mb-2">
-                  نام نمایشی (انگلیسی)
+                  {t("roles.displayNameEn")}
                 </label>
                 <input
                   type="text"
@@ -191,14 +188,13 @@ export default function EditRolePage({ params }) {
                   value={formData.nameEn}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="مثال: admin یا super_admin"
+                  placeholder={t("roles.nameEnPlaceholder")}
                 />
               </div>
 
-              {/* توضیحات */}
               <div className="md:col-span-2">
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                  توضیحات
+                  {t("roles.description")}
                 </label>
                 <textarea
                   id="description"
@@ -207,19 +203,18 @@ export default function EditRolePage({ params }) {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                  placeholder="توضیحات مربوط به نقش..."
+                  placeholder={t("roles.descriptionPlaceholder")}
                 />
               </div>
             </div>
 
-            {/* دکمه‌های عملیات */}
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse pt-6 border-t border-gray-200 mt-8">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard/user-management/roles')}
+                onClick={() => router.push("/dashboard/user-management/roles")}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
               >
-                لغو
+                {t("roles.cancel")}
               </button>
               <button
                 type="submit"
@@ -229,10 +224,10 @@ export default function EditRolePage({ params }) {
                 {saving ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>در حال ذخیره...</span>
+                    <span>{t("form.saving")}</span>
                   </div>
                 ) : (
-                  'ذخیره تغییرات'
+                  t("form.saveChanges")
                 )}
               </button>
             </div>

@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
-const InventoryPricingManager = ({ 
+const InventoryPricingManager = ({
   inventoryLot, 
   onPricingUpdate,
   className = "" 
 }) => {
+  const t = useTranslations('home.pricingManager');
   const [tieredPricing, setTieredPricing] = useState([]);
   const [minimumOrderQuantity, setMinimumOrderQuantity] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,7 +59,7 @@ const InventoryPricingManager = ({
       );
 
       if (validTiers.length === 0 && !minimumOrderQuantity) {
-        setError('حداقل یک سطح قیمت یا حداقل سفارش تعریف کنید');
+        setError(t('minTierRequired'));
         setLoading(false);
         return;
       }
@@ -76,15 +78,15 @@ const InventoryPricingManager = ({
       const result = await response.json();
 
       if (result.success) {
-        setSuccess('قیمت‌گذاری با موفقیت ذخیره شد');
+        setSuccess(t('saveSuccess'));
         if (onPricingUpdate) {
           onPricingUpdate(result.data);
         }
       } else {
-        setError(result.message || 'خطا در ذخیره قیمت‌گذاری');
+        setError(result.message || t('saveError'));
       }
     } catch (err) {
-      setError('خطا در ارتباط با سرور');
+      setError(t('serverError'));
     } finally {
       setLoading(false);
     }
@@ -95,26 +97,26 @@ const InventoryPricingManager = ({
       {/* Header */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          مدیریت قیمت‌گذاری موجودی
+          {t('title')}
         </h3>
         
         {/* Inventory Info */}
         <div className="bg-gray-50 rounded-lg p-4 mb-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600">محصول:</span>
-              <span className="font-medium mr-2">محصول {inventoryLot?.productId}</span>
+              <span className="text-gray-600">{t('productLabel')}</span>
+              <span className="font-medium mr-2">{t('productFallback', { id: inventoryLot?.productId })}</span>
             </div>
             <div>
-              <span className="text-gray-600">درجه کیفیت:</span>
+              <span className="text-gray-600">{t('qualityGradeLabel')}</span>
               <span className="font-medium mr-2">{inventoryLot?.qualityGrade}</span>
             </div>
             <div>
-              <span className="text-gray-600">واحد:</span>
+              <span className="text-gray-600">{t('unitLabel')}</span>
               <span className="font-medium mr-2">{inventoryLot?.unit}</span>
             </div>
             <div>
-              <span className="text-gray-600">موجودی کل:</span>
+              <span className="text-gray-600">{t('totalStockLabel')}</span>
               <span className="font-medium mr-2">{inventoryLot?.totalQuantity} {inventoryLot?.unit}</span>
             </div>
           </div>
@@ -123,7 +125,7 @@ const InventoryPricingManager = ({
         {/* Minimum Order Quantity */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            حداقل سفارش ({inventoryLot?.unit})
+            {t('minOrderLabel', { unit: inventoryLot?.unit })}
           </label>
           <input
             type="number"
@@ -132,44 +134,44 @@ const InventoryPricingManager = ({
             min="0"
             step="0.1"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="حداقل مقدار سفارش را وارد کنید"
+            placeholder={t('minOrderPlaceholder')}
           />
         </div>
 
         {/* Tiered Pricing */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-md font-medium text-gray-900">قیمت‌گذاری پلکانی</h4>
+            <h4 className="text-md font-medium text-gray-900">{t('tieredTitle')}</h4>
             <button
               onClick={addPricingTier}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
             >
-              + اضافه کردن سطح قیمت
+              {t('addTierButton')}
             </button>
           </div>
 
           {tieredPricing.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>هنوز سطح قیمتی تعریف نشده است</p>
-              <p className="text-sm">روی دکمه بالا کلیک کنید تا اولین سطح را اضافه کنید</p>
+              <p>{t('noTiersYet')}</p>
+              <p className="text-sm">{t('addFirstTierHint')}</p>
             </div>
           ) : (
             <div className="space-y-3">
               {tieredPricing.map((tier, index) => (
                 <div key={index} className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-700">سطح {index + 1}</span>
+                    <span className="text-sm font-medium text-gray-700">{t('level', { index: index + 1 })}</span>
                     <button
                       onClick={() => removePricingTier(index)}
                       className="text-red-600 hover:text-red-800 text-sm"
                     >
-                      حذف
+                      {t('remove')}
                     </button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">حداقل مقدار</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('minQty')}</label>
                       <input
                         type="number"
                         value={tier.minQuantity}
@@ -182,7 +184,7 @@ const InventoryPricingManager = ({
                     </div>
                     
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">حداکثر مقدار</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('maxQty')}</label>
                       <input
                         type="number"
                         value={tier.maxQuantity}
@@ -190,12 +192,12 @@ const InventoryPricingManager = ({
                         min="0"
                         step="0.1"
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="خالی = نامحدود"
+                        placeholder={t('unlimitedPlaceholder')}
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">قیمت هر {inventoryLot?.unit}</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('pricePerUnit', { unit: inventoryLot?.unit })}</label>
                       <input
                         type="number"
                         value={tier.pricePerUnit}
@@ -208,13 +210,13 @@ const InventoryPricingManager = ({
                     </div>
                     
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">توضیحات</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('description')}</label>
                       <input
                         type="text"
                         value={tier.description}
                         onChange={(e) => updatePricingTier(index, 'description', e.target.value)}
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="توضیحات اختیاری"
+                        placeholder={t('descriptionPlaceholder')}
                       />
                     </div>
                   </div>
@@ -254,7 +256,7 @@ const InventoryPricingManager = ({
             disabled={loading}
             className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'در حال ذخیره...' : 'ذخیره قیمت‌گذاری'}
+            {loading ? t('saving') : t('save')}
           </button>
         </div>
       </div>

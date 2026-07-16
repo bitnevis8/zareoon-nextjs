@@ -1,24 +1,139 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { API_ENDPOINTS } from '../../config/api';
 import { useRequireAdmin } from '@/app/hooks/useDashboardRole';
 
+const ORDER_STATUS_KEYS = [
+  'pending',
+  'reserved',
+  'approved',
+  'assigned',
+  'preparing',
+  'ready',
+  'shipped',
+  'delivered',
+  'completed',
+  'cancelled',
+];
+
+const ITEM_STATUS_KEYS = [
+  'pending',
+  'approved',
+  'processing',
+  'shipped',
+  'delivered',
+  'cancelled',
+  'rejected',
+];
+
 export default function OrderManagementPage() {
+  const t = useTranslations('order');
+  const tCommon = useTranslations('common');
   const { allowed, loading: authLoading } = useRequireAdmin();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
+  const getCustomerDisplay = (customer) => {
+    if (!customer) return t('unknown');
+    const name = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+    return name || customer.email || t('unknown');
+  };
+
+  const getSupplierDisplay = (item) => {
+    const firstName =
+      item.inventoryLot?.supplier?.firstName ||
+      item.inventoryLot?.farmer?.firstName ||
+      t('nameNotFound');
+    const lastName =
+      item.inventoryLot?.supplier?.lastName ||
+      item.inventoryLot?.farmer?.lastName ||
+      '';
+    return `${firstName} ${lastName}`.trim();
+  };
+
+  const getMobileDisplay = (item) =>
+    item.inventoryLot?.supplier?.mobile ||
+    item.inventoryLot?.supplier?.phone ||
+    item.inventoryLot?.farmer?.mobile ||
+    item.inventoryLot?.farmer?.phone ||
+    t('emDash');
+
+  const renderItemStatusOptions = () =>
+    ITEM_STATUS_KEYS.map((key) => (
+      <option key={key} value={key}>
+        {t(`itemStatus.${key}`)}
+      </option>
+    ));
+
+  const renderOrderStatusOptions = () =>
+    ORDER_STATUS_KEYS.map((key) => (
+      <option key={key} value={key}>
+        {t(`status.${key}`)}
+      </option>
+    ));
+
+  const handleItemStatusChange = async (item, newStatus, onSuccess) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.supplier.orders.updateItemStatus(item.id), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          status: newStatus,
+          notes: item.statusNotes || '',
+        }),
+      });
+      if (response.ok) {
+        alert(onSuccess);
+        loadOrders();
+      } else {
+        alert(t('updateStatusError'));
+      }
+    } catch (error) {
+      console.error('Error updating item status:', error);
+      alert(t('updateStatusError'));
+    }
+  };
+
+  const handleRequestItemStatusChange = async (item, newStatus) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.supplier.orders.updateRequestItemStatus(item.id), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          status: newStatus,
+          notes: item.statusNotes || '',
+        }),
+      });
+      if (response.ok) {
+        alert(t('management.requestItemStatusUpdated'));
+        loadOrders();
+      } else {
+        alert(t('updateStatusError'));
+      }
+    } catch (error) {
+      console.error('Error updating request item status:', error);
+      alert(t('updateStatusError'));
+    }
+  };
+
   // Load orders
   const loadOrders = async () => {
     try {
       setLoading(true);
       const response = await fetch(API_ENDPOINTS.supplier.orders.getAdminOrders, {
-        credentials: 'include'
+        credentials: 'include',
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setOrders(data.data || []);
@@ -32,7 +147,6 @@ export default function OrderManagementPage() {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (allowed) loadOrders();
@@ -48,21 +162,25 @@ export default function OrderManagementPage() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          supplierId: supplierId || 'auto', // Use 'auto' if no supplierId provided
-          notes
-        })
+          supplierId: supplierId || 'auto',
+          notes,
+        }),
       });
 
       if (response.ok) {
-        alert('سفارش تایید شد و به تامین‌کننده ارسال شد');
+        alert(t('management.approveSuccess'));
         loadOrders();
       } else {
         const errorData = await response.json();
-        alert(`خطا در تایید سفارش: ${errorData.message || 'خطای نامشخص'}`);
+        alert(
+          t('management.approveError', {
+            message: errorData.message || t('unknownError'),
+          })
+        );
       }
     } catch (error) {
       console.error('Error approving order:', error);
-      alert('خطا در تایید سفارش');
+      alert(t('management.approveErrorGeneric'));
     }
   };
 
@@ -77,62 +195,54 @@ export default function OrderManagementPage() {
         credentials: 'include',
         body: JSON.stringify({
           status,
-          notes
-        })
+          notes,
+        }),
       });
 
       if (response.ok) {
-        alert('وضعیت سفارش به‌روزرسانی شد');
+        alert(t('management.statusUpdated'));
         loadOrders();
         setShowStatusModal(false);
         setSelectedOrder(null);
       } else {
-        alert('خطا در به‌روزرسانی وضعیت');
+        alert(t('updateStatusError'));
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('خطا در به‌روزرسانی وضعیت');
+      alert(t('updateStatusError'));
+    }
+  };
+
+  const handleApproveClick = (orderId) => {
+    if (confirm(t('management.approveConfirm'))) {
+      approveOrder(orderId, null, t('management.autoApproveNote'));
     }
   };
 
   // Get status badge class
   const getStatusClass = (status) => {
     const statusClasses = {
-      'pending': 'bg-yellow-100 text-yellow-800',
-      'reserved': 'bg-blue-100 text-blue-800',
-      'approved': 'bg-green-100 text-green-800',
-      'assigned': 'bg-purple-100 text-purple-800',
-      'preparing': 'bg-orange-100 text-orange-800',
-      'ready': 'bg-cyan-100 text-cyan-800',
-      'shipped': 'bg-indigo-100 text-indigo-800',
-      'delivered': 'bg-emerald-100 text-emerald-800',
-      'completed': 'bg-gray-100 text-gray-800',
-      'cancelled': 'bg-red-100 text-red-800'
+      pending: 'bg-yellow-100 text-yellow-800',
+      reserved: 'bg-blue-100 text-blue-800',
+      approved: 'bg-green-100 text-green-800',
+      assigned: 'bg-purple-100 text-purple-800',
+      preparing: 'bg-orange-100 text-orange-800',
+      ready: 'bg-cyan-100 text-cyan-800',
+      shipped: 'bg-indigo-100 text-indigo-800',
+      delivered: 'bg-emerald-100 text-emerald-800',
+      completed: 'bg-gray-100 text-gray-800',
+      cancelled: 'bg-red-100 text-red-800',
     };
     return statusClasses[status] || 'bg-gray-100 text-gray-800';
   };
 
-  // Get status text in Persian
-  const getStatusText = (status) => {
-    const statusTexts = {
-      'pending': 'در انتظار',
-      'reserved': 'رزرو شده',
-      'approved': 'تایید شده',
-      'assigned': 'تخصیص یافته',
-      'preparing': 'آماده‌سازی',
-      'ready': 'آماده',
-      'shipped': 'ارسال شده',
-      'delivered': 'تحویل داده شده',
-      'completed': 'تکمیل شده',
-      'cancelled': 'لغو شده'
-    };
-    return statusTexts[status] || status;
-  };
+  const getStatusText = (status) =>
+    ORDER_STATUS_KEYS.includes(status) ? t(`status.${status}`) : status;
 
   if (authLoading || !allowed) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg">در حال بررسی دسترسی...</div>
+        <div className="text-lg">{t('checkingAccess')}</div>
       </div>
     );
   }
@@ -140,14 +250,14 @@ export default function OrderManagementPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg">در حال بارگذاری...</div>
+        <div className="text-lg">{t('loading')}</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">مدیریت و تأیید سفارشات ثبت‌شده توسط مشتریان</p>
+      <p className="text-sm text-slate-600">{t('management.subtitle')}</p>
 
       {/* Orders Table - Mobile First Design */}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -157,19 +267,19 @@ export default function OrderManagementPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  شماره سفارش
+                  {t('management.colOrderNumber')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  مشتری
+                  {t('management.colCustomer')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  تاریخ
+                  {t('management.colDate')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  آیتم‌ها
+                  {t('management.colItems')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  عملیات
+                  {t('management.colActions')}
                 </th>
               </tr>
             </thead>
@@ -180,12 +290,7 @@ export default function OrderManagementPage() {
                     #{order.id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.customer ? 
-                      `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() || 
-                      order.customer.email || 
-                      'نامشخص' : 
-                      'نامشخص'
-                    }
+                    {getCustomerDisplay(order.customer)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {new Date(order.createdAt).toLocaleDateString('fa-IR')}
@@ -197,111 +302,80 @@ export default function OrderManagementPage() {
                         <div key={index} className="text-xs bg-blue-50 p-3 rounded mb-2 border">
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <span className="font-medium text-blue-600">آیتم #{index + 1}</span>
+                              <span className="font-medium text-blue-600">
+                                {t('management.itemLabel', { index: index + 1 })}
+                              </span>
                               <span className="text-gray-600 mr-2">- {item.product?.name}</span>
                             </div>
-                            <select 
+                            <select
                               className="border rounded px-2 py-1 text-xs"
                               defaultValue={item.status || 'pending'}
-                              onChange={async (e) => {
-                                const newStatus = e.target.value;
-                                try {
-                                  const response = await fetch(API_ENDPOINTS.supplier.orders.updateItemStatus(item.id), {
-                                    method: 'PATCH',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    credentials: 'include',
-                                    body: JSON.stringify({
-                                      status: newStatus,
-                                      notes: item.statusNotes || ''
-                                    })
-                                  });
-                                  if (response.ok) {
-                                    alert('وضعیت آیتم به‌روزرسانی شد');
-                                    loadOrders();
-                                  } else {
-                                    alert('خطا در به‌روزرسانی وضعیت');
-                                  }
-                                } catch (error) {
-                                  console.error('Error updating item status:', error);
-                                  alert('خطا در به‌روزرسانی وضعیت');
-                                }
-                              }}
+                              onChange={(e) =>
+                                handleItemStatusChange(
+                                  item,
+                                  e.target.value,
+                                  t('management.itemStatusUpdated')
+                                )
+                              }
                             >
-                              <option value="pending">در انتظار</option>
-                              <option value="approved">تایید شده</option>
-                              <option value="processing">در حال پردازش</option>
-                              <option value="shipped">ارسال شده</option>
-                              <option value="delivered">تحویل داده شده</option>
-                              <option value="cancelled">لغو شده</option>
-                              <option value="rejected">رد شده</option>
+                              {renderItemStatusOptions()}
                             </select>
                           </div>
                           <div className="text-gray-600">
-                            <span>درجه: {item.inventoryLot?.qualityGrade}</span>
-                            <span className="mr-4">مقدار: {item.quantity} {item.product?.unit}</span>
+                            <span>
+                              {t('grade')}: {item.inventoryLot?.qualityGrade}
+                            </span>
+                            <span className="mr-4">
+                              {t('quantity')}: {item.quantity} {item.product?.unit}
+                            </span>
                           </div>
                           <div className="text-gray-600 mt-1">
-                            <span>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</span>
-                            <span className="mr-4">موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</span>
+                            <span>
+                              {t('supplier')}: {getSupplierDisplay(item)}
+                            </span>
+                            <span className="mr-4">
+                              {t('mobile')}: {getMobileDisplay(item)}
+                            </span>
                           </div>
                         </div>
                       ))}
-                      
+
                       {/* Order Request Items */}
                       {order.requestItems?.map((item, index) => (
-                        <div key={index} className="text-xs bg-yellow-50 p-3 rounded mb-2 border border-yellow-200">
+                        <div
+                          key={index}
+                          className="text-xs bg-yellow-50 p-3 rounded mb-2 border border-yellow-200"
+                        >
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <span className="font-medium text-orange-600">درخواست #{index + 1}</span>
+                              <span className="font-medium text-orange-600">
+                                {t('management.requestLabel', { index: index + 1 })}
+                              </span>
                               <span className="text-gray-600 mr-2">- {item.product?.name}</span>
                             </div>
-                            <select 
+                            <select
                               className="border rounded px-2 py-1 text-xs"
                               defaultValue={item.status || 'pending'}
-                              onChange={async (e) => {
-                                const newStatus = e.target.value;
-                                try {
-                                  const response = await fetch(API_ENDPOINTS.supplier.orders.updateRequestItemStatus(item.id), {
-                                    method: 'PATCH',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    credentials: 'include',
-                                    body: JSON.stringify({
-                                      status: newStatus,
-                                      notes: item.statusNotes || ''
-                                    })
-                                  });
-                                  if (response.ok) {
-                                    alert('وضعیت آیتم درخواست به‌روزرسانی شد');
-                                    loadOrders();
-                                  } else {
-                                    alert('خطا در به‌روزرسانی وضعیت');
-                                  }
-                                } catch (error) {
-                                  console.error('Error updating request item status:', error);
-                                  alert('خطا در به‌روزرسانی وضعیت');
-                                }
-                              }}
+                              onChange={(e) => handleRequestItemStatusChange(item, e.target.value)}
                             >
-                              <option value="pending">در انتظار</option>
-                              <option value="approved">تایید شده</option>
-                              <option value="processing">در حال پردازش</option>
-                              <option value="shipped">ارسال شده</option>
-                              <option value="delivered">تحویل داده شده</option>
-                              <option value="cancelled">لغو شده</option>
-                              <option value="rejected">رد شده</option>
+                              {renderItemStatusOptions()}
                             </select>
                           </div>
                           <div className="text-gray-600">
-                            <span>درجه: {item.qualityGrade}</span>
-                            <span className="mr-4">مقدار: {item.quantity} {item.product?.unit}</span>
+                            <span>
+                              {t('grade')}: {item.qualityGrade}
+                            </span>
+                            <span className="mr-4">
+                              {t('quantity')}: {item.quantity} {item.product?.unit}
+                            </span>
                           </div>
                           <div className="text-gray-600 mt-1">
-                            <span>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</span>
-                            <span className="mr-4">موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</span>
+                            <span>
+                              {t('supplier')}: {getSupplierDisplay(item)}
+                            </span>
+                            <span className="mr-4">
+                              {t('mobile')}: {getMobileDisplay(item)}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -310,14 +384,10 @@ export default function OrderManagementPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {order.status === 'pending' && (
                       <button
-                        onClick={() => {
-                          if (confirm('آیا مطمئن هستید که می‌خواهید این سفارش را تایید کنید؟')) {
-                            approveOrder(order.id, null, 'تایید خودکار - تامین‌کننده از روی بچ مشخص است');
-                          }
-                        }}
+                        onClick={() => handleApproveClick(order.id)}
                         className="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded text-xs"
                       >
-                        تایید سفارش
+                        {t('management.approveOrder')}
                       </button>
                     )}
                   </td>
@@ -333,29 +403,20 @@ export default function OrderManagementPage() {
             <div key={order.id} className="bg-white border-b border-gray-200 p-4">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">سفارش #{order.id}</h3>
-                  <p className="text-sm text-gray-600">
-                    {order.customer ? 
-                      `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() || 
-                      order.customer.email || 
-                      'نامشخص' : 
-                      'نامشخص'
-                    }
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('management.orderTitle', { id: order.id })}
+                  </h3>
+                  <p className="text-sm text-gray-600">{getCustomerDisplay(order.customer)}</p>
                   <p className="text-xs text-gray-500 mt-1">
                     {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                   </p>
                 </div>
                 {order.status === 'pending' && (
                   <button
-                    onClick={() => {
-                      if (confirm('آیا مطمئن هستید که می‌خواهید این سفارش را تایید کنید؟')) {
-                        approveOrder(order.id, null, 'تایید خودکار - تامین‌کننده از روی بچ مشخص است');
-                      }
-                    }}
+                    onClick={() => handleApproveClick(order.id)}
                     className="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded text-xs"
                   >
-                    تایید سفارش
+                    {t('management.approveOrder')}
                   </button>
                 )}
               </div>
@@ -366,107 +427,73 @@ export default function OrderManagementPage() {
                   <div key={index} className="bg-blue-50 p-3 rounded border">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <span className="font-medium text-blue-600 text-sm">آیتم #{index + 1}</span>
+                        <span className="font-medium text-blue-600 text-sm">
+                          {t('management.itemLabel', { index: index + 1 })}
+                        </span>
                         <span className="text-gray-600 text-sm mr-2">- {item.product?.name}</span>
                       </div>
-                      <select 
+                      <select
                         className="border rounded px-2 py-1 text-xs"
                         defaultValue={item.status || 'pending'}
-                        onChange={async (e) => {
-                          const newStatus = e.target.value;
-                          try {
-                            const response = await fetch(API_ENDPOINTS.supplier.orders.updateItemStatus(item.id), {
-                              method: 'PATCH',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              credentials: 'include',
-                              body: JSON.stringify({
-                                status: newStatus,
-                                notes: item.statusNotes || ''
-                              })
-                            });
-                            if (response.ok) {
-                              alert('وضعیت آیتم به‌روزرسانی شد');
-                              loadOrders();
-                            } else {
-                              alert('خطا در به‌روزرسانی وضعیت');
-                            }
-                          } catch (error) {
-                            console.error('Error updating item status:', error);
-                            alert('خطا در به‌روزرسانی وضعیت');
-                          }
-                        }}
+                        onChange={(e) =>
+                          handleItemStatusChange(
+                            item,
+                            e.target.value,
+                            t('management.itemStatusUpdated')
+                          )
+                        }
                       >
-                        <option value="pending">در انتظار</option>
-                        <option value="approved">تایید شده</option>
-                        <option value="processing">در حال پردازش</option>
-                        <option value="shipped">ارسال شده</option>
-                        <option value="delivered">تحویل داده شده</option>
-                        <option value="cancelled">لغو شده</option>
-                        <option value="rejected">رد شده</option>
+                        {renderItemStatusOptions()}
                       </select>
                     </div>
                     <div className="text-gray-600 text-xs space-y-1">
-                      <div>درجه: {item.inventoryLot?.qualityGrade}</div>
-                      <div>مقدار: {item.quantity} {item.product?.unit}</div>
-                      <div>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</div>
-                      <div>موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</div>
+                      <div>
+                        {t('grade')}: {item.inventoryLot?.qualityGrade}
+                      </div>
+                      <div>
+                        {t('quantity')}: {item.quantity} {item.product?.unit}
+                      </div>
+                      <div>
+                        {t('supplier')}: {getSupplierDisplay(item)}
+                      </div>
+                      <div>
+                        {t('mobile')}: {getMobileDisplay(item)}
+                      </div>
                     </div>
                   </div>
                 ))}
-                
+
                 {/* Order Request Items */}
                 {order.requestItems?.map((item, index) => (
                   <div key={index} className="bg-yellow-50 p-3 rounded border border-yellow-200">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <span className="font-medium text-orange-600 text-sm">درخواست #{index + 1}</span>
+                        <span className="font-medium text-orange-600 text-sm">
+                          {t('management.requestLabel', { index: index + 1 })}
+                        </span>
                         <span className="text-gray-600 text-sm mr-2">- {item.product?.name}</span>
                       </div>
-                      <select 
+                      <select
                         className="border rounded px-2 py-1 text-xs"
                         defaultValue={item.status || 'pending'}
-                        onChange={async (e) => {
-                          const newStatus = e.target.value;
-                          try {
-                            const response = await fetch(API_ENDPOINTS.supplier.orders.updateRequestItemStatus(item.id), {
-                              method: 'PATCH',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              credentials: 'include',
-                              body: JSON.stringify({
-                                status: newStatus,
-                                notes: item.statusNotes || ''
-                              })
-                            });
-                            if (response.ok) {
-                              alert('وضعیت آیتم درخواست به‌روزرسانی شد');
-                              loadOrders();
-                            } else {
-                              alert('خطا در به‌روزرسانی وضعیت');
-                            }
-                          } catch (error) {
-                            console.error('Error updating request item status:', error);
-                            alert('خطا در به‌روزرسانی وضعیت');
-                          }
-                        }}
+                        onChange={(e) => handleRequestItemStatusChange(item, e.target.value)}
                       >
-                        <option value="pending">در انتظار</option>
-                        <option value="approved">تایید شده</option>
-                        <option value="processing">در حال پردازش</option>
-                        <option value="shipped">ارسال شده</option>
-                        <option value="delivered">تحویل داده شده</option>
-                        <option value="cancelled">لغو شده</option>
-                        <option value="rejected">رد شده</option>
+                        {renderItemStatusOptions()}
                       </select>
                     </div>
                     <div className="text-gray-600 text-xs space-y-1">
-                      <div>درجه: {item.qualityGrade}</div>
-                      <div>مقدار: {item.quantity} {item.product?.unit}</div>
-                      <div>تامین‌کننده: {item.inventoryLot?.supplier?.firstName || item.inventoryLot?.farmer?.firstName || 'نام یافت نشد'} {item.inventoryLot?.supplier?.lastName || item.inventoryLot?.farmer?.lastName || ''}</div>
-                      <div>موبایل: {item.inventoryLot?.supplier?.mobile || item.inventoryLot?.supplier?.phone || item.inventoryLot?.farmer?.mobile || item.inventoryLot?.farmer?.phone || '—'}</div>
+                      <div>
+                        {t('grade')}: {item.qualityGrade}
+                      </div>
+                      <div>
+                        {t('quantity')}: {item.quantity} {item.product?.unit}
+                      </div>
+                      <div>
+                        {t('supplier')}: {getSupplierDisplay(item)}
+                      </div>
+                      <div>
+                        {t('mobile')}: {getMobileDisplay(item)}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -476,45 +503,37 @@ export default function OrderManagementPage() {
         </div>
       </div>
 
-
       {/* Status Update Modal */}
       {showStatusModal && selectedOrder && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">تغییر وضعیت سفارش #{selectedOrder.id}</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {t('management.changeStatusTitle', { id: selectedOrder.id })}
+              </h3>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  وضعیت جدید
+                  {t('management.newStatus')}
                 </label>
                 <select
                   id="newStatus"
                   defaultValue={selectedOrder.status}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="pending">در انتظار</option>
-                  <option value="reserved">رزرو شده</option>
-                  <option value="approved">تایید شده</option>
-                  <option value="assigned">تخصیص یافته</option>
-                  <option value="preparing">آماده‌سازی</option>
-                  <option value="ready">آماده</option>
-                  <option value="shipped">ارسال شده</option>
-                  <option value="delivered">تحویل داده شده</option>
-                  <option value="completed">تکمیل شده</option>
-                  <option value="cancelled">لغو شده</option>
+                  {renderOrderStatusOptions()}
                 </select>
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  یادداشت (اختیاری)
+                  {t('management.notesOptional')}
                 </label>
                 <textarea
                   id="statusNotes"
                   rows="3"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="یادداشت‌های اضافی..."
+                  placeholder={t('management.notesPlaceholder')}
                 ></textarea>
               </div>
 
@@ -526,7 +545,7 @@ export default function OrderManagementPage() {
                   }}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
-                  انصراف
+                  {tCommon('cancel')}
                 </button>
                 <button
                   onClick={() => {
@@ -536,7 +555,7 @@ export default function OrderManagementPage() {
                   }}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
-                  به‌روزرسانی
+                  {t('management.update')}
                 </button>
               </div>
             </div>

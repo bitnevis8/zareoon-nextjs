@@ -3,21 +3,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
+import { useLanguage } from '@/app/context/LanguageContext';
 import LoginRequiredMessage from './LoginRequiredMessage';
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth() || { user: null };
+  const { t } = useLanguage();
 
   const menuItems = [
-    { title: 'داشبورد', href: '/dashboard', protected: true },
-    { title: 'سبد خرید', href: '/cart', protected: true },
-    { title: 'حساب کاربری', href: '/dashboard/account', protected: true },
+    { titleKey: 'dashboard', href: '/dashboard', protected: true },
+    { titleKey: 'cart', href: '/cart', protected: true },
+    { titleKey: 'account', href: '/dashboard/account', protected: true },
   ];
 
   return (
     <div className="md:hidden">
-      {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600 transition-colors duration-200"
@@ -31,7 +32,6 @@ export default function MobileMenu() {
         </svg>
       </button>
 
-      {/* Mobile menu */}
       {isOpen && (
         <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
           <div className="px-2 pt-2 pb-3 space-y-1">
@@ -51,17 +51,16 @@ export default function MobileMenu() {
                 onClick={() => setIsOpen(false)}
                 prefetch={true}
               >
-                ورود / ثبت نام
+                {t('loginRegister')}
               </Link>
             )}
 
-            {/* Menu items */}
             {menuItems.map((item) => (
-              <div key={item.title}>
+              <div key={item.titleKey}>
                 {item.protected && !user ? (
                   <LoginRequiredMessage>
                     <div className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 bg-gray-100 cursor-pointer">
-                      {item.title}
+                      {t(item.titleKey)}
                     </div>
                   </LoginRequiredMessage>
                 ) : (
@@ -71,7 +70,7 @@ export default function MobileMenu() {
                     onClick={() => setIsOpen(false)}
                     prefetch={true}
                   >
-                    {item.title}
+                    {t(item.titleKey)}
                   </Link>
                 )}
               </div>
@@ -81,4 +80,4 @@ export default function MobileMenu() {
       )}
     </div>
   );
-} 
+}

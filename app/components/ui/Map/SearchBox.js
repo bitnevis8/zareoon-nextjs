@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 export default function SearchBox({ onSearchSelect, variant = "default", className = "" }) {
+  const t = useTranslations("shared");
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +73,9 @@ export default function SearchBox({ onSearchSelect, variant = "default", classNa
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder={isOverlay ? "جستجوی مکان…" : "جستجوی مکان..."}
+          placeholder={
+            isOverlay ? t("searchBox.placeholderOverlay") : t("searchBox.placeholderDefault")
+          }
           className={inputClass}
           dir="rtl"
         />

@@ -1,0 +1,37 @@
+{
+  "dashboard": "داشبورد",
+  "escrow": "تضمین معاملات و حساب امانی",
+  "cart": "سبد خرید",
+  "myOrders": "سفارشات من",
+  "startSelling": "شروع فروشندگی",
+  "submitRequest": "ثبت درخواست",
+  "myRequests": "درخواست‌های من",
+  "myProducts": "فهرست محصولات من",
+  "newInventory": "ثبت موجودی جدید",
+  "customerOrders": "سفارشات مشتری",
+  "incomingToMyProducts": "مشاهده نیازمندی‌ها به محصولات من",
+  "admin": {
+    "userManagement": "مدیریت کاربران",
+    "usersList": "لیست کاربران",
+    "rolesList": "لیست نقش‌ها",
+    "supplyManagement": "مدیریت تامین",
+    "productCategories": "دسته‌بندی محصولات",
+    "productAttributes": "ویژگی‌های محصولات",
+    "inventoryList": "لیست محصولات",
+    "createInventory": "ثبت موجودی",
+    "orderManagement": "مدیریت سفارش‌ها",
+    "homepageOrder": "ترتیب نمایش",
+    "escrowSettings": "تنظیمات تضمین معاملات",
+    "servicesManagement": "مدیریت خدمات",
+    "providerRequests": "درخواست‌های عضویت",
+    "providersList": "فهرست ارائه‌دهندگان خدمات",
+    "serviceCategories": "دسته‌بندی خدمات",
+    "settings": "تنظیمات"
+  },
+  "sections": {
+    "seller": "فروشنده",
+    "applicant": "متقاضی",
+    "servicesProvider": "ارائه‌دهنده خدمات",
+    "admin": "مدیریت"
+  }
+}

@@ -2,31 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/context/AuthContext";
-import { useLanguage } from "@/app/context/LanguageContext";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
-import { tradeServicesContent } from "@/app/data/tradeServicesCatalog";
+import { useTradeServicesContent } from "@/app/hooks/useTradeServicesContent";
 import { dash } from "./dashboardTheme";
-
-const STEPS = [
-  { id: 1, label: "نوع درخواست" },
-  { id: 2, label: "دسته‌بندی" },
-  { id: 3, label: "جزئیات" },
-];
-
-const REQUEST_TYPES = [
-  {
-    id: "product",
-    label: "متقاضی محصول",
-    desc: "نیاز به خرید یا تأمین کالا دارید؟ فروشندگان همان دسته مطلع می‌شوند.",
-  },
-  {
-    id: "service",
-    label: "متقاضی خدمات",
-    desc: "نیاز به خدمات بازرگانی دارید؟ ارائه‌دهندگان همان حوزه مطلع می‌شوند.",
-  },
-];
 
 function FieldLabel({ children, required }) {
   return (
@@ -59,10 +40,35 @@ function isCategoryNode(p) {
 }
 
 export default function ApplicantRequestForm({ onSubmitted, compact = false, initialRequestType = "" }) {
+  const t = useTranslations("applicant");
   const auth = useAuth();
   const router = useRouter();
-  const { language } = useLanguage();
   const user = auth?.user;
+
+  const steps = useMemo(
+    () => [
+      { id: 1, label: t("steps.requestType") },
+      { id: 2, label: t("steps.category") },
+      { id: 3, label: t("steps.details") },
+    ],
+    [t]
+  );
+
+  const requestTypes = useMemo(
+    () => [
+      {
+        id: "product",
+        label: t("requestTypes.product.label"),
+        desc: t("requestTypes.product.description"),
+      },
+      {
+        id: "service",
+        label: t("requestTypes.service.label"),
+        desc: t("requestTypes.service.description"),
+      },
+    ],
+    [t]
+  );
 
   const [step, setStep] = useState(1);
   const [requestType, setRequestType] = useState("");
@@ -84,10 +90,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  const serviceCatalog = useMemo(
-    () => tradeServicesContent[language] || tradeServicesContent.fa,
-    [language]
-  );
+  const serviceCatalog = useTradeServicesContent();
 
   useEffect(() => {
     authFetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" })
@@ -153,16 +156,16 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
 
   const validateStep = (targetStep) => {
     if (targetStep >= 2 && !requestType) {
-      setError("لطفاً نوع درخواست را انتخاب کنید.");
+      setError(t("errors.selectRequestType"));
       return false;
     }
     if (targetStep >= 3) {
       if (requestType === "product" && !selectedProductCategoryId) {
-        setError("دسته محصول را انتخاب کنید.");
+        setError(t("errors.selectProductCategory"));
         return false;
       }
       if (requestType === "service" && !serviceCategoryId) {
-        setError("دسته خدمات را انتخاب کنید.");
+        setError(t("errors.selectServiceCategory"));
         return false;
       }
     }
@@ -186,7 +189,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
     setSuccess(null);
 
     if (!user) {
-      setError("برای ثبت درخواست باید وارد حساب کاربری شوید.");
+      setError(t("errors.loginRequired"));
       router.push("/auth/login?next=/dashboard/submit-request");
       return;
     }
@@ -197,19 +200,19 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
     }
 
     if (!title.trim()) {
-      setError("عنوان درخواست الزامی است.");
+      setError(t("errors.titleRequired"));
       return;
     }
     if (!description.trim()) {
-      setError("شرح نیاز الزامی است.");
+      setError(t("errors.descriptionRequired"));
       return;
     }
     if (!phone.trim()) {
-      setError("شماره تماس الزامی است.");
+      setError(t("errors.phoneRequired"));
       return;
     }
     if (!categoryLabel) {
-      setError("دسته‌بندی را انتخاب کنید.");
+      setError(t("errors.categoryRequired"));
       setStep(2);
       return;
     }
@@ -240,18 +243,18 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
       try {
         json = await res.json();
       } catch {
-        throw new Error("پاسخ سرور نامعتبر است. لطفاً API را بررسی کنید.");
+        throw new Error(t("errors.invalidServerResponse"));
       }
 
       if (res.status === 401) {
-        throw new Error("نشست شما منقضی شده. دوباره وارد شوید.");
+        throw new Error(t("errors.sessionExpired"));
       }
-      if (!res.ok) throw new Error(json.message || "خطا در ثبت درخواست");
+      if (!res.ok) throw new Error(json.message || t("errors.submitFailed"));
 
       setSuccess(
         json.notifiedCount > 0
-          ? `درخواست ثبت شد و ${json.notifiedCount} فروشنده/ارائه‌دهنده مطلع شد.`
-          : "درخواست ثبت شد. فروشندگان و ارائه‌دهندگان مرتبط از طریق اعلان مطلع می‌شوند."
+          ? t("success.notified", { count: json.notifiedCount })
+          : t("success.submitted")
       );
       setTitle("");
       setDescription("");
@@ -266,7 +269,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
       setServiceSubcategoryId("");
       onSubmitted?.(json.data);
     } catch (err) {
-      setError(err.message || "خطا در ثبت درخواست");
+      setError(err.message || t("errors.submitFailed"));
     } finally {
       setLoading(false);
     }
@@ -278,7 +281,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
         <p className="text-3xl">✓</p>
         <p className="mt-2 text-sm font-semibold text-emerald-800">{success}</p>
         <button type="button" className={`${dash.btnPrimary} mt-4`} onClick={() => setSuccess(null)}>
-          ثبت درخواست جدید
+          {t("form.newRequest")}
         </button>
       </div>
     );
@@ -286,9 +289,8 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
 
   return (
     <div className={`${dash.card} ${dash.cardBody} space-y-5`}>
-      {/* Progress */}
       <div className="flex items-center gap-2">
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <div key={s.id} className="flex flex-1 items-center gap-2">
             <div
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
@@ -300,7 +302,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
             <span className={`hidden text-xs font-medium sm:inline ${step >= s.id ? "text-sky-800" : "text-slate-400"}`}>
               {s.label}
             </span>
-            {i < STEPS.length - 1 ? <div className={`h-0.5 flex-1 ${step > s.id ? "bg-sky-400" : "bg-slate-200"}`} /> : null}
+            {i < steps.length - 1 ? <div className={`h-0.5 flex-1 ${step > s.id ? "bg-sky-400" : "bg-slate-200"}`} /> : null}
           </div>
         ))}
       </div>
@@ -316,12 +318,11 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
         </div>
       ) : null}
 
-      {/* Step 1: Type */}
       {step === 1 ? (
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">ابتدا مشخص کنید به محصول نیاز دارید یا خدمات:</p>
+          <p className="text-sm text-slate-600">{t("form.step1Hint")}</p>
           <div className="grid gap-3 sm:grid-cols-2">
-            {REQUEST_TYPES.map((type) => (
+            {requestTypes.map((type) => (
               <button
                 key={type.id}
                 type="button"
@@ -341,28 +342,25 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
             ))}
           </div>
           <button type="button" onClick={goNext} disabled={!requestType} className={dash.btnPrimary}>
-            ادامه
+            {t("form.continue")}
           </button>
         </div>
       ) : null}
 
-      {/* Step 2: Category */}
       {step === 2 ? (
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            {requestType === "product"
-              ? "دسته محصول مورد نظر را انتخاب کنید تا فروشندگان همان دسته مطلع شوند:"
-              : "دسته خدمات را انتخاب کنید تا ارائه‌دهندگان همان حوزه مطلع شوند:"}
+            {requestType === "product" ? t("form.step2ProductHint") : t("form.step2ServiceHint")}
           </p>
 
           {requestType === "product" ? (
             <>
               <div>
-                <FieldLabel required>دسته محصول</FieldLabel>
+                <FieldLabel required>{t("form.productCategory")}</FieldLabel>
                 {categoriesLoading ? (
-                  <p className="text-sm text-slate-500">در حال بارگذاری دسته‌ها…</p>
+                  <p className="text-sm text-slate-500">{t("form.loadingCategories")}</p>
                 ) : l1ProductCategoriesFallback.length === 0 ? (
-                  <p className="text-sm text-amber-700">دسته محصولی یافت نشد. با پشتیبانی تماس بگیرید.</p>
+                  <p className="text-sm text-amber-700">{t("form.noProductCategories")}</p>
                 ) : (
                   <select
                     className={inputClass}
@@ -372,7 +370,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
                       setProductSubcategoryId("");
                     }}
                   >
-                    <option value="">انتخاب کنید…</option>
+                    <option value="">{t("form.selectPlaceholder")}</option>
                     {l1ProductCategoriesFallback.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -383,13 +381,13 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
               </div>
               {l2ProductCategories.length > 0 ? (
                 <div>
-                  <FieldLabel>زیردسته (دقیق‌تر)</FieldLabel>
+                  <FieldLabel>{t("form.subcategory")}</FieldLabel>
                   <select
                     className={inputClass}
                     value={productSubcategoryId}
                     onChange={(e) => setProductSubcategoryId(e.target.value)}
                   >
-                    <option value="">کل این دسته</option>
+                    <option value="">{t("form.wholeCategory")}</option>
                     {l2ProductCategories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -402,7 +400,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
           ) : (
             <>
               <div>
-                <FieldLabel required>دسته خدمات</FieldLabel>
+                <FieldLabel required>{t("form.serviceCategory")}</FieldLabel>
                 <select
                   className={inputClass}
                   value={serviceCategoryId}
@@ -411,7 +409,7 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
                     setServiceSubcategoryId("");
                   }}
                 >
-                  <option value="">انتخاب کنید…</option>
+                  <option value="">{t("form.selectPlaceholder")}</option>
                   {serviceCatalog.categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.title}
@@ -421,13 +419,13 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
               </div>
               {serviceCategory?.children?.length ? (
                 <div>
-                  <FieldLabel>زیرخدمت (دقیق‌تر)</FieldLabel>
+                  <FieldLabel>{t("form.subservice")}</FieldLabel>
                   <select
                     className={inputClass}
                     value={serviceSubcategoryId}
                     onChange={(e) => setServiceSubcategoryId(e.target.value)}
                   >
-                    <option value="">کل این دسته</option>
+                    <option value="">{t("form.wholeCategory")}</option>
                     {serviceCategory.children.map((sub) => (
                       <option key={sub.id} value={sub.id}>
                         {sub.title}
@@ -441,66 +439,65 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
 
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={goBack} className={dash.btnSecondary}>
-              بازگشت
+              {t("form.back")}
             </button>
             <button type="button" onClick={goNext} className={dash.btnPrimary}>
-              ادامه
+              {t("form.continue")}
             </button>
           </div>
         </div>
       ) : null}
 
-      {/* Step 3: Details */}
       {step === 3 ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="rounded-lg border border-sky-100 bg-sky-50/50 px-3 py-2 text-xs text-sky-900">
-            <span className="font-semibold">{requestType === "product" ? "متقاضی محصول" : "متقاضی خدمات"}</span>
+            <span className="font-semibold">
+              {requestType === "product" ? t("requestTypes.product.label") : t("requestTypes.service.label")}
+            </span>
             {" · "}
             {categoryLabel}
           </div>
 
           <div>
-            <FieldLabel required>عنوان درخواست</FieldLabel>
+            <FieldLabel required>{t("form.title")}</FieldLabel>
             <input
               className={inputClass}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={
-                requestType === "product"
-                  ? "مثلاً: خرید ۵۰ تن گندم درجه یک"
-                  : "مثلاً: نیاز به ترخیص کالا از بندرعباس"
+                requestType === "product" ? t("form.titlePlaceholderProduct") : t("form.titlePlaceholderService")
               }
             />
           </div>
 
           <div>
-            <FieldLabel required>شرح نیاز</FieldLabel>
+            <FieldLabel required>{t("form.description")}</FieldLabel>
             <textarea
               className={`${inputClass} min-h-[96px] resize-y`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="جزئیات، مشخصات فنی، محل تحویل، زمان مورد نیاز و…"
+              placeholder={t("form.descriptionPlaceholder")}
             />
           </div>
 
           {requestType === "product" ? (
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <FieldLabel>مقدار تقریبی</FieldLabel>
+                <FieldLabel>{t("form.approxQuantity")}</FieldLabel>
                 <input
                   className={inputClass}
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  placeholder="مثلاً 100"
+                  placeholder={t("form.quantityPlaceholder")}
                 />
               </div>
               <div>
-                <FieldLabel>واحد</FieldLabel>
+                <FieldLabel>{t("form.unit")}</FieldLabel>
                 <input
                   className={inputClass}
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  placeholder="مثلاً تن"
+                  placeholder={t("form.unitPlaceholder")}
                 />
               </div>
             </div>
@@ -508,11 +505,11 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <FieldLabel required>شماره تماس</FieldLabel>
+              <FieldLabel required>{t("form.phone")}</FieldLabel>
               <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
             <div>
-              <FieldLabel>نام شرکت / سازمان</FieldLabel>
+              <FieldLabel>{t("form.company")}</FieldLabel>
               <input className={inputClass} value={company} onChange={(e) => setCompany(e.target.value)} />
             </div>
           </div>
@@ -524,14 +521,11 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
               checked={allowPhoneContact}
               onChange={(e) => setAllowPhoneContact(e.target.checked)}
             />
-            <span className="text-xs leading-6 text-slate-600">
-              اجازه می‌دهم فروشندگان و ارائه‌دهندگان خدمات با شماره تماس من تماس بگیرند. در هر صورت می‌توانند از
-              چت داخلی استفاده کنند.
-            </span>
+            <span className="text-xs leading-6 text-slate-600">{t("form.allowPhoneContact")}</span>
           </label>
 
           <div>
-            <FieldLabel>توضیحات تکمیلی</FieldLabel>
+            <FieldLabel>{t("form.notes")}</FieldLabel>
             <textarea
               className={`${inputClass} min-h-[72px] resize-y`}
               value={notes}
@@ -541,10 +535,10 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
 
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={goBack} className={dash.btnSecondary}>
-              بازگشت
+              {t("form.back")}
             </button>
             <button type="submit" disabled={loading} className={dash.btnPrimary}>
-              {loading ? "در حال ثبت…" : "ثبت درخواست"}
+              {loading ? t("form.submitting") : t("form.submit")}
             </button>
           </div>
         </form>

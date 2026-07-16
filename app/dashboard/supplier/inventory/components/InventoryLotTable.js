@@ -1,11 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import { localizeStatus } from "@/app/utils/localize";
 import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
 
-export default function InventoryLotTable({ items, products, farmerNameMap, t, onView, onEdit, onMedia, onDelete }) {
+export default function InventoryLotTable({ items, products, farmerNameMap, onView, onEdit, onMedia, onDelete }) {
+  const t = useTranslations("inventory");
+  const tShared = useTranslations("shared");
   const productName = (id) => products.find((p) => p.id === id)?.name || "—";
 
   return (
@@ -15,14 +18,14 @@ export default function InventoryLotTable({ items, products, farmerNameMap, t, o
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
               <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">محصول</th>
-              <th className="px-4 py-3">تامین‌کننده</th>
-              <th className="px-4 py-3">درجه</th>
-              <th className="px-4 py-3">موجودی</th>
-              <th className="px-4 py-3">رزرو</th>
-              <th className="px-4 py-3">قیمت</th>
-              <th className="px-4 py-3">وضعیت</th>
-              <th className="px-4 py-3 text-left">عملیات</th>
+              <th className="px-4 py-3">{t("lot.product")}</th>
+              <th className="px-4 py-3">{t("lot.supplier")}</th>
+              <th className="px-4 py-3">{t("lot.grade")}</th>
+              <th className="px-4 py-3">{t("lot.inventory")}</th>
+              <th className="px-4 py-3">{t("lot.reserved")}</th>
+              <th className="px-4 py-3">{t("lot.price")}</th>
+              <th className="px-4 py-3">{t("lot.status")}</th>
+              <th className="px-4 py-3 text-left">{t("lot.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -47,7 +50,7 @@ export default function InventoryLotTable({ items, products, farmerNameMap, t, o
                     <TieredPricingDisplay tieredPricing={x.tieredPricing} unit={x.unit} />
                   ) : x.price ? (
                     <span className="font-semibold text-emerald-700">
-                      {formatPriceWithCurrency(x.price, x.priceCurrency || x.price_currency)}
+                      {formatPriceWithCurrency(x.price, x.priceCurrency || x.price_currency, tShared)}
                     </span>
                   ) : (
                     <span className="text-slate-400">—</span>
@@ -59,16 +62,16 @@ export default function InventoryLotTable({ items, products, farmerNameMap, t, o
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1">
                     <button type="button" onClick={() => onView(x)} className={`${inv.btnGhost} ${inv.btnView} px-2`}>
-                      مشاهده
+                      {t("lot.view")}
                     </button>
                     <button type="button" onClick={() => onEdit(x)} className={`${inv.btnGhost} ${inv.btnEdit} px-2`}>
-                      ویرایش
+                      {t("lot.edit")}
                     </button>
                     <button type="button" onClick={() => onMedia(x)} className={`${inv.btnGhost} ${inv.btnMedia} px-2`}>
-                      رسانه
+                      {t("lot.media")}
                     </button>
                     <button type="button" onClick={() => onDelete(x.id)} className={`${inv.btnGhost} ${inv.btnDanger} px-2`}>
-                      حذف
+                      {t("lot.delete")}
                     </button>
                   </div>
                 </td>

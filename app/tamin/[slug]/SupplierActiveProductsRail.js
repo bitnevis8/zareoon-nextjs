@@ -2,24 +2,22 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 
 function availableQty(item) {
   return Math.max(0, parseFloat(item.totalQuantity || 0) - parseFloat(item.reservedQuantity || 0));
 }
 
-function formatPrice(item) {
-  if (item.price != null && item.price !== "") {
-    return `${Number(item.price).toLocaleString("fa-IR")} تومان`;
-  }
-  if (item.tieredPricing?.length) return "قیمت پلکانی";
-  return null;
-}
-
 function ProductCard({ item }) {
+  const t = useTranslations("supplier.activeProducts");
   const image = resolveMediaUrl(item.coverImageUrl || item.imageUrl);
   const qty = availableQty(item);
-  const priceLabel = formatPrice(item);
+  const priceLabel = item.price != null && item.price !== ""
+    ? `${Number(item.price).toLocaleString("fa-IR")} ${t("currencyToman")}`
+    : item.tieredPricing?.length
+      ? t("tieredPrice")
+      : null;
   const href = `/catalog/${item.productId}`;
 
   return (
@@ -40,10 +38,10 @@ function ProductCard({ item }) {
         ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{item.name || "محصول"}</h3>
+        <h3 className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{item.name || t("defaultProductName")}</h3>
         {priceLabel ? <p className="text-xs font-semibold text-emerald-700">{priceLabel}</p> : null}
         <p className="text-[11px] text-slate-500">
-          موجودی: {qty.toLocaleString("fa-IR")} {item.unit || ""}
+          {t("stock", { qty: qty.toLocaleString("fa-IR"), unit: item.unit || "" })}
         </p>
         {Array.isArray(item.hashtags) && item.hashtags.length > 0 ? (
           <div className="mt-auto flex flex-wrap gap-1 pt-1">
@@ -60,14 +58,15 @@ function ProductCard({ item }) {
 }
 
 export default function SupplierActiveProductsRail({ products = [] }) {
+  const t = useTranslations("supplier.activeProducts");
   if (!products.length) return null;
 
   return (
     <section className="mt-5 w-full border-y border-slate-200 bg-white py-4 shadow-sm sm:py-5">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-bold text-slate-800 sm:text-base">محصولات فعال</h2>
-          <span className="text-xs text-slate-500">{products.length.toLocaleString("fa-IR")} مورد</span>
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">{t("title")}</h2>
+          <span className="text-xs text-slate-500">{t("count", { count: products.length.toLocaleString("fa-IR") })}</span>
         </div>
         <div
           className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory scroll-smooth [-ms-overflow-style:auto] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300"

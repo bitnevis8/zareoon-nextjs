@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
-import { useLanguage } from "@/app/context/LanguageContext";
+import { useTranslations } from "next-intl";
 import { useRequireSupplierArea } from "@/app/hooks/useDashboardRole";
 import { isSupplier } from "@/app/utils/roles";
 import InventoryCreatePanel from "../components/InventoryCreatePanel";
@@ -21,7 +21,7 @@ export default function InventoryCreatePage() {
   const searchParams = useSearchParams();
   const scope = searchParams.get("scope");
   const { user, allowed, isOwnScope, loading: authLoading } = useRequireSupplierArea(scope);
-  const { t } = useLanguage();
+  const t = useTranslations("inventory");
   const { products, farmerNameMap, reload } = useInventoryLots(user, isOwnScope);
   const { catalogItems, catalogLoading, catalogError, reloadCatalog } = useProductCatalog();
 
@@ -84,11 +84,11 @@ export default function InventoryCreatePage() {
   const create = async (e) => {
     e.preventDefault();
     if (!form.productId) {
-      alert("لطفاً نوع محصول را انتخاب کنید");
+      alert(t("page.alertSelectProduct"));
       return;
     }
     if (!form.totalQuantity) {
-      alert("مقدار کل را وارد کنید");
+      alert(t("page.alertEnterQuantity"));
       return;
     }
     setSaving(true);
@@ -136,7 +136,7 @@ export default function InventoryCreatePage() {
       if (lotId && (pendingImages.length > 0 || pendingVideos.length > 0)) {
         await uploadMediaFiles([...pendingImages, ...pendingVideos], lotId);
       }
-      setSuccessMsg("موجودی با موفقیت ثبت شد");
+      setSuccessMsg(t("page.successCreated"));
       setForm(INITIAL_FORM);
       setAttributeDefs([]);
       setAttributeValues({});
@@ -171,12 +171,12 @@ export default function InventoryCreatePage() {
         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        بازگشت به فهرست
+        {t("page.backToList")}
       </Link>
 
       {successMsg ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800 sm:text-sm">
-          {successMsg} — در حال انتقال به لیست…
+          {successMsg} — {t("page.successRedirecting")}
         </div>
       ) : null}
 
@@ -195,7 +195,6 @@ export default function InventoryCreatePage() {
         setAttributeValues={setAttributeValues}
         loadProductOptions={loadProductOptions}
         loadFarmerOptions={loadFarmerOptions}
-        t={t}
         saving={saving}
         onSubmit={create}
         onAddTier={() => setForm({ ...form, tieredPricing: [...form.tieredPricing, { ...EMPTY_TIER }] })}

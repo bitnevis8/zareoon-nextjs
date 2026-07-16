@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { authFetch } from "@/app/utils/authHeaders";
 import { formatUserDisplayName } from "@/app/components/dashboard/escrowCopy";
 
@@ -14,6 +15,8 @@ export default function EscrowUserSearch({
   excludeUserId,
   disabled = false,
 }) {
+  const t = useTranslations("escrow");
+  const userFallback = t("userFallback");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
@@ -21,8 +24,8 @@ export default function EscrowUserSearch({
   const wrapRef = useRef(null);
 
   useEffect(() => {
-    setQuery(value ? formatUserDisplayName(value) : "");
-  }, [value]);
+    setQuery(value ? formatUserDisplayName(value, userFallback) : "");
+  }, [value, userFallback]);
 
   useEffect(() => {
     if (disabled || !open) return undefined;
@@ -70,7 +73,7 @@ export default function EscrowUserSearch({
 
   const pickUser = (user) => {
     onChange(user);
-    setQuery(formatUserDisplayName(user));
+    setQuery(formatUserDisplayName(user, userFallback));
     setOpen(false);
   };
 
@@ -98,7 +101,7 @@ export default function EscrowUserSearch({
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="نام، نام خانوادگی یا موبایل…"
+          placeholder={t("search.placeholder")}
           className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-50 disabled:text-slate-500"
           autoComplete="off"
         />
@@ -107,7 +110,7 @@ export default function EscrowUserSearch({
             type="button"
             onClick={clearSelection}
             className="absolute left-2 top-1/2 -translate-y-1/2 rounded-md px-1.5 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="پاک کردن انتخاب"
+            aria-label={t("search.clearAria")}
           >
             ×
           </button>
@@ -117,16 +120,14 @@ export default function EscrowUserSearch({
         <ul className="absolute z-30 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
           {queryTooShort ? (
             <li className="px-3 py-2.5 text-xs text-amber-700">
-              حداقل {MIN_QUERY_LENGTH} حرف برای جستجو وارد کنید
+              {t("search.minChars", { count: MIN_QUERY_LENGTH })}
             </li>
           ) : loading ? (
-            <li className="px-3 py-2.5 text-xs text-slate-500">در حال جستجو…</li>
+            <li className="px-3 py-2.5 text-xs text-slate-500">{t("search.searching")}</li>
           ) : trimmed.length < MIN_QUERY_LENGTH ? (
-            <li className="px-3 py-2.5 text-xs text-slate-500">
-              برای یافتن طرف مقابل، نام یا موبایل را وارد کنید
-            </li>
+            <li className="px-3 py-2.5 text-xs text-slate-500">{t("search.hint")}</li>
           ) : results.length === 0 ? (
-            <li className="px-3 py-2.5 text-xs text-slate-500">کاربری یافت نشد</li>
+            <li className="px-3 py-2.5 text-xs text-slate-500">{t("search.noResults")}</li>
           ) : (
             results.map((user) => (
               <li key={user.id}>
@@ -136,7 +137,7 @@ export default function EscrowUserSearch({
                   className="flex w-full flex-col items-start gap-0.5 px-3 py-2.5 text-right hover:bg-slate-50"
                 >
                   <span className="text-sm font-semibold text-slate-900">
-                    {formatUserDisplayName(user)}
+                    {formatUserDisplayName(user, userFallback)}
                   </span>
                   <span className="text-[11px] text-slate-500" dir="ltr">
                     {[user.mobile, user.username].filter(Boolean).join(" · ")}

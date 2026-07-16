@@ -1,18 +1,20 @@
-/** Supported storefront languages (UI + catalog title fields). */
+/** Supported storefront languages — labels from messages/fa/languages.json */
+import languageLabels from "../../messages/fa/languages.json";
+
 export const SITE_LANGUAGES = [
-  { code: "fa", label: "فارسی", shortLabel: "Fa", countryCode: "IR" },
-  { code: "en", label: "English", shortLabel: "En", countryCode: "GB" },
-  { code: "ru", label: "Русский", shortLabel: "Ru", countryCode: "RU" },
-  { code: "ar", label: "العربية", shortLabel: "Ar", countryCode: "SA" },
-  { code: "tr", label: "Türkçe", shortLabel: "Tr", countryCode: "TR" },
-  { code: "fi", label: "Suomi", shortLabel: "Fi", countryCode: "FI" },
+  { code: "fa", label: languageLabels.fa, shortLabel: "Fa", countryCode: "IR" },
+  { code: "en", label: languageLabels.en, shortLabel: "En", countryCode: "GB" },
+  { code: "ar", label: languageLabels.ar, shortLabel: "Ar", countryCode: "SA" },
+  { code: "ru", label: languageLabels.ru, shortLabel: "Ru", countryCode: "RU" },
+  { code: "ur", label: languageLabels.ur, shortLabel: "Ur", countryCode: "PK" },
+  { code: "fi", label: languageLabels.fi, shortLabel: "Fi", countryCode: "FI" },
 ];
 
-/** Order for stacked homepage intro lines: fa → ar → en → ru → tr → fi */
-export const SITE_INTRO_ORDER = ["fa", "ar", "en", "ru", "tr", "fi"];
+/** Order for stacked homepage intro lines */
+export const SITE_INTRO_ORDER = ["fa", "ar", "en", "ru", "ur", "fi"];
 
 export const SITE_LANGUAGE_CODES = SITE_LANGUAGES.map((item) => item.code);
 
 export function isRtlLanguage(code) {
-  return code === "fa" || code === "ar";
+  return code === "fa" || code === "ar" || code === "ur";
 }

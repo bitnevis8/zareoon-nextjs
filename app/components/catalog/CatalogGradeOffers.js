@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import CatalogGradeMediaPanel from "./CatalogGradeMediaPanel";
 import CatalogGradeLocationPanel from "./CatalogGradeLocationPanel";
 import CatalogProductDescription from "./CatalogProductDescription";
@@ -145,7 +146,6 @@ export default function CatalogGradeOffers({
   item,
   lots = [],
   language,
-  t,
   activeGrade,
   onActiveGradeChange,
   isAdmin,
@@ -163,6 +163,7 @@ export default function CatalogGradeOffers({
   orderMsgType = "info",
   productDescription = "",
 }) {
+  const t = useTranslations("catalog");
   const tabsRef = useRef(null);
   const supplierTabsRef = useRef(null);
   const [activeLotId, setActiveLotId] = useState(null);
@@ -217,7 +218,6 @@ export default function CatalogGradeOffers({
 
   const cardProps = {
     language,
-    t,
     lotMediaPreview,
     openMediaGallery,
     lotQtyById,
@@ -236,7 +236,6 @@ export default function CatalogGradeOffers({
         supplyCountry: item?.supplyCountry || "IR",
         supplyCity: item?.supplyCity || "",
         language,
-        t,
         lotMediaPreview,
         openMediaGallery,
         supplierName: multiSupplier ? activeSupplier?.label : "",
@@ -254,14 +253,13 @@ export default function CatalogGradeOffers({
   })();
 
   const descriptionBlock = hasDescription ? (
-    <CatalogProductDescription description={productDescription} t={t} embedded />
+    <CatalogProductDescription description={productDescription} embedded />
   ) : null;
 
   const locationBlockMobile = activeLot ? (
     <CatalogGradeLocationPanel
       lots={mediaLots}
       language={language}
-      t={t}
       className="px-3 pb-4"
       mapVariant="hero"
       supplyCountry={item?.supplyCountry || "IR"}
@@ -274,7 +272,6 @@ export default function CatalogGradeOffers({
     <CatalogGradeLocationPanel
       lots={mediaLots}
       language={language}
-      t={t}
       mapVariant="full"
       supplyCountry={item?.supplyCountry || "IR"}
       supplyCity={item?.supplyCity || ""}
@@ -313,7 +310,6 @@ export default function CatalogGradeOffers({
         {inventorySummary ? (
           <CatalogInventoryOverview
             summary={inventorySummary}
-            t={t}
             language={language}
             productUnit={productUnit}
             orderMsg={orderMsg}
@@ -372,7 +368,6 @@ export default function CatalogGradeOffers({
         {inventorySummary ? (
           <CatalogInventoryOverview
             summary={inventorySummary}
-            t={t}
             language={language}
             productUnit={productUnit}
             orderMsg={orderMsg}

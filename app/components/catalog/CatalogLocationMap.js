@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import SupplyCountryFlag from "../ui/SupplyCountryFlag";
 import CatalogMapNavButtons from "./CatalogMapNavButtons";
 import { catalogText } from "./catalogTheme";
@@ -12,11 +13,11 @@ export default function CatalogLocationMap({
   longitude,
   label,
   subtitle,
-  t,
   variant = "default",
   supplyCountry = "",
   supplyCity = "",
 }) {
+  const t = useTranslations("catalog");
   const lat = parseFloat(latitude);
   const lng = parseFloat(longitude);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
@@ -74,7 +75,7 @@ export default function CatalogLocationMap({
         className="rounded-none"
       />
 
-      <CatalogMapNavButtons latitude={lat} longitude={lng} t={t} />
+      <CatalogMapNavButtons latitude={lat} longitude={lng} />
     </div>
   );
 }

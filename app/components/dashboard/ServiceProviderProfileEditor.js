@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { API_ENDPOINTS } from "@/app/config/api";
@@ -15,10 +16,10 @@ import TradeProviderServicePicker from "@/app/components/TradeProviderServicePic
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm transition focus:border-sky-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20";
 
-const STATUS = {
-  pending: { text: "در انتظار تأیید", className: "bg-amber-100 text-amber-800 ring-amber-200/80" },
-  approved: { text: "منتشر شده", className: "bg-emerald-100 text-emerald-800 ring-emerald-200/80" },
-  rejected: { text: "رد شده", className: "bg-rose-100 text-rose-800 ring-rose-200/80" },
+const STATUS_KEYS = {
+  pending: { key: "pending", className: "bg-amber-100 text-amber-800 ring-amber-200/80" },
+  approved: { key: "approved", className: "bg-emerald-100 text-emerald-800 ring-emerald-200/80" },
+  rejected: { key: "rejected", className: "bg-rose-100 text-rose-800 ring-rose-200/80" },
 };
 
 function providerToForm(provider, profileFullName) {
@@ -62,16 +63,17 @@ function hydrateFormFromProvider(row, profileFullName, language) {
 }
 
 function DocumentUploader({ documents, onChange }) {
+  const td = useTranslations("supplier.tradeProvider.documents");
   const [uploading, setUploading] = useState(false);
 
   const uploadFile = async (file) => {
     const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
     if (!allowed.includes(file.type)) {
-      showToast.warning("فقط PDF یا تصویر مجاز است");
+      showToast.warning(td("pdfOrImageOnly"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      showToast.warning("حداکثر حجم فایل ۵ مگابایت است");
+      showToast.warning(td("maxFileSize"));
       return;
     }
 
@@ -86,7 +88,7 @@ function DocumentUploader({ documents, onChange }) {
         body: formData,
       });
       const json = await res.json();
-      if (!res.ok || !json.success) throw new Error(json.message || "خطا در آپلود");
+      if (!res.ok || !json.success) throw new Error(json.message || td("uploadError"));
       onChange([
         ...documents,
         {
@@ -95,9 +97,9 @@ function DocumentUploader({ documents, onChange }) {
           url: json.data.downloadUrl || json.data.url,
         },
       ]);
-      showToast.success("مدرک آپلود شد");
+      showToast.success(td("uploadSuccess"));
     } catch (e) {
-      showToast.error(e.message || "خطا در آپلود مدرک");
+      showToast.error(e.message || td("uploadDocError"));
     } finally {
       setUploading(false);
     }
@@ -117,8 +119,8 @@ function DocumentUploader({ documents, onChange }) {
             e.target.value = "";
           }}
         />
-        <p className="text-sm font-semibold text-slate-700">{uploading ? "در حال آپلود…" : "آپلود مدرک"}</p>
-        <p className="mt-1 text-xs text-slate-500">PDF یا تصویر — حداکثر ۵ مگابایت</p>
+        <p className="text-sm font-semibold text-slate-700">{uploading ? td("uploading") : td("uploadLabel")}</p>
+        <p className="mt-1 text-xs text-slate-500">{td("uploadHint")}</p>
       </label>
 
       {documents.length > 0 ? (
@@ -137,7 +139,7 @@ function DocumentUploader({ documents, onChange }) {
                     rel="noopener noreferrer"
                     className="text-[11px] font-semibold text-sky-700 hover:underline"
                   >
-                    مشاهده
+                    {td("view")}
                   </a>
                 ) : null}
                 <button
@@ -145,7 +147,7 @@ function DocumentUploader({ documents, onChange }) {
                   onClick={() => onChange(documents.filter((_, i) => i !== index))}
                   className="text-[11px] font-semibold text-rose-600 hover:underline"
                 >
-                  حذف
+                  {td("remove")}
                 </button>
               </div>
             </li>
@@ -187,20 +189,25 @@ function ProfileViewMode({
   publicHref,
   onEdit,
 }) {
-  const status = STATUS[provider.status] || STATUS.pending;
-  const entityLabel = provider.entityType === "individual" ? "شخص / متخصص" : "شرکت";
+  const te = useTranslations("supplier.tradeProvider.editor");
+  const ts = useTranslations("supplier.tradeProvider");
+  const tst = useTranslations("supplier.tradeProvider.status");
+  const statusMeta = STATUS_KEYS[provider.status] || STATUS_KEYS.pending;
+  const status = { text: tst(statusMeta.key), className: statusMeta.className };
+  const entityLabel =
+    provider.entityType === "individual" ? ts("entityIndividual") : ts("entityCompany");
   const displayName =
     provider.entityType === "individual" ? profileFullName || provider.displayName : provider.displayName;
 
   const groupedServices = useMemo(() => {
     const groups = {};
     serviceItems.forEach((item) => {
-      const key = item.categoryTitle || "سایر";
+      const key = item.categoryTitle || ts("otherCategory");
       if (!groups[key]) groups[key] = [];
       groups[key].push(item.subcategoryTitle);
     });
     return Object.entries(groups);
-  }, [serviceItems]);
+  }, [serviceItems, ts]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 pb-20 sm:pb-4">
@@ -218,21 +225,21 @@ function ProfileViewMode({
                 </span>
               </div>
               <h2 className="text-xl font-black leading-snug sm:text-2xl">{displayName}</h2>
-              <p className="text-sm text-sky-100/90">صفحه اختصاصی خدمات بازرگانی شما در زارعون</p>
+              <p className="text-sm text-sky-100/90">{te("heroSubtitle")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
                 href={publicHref}
                 className="inline-flex h-10 items-center justify-center rounded-xl bg-white/95 px-4 text-sm font-bold text-sky-800 transition hover:bg-white"
               >
-                مشاهده صفحه عمومی
+                {te("viewPublicPage")}
               </Link>
               <button
                 type="button"
                 onClick={onEdit}
                 className="inline-flex h-10 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                ویرایش
+                {te("edit")}
               </button>
             </div>
           </div>
@@ -241,32 +248,30 @@ function ProfileViewMode({
 
       {hasPendingChanges ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
-          تغییرات شما در صف تأیید مدیر است. تا زمان تأیید، صفحه عمومی با اطلاعات قبلی نمایش داده می‌شود.
+          {te("pendingChangesNotice")}
         </div>
       ) : provider.status === "pending" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
-          پروفایل شما در انتظار تأیید مدیر است. پس از تأیید، صفحه عمومی منتشر می‌شود.
+          {te("pendingApprovalNotice")}
         </div>
       ) : null}
 
-      {/* Contact + Services side by side on large screens */}
       <div className="grid gap-4 lg:grid-cols-2">
       <section className={`${dash.card} ${dash.cardBody}`}>
-        <h3 className="mb-3 text-sm font-bold text-slate-900">اطلاعات تماس</h3>
+        <h3 className="mb-3 text-sm font-bold text-slate-900">{te("contactInfo")}</h3>
         <div className="grid gap-3 sm:grid-cols-2">
-          <InfoTile label="نام تماس" value={provider.contactName || profileFullName} />
-          <InfoTile label="تلفن" value={provider.phone} dir="ltr" />
-          <InfoTile label="ایمیل" value={provider.email} dir="ltr" />
+          <InfoTile label={te("contactName")} value={provider.contactName || profileFullName} />
+          <InfoTile label={te("phone")} value={provider.phone} dir="ltr" />
+          <InfoTile label={te("email")} value={provider.email} dir="ltr" />
           <InfoTile
-            label="سابقه فعالیت"
-            value={provider.experienceYears != null ? `${provider.experienceYears} سال` : null}
+            label={te("experience")}
+            value={provider.experienceYears != null ? ts("experienceYears", { years: provider.experienceYears }) : null}
           />
         </div>
       </section>
 
-      {/* Services */}
       <section className={`${dash.card} ${dash.cardBody}`}>
-        <h3 className="mb-3 text-sm font-bold text-slate-900">خدمات ثبت‌شده</h3>
+        <h3 className="mb-3 text-sm font-bold text-slate-900">{te("registeredServices")}</h3>
         {groupedServices.length ? (
           <div className="space-y-4">
             {groupedServices.map(([category, subs]) => (
@@ -286,27 +291,26 @@ function ProfileViewMode({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-slate-500">هنوز خدمتی ثبت نشده است.</p>
+          <p className="text-sm text-slate-500">{te("noServicesYet")}</p>
         )}
       </section>
       </div>
 
-      {/* Details */}
       {(provider.countriesRoutes ||
         provider.licenses ||
         provider.servicesOffered ||
         provider.notes ||
         documents.length > 0) && (
         <section className={`${dash.card} ${dash.cardBody} space-y-3`}>
-          <h3 className="text-sm font-bold text-slate-900">جزئیات و مدارک</h3>
-          <TextBlock label="کشورها / مسیرهای فعالیت" value={provider.countriesRoutes} />
-          <TextBlock label="مجوزها" value={provider.licenses} />
-          <TextBlock label="توضیح خدمات" value={provider.servicesOffered} />
-          <TextBlock label="یادداشت" value={provider.notes} />
+          <h3 className="text-sm font-bold text-slate-900">{te("detailsAndDocs")}</h3>
+          <TextBlock label={te("routes")} value={provider.countriesRoutes} />
+          <TextBlock label={te("licenses")} value={provider.licenses} />
+          <TextBlock label={te("servicesOffered")} value={provider.servicesOffered} />
+          <TextBlock label={te("notes")} value={provider.notes} />
 
           {documents.length > 0 ? (
             <div>
-              <p className="mb-2 text-[11px] font-semibold text-slate-500">مدارک</p>
+              <p className="mb-2 text-[11px] font-semibold text-slate-500">{ts("documents.title")}</p>
               <ul className="space-y-2">
                 {documents.map((doc, i) => (
                   <li
@@ -321,7 +325,7 @@ function ProfileViewMode({
                         rel="noopener noreferrer"
                         className="shrink-0 text-xs font-semibold text-sky-700 hover:underline"
                       >
-                        مشاهده
+                        {ts("documents.view")}
                       </a>
                     ) : null}
                   </li>
@@ -332,14 +336,13 @@ function ProfileViewMode({
         </section>
       )}
 
-      {/* Mobile sticky edit */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur sm:hidden">
         <button
           type="button"
           onClick={onEdit}
           className="flex h-11 w-full items-center justify-center rounded-xl bg-sky-600 text-sm font-bold text-white"
         >
-          ویرایش صفحه خدمات
+          {te("editMobileCta")}
         </button>
       </div>
     </div>
@@ -363,6 +366,8 @@ function ProfileEditMode({
   onCancel,
   publicHref,
 }) {
+  const te = useTranslations("supplier.tradeProvider.editor");
+  const ts = useTranslations("supplier.tradeProvider");
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -371,25 +376,25 @@ function ProfileEditMode({
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-6xl space-y-4 pb-6">
       <div className="rounded-xl border border-sky-100 bg-sky-50/60 px-4 py-3 text-sm leading-7 text-sky-900">
-        پس از ذخیره، تغییرات برای تأیید مدیر ارسال می‌شود و پس از تأیید روی صفحه عمومی اعمال می‌گردد.
+        {te("saveNotice")}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-12 xl:items-start">
         <div className="space-y-4 xl:col-span-5">
           <section className={`${dash.card} ${dash.cardBody}`}>
-            <h2 className="mb-4 text-sm font-bold text-slate-900">مشخصات صفحه</h2>
+            <h2 className="mb-4 text-sm font-bold text-slate-900">{te("pageDetails")}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block sm:col-span-2">
-                <span className="text-sm font-medium text-slate-700">نوع</span>
+                <span className="text-sm font-medium text-slate-700">{te("type")}</span>
                 <select name="entityType" value={form.entityType} onChange={handleChange} className={inputClass}>
-                  <option value="company">شرکت</option>
-                  <option value="individual">شخص / متخصص</option>
+                  <option value="company">{ts("entityCompany")}</option>
+                  <option value="individual">{ts("entityIndividual")}</option>
                 </select>
               </label>
 
               {form.entityType === "company" ? (
                 <label className="block sm:col-span-2">
-                  <span className="text-sm font-medium text-slate-700">نام شرکت *</span>
+                  <span className="text-sm font-medium text-slate-700">{te("companyName")}</span>
                   <input
                     name="displayName"
                     value={form.displayName}
@@ -400,13 +405,13 @@ function ProfileEditMode({
                 </label>
               ) : (
                 <div className="rounded-xl border border-slate-200 bg-slate-100/80 px-4 py-3 sm:col-span-2">
-                  <p className="text-xs font-semibold text-slate-500">نام نمایشی</p>
+                  <p className="text-xs font-semibold text-slate-500">{te("displayName")}</p>
                   <p className="mt-1 text-sm font-medium text-slate-800">{profileFullName}</p>
                 </div>
               )}
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-700">تلفن *</span>
+                <span className="text-sm font-medium text-slate-700">{te("phone")} *</span>
                 <input
                   name="phone"
                   value={form.phone}
@@ -417,7 +422,7 @@ function ProfileEditMode({
                 />
               </label>
               <label className="block">
-                <span className="text-sm font-medium text-slate-700">ایمیل</span>
+                <span className="text-sm font-medium text-slate-700">{te("email")}</span>
                 <input
                   name="email"
                   type="email"
@@ -428,7 +433,7 @@ function ProfileEditMode({
                 />
               </label>
               <label className="block sm:col-span-2">
-                <span className="text-sm font-medium text-slate-700">سابقه (سال)</span>
+                <span className="text-sm font-medium text-slate-700">{te("experienceYears")}</span>
                 <input
                   name="experienceYears"
                   type="number"
@@ -443,17 +448,17 @@ function ProfileEditMode({
           </section>
 
           <section className={`${dash.card} ${dash.cardBody} space-y-4`}>
-            <h2 className="text-sm font-bold text-slate-900">جزئیات و مدارک</h2>
+            <h2 className="text-sm font-bold text-slate-900">{te("detailsAndDocs")}</h2>
             <label className="block">
-              <span className="text-sm font-medium text-slate-700">کشورها / مسیرهای فعالیت</span>
+              <span className="text-sm font-medium text-slate-700">{te("routes")}</span>
               <input name="countriesRoutes" value={form.countriesRoutes} onChange={handleChange} className={inputClass} />
             </label>
             <label className="block">
-              <span className="text-sm font-medium text-slate-700">مجوزها</span>
+              <span className="text-sm font-medium text-slate-700">{te("licenses")}</span>
               <textarea name="licenses" value={form.licenses} onChange={handleChange} rows={2} className={inputClass} />
             </label>
             <label className="block">
-              <span className="text-sm font-medium text-slate-700">توضیح خدمات</span>
+              <span className="text-sm font-medium text-slate-700">{te("servicesOffered")}</span>
               <textarea
                 name="servicesOffered"
                 value={form.servicesOffered}
@@ -463,19 +468,19 @@ function ProfileEditMode({
               />
             </label>
             <label className="block">
-              <span className="text-sm font-medium text-slate-700">یادداشت</span>
+              <span className="text-sm font-medium text-slate-700">{te("notes")}</span>
               <textarea name="notes" value={form.notes} onChange={handleChange} rows={2} className={inputClass} />
             </label>
             <div>
-              <p className="mb-2 text-sm font-medium text-slate-700">مدارک (اختیاری)</p>
+              <p className="mb-2 text-sm font-medium text-slate-700">{ts("documents.optional")}</p>
               <DocumentUploader documents={documents} onChange={setDocuments} />
             </div>
           </section>
         </div>
 
         <section className={`${dash.card} ${dash.cardBody} xl:col-span-7 xl:sticky xl:top-4`}>
-          <h2 className="mb-1 text-sm font-bold text-slate-900">خدمات ارائه‌شده</h2>
-          <p className="mb-4 text-xs text-slate-500">خدمات موردنظر خود را انتخاب یا تغییر دهید.</p>
+          <h2 className="mb-1 text-sm font-bold text-slate-900">{te("offeredServices")}</h2>
+          <p className="mb-4 text-xs text-slate-500">{te("offeredServicesHint")}</p>
           <TradeProviderServicePicker
             categories={categories}
             selected={selectedServices}
@@ -494,20 +499,20 @@ function ProfileEditMode({
           disabled={saving}
           className="h-11 flex-1 rounded-xl bg-sky-600 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60 sm:flex-none sm:px-6"
         >
-          {saving ? "در حال ارسال…" : "ارسال برای تأیید مدیر"}
+          {saving ? te("submitting") : te("submitForApproval")}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="h-11 flex-1 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:flex-none sm:px-6"
         >
-          انصراف
+          {te("cancel")}
         </button>
         <Link
           href={publicHref}
           className="hidden h-11 items-center justify-center rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-600 hover:bg-slate-50 sm:inline-flex"
         >
-          پیش‌نمایش
+          {te("preview")}
         </Link>
       </div>
     </form>
@@ -515,6 +520,7 @@ function ProfileEditMode({
 }
 
 export default function ServiceProviderProfileEditor() {
+  const te = useTranslations("supplier.tradeProvider.editor");
   const auth = useAuth();
   const { t, language, isRTL } = useLanguage();
   const categories = useMemo(() => getL1Categories(language), [language]);
@@ -602,11 +608,11 @@ export default function ServiceProviderProfileEditor() {
 
     const displayName = form.entityType === "individual" ? profileFullName : form.displayName.trim();
     if (!displayName || !form.phone.trim()) {
-      showToast.error("نام و تلفن الزامی است");
+      showToast.error(te("namePhoneRequired"));
       return;
     }
     if (!selectedServices.length) {
-      showToast.warning("حداقل یک خدمت انتخاب کنید");
+      showToast.warning(te("selectOneService"));
       return;
     }
 
@@ -628,17 +634,17 @@ export default function ServiceProviderProfileEditor() {
       });
       const json = await res.json();
       if (!res.ok) {
-        showToast.error(json.message || "خطا در ذخیره");
+        showToast.error(json.message || te("saveError"));
         return;
       }
-      showToast.success(json.message || "تغییرات ثبت شد");
+      showToast.success(json.message || te("saveSuccess"));
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("trade-provider-mine-updated"));
       }
       await loadProvider();
       setMode("view");
     } catch {
-      showToast.error("خطا در ذخیره تغییرات");
+      showToast.error(te("saveChangesError"));
     } finally {
       setSaving(false);
     }
@@ -656,15 +662,15 @@ export default function ServiceProviderProfileEditor() {
     return (
       <div className={dash.page}>
         <header className="mb-6">
-          <h1 className={dash.pageTitle}>صفحه خدمات من</h1>
-          <p className={dash.pageSubtitle}>هنوز در خدمات‌دهندگان عضو نشده‌اید.</p>
+          <h1 className={dash.pageTitle}>{te("myServicesPage")}</h1>
+          <p className={dash.pageSubtitle}>{te("notMemberYet")}</p>
         </header>
         <div className={`${dash.card} ${dash.cardBody}`}>
           <Link
             href="/trade-services/register"
             className="inline-flex rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700"
           >
-            عضویت در خدمات‌دهندگان
+            {te("joinProviders")}
           </Link>
         </div>
       </div>
@@ -677,11 +683,9 @@ export default function ServiceProviderProfileEditor() {
   return (
     <div className={dash.page} dir={isRTL ? "rtl" : "ltr"}>
       <header className="mb-4 sm:mb-6">
-        <h1 className={dash.pageTitle}>{mode === "edit" ? "ویرایش صفحه خدمات" : "صفحه خدمات من"}</h1>
+        <h1 className={dash.pageTitle}>{mode === "edit" ? te("editServicesPage") : te("myServicesPage")}</h1>
         <p className={dash.pageSubtitle}>
-          {mode === "edit"
-            ? "تغییرات را اعمال کنید و برای تأیید مدیر ارسال نمایید."
-            : "خلاصه اطلاعات ثبت‌شده در صفحه اختصاصی خدمات شما."}
+          {mode === "edit" ? te("editSubtitle") : te("viewSubtitle")}
         </p>
       </header>
 

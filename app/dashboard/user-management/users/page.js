@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Section } from "@/app/dashboard/supplier/inventory/components/Field";
 import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
 import { useRequireAdmin } from "@/app/hooks/useDashboardRole";
@@ -20,10 +21,10 @@ import UserTable from "./components/UserTable";
 import UserCard from "./components/UserCard";
 import DeleteUserModal from "./components/DeleteUserModal";
 
-function Toast({ message, type, onClose }) {
+function Toast({ message, type, onClose, closeLabel }) {
   useEffect(() => {
-    const t = setTimeout(onClose, 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
   }, [onClose]);
 
   const tones =
@@ -37,7 +38,7 @@ function Toast({ message, type, onClose }) {
       role="status"
     >
       {message}
-      <button type="button" onClick={onClose} className="opacity-60 hover:opacity-100" aria-label="بستن">
+      <button type="button" onClick={onClose} className="opacity-60 hover:opacity-100" aria-label={closeLabel}>
         ✕
       </button>
     </div>
@@ -45,6 +46,7 @@ function Toast({ message, type, onClose }) {
 }
 
 export default function UserManagementPage() {
+  const t = useTranslations("users");
   const router = useRouter();
   const { user: currentUser, allowed, loading: authLoading } = useRequireAdmin();
 
@@ -89,9 +91,9 @@ export default function UserManagementPage() {
     try {
       await deleteUser(deleteTarget.id);
       setDeleteTarget(null);
-      setToast({ message: "کاربر با موفقیت حذف شد.", type: "success" });
+      setToast({ message: t("page.deleteSuccess"), type: "success" });
     } catch (err) {
-      setToast({ message: err.message || "خطا در حذف کاربر", type: "error" });
+      setToast({ message: err.message || t("page.deleteError"), type: "error" });
     } finally {
       setDeleting(false);
     }
@@ -120,25 +122,25 @@ export default function UserManagementPage() {
             onClick={reload}
             disabled={loading}
             className={inv.btnSecondary}
-            title="بروزرسانی لیست"
+            title={t("page.refreshList")}
           >
             <svg className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            بروزرسانی
+            {t("page.refresh")}
           </button>
           <Link href="/dashboard/user-management/users/create" className={inv.btnPrimary}>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
             </svg>
-            افزودن کاربر
+            {t("page.addUser")}
           </Link>
         </div>
       </div>
 
       <UserStats users={users} />
 
-      <Section title="فیلتر و جستجو" desc="کاربران را بر اساس نقش، وضعیت و اطلاعات تماس پیدا کنید">
+      <Section title={t("page.filterSearchTitle")} desc={t("page.filterSearchDesc")}>
         <UserFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
@@ -159,13 +161,13 @@ export default function UserManagementPage() {
           <div className="flex items-center justify-between gap-3">
             <span>{error}</span>
             <button type="button" onClick={reload} className="font-semibold underline hover:no-underline">
-              تلاش مجدد
+              {t("page.retry")}
             </button>
           </div>
         </div>
       ) : null}
 
-      <Section title="نتایج" desc={`${users.length.toLocaleString("fa-IR")} کاربر`}>
+      <Section title={t("page.resultsTitle")} desc={t("page.resultsCount", { count: users.length.toLocaleString("fa-IR") })}>
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
@@ -180,19 +182,19 @@ export default function UserManagementPage() {
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <p className="font-semibold text-slate-700">کاربری یافت نشد</p>
+            <p className="font-semibold text-slate-700">{t("page.noUsersFound")}</p>
             <p className="mt-1 text-sm text-slate-500">
               {activeFilterCount > 0 || searchTerm
-                ? "فیلترها یا عبارت جستجو را تغییر دهید"
-                : "اولین کاربر را ثبت کنید"}
+                ? t("page.changeFilters")
+                : t("page.createFirstUser")}
             </p>
             {activeFilterCount > 0 || searchTerm ? (
               <button type="button" className={`${inv.btnSecondary} mt-4`} onClick={handleClearFilters}>
-                پاک کردن فیلترها
+                {t("page.clearFilters")}
               </button>
             ) : (
               <Link href="/dashboard/user-management/users/create" className={`${inv.btnPrimary} mt-4`}>
-                افزودن کاربر
+                {t("page.addUser")}
               </Link>
             )}
           </div>
@@ -230,7 +232,14 @@ export default function UserManagementPage() {
         onCancel={() => !deleting && setDeleteTarget(null)}
       />
 
-      {toast ? <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          closeLabel={t("close")}
+        />
+      ) : null}
     </div>
   );
 }

@@ -1,17 +1,15 @@
-/** برچسب‌های بردکرامپ داشبورد بر اساس مسیر */
+/** Breadcrumb trail keys — labels resolved via useTranslations('dashboard') */
 
 export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) {
   const { isSellerView = false, isServicesView = false } = options;
   const scopeOwn = searchParams?.get("scope") === "own";
-  const home = { href: "/dashboard", label: "داشبورد" };
+  const home = { href: "/dashboard", labelKey: "home" };
 
-  const incomingRequestsLabel = isSellerView
-    ? "مشاهده نیازمندی‌ها به محصولات من"
-    : "مشاهده نیازمندی‌ها به خدمات من";
-  const incomingRequestsSection = isSellerView ? "فروشنده" : "ارائه‌دهنده خدمات";
+  const incomingRequestsLabelKey = isSellerView ? "incomingToMyProducts" : "incomingToMyServices";
+  const incomingRequestsSectionKey = isSellerView ? "seller" : "servicesProvider";
 
   if (!pathname || pathname === "/dashboard") {
-    return [{ label: "داشبورد" }];
+    return [{ labelKey: "home" }];
   }
 
   const crumbs = [home];
@@ -19,146 +17,146 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
   const rules = [
     {
       match: "/dashboard/user-management/users/create",
-      trail: [{ label: "مدیریت کاربران" }, { label: "افزودن کاربر" }],
+      trail: [{ labelKey: "userManagement" }, { labelKey: "addUser" }],
     },
     {
       match: /^\/dashboard\/user-management\/users\/\d+\/edit/,
-      trail: [{ href: "/dashboard/user-management/users", label: "لیست کاربران" }, { label: "ویرایش" }],
+      trail: [{ href: "/dashboard/user-management/users", labelKey: "usersList" }, { labelKey: "edit" }],
     },
     {
       match: /^\/dashboard\/user-management\/users\/\d+\/view/,
-      trail: [{ href: "/dashboard/user-management/users", label: "لیست کاربران" }, { label: "مشاهده" }],
+      trail: [{ href: "/dashboard/user-management/users", labelKey: "usersList" }, { labelKey: "view" }],
     },
     {
       match: /^\/dashboard\/user-management\/users\/\d+/,
-      trail: [{ href: "/dashboard/user-management/users", label: "لیست کاربران" }, { label: "جزئیات" }],
+      trail: [{ href: "/dashboard/user-management/users", labelKey: "usersList" }, { labelKey: "details" }],
     },
     {
       match: "/dashboard/user-management/users",
-      trail: [{ label: "مدیریت کاربران" }, { label: "لیست کاربران" }],
+      trail: [{ labelKey: "userManagement" }, { labelKey: "usersList" }],
     },
     {
       match: "/dashboard/user-management/roles/create",
-      trail: [{ href: "/dashboard/user-management/roles", label: "لیست نقش‌ها" }, { label: "افزودن نقش" }],
+      trail: [{ href: "/dashboard/user-management/roles", labelKey: "rolesList" }, { labelKey: "addRole" }],
     },
     {
       match: /^\/dashboard\/user-management\/roles\/\d+/,
-      trail: [{ href: "/dashboard/user-management/roles", label: "لیست نقش‌ها" }, { label: "جزئیات" }],
+      trail: [{ href: "/dashboard/user-management/roles", labelKey: "rolesList" }, { labelKey: "details" }],
     },
     {
       match: "/dashboard/user-management/roles",
-      trail: [{ label: "مدیریت کاربران" }, { label: "لیست نقش‌ها" }],
+      trail: [{ labelKey: "userManagement" }, { labelKey: "rolesList" }],
     },
     {
       match: "/dashboard/supplier/inventory/create",
       trail: scopeOwn
-        ? [{ label: "پنل تأمین‌کننده" }, { label: "ثبت موجودی جدید" }]
-        : [{ label: "مدیریت تامین" }, { label: "ثبت موجودی" }],
+        ? [{ labelKey: "supplierPanel" }, { labelKey: "createInventoryNew" }]
+        : [{ labelKey: "supplyManagement" }, { labelKey: "createInventory" }],
     },
     {
       match: "/dashboard/supplier/inventory",
       trail: scopeOwn
-        ? [{ label: "پنل تأمین‌کننده" }, { label: "فهرست محصولات من" }]
-        : [{ label: "مدیریت تامین" }, { label: "لیست محصولات" }],
+        ? [{ labelKey: "supplierPanel" }, { labelKey: "myProducts" }]
+        : [{ labelKey: "supplyManagement" }, { labelKey: "inventoryList" }],
     },
     {
       match: "/dashboard/supplier/orders",
       trail: scopeOwn
-        ? [{ label: "پنل تأمین‌کننده" }, { label: "سفارشات مشتری" }]
-        : [{ label: "مدیریت تامین" }, { label: "سفارش‌ها" }],
+        ? [{ labelKey: "supplierPanel" }, { labelKey: "customerOrders" }]
+        : [{ labelKey: "supplyManagement" }, { labelKey: "orders" }],
     },
     {
       match: "/dashboard/supplier/products",
-      trail: [{ label: "مدیریت تامین" }, { label: "دسته‌بندی محصولات" }],
+      trail: [{ labelKey: "supplyManagement" }, { labelKey: "productCategories" }],
     },
     {
       match: /^\/dashboard\/supplier\/products\/\d+/,
-      trail: [{ href: "/dashboard/supplier/products", label: "دسته‌بندی محصولات" }, { label: "ویرایش محصول" }],
+      trail: [{ href: "/dashboard/supplier/products", labelKey: "productCategories" }, { labelKey: "editProduct" }],
     },
     {
       match: "/dashboard/supplier/attributes",
-      trail: [{ label: "مدیریت تامین" }, { label: "ویژگی‌های محصولات" }],
+      trail: [{ labelKey: "supplyManagement" }, { labelKey: "productAttributes" }],
     },
     {
       match: "/dashboard/order-management",
-      trail: [{ label: "مدیریت تامین" }, { label: "مدیریت سفارش‌ها" }],
+      trail: [{ labelKey: "supplyManagement" }, { labelKey: "orderManagement" }],
     },
     {
       match: "/dashboard/homepage-order",
-      trail: [{ label: "مدیریت تامین" }, { label: "ترتیب نمایش" }],
+      trail: [{ labelKey: "supplyManagement" }, { labelKey: "homepageOrder" }],
     },
     {
       match: "/dashboard/trade-service-provider-requests",
-      trail: [{ label: "مدیریت خدمات" }, { label: "درخواست‌های عضویت" }],
+      trail: [{ labelKey: "servicesManagement" }, { labelKey: "providerRequests" }],
     },
     {
       match: "/dashboard/trade-service-providers",
-      trail: [{ label: "مدیریت خدمات" }, { label: "فهرست ارائه‌دهندگان خدمات" }],
+      trail: [{ labelKey: "servicesManagement" }, { labelKey: "providersList" }],
     },
     {
       match: "/dashboard/service-categories",
-      trail: [{ label: "خدمات بازرگانی" }, { label: "دسته‌بندی خدمات" }],
+      trail: [{ labelKey: "servicesManagement" }, { labelKey: "serviceCategories" }],
     },
     {
       match: "/dashboard/messages",
-      trail: [{ label: "پیام‌ها" }],
+      trail: [{ labelKey: "messages" }],
     },
     {
       match: "/dashboard/supplier-profile",
-      trail: [{ label: "صفحه عمومی تأمین‌کننده" }],
+      trail: [{ labelKey: "supplierProfile" }],
     },
     {
       match: "/dashboard/account",
-      trail: [{ label: "ویرایش پروفایل" }],
+      trail: [{ labelKey: "editProfile" }],
     },
     {
       match: "/dashboard/settings",
-      trail: [{ label: "خدمات بازرگانی" }, { label: "تنظیمات" }],
+      trail: [{ labelKey: "tradeServices" }, { labelKey: "settings" }],
     },
     {
       match: "/dashboard/submit-request",
-      trail: [{ label: "متقاضی" }, { label: "ثبت درخواست" }],
+      trail: [{ labelKey: "applicant" }, { labelKey: "submitRequest" }],
     },
     {
       match: "/dashboard/my-orders",
-      trail: [{ label: "متقاضی" }, { label: "سفارشات من" }],
+      trail: [{ labelKey: "applicant" }, { labelKey: "myOrders" }],
     },
     {
       match: "/dashboard/applicant-requests",
-      trail: [{ label: "متقاضی" }, { label: "درخواست‌های من" }],
+      trail: [{ labelKey: "applicant" }, { labelKey: "myRequests" }],
     },
     {
       match: "/dashboard/escrow",
-      trail: [{ label: "تضمین معاملات" }, { label: "قراردادها" }],
+      trail: [{ labelKey: "escrow" }, { labelKey: "escrowContracts" }],
     },
     {
       match: "/dashboard/escrow-settings",
-      trail: [{ label: "مدیریت تامین" }, { label: "تنظیمات تضمین معاملات" }],
+      trail: [{ labelKey: "supplyManagement" }, { labelKey: "escrowSettings" }],
     },
     {
       match: /^\/dashboard\/escrow\/\d+/,
-      trail: [{ href: "/dashboard/escrow", label: "تضمین معاملات" }, { label: "جزئیات قرارداد" }],
+      trail: [{ href: "/dashboard/escrow", labelKey: "escrow" }, { labelKey: "contractDetails" }],
     },
     {
       match: /^\/dashboard\/applicant-requests\/\d+/,
       trail: [
-        { href: "/dashboard/applicant-requests", label: "درخواست‌های من" },
-        { label: "جزئیات درخواست" },
+        { href: "/dashboard/applicant-requests", labelKey: "myRequests" },
+        { labelKey: "requestDetails" },
       ],
     },
     {
       match: "/dashboard/service-provider-profile",
-      trail: [{ label: "ارائه‌دهنده خدمات" }, { label: "صفحه خدمات من" }],
+      trail: [{ labelKey: "servicesProvider" }, { labelKey: "myServicesPage" }],
     },
     {
       match: "/dashboard/incoming-requests",
-      trail: [{ label: incomingRequestsSection }, { label: incomingRequestsLabel }],
+      trail: [{ labelKey: incomingRequestsSectionKey }, { labelKey: incomingRequestsLabelKey }],
     },
     {
       match: /^\/dashboard\/incoming-requests\/\d+/,
       trail: [
-        { href: "/dashboard/incoming-requests", label: incomingRequestsLabel },
-        { label: "جزئیات" },
+        { href: "/dashboard/incoming-requests", labelKey: incomingRequestsLabelKey },
+        { labelKey: "details" },
       ],
     },
   ];
@@ -173,6 +171,6 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
   }
 
   const last = pathname.split("/").filter(Boolean).pop();
-  crumbs.push({ label: last || "صفحه" });
+  crumbs.push({ labelKey: "fallbackPage", labelFallback: last });
   return crumbs;
 }

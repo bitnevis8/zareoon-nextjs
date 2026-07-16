@@ -1,11 +1,15 @@
 "use client";
 import { useEffect, useState, use as usePromise } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import MediaUpload from "@/app/components/ui/MediaUpload";
-import { SUPPLY_COUNTRIES } from "@/app/utils/supplySource";
+import { getSupplyCountryOptions } from "@/app/utils/supplySource";
 
 export default function EditProductPage({ params }) {
+  const t = useTranslations("product");
+  const tShared = useTranslations("shared");
+  const supplyCountries = getSupplyCountryOptions(tShared);
   const { id } = usePromise(params);
   const productId = Number(id);
 
@@ -92,10 +96,10 @@ export default function EditProductPage({ params }) {
         body: JSON.stringify(payload),
       });
       const dj = await res.json();
-      if (!res.ok || !dj?.success) throw new Error(dj?.message || 'خطا در ذخیره تغییرات');
-      setMsgType('success'); setMsg('تغییرات با موفقیت ذخیره شد.');
+      if (!res.ok || !dj?.success) throw new Error(dj?.message || t('edit.saveError'));
+      setMsgType('success'); setMsg(t('edit.saveSuccess'));
     } catch (e) {
-      setMsgType('error'); setMsg(e.message || 'خطای غیرمنتظره رخ داد');
+      setMsgType('error'); setMsg(e.message || t('edit.unexpectedError'));
     } finally {
       setSaving(false);
     }
@@ -104,65 +108,64 @@ export default function EditProductPage({ params }) {
   return (
     <div className="p-4 max-w-5xl">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">ویرایش محصول #{productId}</h1>
-        <Link href="/dashboard/farmer/products" className="text-blue-600">بازگشت</Link>
+        <h1 className="text-xl font-bold">{t('edit.title', { id: productId })}</h1>
+        <Link href="/dashboard/farmer/products" className="text-blue-600">{t('edit.backToProducts')}</Link>
       </div>
 
       {loading ? (
-        <div className="text-slate-500">در حال بارگذاری...</div>
+        <div className="text-slate-500">{t('loading')}</div>
       ) : (
         <form onSubmit={save} className="bg-white p-4 rounded-md shadow grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input className="border p-2 rounded" placeholder="نام" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
-          <input className="border p-2 rounded" placeholder="نام انگلیسی (اختیاری)" value={form.englishName} onChange={(e)=>setForm({...form, englishName:e.target.value})} />
-          <input className="border p-2 rounded" placeholder="نام عربی (اختیاری)" value={form.arabicName} onChange={(e)=>setForm({...form, arabicName:e.target.value})} />
-          <input className="border p-2 rounded" placeholder="نام روسی (اختیاری)" value={form.russianName} onChange={(e)=>setForm({...form, russianName:e.target.value})} />
-          <input className="border p-2 rounded" placeholder="اسلاگ (اختیاری)" value={form.slug} onChange={(e)=>setForm({...form, slug:e.target.value})} />
-          <input className="border p-2 rounded" placeholder="واحد (اختیاری)" value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
+          <input className="border p-2 rounded" placeholder={t('list.namePlaceholder')} value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
+          <input className="border p-2 rounded" placeholder={t('list.englishNamePlaceholder')} value={form.englishName} onChange={(e)=>setForm({...form, englishName:e.target.value})} />
+          <input className="border p-2 rounded" placeholder={t('list.arabicNamePlaceholder')} value={form.arabicName} onChange={(e)=>setForm({...form, arabicName:e.target.value})} />
+          <input className="border p-2 rounded" placeholder={t('list.russianNamePlaceholder')} value={form.russianName} onChange={(e)=>setForm({...form, russianName:e.target.value})} />
+          <input className="border p-2 rounded" placeholder={t('edit.slugPlaceholder')} value={form.slug} onChange={(e)=>setForm({...form, slug:e.target.value})} />
+          <input className="border p-2 rounded" placeholder={t('list.unitPlaceholder')} value={form.unit} onChange={(e)=>setForm({...form, unit:e.target.value})} />
           <select className="border p-2 rounded" value={form.supplyCountry} onChange={(e)=>setForm({...form, supplyCountry:e.target.value})} required>
-            {SUPPLY_COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>{c.nameFa}</option>
+            {supplyCountries.map((c) => (
+              <option key={c.code} value={c.code}>{c.label}</option>
             ))}
           </select>
-          <input className="border p-2 rounded" placeholder="شهر عرضه (اختیاری)" value={form.supplyCity} onChange={(e)=>setForm({...form, supplyCity:e.target.value})} />
+          <input className="border p-2 rounded" placeholder={t('list.supplyCityPlaceholder')} value={form.supplyCity} onChange={(e)=>setForm({...form, supplyCity:e.target.value})} />
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-gray-700">توضیحات محصول (اختیاری)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t('edit.descriptionLabel')}</label>
             <textarea
               className="w-full rounded border p-2 text-sm"
               rows={4}
-              placeholder="توضیحات کلی محصول که در صفحه کاتالوگ نمایش داده می‌شود"
+              placeholder={t('edit.descriptionPlaceholder')}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
           <select className="border p-2 rounded" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})}>
-            <option value="">بدون والد (دسته ریشه)</option>
+            <option value="">{t('list.noParent')}</option>
             {categories.map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.isOrderable} onChange={(e)=>setForm({...form, isOrderable:e.target.checked})} />
-            قابل سفارش
+            {t('orderable')}
           </label>
 
-          {/* Media uploaders */}
           <div className="md:col-span-2 border-t pt-3 mt-2">
-            <h2 className="font-semibold text-sm mb-1">رسانه‌های محصول</h2>
+            <h2 className="font-semibold text-sm mb-1">{t('edit.mediaTitle')}</h2>
             <p className="text-xs text-slate-500 mb-3">
-              تصویر یا ویدیو را انتخاب کنید؛ فایل‌ها روی سرور دانلود (dl.zareoon.ir) ذخیره می‌شوند.
+              {t('edit.mediaHint')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-slate-600 mb-1">تصاویر (چندتایی)</div>
-                <MediaUpload module="products" entityId={productId} fileType="images" accept="image/*" buttonLabel="انتخاب و آپلود تصویر" />
+                <div className="text-xs text-slate-600 mb-1">{t('edit.imagesLabel')}</div>
+                <MediaUpload module="products" entityId={productId} fileType="images" accept="image/*" buttonLabel={t('edit.uploadImage')} />
               </div>
               <div>
-                <div className="text-xs text-slate-600 mb-1">ویدیوها (چندتایی)</div>
-                <MediaUpload module="products" entityId={productId} fileType="videos" accept="video/*" buttonLabel="انتخاب و آپلود ویدیو" />
+                <div className="text-xs text-slate-600 mb-1">{t('edit.videosLabel')}</div>
+                <MediaUpload module="products" entityId={productId} fileType="videos" accept="video/*" buttonLabel={t('edit.uploadVideo')} />
               </div>
             </div>
           </div>
           <div className="md:col-span-2 flex items-center justify-end mt-2">
             <button disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
-              {saving ? '...' : 'ذخیره تغییرات'}
+              {saving ? t('ellipsis') : t('edit.saveChanges')}
             </button>
           </div>
           {msg ? (
@@ -173,4 +176,3 @@ export default function EditProductPage({ params }) {
     </div>
   );
 }
-

@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "title": "",
+    "description": ""
+  },
+  "nav": {
+    "home": "",
+    "current": ""
+  },
+  "header": {
+    "title": "",
+    "subtitle": "",
+    "defaultSource": "",
+    "calendarHint": ""
+  },
+  "fetch": {
+    "label": "",
+    "refreshing": "",
+    "refresh": ""
+  },
+  "converter": {
+    "title": "",
+    "subtitle": "",
+    "amountLabel": "",
+    "resultLabel": "",
+    "swapAriaLabel": "",
+    "swapTitle": "",
+    "rateLine": "<one>1 {fromCode}</one><approx>≈</approx><highlight>{rateValue} {toCode}</highlight>"
+  },
+  "errors": {
+    "fetchFailed": "",
+    "serverError": ""
+  },
+  "rates": {
+    "title": "",
+    "cryptoSuffix": "",
+    "currencyUnit": ""
+  },
+  "change": {
+    "percent": ""
+  },
+  "footer": "",
+  "currencies": {
+    "IRR": ""
+  },
+  "apiKeys": [
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    },
+    {
+      "id": "",
+      "labelKey": "",
+      "code": "",
+      "kind": ""
+    }
+  ]
+}

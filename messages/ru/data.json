@@ -1,0 +1,149 @@
+{
+  "persianDigits": "",
+  "arabicDigits": "",
+  "defaultCity": "",
+  "qualityGrades": [
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  "gradeOrder": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  "defaultQualityGrade": "",
+  "otherGrade": "",
+  "gradeAliases": {
+    "درجه یک": "",
+    "درجه دو": "",
+    "درجه سه": ""
+  },
+  "gradeDbToKey": {
+    "صادراتی": "",
+    "درجه 1": "",
+    "درجه 2": "",
+    "درجه 3": "",
+    "ضایعاتی": "",
+    "سایر": ""
+  },
+  "units": {
+    "kg": {
+      "fa": "",
+      "en": "",
+      "ru": "",
+      "ar": ""
+    },
+    "ton": {
+      "fa": "",
+      "en": "",
+      "ru": "",
+      "ar": ""
+    }
+  },
+  "calendars": {
+    "months": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "weekdays": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "shamsi": "",
+    "gregorian": "",
+    "hijri": "",
+    "dateComma": ""
+  },
+  "numerals": {
+    "ones": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "teens": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tens": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "hundreds": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "scales": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "zero": "",
+    "negative": "",
+    "and": "",
+    "oneScale": "",
+    "tomanEquivalent": "",
+    "currencyEquivalent": "",
+    "defaultUnit": "",
+    "unknownInitial": ""
+  },
+  "weatherSamples": {
+    "sunny": "",
+    "cloudy": "",
+    "rainy": "",
+    "unknown": ""
+  }
+}

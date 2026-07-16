@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export default function ZoomableImage({ src, alt, className, thumbnailClassName }) {
+  const tCommon = useTranslations('common');
+  const t = useTranslations('home.zoomImage');
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => setIsOpen(true);
@@ -56,7 +59,7 @@ export default function ZoomableImage({ src, alt, className, thumbnailClassName 
           <button 
             onClick={closeModal}
             className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors z-20 bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70"
-            aria-label="بستن"
+            aria-label={tCommon('close')}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,7 +89,7 @@ export default function ZoomableImage({ src, alt, className, thumbnailClassName 
           <div 
             className="absolute inset-0 cursor-pointer"
             onClick={closeModal}
-            aria-label="بستن تصویر"
+            aria-label={t('closeBackground')}
           />
         </div>
       )}

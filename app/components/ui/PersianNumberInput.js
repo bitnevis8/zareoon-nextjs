@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { formatPersianInteger, parsePersianIntegerInput, parsePersianNumber } from "@/app/utils/persianNumberUtils";
 import { getPriceWordSummary, getQuantityWordSummary } from "@/app/utils/currencyInWords";
 import { DEFAULT_PRICE_CURRENCY } from "@/app/utils/priceCurrencies";
@@ -22,16 +23,17 @@ export function PersianNumberInput({
   id,
   name,
 }) {
+  const t = useTranslations("shared");
   const displayValue = useMemo(() => formatPersianInteger(value), [value]);
 
   const wordHint = useMemo(() => {
     const num = parsePersianNumber(value);
     if (!num || num <= 0) return "";
-    if (hint === "price") return getPriceWordSummary(num, currency, exchangeRates);
+    if (hint === "price") return getPriceWordSummary(num, currency, exchangeRates, t);
     if (hint === "quantity" && unit) return getQuantityWordSummary(num, unit);
     if (hint === "quantity") return getQuantityWordSummary(num);
     return "";
-  }, [value, hint, unit, currency, exchangeRates]);
+  }, [value, hint, unit, currency, exchangeRates, t]);
 
   const handleChange = (e) => {
     onChange?.(parsePersianIntegerInput(e.target.value));

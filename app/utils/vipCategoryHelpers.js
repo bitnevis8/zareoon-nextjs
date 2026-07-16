@@ -1,25 +1,22 @@
 import { DEFAULT_INSPECTION_VIP_BANNER } from "@/app/data/tradeProviderBranding";
+import faSupplier from "../../messages/fa/supplier.json";
 
-export const DEFAULT_VIP_MESSAGE = {
-  fa: "این بخش VIP است و عضویت در آن امکان‌پذیر نیست.",
-  en: "This is a VIP section. Membership is not available.",
-  ru: "Это VIP-раздел. Регистрация недоступна.",
-};
+export const DEFAULT_VIP_MESSAGE = faSupplier.tradeProvider.defaultVipMessage;
 
 export function resolveVipCategoryMessage(vipCategories, categoryId, language, t) {
   const cfg = vipCategories?.[categoryId];
   if (!cfg?.enabled) return null;
 
   if (cfg.messageMode === "default") {
-    return t("tradeProviderVipMessage");
+    return t("vipMessage");
   }
 
   if (cfg.message) {
     if (typeof cfg.message === "string") return cfg.message;
-    return cfg.message[language] || cfg.message.fa || t("tradeProviderVipMessage");
+    return cfg.message[language] || cfg.message.fa || t("vipMessage");
   }
 
-  return t("tradeProviderVipMessage");
+  return t("vipMessage");
 }
 
 export function resolveVipBannerImage(vipCategories, categoryId) {
@@ -34,7 +31,7 @@ export function isVipCategoryEnabled(vipCategories, categoryId) {
   return !!vipCategories?.[categoryId]?.enabled;
 }
 
-export function getVipCompanyName(providers, categoryId) {
+export function getVipCompanyName(providers, categoryId, t) {
   if (!Array.isArray(providers) || !categoryId) return null;
 
   const match = providers.find((provider) => {
@@ -46,7 +43,7 @@ export function getVipCompanyName(providers, categoryId) {
   });
 
   if (match?.displayName) return match.displayName;
-  if (categoryId === "inspection-standards") return "آریا فولاد قرن";
+  if (categoryId === "inspection-standards" && t) return t("vip.inspectionStandardsCompany");
   return null;
 }
 

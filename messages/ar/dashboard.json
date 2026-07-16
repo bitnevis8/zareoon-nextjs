@@ -1,0 +1,258 @@
+{
+  "ariaLabel": "",
+  "home": "",
+  "fallbackPage": "",
+  "welcomeFallback": "",
+  "browseProducts": "",
+  "userManagement": "",
+  "addUser": "",
+  "usersList": "",
+  "edit": "",
+  "view": "",
+  "details": "",
+  "rolesList": "",
+  "addRole": "",
+  "supplyManagement": "",
+  "supplierPanel": "",
+  "createInventory": "",
+  "createInventoryNew": "",
+  "inventoryList": "",
+  "myProducts": "",
+  "orders": "",
+  "customerOrders": "",
+  "productCategories": "",
+  "editProduct": "",
+  "productAttributes": "",
+  "orderManagement": "",
+  "homepageOrder": "",
+  "providerRequests": "",
+  "providersList": "",
+  "tradeServices": "",
+  "servicesManagement": "",
+  "serviceCategories": "",
+  "messages": "",
+  "supplierProfile": "",
+  "editProfile": "",
+  "settings": "",
+  "applicant": "",
+  "submitRequest": "",
+  "myOrders": "",
+  "myRequests": "",
+  "escrow": "",
+  "escrowContracts": "",
+  "escrowSettings": "",
+  "contractDetails": "",
+  "requestDetails": "",
+  "servicesProvider": "",
+  "myServicesPage": "",
+  "seller": "",
+  "incomingToMyProducts": "",
+  "incomingToMyServices": "",
+  "shell": {
+    "openMenu": "",
+    "site": "",
+    "footer": "",
+    "logoAlt": "",
+    "personaTitle": {
+      "services": "",
+      "applicant": "",
+      "seller": "",
+      "default": ""
+    }
+  },
+  "guide": {
+    "triggerLabel": "",
+    "triggerShort": "",
+    "brand": "",
+    "title": "",
+    "subtitle": "",
+    "tipPrefix": "",
+    "tipText": "",
+    "dismiss": "",
+    "sections": {
+      "intro": {
+        "title": "",
+        "summary": ""
+      },
+      "applicant": {
+        "title": "",
+        "summary": "",
+        "items": {
+          "submitRequest": {
+            "label": "",
+            "desc": ""
+          },
+          "myRequests": {
+            "label": "",
+            "desc": ""
+          },
+          "cart": {
+            "label": "",
+            "desc": ""
+          },
+          "myOrders": {
+            "label": "",
+            "desc": ""
+          }
+        }
+      },
+      "seller": {
+        "title": "",
+        "summary": "",
+        "items": {
+          "storeUrl": {
+            "label": "",
+            "desc": ""
+          },
+          "myProducts": {
+            "label": "",
+            "desc": ""
+          },
+          "createInventory": {
+            "label": "",
+            "desc": ""
+          },
+          "customerOrders": {
+            "label": "",
+            "desc": ""
+          },
+          "incomingProducts": {
+            "label": "",
+            "desc": ""
+          }
+        }
+      },
+      "services": {
+        "title": "",
+        "summary": "",
+        "items": {
+          "publicPage": {
+            "label": "",
+            "desc": ""
+          },
+          "register": {
+            "label": "",
+            "desc": ""
+          },
+          "myPage": {
+            "label": "",
+            "desc": ""
+          },
+          "customerOrders": {
+            "label": "",
+            "desc": ""
+          },
+          "incomingServices": {
+            "label": "",
+            "desc": ""
+          }
+        }
+      }
+    }
+  },
+  "adminHome": {
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "users": "",
+      "orders": "",
+      "pendingOrders": "",
+      "activeProducts": "",
+      "lotsHint": "",
+      "providers": "",
+      "pendingProviders": ""
+    },
+    "charts": {
+      "orderStatus": "",
+      "usersByRole": "",
+      "providerStatus": ""
+    },
+    "orderStatus": {
+      "pending": "",
+      "reserved": "",
+      "completed": "",
+      "cancelled": "",
+      "approved": ""
+    },
+    "providerStatus": {
+      "pending": "",
+      "approved": "",
+      "rejected": ""
+    },
+    "noRole": "",
+    "recentOrders": {
+      "title": "",
+      "viewAll": "",
+      "status": "",
+      "date": "",
+      "empty": ""
+    },
+    "quickLinks": {
+      "providers": ""
+    }
+  },
+  "buyerHome": {
+    "title": "",
+    "subtitle": "",
+    "browseProducts": {
+      "title": "",
+      "desc": ""
+    },
+    "cart": {
+      "title": "",
+      "desc": ""
+    },
+    "messages": {
+      "title": "",
+      "desc": ""
+    },
+    "tradeServices": {
+      "title": "",
+      "desc": ""
+    }
+  },
+  "supplierHome": {
+    "title": "",
+    "subtitle": "",
+    "stats": {
+      "myProducts": "",
+      "customerOrders": "",
+      "pending": ""
+    },
+    "productStatusChart": "",
+    "lotStatus": {
+      "harvested": "",
+      "onField": "",
+      "reserved": "",
+      "sold": ""
+    }
+  },
+  "tradeServicesHome": {
+    "title": "",
+    "subtitle": "",
+    "myServicesPage": {
+      "title": "",
+      "desc": ""
+    },
+    "publicProfile": {
+      "title": "",
+      "desc": ""
+    },
+    "customerOrders": {
+      "title": "",
+      "desc": ""
+    },
+    "incomingRequests": {
+      "title": "",
+      "desc": ""
+    },
+    "catalog": {
+      "title": "",
+      "desc": ""
+    },
+    "messages": {
+      "title": "",
+      "desc": ""
+    }
+  }
+}

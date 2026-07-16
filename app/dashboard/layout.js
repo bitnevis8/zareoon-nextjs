@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { useTranslations } from "next-intl";
 import DashboardBreadcrumb from "../components/dashboard/DashboardBreadcrumb";
 import DashboardShell from "../components/dashboard/DashboardShell";
 import { useAuth } from "../context/AuthContext";
@@ -18,15 +19,17 @@ function EmailVerificationBanner({
   resendLoading,
   setResendLoading,
 }) {
+  const t = useTranslations("layout.emailVerification");
+
   const handleVerifyEmail = async () => {
     setVerificationError(null);
     setVerificationSuccess(null);
     if (!user?.email) {
-      setVerificationError("اطلاعات کاربر یا ایمیل در دسترس نیست.");
+      setVerificationError(t("errorUserEmailUnavailable"));
       return;
     }
     if (!emailVerificationCode) {
-      setVerificationError("لطفا کد تایید را وارد کنید.");
+      setVerificationError(t("errorCodeRequired"));
       return;
     }
 
@@ -41,11 +44,11 @@ function EmailVerificationBanner({
         setVerificationSuccess(data.message);
         if (setUser) setUser({ ...user, isEmailVerified: true });
       } else {
-        setVerificationError(data.message || "خطا در تایید ایمیل.");
+        setVerificationError(data.message || t("errorVerifyFailed"));
       }
     } catch (error) {
       console.error("Error verifying email:", error);
-      setVerificationError("خطا در ارتباط با سرور.");
+      setVerificationError(t("errorServer"));
     }
   };
 
@@ -54,7 +57,7 @@ function EmailVerificationBanner({
     setVerificationError(null);
     setVerificationSuccess(null);
     if (!user?.email) {
-      setVerificationError("اطلاعات کاربر یا ایمیل در دسترس نیست.");
+      setVerificationError(t("errorUserEmailUnavailable"));
       setResendLoading(false);
       return;
     }
@@ -69,11 +72,11 @@ function EmailVerificationBanner({
       if (data.success) {
         setVerificationSuccess(data.message);
       } else {
-        setVerificationError(data.message || "خطا در ارسال مجدد کد.");
+        setVerificationError(data.message || t("errorResendFailed"));
       }
     } catch (error) {
       console.error("Error resending code:", error);
-      setVerificationError("خطا در ارتباط با سرور.");
+      setVerificationError(t("errorServer"));
     } finally {
       setResendLoading(false);
     }
@@ -81,10 +84,8 @@ function EmailVerificationBanner({
 
   return (
     <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4" role="alert">
-      <p className="text-sm font-semibold text-amber-900">ایمیل شما تأیید نشده است</p>
-      <p className="mt-1 text-xs leading-6 text-amber-800">
-        کد ارسال‌شده به {user.email} را وارد کنید.
-      </p>
+      <p className="text-sm font-semibold text-amber-900">{t("title")}</p>
+      <p className="mt-1 text-xs leading-6 text-amber-800">{t("prompt", { email: user.email })}</p>
 
       {verificationError ? (
         <p className="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -100,7 +101,7 @@ function EmailVerificationBanner({
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
-          placeholder="کد تأیید"
+          placeholder={t("codePlaceholder")}
           className="h-9 flex-1 rounded-md border border-amber-200 bg-white px-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
           value={emailVerificationCode || ""}
           onChange={(e) => setEmailVerificationCode(e.target.value)}
@@ -110,7 +111,7 @@ function EmailVerificationBanner({
           onClick={handleVerifyEmail}
           className="h-9 rounded-md bg-amber-600 px-4 text-sm font-medium text-white hover:bg-amber-700"
         >
-          تأیید ایمیل
+          {t("verifyButton")}
         </button>
         <button
           type="button"
@@ -118,7 +119,7 @@ function EmailVerificationBanner({
           disabled={resendLoading}
           className="h-9 rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
         >
-          {resendLoading ? "..." : "ارسال مجدد"}
+          {resendLoading ? t("resending") : t("resend")}
         </button>
       </div>
     </div>

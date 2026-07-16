@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { authFetch } from "@/app/utils/authHeaders";
 
 function resolveShopPath(profile, user) {
@@ -29,6 +30,7 @@ function buildDisplayUrl(path) {
 }
 
 export default function SidebarSellerShopUrl({ user }) {
+  const t = useTranslations("layout.sidebar");
   const [shopPath, setShopPath] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +63,7 @@ export default function SidebarSellerShopUrl({ user }) {
   return (
     <div className="border-b border-slate-200 px-3 py-3">
       <div className="space-y-2">
-        <p className="px-0.5 text-[11px] font-semibold text-slate-500">آدرس فروشگاه من</p>
+        <p className="px-0.5 text-[11px] font-semibold text-slate-500">{t("myShopUrl")}</p>
         <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
           {loading ? (
             <span className="block h-4 animate-pulse rounded bg-slate-200/80" aria-hidden />
@@ -79,7 +81,7 @@ export default function SidebarSellerShopUrl({ user }) {
               href="/dashboard/supplier-profile"
               className="text-[11px] font-medium text-slate-600 hover:text-emerald-800 sm:text-xs"
             >
-              تنظیم آدرس فروشگاه
+              {t("configureShopUrl")}
             </Link>
           )}
         </div>

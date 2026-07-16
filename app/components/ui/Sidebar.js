@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/context/AuthContext';
 import { isAdmin, isSupplier, shouldShowSupplierPanel } from '@/app/utils/roles';
 import { isSidebarNavActive, isAdminSectionActive } from '@/app/utils/sidebarNavMatch';
@@ -15,65 +16,72 @@ import SidebarSellerShopUrl from '@/app/components/ui/SidebarSellerShopUrl';
 import SidebarServicesPageUrl from '@/app/components/ui/SidebarServicesPageUrl';
 import SidebarServicesSection from '@/app/components/ui/SidebarServicesSection';
 
-const adminMenuSections = [
-  {
-    title: 'مدیریت کاربران',
-    submenu: [
-      { title: 'لیست کاربران', path: '/dashboard/user-management/users' },
-      { title: 'لیست نقش‌ها', path: '/dashboard/user-management/roles' },
-    ],
-  },
-  {
-    title: 'مدیریت تامین',
-    submenu: [
-      { title: 'دسته‌بندی محصولات', path: '/dashboard/supplier/products' },
-      { title: 'ویژگی‌های محصولات', path: '/dashboard/supplier/attributes' },
-      { title: 'لیست محصولات', path: '/dashboard/supplier/inventory' },
-      { title: 'ثبت موجودی', path: '/dashboard/supplier/inventory/create' },
-      { title: 'مدیریت سفارش‌ها', path: '/dashboard/order-management' },
-      { title: 'ترتیب نمایش', path: '/dashboard/homepage-order' },
-      { title: 'تنظیمات تضمین معاملات', path: '/dashboard/escrow-settings' },
-    ],
-  },
-  {
-    title: 'مدیریت خدمات',
-    submenu: [
-      { title: 'درخواست‌های عضویت', path: '/dashboard/trade-service-provider-requests' },
-      { title: 'فهرست ارائه‌دهندگان خدمات', path: '/dashboard/trade-service-providers' },
-      { title: 'دسته‌بندی خدمات', path: '/dashboard/service-categories' },
-      { title: 'تنظیمات', path: '/dashboard/settings' },
-    ],
-  },
-];
-
-const sellerMenuLinksPrimary = [
-  { title: 'فهرست محصولات من', path: '/dashboard/supplier/inventory?scope=own' },
-  { title: 'ثبت موجودی جدید', path: '/dashboard/supplier/inventory/create?scope=own' },
-  { title: 'سفارشات مشتری', path: '/dashboard/supplier/orders?scope=own' },
-];
-
-const sellerMenuLinksSecondary = [
-  { title: 'مشاهده نیازمندی‌ها به محصولات من', path: '/dashboard/incoming-requests' },
-];
-
-const ESCROW_MENU_TITLE = 'تضمین معاملات و حساب امانی';
 const ESCROW_MENU_PATH = '/dashboard/escrow';
 
-const sellerMenuLinksStart = [
-  { title: 'شروع فروشندگی', path: '/dashboard/supplier-profile' },
-];
+function useSidebarMenus() {
+  const t = useTranslations('nav');
 
-const applicantMenuLinksBeforeEscrow = [
-  { title: 'ثبت درخواست', path: '/dashboard/submit-request' },
-  { title: 'درخواست‌های من', path: '/dashboard/applicant-requests' },
-];
-
-const applicantMenuLinksAfterEscrow = [
-  { title: 'سبد خرید', path: '/cart' },
-  { title: 'سفارشات من', path: '/dashboard/my-orders' },
-];
-
-const primaryLinks = [{ title: 'داشبورد', path: '/dashboard' }];
+  return useMemo(
+    () => ({
+      adminMenuSections: [
+        {
+          id: 'users',
+          title: t('admin.userManagement'),
+          submenu: [
+            { title: t('admin.usersList'), path: '/dashboard/user-management/users' },
+            { title: t('admin.rolesList'), path: '/dashboard/user-management/roles' },
+          ],
+        },
+        {
+          id: 'supply',
+          title: t('admin.supplyManagement'),
+          submenu: [
+            { title: t('admin.productCategories'), path: '/dashboard/supplier/products' },
+            { title: t('admin.productAttributes'), path: '/dashboard/supplier/attributes' },
+            { title: t('admin.inventoryList'), path: '/dashboard/supplier/inventory' },
+            { title: t('admin.createInventory'), path: '/dashboard/supplier/inventory/create' },
+            { title: t('admin.orderManagement'), path: '/dashboard/order-management' },
+            { title: t('admin.homepageOrder'), path: '/dashboard/homepage-order' },
+            { title: t('admin.escrowSettings'), path: '/dashboard/escrow-settings' },
+          ],
+        },
+        {
+          id: 'services',
+          title: t('admin.servicesManagement'),
+          submenu: [
+            { title: t('admin.providerRequests'), path: '/dashboard/trade-service-provider-requests' },
+            { title: t('admin.providersList'), path: '/dashboard/trade-service-providers' },
+            { title: t('admin.serviceCategories'), path: '/dashboard/service-categories' },
+            { title: t('admin.settings'), path: '/dashboard/settings' },
+          ],
+        },
+      ],
+      sellerMenuLinksPrimary: [
+        { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own' },
+        { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own' },
+        { title: t('customerOrders'), path: '/dashboard/supplier/orders?scope=own' },
+      ],
+      sellerMenuLinksSecondary: [
+        { title: t('incomingToMyProducts'), path: '/dashboard/incoming-requests' },
+      ],
+      sellerMenuLinksStart: [{ title: t('startSelling'), path: '/dashboard/supplier-profile' }],
+      applicantMenuLinksBeforeEscrow: [
+        { title: t('submitRequest'), path: '/dashboard/submit-request' },
+        { title: t('myRequests'), path: '/dashboard/applicant-requests' },
+      ],
+      applicantMenuLinksAfterEscrow: [
+        { title: t('cart'), path: '/cart' },
+        { title: t('myOrders'), path: '/dashboard/my-orders' },
+      ],
+      primaryLinks: [{ title: t('dashboard'), path: '/dashboard' }],
+      escrowMenuTitle: t('escrow'),
+      sectionApplicant: t('sections.applicant'),
+      sectionSeller: t('sections.seller'),
+      sectionAdmin: t('sections.admin'),
+    }),
+    [t]
+  );
+}
 
 function NavItem({ href, label, active, onClick, nested = false, badge = 0 }) {
   return (
@@ -114,14 +122,14 @@ function SectionLabel({ children }) {
 }
 
 function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick, badge = 0, itemBadges = {} }) {
-  const expanded = openMenu === section.title;
+  const expanded = openMenu === section.id;
   const sectionActive = section.submenu.some((item) => isActive(item.path));
 
   return (
     <div className="px-2">
       <button
         type="button"
-        onClick={() => onToggle(section.title)}
+        onClick={() => onToggle(section.id)}
         className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-[13px] font-medium transition-colors ${
           sectionActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
         }`}
@@ -158,18 +166,33 @@ function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick, badg
 function SidebarNavFallback({ onLinkClick, showMobileUserHeader = false }) {
   const auth = useAuth();
   const user = auth?.user;
+  const tCommon = useTranslations('common');
 
   return (
     <div>
       {showMobileUserHeader && user ? (
         <SidebarMobileUserHeader user={user} onLinkClick={onLinkClick} />
       ) : null}
-      <div className="px-4 py-6 text-center text-xs text-slate-400">در حال بارگذاری منو…</div>
+      <div className="px-4 py-6 text-center text-xs text-slate-400">{tCommon('loading')}</div>
     </div>
   );
 }
 
 function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
+  const menus = useSidebarMenus();
+  const {
+    adminMenuSections,
+    sellerMenuLinksPrimary,
+    sellerMenuLinksSecondary,
+    sellerMenuLinksStart,
+    applicantMenuLinksBeforeEscrow,
+    applicantMenuLinksAfterEscrow,
+    primaryLinks,
+    escrowMenuTitle,
+    sectionApplicant,
+    sectionSeller,
+    sectionAdmin,
+  } = menus;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const auth = useAuth();
@@ -213,11 +236,11 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
     const match = adminMenuSections.find((section) =>
       isAdminSectionActive(section, pathname, searchParams, navMatchOptions)
     );
-    if (match) setOpenMenu(match.title);
-  }, [pathname, searchParams, showAdmin, navMatchOptions]);
+    if (match) setOpenMenu(match.id);
+  }, [pathname, searchParams, showAdmin, navMatchOptions, adminMenuSections]);
 
-  const toggleMenu = (title) => {
-    setOpenMenu((prev) => (prev === title ? null : title));
+  const toggleMenu = (id) => {
+    setOpenMenu((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -259,7 +282,7 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
 
         {showApplicantNav ? (
           <>
-            <SectionLabel>متقاضی</SectionLabel>
+            <SectionLabel>{sectionApplicant}</SectionLabel>
             <div className="space-y-0.5">
               {applicantMenuLinksBeforeEscrow.map((item) => (
                 <NavItem
@@ -273,7 +296,7 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
               <MenuDivider />
               <NavItem
                 href={ESCROW_MENU_PATH}
-                label={ESCROW_MENU_TITLE}
+                label={escrowMenuTitle}
                 active={isActive(ESCROW_MENU_PATH)}
                 onClick={onLinkClick}
               />
@@ -293,7 +316,7 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
 
         {showSellerNav ? (
           <>
-            <SectionLabel>فروشنده</SectionLabel>
+            <SectionLabel>{sectionSeller}</SectionLabel>
             <div className="space-y-0.5">
               {sellerMenuLinks.map((item) => (
                 <NavItem
@@ -321,7 +344,7 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
               <MenuDivider />
               <NavItem
                 href={ESCROW_MENU_PATH}
-                label={ESCROW_MENU_TITLE}
+                label={escrowMenuTitle}
                 active={isActive(ESCROW_MENU_PATH)}
                 onClick={onLinkClick}
               />
@@ -341,18 +364,18 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
 
         {showAdmin ? (
           <>
-            <SectionLabel>مدیریت</SectionLabel>
+            <SectionLabel>{sectionAdmin}</SectionLabel>
             {adminMenuSections.map((section) => (
               <SubmenuBlock
-                key={section.title}
+                key={section.id}
                 section={section}
                 openMenu={openMenu}
                 onToggle={toggleMenu}
                 isActive={isActive}
                 onLinkClick={onLinkClick}
-                badge={section.title === 'مدیریت خدمات' ? pendingProviderRequests : 0}
+                badge={section.id === 'services' ? pendingProviderRequests : 0}
                 itemBadges={
-                  section.title === 'مدیریت خدمات'
+                  section.id === 'services'
                     ? { '/dashboard/trade-service-provider-requests': pendingProviderRequests }
                     : {}
                 }

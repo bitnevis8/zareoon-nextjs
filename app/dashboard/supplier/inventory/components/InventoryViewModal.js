@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
 import { localizeStatus } from "@/app/utils/localize";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
@@ -15,7 +16,9 @@ function Row({ label, value }) {
   );
 }
 
-export default function InventoryViewModal({ lot, productName, farmerName, t, onClose, onEdit, onMedia }) {
+export default function InventoryViewModal({ lot, productName, farmerName, onClose, onEdit, onMedia }) {
+  const t = useTranslations("inventory");
+  const tShared = useTranslations("shared");
   if (!lot) return null;
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
 
@@ -24,7 +27,7 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
       <div className={inv.modal} onClick={(e) => e.stopPropagation()}>
         <div className={inv.modalHeader}>
           <div>
-            <p className="text-xs text-slate-500">بار #{lot.id}</p>
+            <p className="text-xs text-slate-500">{t("lot.lotNumber", { id: lot.id })}</p>
             <h2 className="text-lg font-bold text-slate-900">{productName}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
@@ -41,30 +44,30 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50/50 px-4">
-            <Row label="تامین‌کننده" value={farmerName} />
-            <Row label="واحد" value={lot.unit} />
-            <Row label="کل موجودی" value={`${parseFloat(lot.totalQuantity || 0).toLocaleString("fa-IR")} ${lot.unit}`} />
-            <Row label="رزرو شده" value={`${parseFloat(lot.reservedQuantity || 0).toLocaleString("fa-IR")} ${lot.unit}`} />
-            <Row label="قابل عرضه" value={`${available.toLocaleString("fa-IR")} ${lot.unit}`} />
+            <Row label={t("lot.supplier")} value={farmerName} />
+            <Row label={t("lot.unit")} value={lot.unit} />
+            <Row label={t("lot.totalInventory")} value={`${parseFloat(lot.totalQuantity || 0).toLocaleString("fa-IR")} ${lot.unit}`} />
+            <Row label={t("lot.reserved")} value={`${parseFloat(lot.reservedQuantity || 0).toLocaleString("fa-IR")} ${lot.unit}`} />
+            <Row label={t("lot.available")} value={`${available.toLocaleString("fa-IR")} ${lot.unit}`} />
             <Row
-              label="قیمت"
+              label={t("lot.price")}
               value={
                 lot.tieredPricing?.length > 0
-                  ? "قیمت پلکانی"
+                  ? t("lot.tieredPrice")
                   : lot.price
-                    ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency)
+                    ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency, tShared)
                     : "—"
               }
             />
             <Row
-              label="حداقل سفارش"
+              label={t("lot.minOrder")}
               value={lot.minimumOrderQuantity ? `${lot.minimumOrderQuantity} ${lot.unit}` : "—"}
             />
           </div>
 
           {lot.tieredPricing?.length > 0 ? (
             <div className="mt-4">
-              <p className="mb-2 text-sm font-semibold text-slate-700">قیمت‌گذاری پلکانی</p>
+              <p className="mb-2 text-sm font-semibold text-slate-700">{t("viewModal.tieredPricing")}</p>
               <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
             </div>
           ) : null}
@@ -73,7 +76,7 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
 
           {lot.locationLabel || (lot.latitude && lot.longitude) ? (
             <div className="mt-4">
-              <p className="mb-2 text-sm font-semibold text-slate-700">موقعیت</p>
+              <p className="mb-2 text-sm font-semibold text-slate-700">{t("viewModal.location")}</p>
               <p className="text-sm text-slate-700">{lot.locationLabel || "—"}</p>
               {lot.latitude && lot.longitude ? (
                 <p className="mt-1 font-mono text-xs text-slate-500" dir="ltr">
@@ -85,7 +88,7 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
 
           {lot.attributes?.length > 0 ? (
             <div className="mt-4">
-              <p className="mb-2 text-sm font-semibold text-slate-700">مشخصات فنی</p>
+              <p className="mb-2 text-sm font-semibold text-slate-700">{t("viewModal.technicalSpecs")}</p>
               <div className="space-y-2">
                 {lot.attributes.map((a) => (
                   <div key={a.id} className="flex justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm">
@@ -100,13 +103,13 @@ export default function InventoryViewModal({ lot, productName, farmerName, t, on
 
         <div className={inv.modalFooter}>
           <button type="button" onClick={onClose} className={inv.btnSecondary}>
-            بستن
+            {t("viewModal.close")}
           </button>
           <button type="button" onClick={() => onMedia(lot)} className={`${inv.btnSecondary} text-sky-700`}>
-            رسانه
+            {t("lot.media")}
           </button>
           <button type="button" onClick={() => onEdit(lot)} className={inv.btnPrimary}>
-            ویرایش
+            {t("lot.edit")}
           </button>
         </div>
       </div>

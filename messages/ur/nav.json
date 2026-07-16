@@ -1,0 +1,37 @@
+{
+  "dashboard": "",
+  "escrow": "",
+  "cart": "",
+  "myOrders": "",
+  "startSelling": "",
+  "submitRequest": "",
+  "myRequests": "",
+  "myProducts": "",
+  "newInventory": "",
+  "customerOrders": "",
+  "incomingToMyProducts": "",
+  "admin": {
+    "userManagement": "",
+    "usersList": "",
+    "rolesList": "",
+    "supplyManagement": "",
+    "productCategories": "",
+    "productAttributes": "",
+    "inventoryList": "",
+    "createInventory": "",
+    "orderManagement": "",
+    "homepageOrder": "",
+    "escrowSettings": "",
+    "servicesManagement": "",
+    "providerRequests": "",
+    "providersList": "",
+    "serviceCategories": "",
+    "settings": ""
+  },
+  "sections": {
+    "seller": "",
+    "applicant": "",
+    "servicesProvider": "",
+    "admin": ""
+  }
+}

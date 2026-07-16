@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { buildDashboardBreadcrumbs } from "@/app/dashboard/dashboardRoutes";
 
@@ -10,18 +11,24 @@ export default function DashboardBreadcrumb() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isSellerView, isServicesView } = useDashboardPersona();
+  const t = useTranslations("dashboard");
 
-  const crumbs = useMemo(
-    () => buildDashboardBreadcrumbs(pathname, searchParams, { isSellerView, isServicesView }),
-    [pathname, searchParams, isSellerView, isServicesView]
-  );
+  const crumbs = useMemo(() => {
+    const raw = buildDashboardBreadcrumbs(pathname, searchParams, { isSellerView, isServicesView });
+    return raw.map((crumb) => ({
+      ...crumb,
+      label: crumb.labelKey
+        ? t(crumb.labelKey)
+        : crumb.labelFallback || t("fallbackPage"),
+    }));
+  }, [pathname, searchParams, isSellerView, isServicesView, t]);
 
   if (!crumbs.length) return null;
 
   return (
     <nav
       className="mb-5 flex min-h-[1.75rem] flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-slate-500"
-      aria-label="مسیر صفحه"
+      aria-label={t("ariaLabel")}
     >
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;

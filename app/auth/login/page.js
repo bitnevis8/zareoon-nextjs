@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useAuth } from "../../context/AuthContext";
 import { API_ENDPOINTS } from "../../config/api";
 
 export default function LoginPage() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -57,11 +60,11 @@ export default function LoginPage() {
         }
       } else {
         console.log("❌ API Error:", data.message);
-        setError(data.message || "خطا در بررسی اطلاعات");
+        setError(data.message || t("checkError"));
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("خطا در ارتباط با سرور");
+      setError(t("serverError"));
     } finally {
       setLoading(false);
     }
@@ -73,7 +76,7 @@ export default function LoginPage() {
       <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بارگذاری...</p>
+          <p className="text-gray-600">{tCommon("loading")}</p>
         </div>
       </div>
     );
@@ -84,11 +87,11 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
         {/* هدر */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-800">ورود / ثبت نام</h1>
+          <h1 className="text-xl font-bold text-gray-800">{t("loginRegisterTitle")}</h1>
           <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
             <Image
               src="/images/logo.png"
-              alt="لوگو زارعون"
+              alt={t("logoAlt")}
               width={48}
               height={48}
               className="w-full h-full object-contain"
@@ -102,7 +105,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              شماره موبایل خود را وارد کنید
+              {t("mobileLabel")}
             </label>
             <input
               type="tel"
@@ -124,17 +127,17 @@ export default function LoginPage() {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="rememberMe" className="mr-2 block text-sm text-gray-700">
-              مرا به خاطر بسپار
+              {t("rememberMe")}
             </label>
           </div>
 
           {/* قوانین */}
           <div className="text-center text-sm text-gray-600">
-            ورود/ثبت‌نام شما به معنای پذیرش{" "}
+            {t("termsPrefix")}{" "}
             <Link href="/terms" className="text-blue-600 hover:text-blue-800">
-              قوانین
+              {t("termsLink")}
             </Link>{" "}
-            می‌باشد
+            {t("termsSuffix")}
           </div>
 
           {/* نمایش خطا */}
@@ -150,14 +153,14 @@ export default function LoginPage() {
             disabled={loading || !identifier.trim()}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
           >
-            {loading ? "در حال بررسی..." : "ادامه"}
+            {loading ? t("checking") : t("continue")}
           </button>
         </form>
 
         {/* لینک‌های اضافی */}
         <div className="mt-6 text-center">
           <Link href="/help" className="text-sm text-gray-600 hover:text-gray-800">
-            راهنمای ورود
+            {t("loginHelp")}
           </Link>
         </div>
         </div>

@@ -1,48 +1,52 @@
+import createNextIntlPlugin from "next-intl/plugin";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['api.zareoon.ir', 'localhost', 'zareoon.ir', 'dl.zareoon.ir', '2193182645.cloudydl.com'],
-    formats: ['image/webp', 'image/avif'],
-    unoptimized: true, // برای تصاویر خارجی
+    remotePatterns: [
+      { protocol: "https", hostname: "api.zareoon.ir" },
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "https", hostname: "zareoon.ir" },
+      { protocol: "https", hostname: "dl.zareoon.ir" },
+      { protocol: "http", hostname: "dl.zareoon.ir" },
+      { protocol: "https", hostname: "2193182645.cloudydl.com" },
+    ],
+    formats: ["image/webp", "image/avif"],
+    unoptimized: true,
   },
   async rewrites() {
     return [
       {
-        source: '/dl-media/:path*',
-        destination: 'http://dl.zareoon.ir/:path*',
+        source: "/dl-media/:path*",
+        destination: "http://dl.zareoon.ir/:path*",
       },
     ];
   },
   async redirects() {
     return [
       {
-        source: '/dashboard/farmer/:path*',
-        destination: '/dashboard/supplier/:path*',
+        source: "/dashboard/farmer/:path*",
+        destination: "/dashboard/supplier/:path*",
         permanent: true,
       },
     ];
   },
-  // غیرفعال کردن کامل کش
   experimental: {
-    optimizePackageImports: ['@heroicons/react', 'react-leaflet'],
+    optimizePackageImports: ["@heroicons/react", "react-leaflet"],
   },
-  // تنظیمات برای غیرفعال کردن کش
   generateEtags: false,
   poweredByHeader: false,
   compress: true,
-  // تنظیم timeout برای API calls
-  serverRuntimeConfig: {
-    maxDuration: 120, // کاهش به 15 ثانیه برای سرعت بیشتر
-  },
-  // غیرفعال کردن کش در webpack
+  // Custom webpack is only used when building with --webpack.
+  // Turbopack is the default bundler in Next.js 16.
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
       config.optimization.splitChunks.cacheGroups = {
         ...config.optimization.splitChunks.cacheGroups,
         vendor: {
           test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
+          name: "vendors",
+          chunks: "all",
         },
       };
     }
@@ -50,4 +54,6 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./i18n/request.js");
+
+export default withNextIntl(nextConfig);

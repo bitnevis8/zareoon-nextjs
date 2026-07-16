@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function AccountNotFoundContent() {
+  const t = useTranslations("auth");
   const [identifier, setIdentifier] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,14 +36,14 @@ export default function AccountNotFoundContent() {
           <div className="w-20 h-20 bg-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-white text-2xl">⚠️</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">حساب کاربری یافت نشد</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("accountNotFoundTitle")}</h1>
         </div>
 
         <div className="space-y-6">
           <div className="text-center">
-            <p className="text-gray-600 mb-4">می‌خواهید یک حساب کاربری جدید بسازید؟</p>
+            <p className="text-gray-600 mb-4">{t("createAccountQuestion")}</p>
             <p className="text-sm text-gray-500">
-              برای ساختن حساب کاربری با {formatIdentifier(identifier)} روی دکمه زیر بزنید.
+              {t("createAccountHint", { identifier: formatIdentifier(identifier) })}
             </p>
           </div>
 
@@ -51,7 +53,7 @@ export default function AccountNotFoundContent() {
               onClick={handleCreateAccount}
               className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
             >
-              ساخت حساب کاربری جدید
+              {t("createAccountBtn")}
             </button>
 
             <button
@@ -59,12 +61,12 @@ export default function AccountNotFoundContent() {
               onClick={handleEditIdentifier}
               className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-200"
             >
-              ویرایش شماره همراه
+              {t("editMobileBtn")}
             </button>
           </div>
 
           <div className="text-center text-sm text-gray-500">
-            <p>اگر شماره موبایل یا ایمیل را اشتباه وارد کرده‌اید، روی «ویرایش شماره همراه» کلیک کنید.</p>
+            <p>{t("editMobileHint")}</p>
           </div>
         </div>
       </div>

@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
 
 export default function VerificationCodePage() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -79,15 +82,15 @@ export default function VerificationCodePage() {
         setCanResend(false);
         console.log("✅ Code sent successfully");
       } else {
-        setError(data.message || "خطا در ارسال کد");
+        setError(data.message || t("sendCodeError"));
       }
     } catch (err) {
       console.error("Send code error:", err);
-      setError("خطا در ارتباط با سرور");
+      setError(t("serverError"));
     } finally {
       setLoading(false);
     }
-  }, [identifier, action]);
+  }, [identifier, action, t]);
 
   // اگر کاربر قبلاً لاگین کرده، به داشبورد هدایت کن
   useEffect(() => {
@@ -275,7 +278,7 @@ export default function VerificationCodePage() {
           }, 1000);
         }
       } else {
-        setError(data.message || "کد تایید اشتباه است");
+        setError(data.message || t("wrongCode"));
         setCode(["", "", "", "", "", ""]);
         // فوکوس به فیلد آخر بعد از خطا (از راست به چپ)
         setTimeout(() => {
@@ -284,7 +287,7 @@ export default function VerificationCodePage() {
       }
     } catch (err) {
       console.error("Verification error:", err);
-      setError("خطا در ارتباط با سرور");
+      setError(t("serverError"));
     } finally {
       setLoading(false);
     }
@@ -308,13 +311,19 @@ export default function VerificationCodePage() {
     return id;
   };
 
+  const formatTimer = () => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = (timeLeft % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  };
+
   // اگر AuthContext در حال لود است، loading نشان بده
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بارگذاری...</p>
+          <p className="text-gray-600">{tCommon("loading")}</p>
         </div>
       </div>
     );
@@ -328,22 +337,24 @@ export default function VerificationCodePage() {
           <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-white text-2xl">📱</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">تایید کد</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("verifyCodeTitle")}</h1>
         </div>
         
         {/* عنوان موبایل */}
         <div className="text-center mb-8 md:hidden">
-          <h1 className="text-2xl font-bold text-gray-800">تایید کد</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("verifyCodeTitle")}</h1>
         </div>
 
         {/* اطلاعات */}
         <div className="space-y-6">
           <div className="text-center">
             <p className="text-gray-600 mb-2">
-              رمز یک‌بار مصرف به {formatIdentifier(identifier)} ارسال شد.
+              {t("codeSentTo", { identifier: formatIdentifier(identifier) })}
             </p>
             <p className="text-sm text-gray-500">
-              {timeLeft > 0 ? `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')} مانده تا دریافت مجدد کد تایید` : "می‌توانید کد جدید درخواست کنید"}
+              {timeLeft > 0
+                ? t("timerRemaining", { time: formatTimer() })
+                : t("canResend")}
             </p>
           </div>
 
@@ -378,7 +389,7 @@ export default function VerificationCodePage() {
           {/* نمایش موفقیت */}
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm text-center">
-              کد تایید شد! در حال انتقال...
+              {t("codeVerified")}
             </div>
           )}
 
@@ -389,13 +400,13 @@ export default function VerificationCodePage() {
               disabled={loading}
               className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-200"
             >
-              {loading ? "در حال ارسال..." : "دریافت مجدد کد تایید"}
+              {loading ? t("sending") : t("resendCode")}
             </button>
           )}
 
           {/* راهنمای اضافی */}
           <div className="text-center text-xs text-gray-500">
-            <p>در بعضی از تلفن‌های همراه کد تایید به Blacklist آن ارسال می‌شود. در صورتی عدم دریافت با پشتیبانی تماس بگیرید.</p>
+            <p>{t("blacklistHint")}</p>
           </div>
         </div>
       </div>

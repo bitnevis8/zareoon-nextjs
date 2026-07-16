@@ -2,52 +2,42 @@
 
 export const DEFAULT_ESCROW_CURRENCY = "IRR";
 
-export const ESCROW_CURRENCIES = [
-  {
-    code: "IRR",
-    label: "ریال ایران",
-    shortLabel: "ریال",
-    hint: "واحد پول ملی — مبالغ به ریال وارد شود",
-    integerOnly: true,
-  },
-  {
-    code: "USD",
-    label: "دلار آمریکا",
-    shortLabel: "دلار",
-    hint: "United States Dollar (USD)",
-    integerOnly: false,
-  },
-  {
-    code: "EUR",
-    label: "یورو",
-    shortLabel: "یورو",
-    hint: "Euro (EUR)",
-    integerOnly: false,
-  },
-  {
-    code: "AED",
-    label: "درهم امارات",
-    shortLabel: "درهم",
-    hint: "UAE Dirham (AED)",
-    integerOnly: false,
-  },
-  {
-    code: "TRY",
-    label: "لیر ترکیه",
-    shortLabel: "لیر",
-    hint: "Turkish Lira (TRY)",
-    integerOnly: false,
-  },
-];
+export const ESCROW_CURRENCY_CODES = ["IRR", "USD", "EUR", "AED", "TRY"];
 
-export function getEscrowCurrency(code) {
+const CURRENCY_META = {
+  IRR: { integerOnly: true },
+  USD: { integerOnly: false },
+  EUR: { integerOnly: false },
+  AED: { integerOnly: false },
+  TRY: { integerOnly: false },
+};
+
+export function getEscrowCurrency(code, t) {
   const normalized = String(code || DEFAULT_ESCROW_CURRENCY).toUpperCase();
-  return ESCROW_CURRENCIES.find((c) => c.code === normalized) || ESCROW_CURRENCIES[0];
+  const meta = CURRENCY_META[normalized] || CURRENCY_META.IRR;
+  const labels = t?.raw?.(`currencies.${normalized}`) || {};
+  return {
+    code: normalized,
+    label: labels.label || normalized,
+    shortLabel: labels.shortLabel || normalized,
+    hint: labels.hint || "",
+    integerOnly: meta.integerOnly,
+  };
 }
 
-export function formatEscrowMoney(amount, currencyCode = DEFAULT_ESCROW_CURRENCY) {
+export function getEscrowCurrencies(t) {
+  return ESCROW_CURRENCY_CODES.map((code) => getEscrowCurrency(code, t));
+}
+
+/** @deprecated use getEscrowCurrencies(t) */
+export const ESCROW_CURRENCIES = ESCROW_CURRENCY_CODES.map((code) => ({
+  code,
+  ...CURRENCY_META[code],
+}));
+
+export function formatEscrowMoney(amount, currencyCode = DEFAULT_ESCROW_CURRENCY, t) {
   const n = Number(amount || 0);
   if (!Number.isFinite(n)) return "—";
-  const cur = getEscrowCurrency(currencyCode);
+  const cur = getEscrowCurrency(currencyCode, t);
   return `${n.toLocaleString("fa-IR")} ${cur.shortLabel}`;
 }

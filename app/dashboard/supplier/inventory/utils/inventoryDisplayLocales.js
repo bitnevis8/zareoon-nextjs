@@ -1,4 +1,5 @@
 import { SITE_LANGUAGES, SITE_LANGUAGE_CODES, isRtlLanguage } from "@/app/config/siteLanguages";
+import inventoryMessages from "../../../../../messages/fa/inventory.json";
 
 export const DISPLAY_LOCALE_CODES = SITE_LANGUAGE_CODES;
 
@@ -112,28 +113,15 @@ export function countFilledDisplayLocales(displayContent) {
   }).length;
 }
 
-const TITLE_PLACEHOLDERS = {
-  fa: "مثلاً خرمای مضافتی درجه یک — برداشت تازه",
-  en: "e.g. Premium Mazafati dates — fresh harvest",
-  ar: "مثال: تمر مضافي درجة أولى",
-  ru: "например: финики Мазафати премиум",
-  tr: "ör. Premium Mazafati hurması — taze hasat",
-  fi: "esim. Premium Mazafati -tuore sato",
-};
+const TITLE_PLACEHOLDERS = inventoryMessages.display.titlePlaceholders;
+const DESCRIPTION_PLACEHOLDERS = inventoryMessages.display.descriptionPlaceholders;
 
-const DESCRIPTION_PLACEHOLDERS = {
-  fa: "توضیح کوتاه برای نمایش در صفحه این عرضه…",
-  en: "Short description for this listing…",
-  ar: "وصف قصير لهذا العرض…",
-  ru: "Краткое описание для этой позиции…",
-  tr: "Bu ilan için kısa açıklama…",
-  fi: "Lyhyt kuvaus tälle tarjoukselle…",
-};
-
-export function getDisplayTitlePlaceholder(code) {
+export function getDisplayTitlePlaceholder(code, t) {
+  if (code === "fa" && t) return t("display.titlePlaceholderFa");
   return TITLE_PLACEHOLDERS[code] || TITLE_PLACEHOLDERS.en;
 }
 
-export function getDisplayDescriptionPlaceholder(code) {
+export function getDisplayDescriptionPlaceholder(code, t) {
+  if (code === "fa" && t) return t("display.descriptionPlaceholderFa");
   return DESCRIPTION_PLACEHOLDERS[code] || DESCRIPTION_PLACEHOLDERS.en;
 }

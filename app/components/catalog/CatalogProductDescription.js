@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { catalogSurface, catalogText } from "./catalogTheme";
 
-export default function CatalogProductDescription({ description, t, embedded = false, className = "" }) {
+export default function CatalogProductDescription({ description, embedded = false, className = "" }) {
+  const t = useTranslations("catalog");
   const text = (description || "").trim();
   if (!text) return null;
 

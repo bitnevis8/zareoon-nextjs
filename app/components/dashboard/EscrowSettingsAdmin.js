@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRequireAdmin } from "@/app/hooks/useDashboardRole";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
-import {
-  ESCROW_SETTINGS_TITLE,
-  formatUserDisplayName,
-} from "@/app/components/dashboard/escrowCopy";
+import { dash } from "@/app/components/dashboard/dashboardTheme";
 
 export default function EscrowSettingsAdmin() {
+  const t = useTranslations("escrow");
+  const tCommon = useTranslations("common");
   const { allowed, loading: authLoading } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,7 +55,7 @@ export default function EscrowSettingsAdmin() {
           });
         }
       } catch {
-        if (!cancelled) showToast.error("خطا در بارگذاری تنظیمات تضمین معاملات");
+        if (!cancelled) showToast.error(t("settings.loadError"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -63,7 +63,7 @@ export default function EscrowSettingsAdmin() {
     return () => {
       cancelled = true;
     };
-  }, [allowed]);
+  }, [allowed, t]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -75,10 +75,10 @@ export default function EscrowSettingsAdmin() {
         body: JSON.stringify(form),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "خطا");
-      showToast.success(json.message || "ذخیره شد");
+      if (!res.ok) throw new Error(json.message || t("form.genericError"));
+      showToast.success(json.message || t("settings.saved"));
     } catch (err) {
-      showToast.error(err.message || "خطا در ذخیره");
+      showToast.error(err.message || t("settings.saveError"));
     } finally {
       setSaving(false);
     }
@@ -96,40 +96,42 @@ export default function EscrowSettingsAdmin() {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "خطا");
-      showToast.success("قانون فروشنده تأییدشده ذخیره شد");
+      if (!res.ok) throw new Error(json.message || t("form.genericError"));
+      showToast.success(t("settings.verifiedSaved"));
     } catch (err) {
-      showToast.error(err.message || "خطا");
+      showToast.error(err.message || t("settings.saveError"));
     }
   };
 
   if (authLoading || !allowed) {
-    return <div className={dash.page}><p className="text-sm text-slate-500">در حال بارگذاری…</p></div>;
+    return (
+      <div className={dash.page}>
+        <p className="text-sm text-slate-500">{tCommon("loading")}</p>
+      </div>
+    );
   }
 
   return (
     <div className={dash.page}>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className={dash.pageTitle}>{ESCROW_SETTINGS_TITLE}</h1>
-          <p className={dash.pageSubtitle}>
-            درصد پیش‌فرض، محدوده وجه تضمین، قفل کامل معامله، سیاست آزادسازی و الگوی مراحل
-          </p>
+          <h1 className={dash.pageTitle}>{t("settingsTitle")}</h1>
+          <p className={dash.pageSubtitle}>{t("settings.subtitle")}</p>
         </div>
         <Link href="/dashboard/escrow" className="text-sm font-semibold text-sky-700 hover:underline">
-          قراردادهای تضمین معاملات
+          {t("settings.contractsLink")}
         </Link>
       </header>
 
       {loading ? (
-        <p className="text-sm text-slate-500">در حال بارگذاری تنظیمات…</p>
+        <p className="text-sm text-slate-500">{t("settings.loading")}</p>
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
           <section className={`${dash.card} ${dash.cardBody} space-y-4`}>
-            <h2 className="text-sm font-bold text-slate-900">وجه تضمین پیش‌فرض</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t("settings.defaultDeposit")}</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <label className="block">
-                <span className="text-xs text-slate-600">درصد پیش‌فرض وجه تضمین (٪)</span>
+                <span className="text-xs text-slate-600">{t("settings.defaultPercent")}</span>
                 <input
                   type="number"
                   min="1"
@@ -142,7 +144,7 @@ export default function EscrowSettingsAdmin() {
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-slate-600">حداقل مجاز (٪)</span>
+                <span className="text-xs text-slate-600">{t("settings.minPercent")}</span>
                 <input
                   type="number"
                   min="1"
@@ -154,7 +156,7 @@ export default function EscrowSettingsAdmin() {
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-slate-600">حداکثر مجاز (٪)</span>
+                <span className="text-xs text-slate-600">{t("settings.maxPercent")}</span>
                 <input
                   type="number"
                   min="1"
@@ -166,7 +168,7 @@ export default function EscrowSettingsAdmin() {
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-slate-600">کارمزد سامانه (٪)</span>
+                <span className="text-xs text-slate-600">{t("settings.platformFee")}</span>
                 <input
                   type="number"
                   min="0"
@@ -185,7 +187,7 @@ export default function EscrowSettingsAdmin() {
                   checked={form.allowFullDealHold}
                   onChange={(e) => setForm((f) => ({ ...f, allowFullDealHold: e.target.checked }))}
                 />
-                اجازه قفل ۱۰۰٪ کل معامله
+                {t("settings.allowFullHold")}
               </label>
               <label className="inline-flex items-center gap-2">
                 <input
@@ -193,13 +195,13 @@ export default function EscrowSettingsAdmin() {
                   checked={form.allowCustomDeposit}
                   onChange={(e) => setForm((f) => ({ ...f, allowCustomDeposit: e.target.checked }))}
                 />
-                اجازه مبلغ/درصد دلخواه
+                {t("settings.allowCustom")}
               </label>
             </div>
           </section>
 
           <section className={`${dash.card} ${dash.cardBody} space-y-4`}>
-            <h2 className="text-sm font-bold text-slate-900">سیاست آزادسازی (استاندارد B2B)</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t("settings.releasePolicy")}</h2>
             <div className="flex flex-wrap gap-4 text-sm">
               <label className="inline-flex items-center gap-2">
                 <input
@@ -207,7 +209,7 @@ export default function EscrowSettingsAdmin() {
                   checked={form.releaseRequiresBuyerApproval}
                   onChange={(e) => setForm((f) => ({ ...f, releaseRequiresBuyerApproval: e.target.checked }))}
                 />
-                آزادسازی نیاز به تأیید خریدار
+                {t("settings.releaseNeedsBuyer")}
               </label>
               <label className="inline-flex items-center gap-2">
                 <input
@@ -215,7 +217,7 @@ export default function EscrowSettingsAdmin() {
                   checked={form.sellerCanRequestRelease}
                   onChange={(e) => setForm((f) => ({ ...f, sellerCanRequestRelease: e.target.checked }))}
                 />
-                فروشنده می‌تواند درخواست آزادسازی بدهد
+                {t("settings.sellerCanRequest")}
               </label>
               <label className="inline-flex items-center gap-2">
                 <input
@@ -225,11 +227,11 @@ export default function EscrowSettingsAdmin() {
                     setForm((f) => ({ ...f, sellerReleaseRequiresBuyerApproval: e.target.checked }))
                   }
                 />
-                درخواست فروشنده نیاز به تأیید خریدار دارد
+                {t("settings.sellerReleaseNeedsBuyer")}
               </label>
             </div>
             <label className="block max-w-md">
-              <span className="text-xs text-slate-600">الگوی پیش‌فرض مراحل آزادسازی</span>
+              <span className="text-xs text-slate-600">{t("settings.defaultMilestone")}</span>
               <select
                 value={form.defaultMilestonePreset}
                 onChange={(e) => setForm((f) => ({ ...f, defaultMilestonePreset: e.target.value }))}
@@ -246,11 +248,11 @@ export default function EscrowSettingsAdmin() {
 
           {verifiedRule ? (
             <section className={`${dash.card} ${dash.cardBody} space-y-3`}>
-              <h2 className="text-sm font-bold text-slate-900">فروشنده تأییدشده</h2>
-              <p className="text-xs text-slate-500">درصد وجه تضمین برای فروشندگان با سابقه تأیید (اولویت بالاتر از عمومی)</p>
+              <h2 className="text-sm font-bold text-slate-900">{t("settings.verifiedSeller")}</h2>
+              <p className="text-xs text-slate-500">{t("settings.verifiedHint")}</p>
               <div className="flex flex-wrap items-end gap-3">
                 <label className="block">
-                  <span className="text-xs text-slate-600">درصد وجه تضمین (٪)</span>
+                  <span className="text-xs text-slate-600">{t("settings.verifiedPercent")}</span>
                   <input
                     type="number"
                     min="1"
@@ -268,7 +270,7 @@ export default function EscrowSettingsAdmin() {
                   onClick={saveVerifiedRule}
                   className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
                 >
-                  ذخیره قانون VIP
+                  {t("settings.saveVerifiedRule")}
                 </button>
               </div>
             </section>
@@ -279,7 +281,7 @@ export default function EscrowSettingsAdmin() {
             disabled={saving}
             className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
           >
-            {saving ? "در حال ذخیره…" : "ذخیره تنظیمات"}
+            {saving ? t("settings.saving") : t("settings.save")}
           </button>
         </form>
       )}

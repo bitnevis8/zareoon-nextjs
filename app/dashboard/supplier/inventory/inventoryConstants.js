@@ -1,11 +1,12 @@
 import { createEmptyDisplayContent } from "./utils/inventoryDisplayLocales";
+import i18nData from "@/app/utils/i18nFaData";
 
 export const INITIAL_FORM = {
   productId: "",
   farmerId: "",
   farmerLabel: "",
   unit: "kg",
-  qualityGrade: "درجه 1",
+  qualityGrade: i18nData.defaultQualityGrade,
   totalQuantity: "",
   price: "",
   priceCurrency: "TOMAN",
@@ -20,7 +21,7 @@ export const INITIAL_FORM = {
 
 export const EMPTY_TIER = { minQuantity: "", maxQuantity: "", pricePerUnit: "", description: "" };
 
-export const QUALITY_GRADES = ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"];
+export const QUALITY_GRADES = i18nData.qualityGrades;
 
 export const LOT_STATUSES = [
   { value: "harvested", labelKey: "statusHarvested" },
@@ -30,12 +31,12 @@ export const LOT_STATUSES = [
 ];
 
 export const SORT_OPTIONS = [
-  { value: "newest", label: "جدیدترین" },
-  { value: "oldest", label: "قدیمی‌ترین" },
-  { value: "qty_desc", label: "بیشترین موجودی" },
-  { value: "qty_asc", label: "کمترین موجودی" },
-  { value: "price_desc", label: "بیشترین قیمت" },
-  { value: "price_asc", label: "کمترین قیمت" },
+  { value: "newest", labelKey: "sort.newest" },
+  { value: "oldest", labelKey: "sort.oldest" },
+  { value: "qty_desc", labelKey: "sort.qtyDesc" },
+  { value: "qty_asc", labelKey: "sort.qtyAsc" },
+  { value: "price_desc", labelKey: "sort.priceDesc" },
+  { value: "price_asc", labelKey: "sort.priceAsc" },
 ];
 
 export const DEFAULT_FILTERS = {

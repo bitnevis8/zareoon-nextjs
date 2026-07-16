@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { getAuthHeaders } from "@/app/utils/authHeaders";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
+import homeFa from "../../../messages/fa/home.json";
 
 export default function AvatarUpload({
   onUploadSuccess,
@@ -126,7 +127,7 @@ export default function AvatarUpload({
 
   const displaySrc = preview || currentAvatar || "/images/default/male.png";
   const initials =
-    (user?.firstName?.[0] || user?.username?.[0] || "ک").toUpperCase();
+    (user?.firstName?.[0] || user?.username?.[0] || homeFa.avatarFallbackInitial).toUpperCase();
 
   if (variant === "classic") {
     return (

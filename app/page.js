@@ -7,6 +7,7 @@ import { useAuth } from './context/AuthContext';
 import { useLanguage, siteIntroByLang } from './context/LanguageContext';
 import { authFetch } from './utils/authHeaders';
 import MainCategoryGrid from './components/MainCategoryGrid';
+import MarketplaceDisclaimer from './components/MarketplaceDisclaimer';
 import QuickSearchBox from './components/QuickSearchBox';
 import LanguageFlag from './components/ui/LanguageFlag';
 import LazyWhenVisible from './components/ui/LazyWhenVisible';
@@ -15,13 +16,13 @@ import { SITE_LANGUAGES, SITE_INTRO_ORDER, isRtlLanguage } from './config/siteLa
 
 const LatestAvailableProductsSection = dynamic(
   () => import('./components/LatestAvailableProductsSection'),
-  { loading: () => <SectionSkeleton minHeight="14rem" /> }
+  { loading: () => <SectionSkeleton minHeight="14rem" variant="products" /> }
 );
 const BuyerSellerPortal = dynamic(() => import('./components/BuyerSellerPortal'), {
-  loading: () => <SectionSkeleton minHeight="11rem" className="mt-2" />,
+  loading: () => <SectionSkeleton minHeight="22rem" className="mt-2" variant="portal" />,
 });
 const ZareoonExclusiveServices = dynamic(() => import('./components/ZareoonExclusiveServices'), {
-  loading: () => <SectionSkeleton minHeight="20rem" className="mt-2" />,
+  loading: () => <SectionSkeleton minHeight="20rem" className="mt-2" variant="services" />,
 });
 
 export default function Home() {
@@ -122,27 +123,29 @@ function HomeContent() {
           })}
         </div>
 
+        <MarketplaceDisclaimer className="mt-2" />
+
         <MainCategoryGrid className="w-full" id="product-categories" />
 
         <LazyWhenVisible
           id="latest-available"
           className="w-full scroll-mt-20"
           minHeight="14rem"
-          fallback={<SectionSkeleton minHeight="14rem" />}
+          fallback={<SectionSkeleton minHeight="14rem" variant="products" />}
         >
           <LatestAvailableProductsSection autoFetch variant="homepage" className="w-full" />
         </LazyWhenVisible>
 
         <LazyWhenVisible
-          minHeight="11rem"
-          fallback={<SectionSkeleton minHeight="11rem" className="mt-2" />}
+          minHeight="22rem"
+          fallback={<SectionSkeleton minHeight="22rem" className="mt-2" variant="portal" />}
         >
           <BuyerSellerPortal className="w-full" />
         </LazyWhenVisible>
 
         <LazyWhenVisible
           minHeight="20rem"
-          fallback={<SectionSkeleton minHeight="20rem" className="mt-2" />}
+          fallback={<SectionSkeleton minHeight="20rem" className="mt-2" variant="services" />}
         >
           <ZareoonExclusiveServices className="w-full" />
         </LazyWhenVisible>

@@ -3,44 +3,22 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
 import { isAdmin } from "@/app/utils/roles";
 import { useAuth } from "@/app/context/AuthContext";
+import { formatUserDisplayName } from "@/app/components/dashboard/escrowCopy";
 import {
-  ESCROW_DEPOSIT_LABEL,
-  ESCROW_TAGLINE,
-  formatUserDisplayName,
-} from "@/app/components/dashboard/escrowCopy";
-import {
-  DISPUTE_STATUS_LABELS,
-  ESCROW_ACTIONS,
+  getEscrowAction,
   getStatusGuide,
-  LEDGER_TYPE_LABELS,
-  MILESTONE_STATUS_LABELS,
-  REFUND_STATUS_LABELS,
-  RELEASE_STATUS_LABELS,
-  ROLE_LABELS,
-  WORKFLOW_STEPS,
+  getWorkflowSteps,
+  labelMap,
   workflowStepIndex,
-} from "@/app/components/dashboard/escrowDetailHelp";
+} from "@/app/components/dashboard/escrowHelpers";
 import { formatEscrowMoney, getEscrowCurrency } from "@/app/utils/escrowCurrencies";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
-
-const STATUS_LABELS = {
-  draft: "پیش‌نویس",
-  awaiting_payment: "منتظر پرداخت",
-  funds_locked: "وجه قفل شده",
-  in_progress: "در حال انجام",
-  partially_released: "آزادسازی جزئی",
-  fully_released: "آزادسازی کامل",
-  refunded: "برگشت داده شده",
-  cancelled: "لغو شده",
-  expired: "منقضی",
-  disputed: "اختلاف",
-  completed: "تکمیل شده",
-};
 
 const STATUS_CLASS = {
   draft: "bg-slate-100 text-slate-700",
@@ -54,22 +32,6 @@ const STATUS_CLASS = {
   expired: "bg-slate-200 text-slate-600",
   disputed: "bg-orange-100 text-orange-900",
   completed: "bg-emerald-100 text-emerald-900",
-};
-
-const EVENT_LABELS = {
-  agreement_created: "قرارداد ایجاد شد",
-  awaiting_payment: "منتظر پرداخت",
-  payment_intent_created: "درخواست پرداخت",
-  payment_confirmed_funds_locked: "پرداخت تأیید و قفل شد",
-  milestone_confirmed: "تأیید مرحله",
-  release_requested: "درخواست آزادسازی",
-  funds_released: "وجه آزاد شد",
-  agreement_completed: "قرارداد تکمیل شد",
-  refund_requested: "درخواست برگشت",
-  refund_completed: "برگشت انجام شد",
-  dispute_opened: "اختلاف ثبت شد",
-  dispute_resolved: "اختلاف حل شد",
-  agreement_cancelled: "قرارداد لغو شد",
 };
 
 const ACTION_VARIANT_CLASS = {
@@ -89,14 +51,14 @@ function formatDate(value) {
   }
 }
 
-function WorkflowStepper({ status }) {
+function WorkflowStepper({ status, steps }) {
   const activeIdx = workflowStepIndex(status);
   const terminal = ["cancelled", "expired", "refunded"].includes(status);
 
   return (
     <div className="overflow-x-auto pb-1">
       <ol className="flex min-w-[min(100%,36rem)] gap-0 md:min-w-0">
-        {WORKFLOW_STEPS.map((step, idx) => {
+        {steps.map((step, idx) => {
           const done = idx < activeIdx;
           const current = idx === activeIdx && !terminal;
           return (
@@ -135,8 +97,7 @@ function WorkflowStepper({ status }) {
   );
 }
 
-function ActionCard({ action, onClick, disabled, busy }) {
-  const meta = ESCROW_ACTIONS[action];
+function ActionCard({ actionId, meta, onClick, disabled, busy, allowedForLabel, busyLabel }) {
   if (!meta) return null;
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -152,7 +113,7 @@ function ActionCard({ action, onClick, disabled, busy }) {
           </div>
           <p className="mt-2 text-xs leading-6 text-slate-600">{meta.description}</p>
           <p className="mt-2 text-[11px] text-slate-400">
-            <span className="font-medium text-slate-500">مجاز برای:</span> {meta.who}
+            <span className="font-medium text-slate-500">{allowedForLabel}</span> {meta.who}
           </p>
         </div>
         <button
@@ -161,14 +122,24 @@ function ActionCard({ action, onClick, disabled, busy }) {
           onClick={onClick}
           className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${ACTION_VARIANT_CLASS[meta.variant] || ACTION_VARIANT_CLASS.primary}`}
         >
-          {busy ? "در حال انجام…" : meta.shortLabel}
+          {busy ? busyLabel : meta.shortLabel}
         </button>
       </div>
     </div>
   );
 }
 
-function InlineDialog({ open, title, description, children, onClose, onConfirm, confirmLabel, danger }) {
+function InlineDialog({
+  open,
+  title,
+  description,
+  children,
+  onClose,
+  onConfirm,
+  confirmLabel,
+  cancelLabel,
+  danger,
+}) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
@@ -191,7 +162,7 @@ function InlineDialog({ open, title, description, children, onClose, onConfirm, 
             onClick={onClose}
             className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
-            انصراف
+            {cancelLabel}
           </button>
         </div>
       </div>
@@ -201,15 +172,27 @@ function InlineDialog({ open, title, description, children, onClose, onConfirm, 
 
 export default function EscrowAgreementDetail() {
   const { id } = useParams();
+  const t = useTranslations("escrow");
+  const tCommon = useTranslations("common");
   const auth = useAuth();
   const user = auth?.user;
   const userId = user?.id || user?.userId;
+  const userFallback = t("userFallback");
+
+  const statusLabels = labelMap(t, "agreementStatus");
+  const milestoneStatusLabels = labelMap(t, "milestoneStatus");
+  const releaseStatusLabels = labelMap(t, "releaseStatus");
+  const refundStatusLabels = labelMap(t, "refundStatus");
+  const disputeStatusLabels = labelMap(t, "disputeStatus");
+  const ledgerTypeLabels = labelMap(t, "ledgerType");
+  const roleLabels = labelMap(t, "roles");
+  const eventLabels = labelMap(t, "events");
+  const workflowSteps = useMemo(() => getWorkflowSteps(t), [t]);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
-  const [disputeMsg, setDisputeMsg] = useState("");
   const [resolveNotes, setResolveNotes] = useState("");
   const [resolveOutcome, setResolveOutcome] = useState("seller");
   const [dialog, setDialog] = useState(null);
@@ -222,15 +205,15 @@ export default function EscrowAgreementDetail() {
     try {
       const res = await authFetch(API_ENDPOINTS.escrow.agreement(id), { cache: "no-store" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "خطا");
+      if (!res.ok) throw new Error(json.message || t("form.genericError"));
       setData(json.data);
     } catch (err) {
-      showToast.error(err.message || "بارگذاری ناموفق");
+      showToast.error(err.message || t("detail.loadFailed"));
       setData(null);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     load();
@@ -239,7 +222,7 @@ export default function EscrowAgreementDetail() {
   const agreement = data?.agreement;
   const role = data?.viewerRole;
   const admin = isAdmin(user);
-  const currencyDef = getEscrowCurrency(agreement?.currency);
+  const currencyDef = getEscrowCurrency(agreement?.currency, t);
 
   const availableToRelease = useMemo(() => {
     if (!agreement) return 0;
@@ -252,8 +235,8 @@ export default function EscrowAgreementDetail() {
   }, [agreement]);
 
   const statusGuide = useMemo(
-    () => (agreement ? getStatusGuide(agreement, role) : null),
-    [agreement, role]
+    () => (agreement ? getStatusGuide(t, agreement, role) : null),
+    [agreement, role, t]
   );
 
   const runAction = async (fn) => {
@@ -265,7 +248,7 @@ export default function EscrowAgreementDetail() {
       setDialogReason("");
       setDialogAmount("");
     } catch (err) {
-      showToast.error(err.message || "عملیات ناموفق");
+      showToast.error(err.message || t("detail.operationFailed"));
     } finally {
       setBusy(false);
     }
@@ -278,16 +261,19 @@ export default function EscrowAgreementDetail() {
       body: body ? JSON.stringify(body) : undefined,
     });
     const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "خطا");
-    showToast.success(json.message || "انجام شد");
+    if (!res.ok) throw new Error(json.message || t("form.genericError"));
+    showToast.success(json.message || t("detail.done"));
     return json;
   };
+
+  const partyName = (party, partyId) =>
+    formatUserDisplayName(party, userFallback) || userFallback.replace("{id}", String(partyId));
 
   if (loading) {
     return (
       <div className={`${dash.page} mx-auto max-w-6xl`}>
         <div className={`${dash.card} ${dash.cardBody}`}>
-          <p className="text-sm text-slate-500">در حال بارگذاری قرارداد…</p>
+          <p className="text-sm text-slate-500">{t("detail.loading")}</p>
         </div>
       </div>
     );
@@ -296,9 +282,9 @@ export default function EscrowAgreementDetail() {
   if (!agreement) {
     return (
       <div className={`${dash.page} mx-auto max-w-6xl`}>
-        <p className="text-sm text-rose-600">قرارداد یافت نشد یا دسترسی ندارید.</p>
+        <p className="text-sm text-rose-600">{t("detail.notFound")}</p>
         <Link href="/dashboard/escrow" className="mt-4 inline-block text-sm text-sky-600 hover:underline">
-          بازگشت به فهرست
+          {t("detail.backToList")}
         </Link>
       </div>
     );
@@ -314,10 +300,12 @@ export default function EscrowAgreementDetail() {
     availableToRelease > 0;
   const canCancel = !["cancelled", "completed", "refunded", "expired"].includes(agreement.status);
 
+  const resolveOptions = t.raw("detail.resolveOptions") || {};
+
   return (
     <div className={`${dash.page} mx-auto max-w-6xl`}>
       <Link href="/dashboard/escrow" className="text-xs font-medium text-sky-600 hover:underline">
-        ← فهرست تضمین معاملات
+        {t("detail.backLink")}
       </Link>
 
       <header className="mt-3 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm md:p-6">
@@ -328,7 +316,7 @@ export default function EscrowAgreementDetail() {
               <span
                 className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${STATUS_CLASS[agreement.status] || STATUS_CLASS.draft}`}
               >
-                {STATUS_LABELS[agreement.status] || agreement.status}
+                {statusLabels[agreement.status] || agreement.status}
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-400" dir="ltr">
@@ -340,34 +328,50 @@ export default function EscrowAgreementDetail() {
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-2 lg:min-w-[240px]">
             <div className="rounded-xl bg-sky-50 px-3 py-2">
-              <p className="text-sky-700">خریدار</p>
+              <p className="text-sky-700">{t("list.buyer")}</p>
               <p className="mt-0.5 font-bold text-slate-900">
-                {formatUserDisplayName(agreement.buyer) || `کاربر ${agreement.buyerId}`}
-                {Number(userId) === Number(agreement.buyerId) ? " (شما)" : ""}
+                {partyName(agreement.buyer, agreement.buyerId)}
+                {Number(userId) === Number(agreement.buyerId) ? ` ${t("detail.you")}` : ""}
               </p>
             </div>
             <div className="rounded-xl bg-emerald-50 px-3 py-2">
-              <p className="text-emerald-700">فروشنده</p>
+              <p className="text-emerald-700">{t("list.seller")}</p>
               <p className="mt-0.5 font-bold text-slate-900">
-                {formatUserDisplayName(agreement.seller) || `کاربر ${agreement.sellerId}`}
-                {Number(userId) === Number(agreement.sellerId) ? " (شما)" : ""}
+                {partyName(agreement.seller, agreement.sellerId)}
+                {Number(userId) === Number(agreement.sellerId) ? ` ${t("detail.you")}` : ""}
               </p>
             </div>
           </div>
         </div>
 
         <div className="mt-5 border-t border-slate-100 pt-5">
-          <p className="mb-3 text-xs font-bold text-slate-700">مراحل قرارداد</p>
-          <WorkflowStepper status={agreement.status} />
+          <p className="mb-3 text-xs font-bold text-slate-700">{t("detail.workflowTitle")}</p>
+          <WorkflowStepper status={agreement.status} steps={workflowSteps} />
         </div>
       </header>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "کل معامله", value: formatEscrowMoney(agreement.dealTotalAmount, agreement.currency), tone: "" },
-          { label: ESCROW_DEPOSIT_LABEL, value: formatEscrowMoney(agreement.depositAmount, agreement.currency), tone: "" },
-          { label: "قفل‌شده", value: formatEscrowMoney(agreement.lockedAmount, agreement.currency), tone: "text-sky-800" },
-          { label: "قابل آزادسازی", value: formatEscrowMoney(availableToRelease, agreement.currency), tone: "text-emerald-800" },
+          {
+            label: t("list.dealTotal"),
+            value: formatEscrowMoney(agreement.dealTotalAmount, agreement.currency, t),
+            tone: "",
+          },
+          {
+            label: t("depositLabel"),
+            value: formatEscrowMoney(agreement.depositAmount, agreement.currency, t),
+            tone: "",
+          },
+          {
+            label: t("list.locked"),
+            value: formatEscrowMoney(agreement.lockedAmount, agreement.currency, t),
+            tone: "text-sky-800",
+          },
+          {
+            label: t("detail.availableRelease"),
+            value: formatEscrowMoney(availableToRelease, agreement.currency, t),
+            tone: "text-emerald-800",
+          },
         ].map((item) => (
           <div key={item.label} className={`${dash.card} ${dash.cardBody}`}>
             <p className="text-xs text-slate-500">{item.label}</p>
@@ -382,9 +386,10 @@ export default function EscrowAgreementDetail() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
           <section className="rounded-2xl border border-sky-100 bg-sky-50/50 p-4 md:p-5">
-            <h2 className="text-sm font-bold text-slate-900">اقدامات بعدی</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t("detail.nextActions")}</h2>
             <p className="mt-1 text-xs text-slate-500">
-              نقش شما: <strong className="text-slate-800">{ROLE_LABELS[role] || role}</strong>
+              {t("detail.yourRole")}{" "}
+              <strong className="text-slate-800">{roleLabels[role] || role}</strong>
             </p>
             {statusGuide ? (
               <div className="mt-3 rounded-xl border border-sky-100 bg-white px-4 py-3">
@@ -396,8 +401,11 @@ export default function EscrowAgreementDetail() {
             <div className="mt-4 space-y-3">
               {canActivate ? (
                 <ActionCard
-                  action="activate"
+                  actionId="activate"
+                  meta={getEscrowAction(t, "activate")}
                   busy={busy}
+                  allowedForLabel={t("detail.actionAllowedFor")}
+                  busyLabel={t("detail.actionBusy")}
                   onClick={() => runAction(() => post(API_ENDPOINTS.escrow.activate(id)))}
                 />
               ) : null}
@@ -405,8 +413,11 @@ export default function EscrowAgreementDetail() {
               {canPay ? (
                 <>
                   <ActionCard
-                    action="createPaymentIntent"
+                    actionId="createPaymentIntent"
+                    meta={getEscrowAction(t, "createPaymentIntent")}
                     busy={busy}
+                    allowedForLabel={t("detail.actionAllowedFor")}
+                    busyLabel={t("detail.actionBusy")}
                     onClick={() =>
                       runAction(() =>
                         post(API_ENDPOINTS.escrow.paymentIntents(id), {
@@ -417,8 +428,11 @@ export default function EscrowAgreementDetail() {
                   />
                   {admin ? (
                     <ActionCard
-                      action="confirmPaymentDemo"
+                      actionId="confirmPaymentDemo"
+                      meta={getEscrowAction(t, "confirmPaymentDemo")}
                       busy={busy}
+                      allowedForLabel={t("detail.actionAllowedFor")}
+                      busyLabel={t("detail.actionBusy")}
                       onClick={() =>
                         runAction(() =>
                           post(API_ENDPOINTS.escrow.confirmPayment(id), {
@@ -434,8 +448,11 @@ export default function EscrowAgreementDetail() {
 
               {canRelease ? (
                 <ActionCard
-                  action="requestRelease"
+                  actionId="requestRelease"
+                  meta={getEscrowAction(t, "requestRelease")}
                   busy={busy}
+                  allowedForLabel={t("detail.actionAllowedFor")}
+                  busyLabel={t("detail.actionBusy")}
                   onClick={() => {
                     setDialogAmount(String(availableToRelease));
                     setDialog("release");
@@ -445,29 +462,31 @@ export default function EscrowAgreementDetail() {
 
               {canCancel ? (
                 <ActionCard
-                  action="cancel"
+                  actionId="cancel"
+                  meta={getEscrowAction(t, "cancel")}
                   busy={busy}
+                  allowedForLabel={t("detail.actionAllowedFor")}
+                  busyLabel={t("detail.actionBusy")}
                   onClick={() => setDialog("cancel")}
                 />
               ) : null}
 
               {!canActivate && !canPay && !canRelease && !canCancel ? (
                 <p className="rounded-xl border border-slate-100 bg-white px-4 py-3 text-xs leading-6 text-slate-500">
-                  در این مرحله اقدام مستقیمی از سمت شما لازم نیست. مراحل تحویل یا تایم‌لاین را بررسی
-                  کنید.
+                  {t("detail.noDirectAction")}
                 </p>
               ) : null}
             </div>
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold text-slate-900">مراحل آزادسازی وجه</h2>
-            <p className="mb-3 text-xs leading-6 text-slate-500">
-              پس از قفل شدن وجه تضمین، مبلغ طبق این مراحل و با تأیید خریدار/فروشنده آزاد می‌شود.
-            </p>
+            <h2 className="mb-3 text-sm font-bold text-slate-900">{t("detail.milestonesTitle")}</h2>
+            <p className="mb-3 text-xs leading-6 text-slate-500">{t("detail.milestonesHint")}</p>
             <div className="space-y-3">
               {(data.milestones || []).length === 0 ? (
-                <p className={`${dash.card} ${dash.cardBody} text-xs text-slate-500`}>مرحله‌ای تعریف نشده.</p>
+                <p className={`${dash.card} ${dash.cardBody} text-xs text-slate-500`}>
+                  {t("detail.noMilestones")}
+                </p>
               ) : (
                 (data.milestones || []).map((m, index) => (
                   <div key={m.id} className={`${dash.card} overflow-hidden`}>
@@ -476,7 +495,7 @@ export default function EscrowAgreementDetail() {
                         {index + 1}
                       </span>
                       <span className="text-xs font-bold text-slate-700">
-                        {MILESTONE_STATUS_LABELS[m.status] || m.status}
+                        {milestoneStatusLabels[m.status] || m.status}
                       </span>
                     </div>
                     <div className={`${dash.cardBody} space-y-2`}>
@@ -485,7 +504,7 @@ export default function EscrowAgreementDetail() {
                         <p className="text-xs leading-6 text-slate-500">{m.description}</p>
                       ) : null}
                       <p className="text-sm font-bold text-slate-800" dir="ltr">
-                        {formatEscrowMoney(m.amount, agreement.currency)}
+                        {formatEscrowMoney(m.amount, agreement.currency, t)}
                       </p>
                       {m.status !== "released" &&
                       ["in_progress", "partially_released", "funds_locked"].includes(agreement.status) ? (
@@ -500,9 +519,9 @@ export default function EscrowAgreementDetail() {
                                 )
                               }
                               className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
-                              title="با این کار تأیید می‌کنید تعهد این مرحله انجام شده است"
+                              title={t("detail.buyerConfirmTitle")}
                             >
-                              {m.buyerApprovedAt ? "تأیید خریدار ✓" : "تأیید به‌عنوان خریدار"}
+                              {m.buyerApprovedAt ? t("detail.buyerConfirmed") : t("detail.buyerConfirm")}
                             </button>
                           ) : null}
                           {(role === "seller" || admin) && m.requiresSellerConfirmation ? (
@@ -515,9 +534,9 @@ export default function EscrowAgreementDetail() {
                                 )
                               }
                               className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
-                              title="تأیید انجام تعهد فروشنده در این مرحله"
+                              title={t("detail.sellerConfirmTitle")}
                             >
-                              {m.sellerConfirmedAt ? "تأیید فروشنده ✓" : "تأیید به‌عنوان فروشنده"}
+                              {m.sellerConfirmedAt ? t("detail.sellerConfirmed") : t("detail.sellerConfirm")}
                             </button>
                           ) : null}
                         </div>
@@ -531,7 +550,7 @@ export default function EscrowAgreementDetail() {
 
           {(data.releases || []).length > 0 ? (
             <section>
-              <h2 className="mb-3 text-sm font-bold text-slate-900">درخواست‌های آزادسازی</h2>
+              <h2 className="mb-3 text-sm font-bold text-slate-900">{t("detail.releasesTitle")}</h2>
               <div className="space-y-2">
                 {data.releases.map((r) => (
                   <div
@@ -540,10 +559,10 @@ export default function EscrowAgreementDetail() {
                   >
                     <div className="text-xs">
                       <p className="font-semibold text-slate-800" dir="ltr">
-                        {formatEscrowMoney(r.amount, r.currency)}
+                        {formatEscrowMoney(r.amount, r.currency, t)}
                       </p>
                       <p className="mt-1 text-slate-500">
-                        {RELEASE_STATUS_LABELS[r.status] || r.status}
+                        {releaseStatusLabels[r.status] || r.status}
                         {r.reason ? ` · ${r.reason}` : ""}
                       </p>
                     </div>
@@ -554,7 +573,7 @@ export default function EscrowAgreementDetail() {
                         onClick={() => runAction(() => post(API_ENDPOINTS.escrow.approveRelease(r.id)))}
                         className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
                       >
-                        تأیید آزادسازی
+                        {t("detail.approveRelease")}
                       </button>
                     ) : null}
                   </div>
@@ -564,19 +583,16 @@ export default function EscrowAgreementDetail() {
           ) : null}
 
           <section>
-            <h2 className="mb-3 text-sm font-bold text-slate-900">اختلاف و برگشت وجه</h2>
+            <h2 className="mb-3 text-sm font-bold text-slate-900">{t("detail.disputeSection")}</h2>
             <div className={`${dash.card} ${dash.cardBody} space-y-4`}>
               {!openDispute && !["cancelled", "completed", "refunded"].includes(agreement.status) ? (
                 <div className="space-y-3">
-                  <p className="text-xs leading-6 text-slate-500">
-                    اگر مشکلی در تحویل یا کیفیت وجود دارد، ابتدا با طرف مقابل هماهنگ کنید. در صورت
-                    عدم توافق، اختلاف ثبت کنید.
-                  </p>
+                  <p className="text-xs leading-6 text-slate-500">{t("detail.disputeHint")}</p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <input
                       value={disputeReason}
                       onChange={(e) => setDisputeReason(e.target.value)}
-                      placeholder="شرح مختصر اختلاف…"
+                      placeholder={t("detail.disputePlaceholder")}
                       className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
                     />
                     <button
@@ -590,7 +606,7 @@ export default function EscrowAgreementDetail() {
                       }
                       className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                     >
-                      ثبت اختلاف
+                      {t("detail.fileDispute")}
                     </button>
                   </div>
                   {availableToRelease > 0 ? (
@@ -600,7 +616,7 @@ export default function EscrowAgreementDetail() {
                       onClick={() => setDialog("refund")}
                       className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                     >
-                      درخواست برگشت وجه
+                      {getEscrowAction(t, "requestRefund")?.shortLabel || t("actions.requestRefund.shortLabel")}
                     </button>
                   ) : null}
                 </div>
@@ -609,7 +625,10 @@ export default function EscrowAgreementDetail() {
               {(data.disputes || []).map((d) => (
                 <div key={d.id} className="rounded-xl border border-orange-100 bg-orange-50/50 p-4 text-xs">
                   <p className="font-bold text-orange-900">
-                    اختلاف #{d.id} — {DISPUTE_STATUS_LABELS[d.status] || d.status}
+                    {t("detail.disputeItem", {
+                      id: d.id,
+                      status: disputeStatusLabels[d.status] || d.status,
+                    })}
                   </p>
                   <p className="mt-1 leading-6 text-orange-800">{d.reason}</p>
                   {admin &&
@@ -617,22 +636,23 @@ export default function EscrowAgreementDetail() {
                     d.status
                   ) ? (
                     <div className="mt-3 space-y-2">
-                      <p className="text-[11px] text-orange-700">به‌عنوان مدیر، نتیجه اختلاف را مشخص کنید:</p>
+                      <p className="text-[11px] text-orange-700">{t("detail.adminResolveHint")}</p>
                       <div className="flex flex-wrap gap-2">
                         <select
                           value={resolveOutcome}
                           onChange={(e) => setResolveOutcome(e.target.value)}
                           className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
                         >
-                          <option value="seller">آزادسازی به فروشنده</option>
-                          <option value="buyer">برگشت به خریدار</option>
-                          <option value="split">تقسیم (۵۰/۵۰)</option>
-                          <option value="closed">بستن بدون اقدام مالی</option>
+                          {Object.entries(resolveOptions).map(([key, label]) => (
+                            <option key={key} value={key}>
+                              {label}
+                            </option>
+                          ))}
                         </select>
                         <input
                           value={resolveNotes}
                           onChange={(e) => setResolveNotes(e.target.value)}
-                          placeholder="یادداشت مدیر"
+                          placeholder={t("detail.adminNotesPlaceholder")}
                           className="min-w-[160px] flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
                         />
                         <button
@@ -649,7 +669,7 @@ export default function EscrowAgreementDetail() {
                           }
                           className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white"
                         >
-                          حل اختلاف
+                          {t("detail.resolveDispute")}
                         </button>
                       </div>
                     </div>
@@ -660,8 +680,10 @@ export default function EscrowAgreementDetail() {
               {(data.refunds || []).map((r) => (
                 <div key={r.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
                   <p className="font-semibold text-slate-800">
-                    برگشت {formatEscrowMoney(r.amount, r.currency)} —{" "}
-                    {REFUND_STATUS_LABELS[r.status] || r.status}
+                    {t("detail.refundItem", {
+                      amount: formatEscrowMoney(r.amount, r.currency, t),
+                      status: refundStatusLabels[r.status] || r.status,
+                    })}
                   </p>
                   <p className="mt-1 text-slate-600">{r.reason || "—"}</p>
                   {admin && r.status === "pending" ? (
@@ -671,7 +693,7 @@ export default function EscrowAgreementDetail() {
                       onClick={() => runAction(() => post(API_ENDPOINTS.escrow.approveRefund(r.id)))}
                       className="mt-2 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white"
                     >
-                      تأیید برگشت (مدیر)
+                      {t("detail.approveRefund")}
                     </button>
                   ) : null}
                 </div>
@@ -682,39 +704,39 @@ export default function EscrowAgreementDetail() {
 
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
           <div className={`${dash.card} ${dash.cardBody} space-y-3 text-xs`}>
-            <h2 className="text-sm font-bold text-slate-900">اطلاعات قرارداد</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t("detail.contractInfo")}</h2>
             <dl className="space-y-2">
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">ارز</dt>
+                <dt className="text-slate-500">{t("form.currency")}</dt>
                 <dd className="font-medium text-slate-800">{currencyDef.label}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">انقضا</dt>
+                <dt className="text-slate-500">{t("detail.expiresAt")}</dt>
                 <dd className="text-slate-800">{formatDate(agreement.expiresAt)}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">کارمزد</dt>
+                <dt className="text-slate-500">{t("detail.platformFeeLabel")}</dt>
                 <dd className="text-left font-medium text-slate-800" dir="ltr">
-                  {formatEscrowMoney(agreement.platformFeeAmount, agreement.currency)} (
+                  {formatEscrowMoney(agreement.platformFeeAmount, agreement.currency, t)} (
                   {Number(agreement.platformFeePercent || 0).toLocaleString("fa-IR")}٪)
                 </dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">آزادشده</dt>
+                <dt className="text-slate-500">{t("list.released")}</dt>
                 <dd className="font-medium text-emerald-800" dir="ltr">
-                  {formatEscrowMoney(agreement.releasedAmount, agreement.currency)}
+                  {formatEscrowMoney(agreement.releasedAmount, agreement.currency, t)}
                 </dd>
               </div>
             </dl>
-            <p className="border-t border-slate-100 pt-3 text-[11px] leading-5 text-slate-400">{ESCROW_TAGLINE}</p>
+            <p className="border-t border-slate-100 pt-3 text-[11px] leading-5 text-slate-400">{t("tagline")}</p>
           </div>
 
           <div className={`${dash.card} max-h-72 overflow-y-auto`}>
             <div className={`${dash.cardBody}`}>
-              <h2 className="text-sm font-bold text-slate-900">تایم‌لاین</h2>
+              <h2 className="text-sm font-bold text-slate-900">{t("detail.timeline")}</h2>
               <ul className="mt-3 space-y-3">
                 {(data.events || []).length === 0 ? (
-                  <li className="text-xs text-slate-400">هنوز رویدادی ثبت نشده.</li>
+                  <li className="text-xs text-slate-400">{t("detail.noEvents")}</li>
                 ) : (
                   (data.events || [])
                     .slice()
@@ -722,7 +744,7 @@ export default function EscrowAgreementDetail() {
                     .map((ev) => (
                       <li key={ev.id} className="border-r-2 border-slate-200 pr-3">
                         <p className="text-xs font-semibold text-slate-800">
-                          {EVENT_LABELS[ev.eventType] || ev.eventType}
+                          {eventLabels[ev.eventType] || ev.eventType}
                         </p>
                         <p className="text-[10px] text-slate-400">{formatDate(ev.createdAt)}</p>
                       </li>
@@ -736,25 +758,25 @@ export default function EscrowAgreementDetail() {
 
       {(data.ledger || []).length > 0 ? (
         <section className="mt-6">
-          <h2 className="mb-3 text-sm font-bold text-slate-900">دفتر کل مالی</h2>
-          <p className="mb-3 text-xs text-slate-500">تمام تراکنش‌های مربوط به این قرارداد به‌صورت شفاف ثبت می‌شود.</p>
+          <h2 className="mb-3 text-sm font-bold text-slate-900">{t("detail.ledgerTitle")}</h2>
+          <p className="mb-3 text-xs text-slate-500">{t("detail.ledgerHint")}</p>
           <div className={`${dash.card} overflow-x-auto`}>
             <table className="min-w-full text-xs">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-slate-500">
-                  <th className="px-4 py-2.5 text-right font-medium">نوع</th>
-                  <th className="px-4 py-2.5 text-right font-medium">مبلغ</th>
-                  <th className="px-4 py-2.5 text-right font-medium">توضیح</th>
+                  <th className="px-4 py-2.5 text-right font-medium">{t("detail.ledgerColType")}</th>
+                  <th className="px-4 py-2.5 text-right font-medium">{t("detail.ledgerColAmount")}</th>
+                  <th className="px-4 py-2.5 text-right font-medium">{t("detail.ledgerColNote")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {(data.ledger || []).map((e) => (
                   <tr key={e.id}>
                     <td className="px-4 py-2.5 font-medium text-slate-800">
-                      {LEDGER_TYPE_LABELS[e.entryType] || e.entryType}
+                      {ledgerTypeLabels[e.entryType] || e.entryType}
                     </td>
                     <td className="px-4 py-2.5 font-semibold text-slate-900" dir="ltr">
-                      {formatEscrowMoney(e.amount, e.currency)}
+                      {formatEscrowMoney(e.amount, e.currency, t)}
                     </td>
                     <td className="px-4 py-2.5 text-slate-500">{e.note || "—"}</td>
                   </tr>
@@ -767,14 +789,15 @@ export default function EscrowAgreementDetail() {
 
       <InlineDialog
         open={dialog === "cancel"}
-        title="لغو قرارداد"
-        description="با لغو، قرارداد دیگر ادامه پیدا نمی‌کند. لطفاً دلیل را بنویسید."
-        confirmLabel="لغو قرارداد"
+        title={t("detail.dialogs.cancel.title")}
+        description={t("detail.dialogs.cancel.description")}
+        confirmLabel={t("detail.dialogs.cancel.confirm")}
+        cancelLabel={tCommon("cancel")}
         danger
         onClose={() => setDialog(null)}
         onConfirm={() => {
           if (!dialogReason.trim()) {
-            showToast.error("دلیل لغو را وارد کنید");
+            showToast.error(t("detail.dialogs.cancel.reasonRequired"));
             return;
           }
           runAction(() => post(API_ENDPOINTS.escrow.cancel(id), { reason: dialogReason }));
@@ -784,33 +807,36 @@ export default function EscrowAgreementDetail() {
           rows={3}
           value={dialogReason}
           onChange={(e) => setDialogReason(e.target.value)}
-          placeholder="دلیل لغو…"
+          placeholder={t("detail.dialogs.cancel.placeholder")}
           className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
         />
       </InlineDialog>
 
       <InlineDialog
         open={dialog === "release"}
-        title="درخواست آزادسازی"
-        description={`حداکثر قابل درخواست: ${formatEscrowMoney(availableToRelease, agreement.currency)}`}
-        confirmLabel="ثبت درخواست"
+        title={t("detail.dialogs.release.title")}
+        description={t("detail.dialogs.release.description", {
+          amount: formatEscrowMoney(availableToRelease, agreement.currency, t),
+        })}
+        confirmLabel={t("detail.dialogs.release.confirm")}
+        cancelLabel={tCommon("cancel")}
         onClose={() => setDialog(null)}
         onConfirm={() => {
           const amount = Number(dialogAmount);
           if (!amount || amount <= 0) {
-            showToast.error("مبلغ معتبر وارد کنید");
+            showToast.error(t("detail.dialogs.release.amountRequired"));
             return;
           }
           runAction(() =>
             post(API_ENDPOINTS.escrow.releaseRequests(id), {
               amount,
-              reason: dialogReason.trim() || "درخواست آزادسازی فروشنده",
+              reason: dialogReason.trim() || t("detail.dialogs.release.defaultReason"),
             })
           );
         }}
       >
         <label className="block text-xs text-slate-600">
-          مبلغ آزادسازی
+          {t("detail.dialogs.release.amountLabel")}
           <input
             type="number"
             min="0"
@@ -823,25 +849,26 @@ export default function EscrowAgreementDetail() {
           />
         </label>
         <label className="mt-3 block text-xs text-slate-600">
-          توضیح (اختیاری)
+          {t("detail.dialogs.release.noteLabel")}
           <input
             value={dialogReason}
             onChange={(e) => setDialogReason(e.target.value)}
             className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-            placeholder="مثلاً تحویل مرحله اول"
+            placeholder={t("detail.dialogs.release.notePlaceholder")}
           />
         </label>
       </InlineDialog>
 
       <InlineDialog
         open={dialog === "refund"}
-        title="درخواست برگشت وجه"
-        description="درخواست بازگرداندن وجه قفل‌شده به خریدار. مدیر باید تأیید کند."
-        confirmLabel="ثبت درخواست"
+        title={t("detail.dialogs.refund.title")}
+        description={t("detail.dialogs.refund.description")}
+        confirmLabel={t("detail.dialogs.refund.confirm")}
+        cancelLabel={tCommon("cancel")}
         onClose={() => setDialog(null)}
         onConfirm={() => {
           if (!dialogReason.trim()) {
-            showToast.error("دلیل برگشت را وارد کنید");
+            showToast.error(t("detail.dialogs.refund.reasonRequired"));
             return;
           }
           runAction(() => post(API_ENDPOINTS.escrow.refunds(id), { reason: dialogReason }));
@@ -851,7 +878,7 @@ export default function EscrowAgreementDetail() {
           rows={3}
           value={dialogReason}
           onChange={(e) => setDialogReason(e.target.value)}
-          placeholder="دلیل درخواست برگشت…"
+          placeholder={t("detail.dialogs.refund.placeholder")}
           className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
         />
       </InlineDialog>

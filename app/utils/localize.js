@@ -1,3 +1,5 @@
+import i18nData from "./i18nFaData";
+
 export function getLocalizedText(entity, language, fallbackKey = "name") {
   if (!entity) return "";
   if (language === "en" && entity.englishName) return entity.englishName;
@@ -8,7 +10,9 @@ export function getLocalizedText(entity, language, fallbackKey = "name") {
   if (language === "ar" && entity.arabicName) return entity.arabicName;
   if (language === "tr" && entity.turkishName) return entity.turkishName;
   if (language === "fi" && entity.finnishName) return entity.finnishName;
-  if ((language === "tr" || language === "fi") && entity.englishName) return entity.englishName;
+  if (language === "ur" && entity.urduName) return entity.urduName;
+  if (entity.translations?.[language]?.name) return entity.translations[language].name;
+  if ((language === "tr" || language === "fi" || language === "ur") && entity.englishName) return entity.englishName;
   return entity[fallbackKey] || "";
 }
 
@@ -37,8 +41,8 @@ export function formatLocalizedNumber(value, language, options = {}) {
 export function parseLocalizedNumberInput(input) {
   if (input == null || input === "") return "";
   let s = String(input);
-  s = s.replace(/[۰-۹]/g, (ch) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(ch)));
-  s = s.replace(/[٠-٩]/g, (ch) => String("٠١٢٣٤٥٦٧٨٩".indexOf(ch)));
+  s = s.replace(/[۰-۹]/g, (ch) => String(i18nData.persianDigits.indexOf(ch)));
+  s = s.replace(/[٠-٩]/g, (ch) => String(i18nData.arabicDigits.indexOf(ch)));
   s = s.replace(/[,٬\s]/g, "");
   return s;
 }
@@ -73,10 +77,7 @@ export function formatLocalizedPrice(value, language, t) {
 export function localizeUnit(unit, language) {
   if (!unit) return "";
   const normalized = String(unit).toLowerCase();
-  const units = {
-    kg: { fa: "کیلوگرم", en: "kg", ru: "кг", ar: "كجم" },
-    ton: { fa: "تن", en: "ton", ru: "т", ar: "طن" },
-  };
+  const units = i18nData.units;
   return units[normalized]?.[language] || units[normalized]?.fa || unit;
 }
 
@@ -92,13 +93,6 @@ export function localizeStatus(status, t) {
 
 export function localizeGrade(grade, t) {
   const normalized = String(grade || "").trim();
-  const map = {
-    "صادراتی": "qualityExport",
-    "درجه 1": "qualityGrade1",
-    "درجه 2": "qualityGrade2",
-    "درجه 3": "qualityGrade3",
-    "ضایعاتی": "qualityWaste",
-    "سایر": "qualityOther",
-  };
+  const map = i18nData.gradeDbToKey;
   return t(map[normalized] || normalized || "qualityOther");
 }

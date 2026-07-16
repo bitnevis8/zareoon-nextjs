@@ -40,6 +40,6 @@ export function getLotSupplierDisplay(lot, t) {
     mobile ||
     supplier?.username ||
     (t ? t("lotNumber", { id: lot?.id }) : null) ||
-    (lot?.id ? `بار #${lot.id}` : "—");
+    (t ? t("notSet") : "—");
   return { label, name, mobile };
 }

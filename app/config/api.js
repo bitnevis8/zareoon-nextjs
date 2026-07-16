@@ -380,6 +380,13 @@ export const API_ENDPOINTS = {
     messageImage: (id) => `${API_BASE_URL}/messaging/conversations/${id}/messages/image`,
     markRead: (id) => `${API_BASE_URL}/messaging/conversations/${id}/read`,
   },
+  subscription: {
+    plans: `${API_BASE_URL}/subscription/plans`,
+    me: `${API_BASE_URL}/subscription/me`,
+    checkout: `${API_BASE_URL}/subscription/checkout`,
+    verify: `${API_BASE_URL}/subscription/verify`,
+    verifyPublic: `${API_BASE_URL}/subscription/verify-public`,
+  },
   tamin: {
     base: `${API_BASE_URL}/tamin`,
     public: (slug) => `${API_BASE_URL}/tamin/public/${slug}`,

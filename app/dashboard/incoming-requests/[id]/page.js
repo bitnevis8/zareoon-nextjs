@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import ApplicantRequestContactActions from "@/app/components/dashboard/ApplicantRequestContactActions";
 import { API_ENDPOINTS } from "@/app/config/api";
@@ -20,6 +21,8 @@ function DetailRow({ label, value }) {
 }
 
 function IncomingRequestDetailContent() {
+  const t = useTranslations("applicant");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const id = params?.id;
   const [item, setItem] = useState(null);
@@ -32,7 +35,7 @@ function IncomingRequestDetailContent() {
     authFetch(API_ENDPOINTS.applicantRequests.getById(id), { cache: "no-store" })
       .then(async (r) => {
         const json = await r.json();
-        if (!r.ok) throw new Error(json.message || "خطا");
+        if (!r.ok) throw new Error(json.message);
         setItem(json.data);
         setViewerRole(json.viewerRole || null);
         return authFetch(`${API_ENDPOINTS.applicantRequests.notifications}?limit=50`, {
@@ -48,17 +51,17 @@ function IncomingRequestDetailContent() {
           }).catch(() => {});
         }
       })
-      .catch((e) => setError(e.message))
+      .catch((e) => setError(e.message || t("errors.generic")))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p className="p-6 text-sm text-slate-500">در حال بارگذاری…</p>;
+  if (loading) return <p className="p-6 text-sm text-slate-500">{tCommon("loading")}</p>;
   if (error) {
     return (
       <div className={dash.page}>
         <p className="text-sm text-red-600">{error}</p>
         <Link href="/dashboard/incoming-requests" className="mt-4 inline-block text-sm text-sky-700">
-          بازگشت
+          {t("form.back")}
         </Link>
       </div>
     );
@@ -76,36 +79,40 @@ function IncomingRequestDetailContent() {
   return (
     <div className={dash.page}>
       <Link href="/dashboard/incoming-requests" className="mb-4 inline-block text-sm text-sky-700 hover:underline">
-        ← بازگشت به درخواست‌ها
+        {t("incoming.backToRequests")}
       </Link>
       <header className="mb-4">
         <h1 className={dash.pageTitle}>{item.title}</h1>
         <p className={dash.pageSubtitle}>
-          {item.categoryLabel} · {item.requestType === "product" ? "متقاضی محصول" : "متقاضی خدمات"}
+          {item.categoryLabel} ·{" "}
+          {item.requestType === "product" ? t("requestTypes.product.label") : t("requestTypes.service.label")}
         </p>
       </header>
 
       {isRecipient ? (
         <div className={`${dash.card} mb-4 ${dash.cardBody}`}>
-          <p className="mb-3 text-xs text-slate-500">پاسخ به این درخواست:</p>
+          <p className="mb-3 text-xs text-slate-500">{t("incoming.respondHint")}</p>
           <ApplicantRequestContactActions request={item} />
           {!showPhone && item.allowPhoneContact === false ? (
-            <p className="mt-2 text-xs text-slate-500">متقاضی نمایش شماره تماس را مجاز نکرده — از چت استفاده کنید.</p>
+            <p className="mt-2 text-xs text-slate-500">{t("incoming.phoneHiddenHint")}</p>
           ) : null}
         </div>
       ) : null}
 
       <div className={`${dash.card} ${dash.cardBody}`}>
         <dl>
-          <DetailRow label="متقاضی" value={applicantName} />
-          <DetailRow label="شرح نیاز" value={item.description} />
+          <DetailRow label={t("incoming.applicant")} value={applicantName} />
+          <DetailRow label={t("requestDetail.needDescription")} value={item.description} />
           {item.requestType === "product" && item.quantity ? (
-            <DetailRow label="مقدار" value={`${item.quantity}${item.unit ? ` ${item.unit}` : ""}`} />
+            <DetailRow
+              label={t("requestDetail.quantity")}
+              value={`${item.quantity}${item.unit ? ` ${item.unit}` : ""}`}
+            />
           ) : null}
-          {showPhone ? <DetailRow label="شماره تماس" value={item.phone} /> : null}
-          <DetailRow label="شرکت / سازمان" value={item.company} />
-          <DetailRow label="ایمیل" value={applicant?.email} />
-          <DetailRow label="توضیحات تکمیلی" value={item.notes} />
+          {showPhone ? <DetailRow label={t("requestDetail.phone")} value={item.phone} /> : null}
+          <DetailRow label={t("requestDetail.company")} value={item.company} />
+          <DetailRow label={t("incoming.email")} value={applicant?.email} />
+          <DetailRow label={t("requestDetail.notes")} value={item.notes} />
         </dl>
       </div>
     </div>

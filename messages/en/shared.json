@@ -1,0 +1,268 @@
+{
+  "roles": {
+    "super_admin": "",
+    "admin": "",
+    "employee": "",
+    "supplier": "",
+    "farmer": "",
+    "customer": "",
+    "loader": "",
+    "driver": "",
+    "administrator": ""
+  },
+  "accountNav": {
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": "",
+    "admin": "",
+    "user": ""
+  },
+  "currencies": {
+    "TOMAN": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "USD": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "AED": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "EUR": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "GBP": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "TRY": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "SAR": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "CNY": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "RUB": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "CAD": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "CHF": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "JPY": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "AUD": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "USDT": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "BTC": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    },
+    "ETH": {
+      "label": "",
+      "shortLabel": "",
+      "wordLabel": ""
+    }
+  },
+  "priceCurrencySelect": {
+    "ariaLabel": ""
+  },
+  "stock": {
+    "empty": "",
+    "emptyRange": "",
+    "low": "",
+    "lowRange": "",
+    "medium": "",
+    "mediumRange": "",
+    "high": "",
+    "highRange": "",
+    "legendTitle": "",
+    "legendAriaLabel": ""
+  },
+  "supplyCountries": {
+    "IR": "",
+    "AE": "",
+    "SA": "",
+    "IQ": "",
+    "TR": "",
+    "OM": "",
+    "QA": "",
+    "KW": "",
+    "PK": "",
+    "AF": "",
+    "US": "",
+    "RU": ""
+  },
+  "supplySource": {
+    "withCity": ""
+  },
+  "entityTypes": {
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": ""
+  },
+  "vip": {
+    "inspectionStandardsCompany": ""
+  },
+  "attributeFields": {
+    "yes": "",
+    "no": ""
+  },
+  "documentUpload": {
+    "invalidFormat": "",
+    "fileTooLarge": "",
+    "uploadSuccess": "",
+    "uploadError": "",
+    "deleteSuccess": "",
+    "deleteError": "",
+    "uploading": "",
+    "selectDocuments": "",
+    "hint": "",
+    "uploadedTitle": "",
+    "view": "",
+    "delete": ""
+  },
+  "mediaUpload": {
+    "defaultButtonLabel": "",
+    "loadError": "",
+    "uploadError": "",
+    "deleteConfirm": "",
+    "deleteError": "",
+    "deleteFileError": "",
+    "saveProductFirst": "",
+    "uploading": "",
+    "noFilesYet": "",
+    "delete": ""
+  },
+  "shareButton": {
+    "title": "",
+    "telegram": "",
+    "whatsapp": "",
+    "eitaa": "",
+    "rubika": "",
+    "twitter": "",
+    "copyLink": "",
+    "linkCopied": ""
+  },
+  "tieredPricing": {
+    "levelsCount": "",
+    "title": "",
+    "level": "",
+    "from": "",
+    "to": "",
+    "unlimited": "",
+    "hint": ""
+  },
+  "inventoryPricing": {
+    "calcError": "",
+    "serverError": "",
+    "inventoryInfo": "",
+    "grade": "",
+    "totalStock": "",
+    "availableStock": "",
+    "minOrder": "",
+    "orderQuantity": "",
+    "quantityPlaceholder": "",
+    "calculating": "",
+    "calculatePrice": "",
+    "quantityExceedsStock": "",
+    "calculatedPrice": "",
+    "pricePerUnit": "",
+    "quantity": "",
+    "priceTier": "",
+    "pricingType": "",
+    "pricingTypeTiered": "",
+    "pricingTypeSimple": "",
+    "tierTableTitle": "",
+    "quantityRange": "",
+    "pricePerUnitHeader": "",
+    "description": ""
+  },
+  "hashtagInput": {
+    "defaultLabel": "",
+    "minLength": "",
+    "maxCount": "",
+    "removeAria": "",
+    "placeholder": ""
+  },
+  "lotLocationPicker": {
+    "fullscreenTitle": "",
+    "fullscreenAria": "",
+    "closeFullscreenAria": "",
+    "close": "",
+    "delete": "",
+    "hintCompact": "",
+    "hintExpanded": "",
+    "locationLabel": "",
+    "locationPlaceholder": "",
+    "defaultMarkerName": "",
+    "modalTitle": "",
+    "modalHint": "",
+    "confirmLocation": ""
+  },
+  "map": {
+    "zoomIn": "",
+    "zoomOut": "",
+    "positionDefault": "",
+    "selectedPosition": ""
+  },
+  "searchBox": {
+    "placeholderOverlay": "",
+    "placeholderDefault": ""
+  },
+  "currencyTicker": {
+    "zeroPercent": "",
+    "rial": "",
+    "ratesAria": "",
+    "ratesLabel": "",
+    "calendarGregorian": "",
+    "calendarHijri": "",
+    "calendarShamsi": "",
+    "calendarClickHint": "",
+    "calendarAria": "",
+    "regionAria": "",
+    "loadingRates": "",
+    "ratesUnavailable": "",
+    "viewRates": "",
+    "viewRatesDetails": ""
+  }
+}

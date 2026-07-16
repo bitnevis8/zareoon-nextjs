@@ -2,9 +2,11 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function ViewUser({ params }) {
+  const t = useTranslations("users");
   const router = useRouter();
   const { id: userId } = use(params);
   const [userData, setUserData] = useState(null);
@@ -23,11 +25,11 @@ export default function ViewUser({ params }) {
         if (data.success) {
           setUserData(data.data);
         } else {
-          throw new Error(data.message || "خطا در دریافت اطلاعات کاربر");
+          throw new Error(data.message || t("editUser.fetchUserError"));
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError(error.message || "خطا در ارتباط با سرور");
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError(err.message || t("serverError"));
       } finally {
         setLoading(false);
       }
@@ -36,7 +38,7 @@ export default function ViewUser({ params }) {
     if (userId) {
       fetchUserData();
     }
-  }, [userId]);
+  }, [userId, t]);
 
   if (loading) {
     return (
@@ -57,7 +59,7 @@ export default function ViewUser({ params }) {
             onClick={() => router.back()}
             className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
           >
-            بازگشت
+            {t("back")}
           </button>
         </div>
       </div>
@@ -67,66 +69,68 @@ export default function ViewUser({ params }) {
   if (!userData) {
     return (
       <div className="p-4 text-center">
-        <p>اطلاعات کاربری یافت نشد.</p>
+        <p>{t("viewUser.notFound")}</p>
         <button
           onClick={() => router.back()}
           className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
         >
-          بازگشت
+          {t("back")}
         </button>
       </div>
     );
   }
 
+  const emptyValue = t("emptyValue");
+
   return (
     <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-4 md:p-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">مشاهده جزئیات کاربر</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">{t("viewUser.title")}</h1>
 
         <div className="space-y-4 text-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="font-semibold">نام:</p>
+              <p className="font-semibold">{t("form.firstName")}:</p>
               <p>{userData.firstName}</p>
             </div>
             <div>
-              <p className="font-semibold">نام خانوادگی:</p>
+              <p className="font-semibold">{t("form.lastName")}:</p>
               <p>{userData.lastName}</p>
             </div>
             <div>
-              <p className="font-semibold">نام کاربری:</p>
+              <p className="font-semibold">{t("form.username")}:</p>
               <p>{userData.username}</p>
             </div>
             <div>
-              <p className="font-semibold">ایمیل:</p>
+              <p className="font-semibold">{t("form.email")}:</p>
               <p>{userData.email}</p>
             </div>
             <div>
-              <p className="font-semibold">موبایل:</p>
-              <p>{userData.mobile || '-'}</p>
+              <p className="font-semibold">{t("form.mobile")}:</p>
+              <p>{userData.mobile || emptyValue}</p>
             </div>
             <div>
-              <p className="font-semibold">نام کسب و کار:</p>
-              <p>{userData.businessName || '-'}</p>
+              <p className="font-semibold">{t("viewUser.businessName")}</p>
+              <p>{userData.businessName || emptyValue}</p>
             </div>
             <div>
-              <p className="font-semibold">اطلاعات تماس کسب و کار:</p>
-              <p>{userData.businessContactInfo || '-'}</p>
+              <p className="font-semibold">{t("viewUser.businessContactInfo")}</p>
+              <p>{userData.businessContactInfo || emptyValue}</p>
             </div>
             <div>
-              <p className="font-semibold">نقش‌ها:</p>
+              <p className="font-semibold">{t("form.roles")}:</p>
               <p>
                 {userData.roles && userData.roles.length > 0
                   ? userData.roles.map((role) => role.nameFa).join(", ")
-                  : '-'}
+                  : emptyValue}
               </p>
             </div>
             <div>
-              <p className="font-semibold">تاریخ ایجاد:</p>
+              <p className="font-semibold">{t("viewUser.createdAt")}</p>
               <p>{new Date(userData.createdAt).toLocaleDateString("fa-IR")}</p>
             </div>
             <div>
-              <p className="font-semibold">تاریخ آخرین به‌روزرسانی:</p>
+              <p className="font-semibold">{t("viewUser.updatedAt")}</p>
               <p>{new Date(userData.updatedAt).toLocaleDateString("fa-IR")}</p>
             </div>
           </div>
@@ -136,11 +140,11 @@ export default function ViewUser({ params }) {
               onClick={() => router.push("/dashboard/user-management/users")}
               className="w-full sm:w-auto px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              بازگشت به لیست کاربران
+              {t("viewUser.backToList")}
             </button>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

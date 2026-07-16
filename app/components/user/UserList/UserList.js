@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { API_ENDPOINTS } from '@/app/config/api';
 import { fetchWithCredentials } from '@/app/utils/fetch';
 import Button from '@/app/components/ui/Button/Button';
@@ -9,6 +10,9 @@ import Table from '@/app/components/ui/Table/Table';
 
 const UserList = () => {
   const router = useRouter();
+  const t = useTranslations('home.userList');
+  const tUsers = useTranslations('users');
+  const tCommon = useTranslations('common');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,7 +36,7 @@ const UserList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('آیا از حذف این کاربر اطمینان دارید؟')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     try {
       await fetchWithCredentials(API_ENDPOINTS.users.delete(id), {
         method: 'DELETE'
@@ -40,34 +44,36 @@ const UserList = () => {
       setUsers(users.filter(user => user.id !== id));
     } catch (err) {
       console.error('Error deleting user:', err);
-      alert(err.message || 'خطا در حذف کاربر');
+      alert(err.message || t('deleteError'));
     }
   };
 
-  if (loading) return <div>در حال بارگذاری...</div>;
+  if (loading) return <div>{tCommon('loading')}</div>;
   if (error) return <div className="text-red-500">{error}</div>;
+
+  const columns = t.raw('columns');
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">لیست کاربران</h2>
+        <h2 className="text-xl font-semibold">{t('title')}</h2>
         <Button
           onClick={() => router.push('/dashboard/user-management/users/create')}
           variant="primary"
         >
-          افزودن کاربر جدید
+          {t('addUser')}
         </Button>
       </div>
 
       <Table
         headers={[
-          { key: 'id', label: 'شناسه' },
-          { key: 'username', label: 'نام کاربری' },
-          { key: 'email', label: 'ایمیل' },
-          { key: 'firstName', label: 'نام' },
-          { key: 'lastName', label: 'نام خانوادگی' },
-          { key: 'personnelNumber', label: 'شماره پرسنلی' },
-          { key: 'actions', label: 'عملیات' }
+          { key: 'id', label: columns.id },
+          { key: 'username', label: columns.username },
+          { key: 'email', label: columns.email },
+          { key: 'firstName', label: columns.firstName },
+          { key: 'lastName', label: columns.lastName },
+          { key: 'personnelNumber', label: columns.personnelNumber },
+          { key: 'actions', label: columns.actions }
         ]}
         data={users.map(user => ({
           ...user,
@@ -78,21 +84,21 @@ const UserList = () => {
                 variant="secondary"
                 size="small"
               >
-                مشاهده
+                {tUsers('view')}
               </Button>
               <Button
                 onClick={() => router.push(`/dashboard/user-management/users/${user.id}/edit`)}
                 variant="secondary"
                 size="small"
               >
-                ویرایش
+                {tUsers('edit')}
               </Button>
               <Button
                 onClick={() => handleDelete(user.id)}
                 variant="danger"
                 size="small"
               >
-                حذف
+                {tUsers('delete')}
               </Button>
             </div>
           )
@@ -102,4 +108,4 @@ const UserList = () => {
   );
 };
 
-export default UserList; 
+export default UserList;

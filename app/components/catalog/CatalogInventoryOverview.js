@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { lotAvailableQuantity } from "../../utils/catalogGrades";
 import { formatLocalizedNumber, localizeUnit } from "../../utils/localize";
 import { catalogAlert, catalogText } from "./catalogTheme";
@@ -39,13 +40,13 @@ function StockStat({ label, amount, unit, language, accent = false, subtitle = "
 
 export default function CatalogInventoryOverview({
   summary,
-  t,
   orderMsg,
   orderMsgType,
   language,
   productUnit = "",
   className = "",
 }) {
+  const t = useTranslations("catalog");
   if (!summary) return null;
 
   const lots = summary.lots || [];

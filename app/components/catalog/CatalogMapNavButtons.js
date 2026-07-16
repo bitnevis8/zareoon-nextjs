@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { buildMapNavigationLinks } from "../../utils/mapNavigationLinks";
 
 function NavLink({ href, label, className, children }) {
@@ -49,7 +50,8 @@ function BaladIcon() {
   );
 }
 
-export default function CatalogMapNavButtons({ latitude, longitude, t }) {
+export default function CatalogMapNavButtons({ latitude, longitude }) {
+  const t = useTranslations("catalog");
   const links = buildMapNavigationLinks(latitude, longitude);
   if (!links) return null;
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { getTradeServicesContent } from "@/app/data/tradeServicesCatalog";
+import { useTradeServicesContent } from "@/app/hooks/useTradeServicesContent";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { resolveVipCategoryMessage } from "@/app/utils/vipCategoryHelpers";
 import TradeServicesJoinBanner from "@/app/components/TradeServicesJoinBanner";
@@ -87,7 +87,7 @@ function HubCategoryCard({ category, isVip, vipMessage, t }) {
 
 export default function TradeServicesHubPage() {
   const { language, isRTL, t } = useLanguage();
-  const content = getTradeServicesContent(language);
+  const content = useTradeServicesContent();
   const [vipCategories, setVipCategories] = useState({});
 
   useEffect(() => {

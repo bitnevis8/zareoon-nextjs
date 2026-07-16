@@ -83,15 +83,16 @@ export async function generateCatalogPdf({
   supplierUserId,
   productIsOrderable = true,
   user,
+  t,
   onProgress,
 }) {
   assertCatalogPdfAccess({ user, scope, productIsOrderable, supplierUserId });
 
   onProgress?.("loading");
-  const data = await fetchCatalogPdfData({ scope, productId, categoryId, lotId, supplierUserId });
+  const data = await fetchCatalogPdfData({ scope, productId, categoryId, lotId, supplierUserId, t });
 
   onProgress?.("rendering");
-  const { pages, spec } = buildPdfPages(data);
+  const { pages, spec } = buildPdfPages(data, t);
 
   onProgress?.("generating");
   const { jsPDF } = await import("jspdf");

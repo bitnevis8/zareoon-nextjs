@@ -1,23 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import LocationPageClient from './LocationPageClient';
 import { API_ENDPOINTS } from '../config/api';
 
 export default function LocationPage() {
+  const t = useTranslations('location');
   const [loading, setLoading] = useState(true);
   const [locationData, setLocationData] = useState(null);
 
   useEffect(() => {
     const fetchLocationData = async () => {
       try {
-        // دریافت کشور ایران (divisionType = 0) با استفاده از getAll و فیلتر type
         const response = await fetch(`${API_ENDPOINTS.locations.getAll}?type=0`);
         const data = await response.json();
         
         if (data.success && data.data.length > 0) {
-          // پیدا کردن ایران
-          const iran = data.data.find(loc => loc.name === 'کشور ایران' || loc.displayName.includes('ایران'));
+          const iran = data.data.find(
+            (loc) => loc.name === t('iran.countryName') || loc.displayName.includes(t('iran.matchToken'))
+          );
           setLocationData(iran || data.data[0]);
         }
       } catch (error) {
@@ -28,7 +30,7 @@ export default function LocationPage() {
     };
 
     fetchLocationData();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (

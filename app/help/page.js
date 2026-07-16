@@ -1,107 +1,70 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
+const CUSTOMER_SECTION_KEYS = ["signup", "ordering", "tracking"];
+const SUPPLIER_SECTION_KEYS = ["inventory", "orders", "products"];
+
+function GuideCard({ title, sectionKeys, sectionPrefix, titleClassName }) {
+  const t = useTranslations("legal");
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-8">
+      <h2 className={`text-2xl font-bold mb-6 ${titleClassName}`}>{title}</h2>
+      <div className="space-y-4">
+        {sectionKeys.map((key) => (
+          <div key={key}>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">{t(`${sectionPrefix}.sections.${key}.title`)}</h3>
+            <p className="text-gray-600">{t(`${sectionPrefix}.sections.${key}.body`)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HelpPage() {
+  const t = useTranslations("legal");
+  const contact = t.raw("help.contact");
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            راهنمای استفاده از زارعون
-          </h1>
-          <p className="text-xl text-gray-600">
-            راهنمای کامل برای استفاده از پلتفرم زارعون
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t("help.title")}</h1>
+          <p className="text-xl text-gray-600">{t("help.subtitle")}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* راهنمای مشتریان */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-600 mb-6">
-              راهنمای مشتریان
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  ثبت‌نام و ورود
-                </h3>
-                <p className="text-gray-600">
-                  برای شروع، شماره موبایل یا ایمیل خود را وارد کنید و کد تایید را دریافت کنید.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  سفارش محصولات
-                </h3>
-                <p className="text-gray-600">
-                  محصولات مورد نظر خود را انتخاب کنید و سفارش خود را ثبت کنید.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  پیگیری سفارش
-                </h3>
-                <p className="text-gray-600">
-                  وضعیت سفارش خود را در داشبورد شخصی مشاهده کنید.
-                </p>
-              </div>
-            </div>
-          </div>
+          <GuideCard
+            title={t("help.customerGuide.title")}
+            sectionKeys={CUSTOMER_SECTION_KEYS}
+            sectionPrefix="help.customerGuide"
+            titleClassName="text-blue-600"
+          />
 
-          {/* راهنمای تامین‌کنندگان */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-green-600 mb-6">
-              راهنمای تامین‌کنندگان
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  ثبت موجودی
-                </h3>
-                <p className="text-gray-600">
-                  محصولات خود را در سیستم ثبت کنید و موجودی خود را مدیریت کنید.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  دریافت سفارشات
-                </h3>
-                <p className="text-gray-600">
-                  سفارشات مشتریان را دریافت کنید و آن‌ها را آماده کنید.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  مدیریت محصولات
-                </h3>
-                <p className="text-gray-600">
-                  محصولات خود را ویرایش کنید و ویژگی‌های آن‌ها را تعریف کنید.
-                </p>
-              </div>
-            </div>
-          </div>
+          <GuideCard
+            title={t("help.supplierGuide.title")}
+            sectionKeys={SUPPLIER_SECTION_KEYS}
+            sectionPrefix="help.supplierGuide"
+            titleClassName="text-green-600"
+          />
         </div>
 
-        {/* تماس با ما */}
         <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            تماس با ما
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">{contact.title}</h2>
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">تلفن</h3>
-              <p className="text-gray-600">09393387148</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{contact.phoneLabel}</h3>
+              <p className="text-gray-600">{contact.phone}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">ایمیل</h3>
-              <p className="text-gray-600">info@zareoon.ir</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{contact.emailLabel}</h3>
+              <p className="text-gray-600">{contact.email}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">ساعات کاری</h3>
-              <p className="text-gray-600">24 ساعته</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{contact.hoursLabel}</h3>
+              <p className="text-gray-600">{contact.hours}</p>
             </div>
           </div>
         </div>

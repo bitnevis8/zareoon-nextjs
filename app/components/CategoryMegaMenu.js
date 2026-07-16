@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { API_ENDPOINTS } from "@/app/config/api";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getLocalizedText } from "@/app/utils/localize";
 import { sortCatalogItems } from "@/app/utils/productSort";
 import { getMainCategoryIcon } from "@/app/utils/mainCategoryIcons";
+import { useFullCatalog } from "@/app/hooks/useCatalogProducts";
 
 const HOVER_CLOSE_DELAY_MS = 400;
 const HOVER_BRIDGE_PX = 10;
@@ -149,8 +149,7 @@ export default function CategoryMegaMenu() {
   const isDesktop = useIsDesktop();
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
-  const [allItems, setAllItems] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [catalogRequested, setCatalogRequested] = useState(false);
   const [activeRootId, setActiveRootId] = useState(null);
   const [panelTop, setPanelTop] = useState(0);
   const [panelHeight, setPanelHeight] = useState(null);
@@ -162,6 +161,9 @@ export default function CategoryMegaMenu() {
   const pinnedRef = useRef(false);
 
   pinnedRef.current = pinned;
+
+  // Shared with homepage "latest available" — only fetch when menu is opened (or already cached).
+  const { products: allItems, loading } = useFullCatalog({ enabled: catalogRequested });
 
   const childrenMap = useMemo(
     () => buildChildrenMap(allItems, language),
@@ -185,19 +187,9 @@ export default function CategoryMegaMenu() {
     return distributeL2ToColumns(l2Categories, DESKTOP_L2_COLUMNS, activeRoot?.id);
   }, [isDesktop, l2Categories, activeRoot?.id]);
 
-  const loadCatalog = useCallback(async () => {
-    if (allItems.length) return;
-    setLoading(true);
-    try {
-      const res = await fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" });
-      const json = await res.json();
-      setAllItems(Array.isArray(json?.data) ? json.data : []);
-    } catch {
-      setAllItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [allItems.length]);
+  const ensureCatalog = useCallback(() => {
+    setCatalogRequested(true);
+  }, []);
 
   const updatePanelLayout = useCallback(() => {
     const el = triggerRef.current;
@@ -233,9 +225,9 @@ export default function CategoryMegaMenu() {
   const openMenu = useCallback(() => {
     clearCloseTimer();
     setOpen(true);
-    loadCatalog();
+    ensureCatalog();
     updatePanelLayout();
-  }, [clearCloseTimer, loadCatalog, updatePanelLayout]);
+  }, [clearCloseTimer, ensureCatalog, updatePanelLayout]);
 
   const keepOpen = useCallback(() => {
     clearCloseTimer();
@@ -264,7 +256,7 @@ export default function CategoryMegaMenu() {
     if (!isDesktop) {
       setPinned(true);
       setOpen(true);
-      loadCatalog();
+      ensureCatalog();
       updatePanelLayout();
       return;
     }
@@ -278,13 +270,12 @@ export default function CategoryMegaMenu() {
     clearCloseTimer();
     setPinned(true);
     setOpen(true);
-    loadCatalog();
+    ensureCatalog();
   };
 
   useEffect(() => {
     setMounted(true);
-    loadCatalog();
-  }, [loadCatalog]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -457,9 +448,12 @@ export default function CategoryMegaMenu() {
               </p>
 
               {loading ? (
-                <div className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-y-contain p-2">
+                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-y-contain p-2" aria-busy="true">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="h-7 animate-pulse rounded bg-slate-200/60" />
+                    <div key={i} className="flex items-center gap-2 rounded-lg p-1.5">
+                      <div className="skeleton-bone h-8 w-8 shrink-0 rounded-lg" />
+                      <div className="skeleton-bone h-3 flex-1 rounded-md" />
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -504,13 +498,15 @@ export default function CategoryMegaMenu() {
             {/* Content — inner scroll box */}
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               {loading ? (
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-3">
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-3" aria-busy="true">
+                  <div className="mb-3 skeleton-bone h-5 w-40 rounded-lg" />
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="h-3 w-16 animate-pulse rounded bg-slate-200" />
-                        <div className="h-2 w-full animate-pulse rounded bg-slate-100" />
-                        <div className="h-2 w-4/5 animate-pulse rounded bg-slate-100" />
+                      <div key={i} className="space-y-2">
+                        <div className="skeleton-bone h-3.5 w-20 rounded-md" />
+                        <div className="skeleton-bone h-2.5 w-full rounded-md" />
+                        <div className="skeleton-bone h-2.5 w-4/5 rounded-md opacity-70" />
+                        <div className="skeleton-bone h-2.5 w-3/5 rounded-md opacity-50" />
                       </div>
                     ))}
                   </div>

@@ -1,13 +1,14 @@
-export const ESCROW_MENU_TITLE = "تضمین معاملات و حساب امانی";
-export const ESCROW_PAGE_TITLE = "تضمین معاملات و حساب امانی";
-export const ESCROW_TAGLINE =
-  "با تضمین معاملات، وجه شما تا انجام کامل تعهدات نزد سیستم امن نگهداری می‌شود.";
-export const ESCROW_SETTINGS_TITLE = "تنظیمات تضمین معاملات";
-export const ESCROW_DEPOSIT_LABEL = "وجه تضمین";
+/** User display name for escrow parties — fallback label from i18n */
 
-export function formatUserDisplayName(user) {
+export function formatUserDisplayName(user, userFallbackLabel) {
   if (!user) return "";
   if (user.displayName) return user.displayName;
   const name = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
-  return name || user.username || user.mobile || `کاربر ${user.id}`;
+  if (name) return name;
+  if (user.username) return user.username;
+  if (user.mobile) return user.mobile;
+  if (userFallbackLabel && user.id != null) {
+    return userFallbackLabel.replace("{id}", String(user.id));
+  }
+  return user.id != null ? String(user.id) : "";
 }

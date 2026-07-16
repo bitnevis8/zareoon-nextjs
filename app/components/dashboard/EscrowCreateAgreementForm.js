@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
@@ -9,10 +10,7 @@ import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { isAdmin } from "@/app/utils/roles";
 import EscrowUserSearch from "@/app/components/dashboard/EscrowUserSearch";
 import EscrowCurrencySelect from "@/app/components/dashboard/EscrowCurrencySelect";
-import {
-  ESCROW_TAGLINE,
-  formatUserDisplayName,
-} from "@/app/components/dashboard/escrowCopy";
+import { formatUserDisplayName } from "@/app/components/dashboard/escrowCopy";
 import {
   DEFAULT_ESCROW_CURRENCY,
   formatEscrowMoney,
@@ -20,17 +18,12 @@ import {
 } from "@/app/utils/escrowCurrencies";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 
-const HOLD_MODES = [
-  { id: "auto", label: "پیشنهاد زارعون", desc: "بر اساس قوانین سیستم" },
-  { id: "percent", label: "درصد دلخواه", desc: "از مبلغ کل معامله" },
-  { id: "full", label: "قفل کامل", desc: "۱۰۰٪ مبلغ معامله" },
-  { id: "custom_amount", label: "مبلغ دلخواه", desc: "مقدار مشخص شما" },
-];
+const HOLD_MODE_IDS = ["auto", "percent", "full", "custom_amount"];
 
 const inputClass =
   "mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100";
 
-function PartyCard({ roleLabel, user, accent = "emerald" }) {
+function PartyCard({ roleLabel, user, selfNote, accent = "emerald" }) {
   const name = formatUserDisplayName(user);
   const accentMap = {
     emerald: "border-emerald-100 bg-emerald-50/70 text-emerald-800",
@@ -45,7 +38,7 @@ function PartyCard({ roleLabel, user, accent = "emerald" }) {
           {user.mobile}
         </p>
       ) : null}
-      <p className="mt-2 text-[10px] text-slate-500">شما در این نقش قرارداد را ثبت می‌کنید</p>
+      <p className="mt-2 text-[10px] text-slate-500">{selfNote}</p>
     </div>
   );
 }
@@ -63,11 +56,15 @@ function FormSection({ title, hint, children, className = "" }) {
 }
 
 export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
+  const t = useTranslations("escrow");
+  const tCommon = useTranslations("common");
   const auth = useAuth();
   const user = auth?.user;
   const userId = user?.id || user?.userId;
   const admin = isAdmin(user);
   const { isSellerView } = useDashboardPersona();
+  const userFallback = t("userFallback");
+  const holdModesRaw = t.raw("form.holdModes") || {};
 
   const selfParty = useMemo(
     () =>
@@ -78,10 +75,10 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
             lastName: user.lastName,
             username: user.username,
             mobile: user.mobile,
-            displayName: formatUserDisplayName(user),
+            displayName: formatUserDisplayName(user, userFallback),
           }
         : null,
-    [user, userId]
+    [user, userId, userFallback]
   );
 
   const [settings, setSettings] = useState(null);
@@ -102,7 +99,7 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
 
   const buyerFixed = !admin && !isSellerView;
   const sellerFixed = !admin && isSellerView;
-  const currencyDef = getEscrowCurrency(form.currency);
+  const currencyDef = getEscrowCurrency(form.currency, t);
 
   useEffect(() => {
     if (buyerFixed && selfParty) setBuyer(selfParty);
@@ -161,27 +158,27 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
     return () => clearTimeout(timer);
   }, [form, total, sellerId]);
 
-  const availableHoldModes = HOLD_MODES.filter((mode) => {
-    if (mode.id === "full" && policy && !policy.allowFullDealHold) return false;
-    if (mode.id === "custom_amount" && policy && !policy.allowCustomDeposit) return false;
-    if ((mode.id === "percent" || mode.id === "custom_amount") && policy && !policy.allowCustomDeposit) {
+  const availableHoldModes = HOLD_MODE_IDS.filter((id) => {
+    if (id === "full" && policy && !policy.allowFullDealHold) return false;
+    if (id === "custom_amount" && policy && !policy.allowCustomDeposit) return false;
+    if ((id === "percent" || id === "custom_amount") && policy && !policy.allowCustomDeposit) {
       return false;
     }
-    return true;
-  });
+    return holdModesRaw[id];
+  }).map((id) => ({ id, ...holdModesRaw[id] }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userId) {
-      showToast.error("ابتدا وارد حساب شوید");
+      showToast.error(t("form.loginRequired"));
       return;
     }
     if (!buyerId || !sellerId) {
-      showToast.error("خریدار و فروشنده را مشخص کنید");
+      showToast.error(t("form.partiesRequired"));
       return;
     }
     if (Number(buyerId) === Number(sellerId)) {
-      showToast.error("خریدار و فروشنده نمی‌توانند یکسان باشند");
+      showToast.error(t("form.samePartyError"));
       return;
     }
 
@@ -206,11 +203,11 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "خطا");
-      showToast.success("قرارداد تضمین معاملات ایجاد شد");
+      if (!res.ok) throw new Error(json.message || t("form.genericError"));
+      showToast.success(t("form.createSuccess"));
       onCreated?.();
     } catch (err) {
-      showToast.error(err.message || "خطا در ایجاد قرارداد");
+      showToast.error(err.message || t("form.createError"));
     } finally {
       setSubmitting(false);
     }
@@ -226,34 +223,41 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
       className={`${dash.card} overflow-hidden border-sky-100/80 shadow-md`}
     >
       <header className="border-b border-slate-100 bg-gradient-to-l from-sky-50/80 to-white px-4 py-4 md:px-6 md:py-5">
-        <h2 className="text-base font-bold text-slate-900 md:text-lg">ایجاد قرارداد تضمین معاملات</h2>
-        <p className="mt-1.5 max-w-3xl text-xs leading-6 text-slate-600 md:text-sm">{ESCROW_TAGLINE}</p>
+        <h2 className="text-base font-bold text-slate-900 md:text-lg">{t("form.createTitle")}</h2>
+        <p className="mt-1.5 max-w-3xl text-xs leading-6 text-slate-600 md:text-sm">{t("tagline")}</p>
       </header>
 
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4 p-4 md:space-y-5 md:p-6">
-          <FormSection
-            title="طرفین معامله"
-            hint="خریدار و فروشنده باید هر دو کاربر ثبت‌شده زارعون باشند. نمی‌توانید خودتان را هم‌زمان خریدار و فروشنده انتخاب کنید."
-          >
+          <FormSection title={t("form.partiesTitle")} hint={t("form.partiesHint")}>
             <div className="grid gap-4 md:grid-cols-2">
               {buyerFixed ? (
-                <PartyCard roleLabel="خریدار (شما)" user={selfParty} accent="sky" />
+                <PartyCard
+                  roleLabel={t("form.buyerYou")}
+                  user={selfParty}
+                  selfNote={t("form.partySelfNote")}
+                  accent="sky"
+                />
               ) : (
                 <EscrowUserSearch
-                  label="خریدار"
-                  hint="حداقل ۲ حرف از نام، نام خانوادگی یا موبایل"
+                  label={t("form.buyer")}
+                  hint={t("search.buyerHint")}
                   value={buyer}
                   onChange={setBuyer}
                   excludeUserId={sellerId}
                 />
               )}
               {sellerFixed ? (
-                <PartyCard roleLabel="فروشنده (شما)" user={selfParty} accent="emerald" />
+                <PartyCard
+                  roleLabel={t("form.sellerYou")}
+                  user={selfParty}
+                  selfNote={t("form.partySelfNote")}
+                  accent="emerald"
+                />
               ) : (
                 <EscrowUserSearch
-                  label="فروشنده"
-                  hint="حداقل ۲ حرف از نام، نام خانوادگی یا موبایل"
+                  label={t("form.seller")}
+                  hint={t("search.sellerHint")}
                   value={seller}
                   onChange={setSeller}
                   excludeUserId={buyerId}
@@ -262,15 +266,15 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
             </div>
           </FormSection>
 
-          <FormSection title="جزئیات معامله">
+          <FormSection title={t("form.dealDetails")}>
             <div className="grid gap-4">
               <label className="block">
-                <span className="text-xs font-medium text-slate-600">عنوان معامله</span>
+                <span className="text-xs font-medium text-slate-600">{t("form.dealTitle")}</span>
                 <input
                   required
                   value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="مثلاً فروش ۱۰ تن زعفران صادراتی"
+                  placeholder={t("form.dealTitlePlaceholder")}
                   className={inputClass}
                 />
               </label>
@@ -278,7 +282,7 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-xs font-medium text-slate-600">
-                    مبلغ کل ({currencyDef.shortLabel})
+                    {t("form.totalAmount", { currency: currencyDef.shortLabel })}
                   </span>
                   <input
                     required
@@ -299,22 +303,19 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
               </div>
 
               <label className="block">
-                <span className="text-xs font-medium text-slate-600">توضیحات (اختیاری)</span>
+                <span className="text-xs font-medium text-slate-600">{t("form.description")}</span>
                 <textarea
                   rows={3}
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   className={inputClass}
-                  placeholder="شرایط تحویل، بسته‌بندی، زمان‌بندی و…"
+                  placeholder={t("form.descriptionPlaceholder")}
                 />
               </label>
             </div>
           </FormSection>
 
-          <FormSection
-            title="مبلغ قفل‌شده در حساب امانی"
-            hint="تا زمان تکمیل تعهدات، این مبلغ نزد زارعون نگهداری می‌شود."
-          >
+          <FormSection title={t("form.holdSectionTitle")} hint={t("form.holdSectionHint")}>
             <div className="grid gap-2 sm:grid-cols-2">
               {availableHoldModes.map((mode) => (
                 <label
@@ -344,8 +345,13 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
             {form.holdMode === "percent" ? (
               <label className="mt-3 block max-w-xs">
                 <span className="text-xs text-slate-600">
-                  درصد از معامله
-                  {policy ? ` (${policy.minDepositPercent}–${policy.maxDepositPercent}٪)` : ""}
+                  {t("form.percentOfDeal")}
+                  {policy
+                    ? t("form.percentRange", {
+                        min: policy.minDepositPercent,
+                        max: policy.maxDepositPercent,
+                      })
+                    : ""}
                 </span>
                 <input
                   required
@@ -363,7 +369,7 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
             {form.holdMode === "custom_amount" ? (
               <label className="mt-3 block max-w-xs">
                 <span className="text-xs text-slate-600">
-                  مبلغ قفل ({currencyDef.shortLabel})
+                  {t("form.lockAmount", { currency: currencyDef.shortLabel })}
                 </span>
                 <input
                   required
@@ -379,9 +385,9 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
             ) : null}
           </FormSection>
 
-          <FormSection title="مراحل آزادسازی">
+          <FormSection title={t("form.milestonesTitle")}>
             <label className="block">
-              <span className="text-xs font-medium text-slate-600">الگوی آزادسازی به فروشنده</span>
+              <span className="text-xs font-medium text-slate-600">{t("form.milestonePreset")}</span>
               <select
                 value={form.milestonePreset}
                 onChange={(e) => setForm((f) => ({ ...f, milestonePreset: e.target.value }))}
@@ -402,10 +408,10 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
                     <strong className="text-slate-900">{m.title}</strong>
                     <span className="text-slate-500">— {m.percentOfDeposit}٪</span>
                     {m.requiresBuyerApproval !== false ? (
-                      <span className="text-sky-700">· تأیید خریدار</span>
+                      <span className="text-sky-700">{t("form.buyerApproval")}</span>
                     ) : null}
                     {m.requiresSellerConfirmation ? (
-                      <span className="text-emerald-700">· تأیید فروشنده</span>
+                      <span className="text-emerald-700">{t("form.sellerConfirmation")}</span>
                     ) : null}
                   </li>
                 ))}
@@ -417,28 +423,28 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
         <aside className="border-t border-slate-100 bg-slate-50/60 p-4 md:p-5 lg:border-r lg:border-t-0">
           <div className="lg:sticky lg:top-4 space-y-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-bold text-slate-800">خلاصه قرارداد</p>
+              <p className="text-xs font-bold text-slate-800">{t("form.summaryTitle")}</p>
               <dl className="mt-3 space-y-2.5 text-xs">
                 <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">خریدار</dt>
+                  <dt className="text-slate-500">{t("form.buyer")}</dt>
                   <dd className="max-w-[55%] truncate text-left font-medium text-slate-900">
-                    {buyer ? formatUserDisplayName(buyer) : "—"}
+                    {buyer ? formatUserDisplayName(buyer, userFallback) : "—"}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">فروشنده</dt>
+                  <dt className="text-slate-500">{t("form.seller")}</dt>
                   <dd className="max-w-[55%] truncate text-left font-medium text-slate-900">
-                    {seller ? formatUserDisplayName(seller) : "—"}
+                    {seller ? formatUserDisplayName(seller, userFallback) : "—"}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">مبلغ کل</dt>
+                  <dt className="text-slate-500">{t("list.dealTotal")}</dt>
                   <dd className="font-semibold text-slate-900" dir="ltr">
-                    {total > 0 ? formatEscrowMoney(total, form.currency) : "—"}
+                    {total > 0 ? formatEscrowMoney(total, form.currency, t) : "—"}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">ارز</dt>
+                  <dt className="text-slate-500">{t("form.currency")}</dt>
                   <dd className="font-medium text-slate-800">{currencyDef.label}</dd>
                 </div>
               </dl>
@@ -446,26 +452,27 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
               {preview ? (
                 <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/80 px-3 py-2.5 text-xs text-emerald-900">
                   <p>
-                    وجه تضمین:{" "}
-                    <strong>{formatEscrowMoney(preview.depositAmount, form.currency)}</strong>
+                    {t("form.depositPreview")}{" "}
+                    <strong>{formatEscrowMoney(preview.depositAmount, form.currency, t)}</strong>
                   </p>
                   {preview.depositPercent != null ? (
                     <p className="mt-1 text-emerald-800">
-                      معادل {Number(preview.depositPercent).toLocaleString("fa-IR")}٪ از معامله
+                      {t("form.depositPercentOfDeal", {
+                        percent: Number(preview.depositPercent).toLocaleString("fa-IR"),
+                      })}
                     </p>
                   ) : null}
                   {preview.platformFeeAmount ? (
                     <p className="mt-1 text-emerald-700">
-                      کارمزد: {formatEscrowMoney(preview.platformFeeAmount, form.currency)}
+                      {t("form.platformFee")}{" "}
+                      {formatEscrowMoney(preview.platformFeeAmount, form.currency, t)}
                     </p>
                   ) : null}
                 </div>
               ) : summaryReady ? (
-                <p className="mt-4 text-[11px] text-slate-500">در حال محاسبه وجه تضمین…</p>
+                <p className="mt-4 text-[11px] text-slate-500">{t("form.calculatingDeposit")}</p>
               ) : (
-                <p className="mt-4 text-[11px] leading-5 text-slate-500">
-                  پس از تکمیل طرفین و مبلغ، پیش‌نمایش وجه تضمین اینجا نمایش داده می‌شود.
-                </p>
+                <p className="mt-4 text-[11px] leading-5 text-slate-500">{t("form.summaryHint")}</p>
               )}
             </div>
 
@@ -475,21 +482,18 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
                 disabled={submitting}
                 className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
               >
-                {submitting ? "در حال ایجاد…" : "ایجاد قرارداد"}
+                {submitting ? t("form.submitting") : t("form.submit")}
               </button>
               <button
                 type="button"
                 onClick={onCancel}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
-                انصراف
+                {tCommon("cancel")}
               </button>
             </div>
 
-            <p className="text-[10px] leading-5 text-slate-400">
-              ایجاد قرارداد به‌تنهایی وجهی قفل نمی‌کند؛ پس از تأیید طرفین و پرداخت، وجه تضمین در حساب
-              امانی نگهداری می‌شود.
-            </p>
+            <p className="text-[10px] leading-5 text-slate-400">{t("form.footerNote")}</p>
           </div>
         </aside>
       </div>

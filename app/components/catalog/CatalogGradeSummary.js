@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { localizeGrade } from "../../utils/localize";
 
 function StatCell({ label, value, highlight = false }) {
@@ -15,7 +16,8 @@ function StatCell({ label, value, highlight = false }) {
   );
 }
 
-export default function CatalogGradeSummary({ byGrade, t, language, title, description }) {
+export default function CatalogGradeSummary({ byGrade, language, title, description }) {
+  const t = useTranslations("catalog");
   if (!byGrade?.length) return null;
 
   return (

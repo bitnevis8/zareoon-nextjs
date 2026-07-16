@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useLanguage } from "../context/LanguageContext";
 import { getExclusiveServicesContent } from "../data/zareoonExclusiveServices";
 import { countProvidersByCategory } from "../data/tradeServicesCatalog";
@@ -209,6 +210,8 @@ function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel,
 }
 
 export default function ZareoonExclusiveServices({ className = "" }) {
+  const ts = useTranslations("supplier.tradeProvider");
+  const tShared = useTranslations("shared");
   const { language, isRTL, t } = useLanguage();
   const content = getExclusiveServicesContent(language);
   const patternBaseId = useId();
@@ -247,9 +250,9 @@ export default function ZareoonExclusiveServices({ className = "" }) {
 
   const memberLabel = (count) => {
     const formatted = count.toLocaleString(numberLocale);
-    if (language === "en") return `${formatted} members`;
-    if (language === "ru") return `${formatted} участников`;
-    return `${formatted} عضو`;
+    if (language === "en") return ts("memberCountEn", { count: formatted });
+    if (language === "ru") return ts("memberCountRu", { count: formatted });
+    return ts("memberCount", { count: formatted });
   };
 
   return (
@@ -317,7 +320,7 @@ export default function ZareoonExclusiveServices({ className = "" }) {
                 {content.items.map((item) => {
                   const count = memberCounts?.[item.id] ?? item.memberCount ?? 0;
                   const isVip = !!vipCategories[item.id]?.enabled;
-                  const companyName = isVip ? getVipCompanyName(providers, item.id) : null;
+                  const companyName = isVip ? getVipCompanyName(providers, item.id, tShared) : null;
                   return (
                     <div key={item.id} className="w-[min(70vw,15.5rem)] shrink-0 snap-start">
                       <CategoryCard
@@ -341,7 +344,7 @@ export default function ZareoonExclusiveServices({ className = "" }) {
               {content.items.map((item) => {
                 const count = memberCounts?.[item.id] ?? item.memberCount ?? 0;
                 const isVip = !!vipCategories[item.id]?.enabled;
-                const companyName = isVip ? getVipCompanyName(providers, item.id) : null;
+                const companyName = isVip ? getVipCompanyName(providers, item.id, tShared) : null;
                 return (
                   <CategoryCard
                     key={item.id}

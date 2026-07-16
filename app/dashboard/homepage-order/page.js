@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "@/app/context/AuthContext";
 import { compareCatalogItems } from "@/app/utils/productSort";
@@ -20,6 +21,7 @@ function buildPath(item, byId) {
 }
 
 export default function HomepageOrderPage() {
+  const t = useTranslations("product");
   const auth = useAuth();
   const router = useRouter();
   const [categories, setCategories] = useState([]);
@@ -74,9 +76,9 @@ export default function HomepageOrderPage() {
       setCategories((prev) =>
         prev.map((c) => (c.id === id ? { ...c, homepageSortOrder } : c))
       );
-      setMessage("ذخیره شد");
+      setMessage(t("homepageOrder.saved"));
     } catch {
-      setMessage("خطا در ذخیره");
+      setMessage(t("homepageOrder.saveError"));
     } finally {
       setSavingId(null);
     }
@@ -88,22 +90,22 @@ export default function HomepageOrderPage() {
   };
 
   if (auth?.loading || loading) {
-    return <div className="p-8 text-center">در حال بارگذاری...</div>;
+    return <div className="p-8 text-center">{t("loading")}</div>;
   }
   if (!admin) return null;
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-600 leading-7">
-        عدد کوچکتر یعنی نمایش زودتر. دسته‌های بدون عدد، بعد از بقیه نمایش داده می‌شوند.
+        {t("homepageOrder.hint")}
         {message ? <span className="mr-2 font-medium text-emerald-700">{message}</span> : null}
       </p>
 
       <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
         <div className="hidden md:grid grid-cols-[1fr_140px_120px] gap-3 px-4 py-3 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
-          <span>دسته</span>
-          <span>ترتیب نمایش</span>
-          <span>عملیات</span>
+          <span>{t("homepageOrder.colCategory")}</span>
+          <span>{t("homepageOrder.colDisplayOrder")}</span>
+          <span>{t("homepageOrder.colActions")}</span>
         </div>
         <div className="divide-y divide-gray-100">
           {rows.map((item) => (
@@ -116,13 +118,13 @@ export default function HomepageOrderPage() {
                 <div className="text-xs text-gray-500 mt-0.5">{buildPath(item, byId)}</div>
               </div>
               <label className="flex items-center gap-2 text-sm">
-                <span className="md:hidden text-gray-500">ترتیب:</span>
+                <span className="md:hidden text-gray-500">{t("homepageOrder.orderLabel")}</span>
                 <input
                   type="number"
                   min={1}
                   className="w-24 rounded-lg border border-gray-200 px-3 py-2 text-sm"
                   defaultValue={item.homepageSortOrder ?? ""}
-                  placeholder="—"
+                  placeholder={t("emDash")}
                   onBlur={(e) => {
                     const next = e.target.value;
                     const prev = item.homepageSortOrder ?? "";
@@ -139,7 +141,7 @@ export default function HomepageOrderPage() {
                   disabled={savingId === item.id}
                   className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50"
                 >
-                  بالاتر
+                  {t("homepageOrder.moveUp")}
                 </button>
                 <button
                   type="button"
@@ -147,7 +149,7 @@ export default function HomepageOrderPage() {
                   disabled={savingId === item.id}
                   className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50"
                 >
-                  پایین‌تر
+                  {t("homepageOrder.moveDown")}
                 </button>
               </div>
             </div>

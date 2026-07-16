@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import SupplyCountryFlag from "../ui/SupplyCountryFlag";
 import CatalogMediaSlider from "./CatalogMediaSlider";
 import { buildGradeMediaSlides } from "../../utils/catalogGradeMedia";
@@ -23,7 +24,6 @@ export default function CatalogGradeMediaPanel({
   supplyCountry = "IR",
   supplyCity = "",
   language,
-  t,
   lotMediaPreview,
   openMediaGallery,
   className = "",
@@ -32,6 +32,7 @@ export default function CatalogGradeMediaPanel({
   supplierIndex = 1,
   supplierTotal = 1,
 }) {
+  const t = useTranslations("catalog");
   const slides = useMemo(
     () => buildGradeMediaSlides(lots, lotMediaPreview, language, t),
     [lots, lotMediaPreview, language, t]

@@ -1,4 +1,5 @@
 import { isAdmin } from "./roles";
+import { apiError } from "./apiErrors";
 
 export const CATALOG_PDF_SCOPES = {
   FULL: "full",
@@ -60,7 +61,7 @@ export function canDownloadCatalogPdf({
 
 export function assertCatalogPdfAccess(options) {
   if (!canDownloadCatalogPdf(options)) {
-    throw new Error("شما مجاز به دانلود این کاتالوگ نیستید.");
+    throw new Error(apiError("catalogPdfForbidden"));
   }
 }
 

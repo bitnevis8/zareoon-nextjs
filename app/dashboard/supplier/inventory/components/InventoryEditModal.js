@@ -1,16 +1,16 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import LotLocationPicker from "@/app/components/ui/LotLocationPicker";
 import AttributeFields from "@/app/components/ui/AttributeFields";
 import { Field } from "./Field";
 import TieredPricingEditor from "./TieredPricingEditor";
 import InventoryDisplayDetailsEditor from "./InventoryDisplayDetailsEditor";
 import { inv } from "../inventoryTheme";
+import { QUALITY_GRADES } from "../inventoryConstants";
 import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/PersianNumberInput";
 import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
 import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
-
-const GRADES = ["صادراتی", "درجه 1", "درجه 2", "درجه 3", "ضایعاتی"];
 
 export default function InventoryEditModal({
   lot,
@@ -20,7 +20,6 @@ export default function InventoryEditModal({
   attributeDefs,
   attributeValues,
   setAttributeValues,
-  t,
   saving,
   onClose,
   onSave,
@@ -28,6 +27,7 @@ export default function InventoryEditModal({
   onRemoveTier,
   onUpdateTier,
 }) {
+  const t = useTranslations("inventory");
   const exchangeRates = useExchangeRatesMap();
 
   if (!lot) return null;
@@ -37,7 +37,7 @@ export default function InventoryEditModal({
       <div className={`${inv.modal} ${inv.modalLg}`} onClick={(e) => e.stopPropagation()}>
         <div className={inv.modalHeader}>
           <div>
-            <p className="text-xs text-slate-500">ویرایش بار #{lot.id}</p>
+            <p className="text-xs text-slate-500">{t("lot.editLot", { id: lot.id })}</p>
             <h2 className="text-lg font-bold text-slate-900">{productName}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100">
@@ -50,19 +50,19 @@ export default function InventoryEditModal({
         <div className={inv.modalBody}>
           <div className="space-y-5">
             <div>
-              <h3 className="mb-3 text-sm font-bold text-slate-800">اطلاعات پایه</h3>
+              <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.basicInfo")}</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="واحد">
+                <Field label={t("lot.unit")}>
                   <input className={inv.input} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
                 </Field>
-                <Field label="درجه کیفیت">
+                <Field label={t("create.qualityGrade")}>
                   <select className={inv.select} value={form.qualityGrade} onChange={(e) => setForm({ ...form, qualityGrade: e.target.value })}>
-                    {GRADES.map((g) => (
+                    {QUALITY_GRADES.map((g) => (
                       <option key={g} value={g}>{g}</option>
                     ))}
                   </select>
                 </Field>
-                <Field label="وضعیت">
+                <Field label={t("create.status")}>
                   <select className={inv.select} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                     <option value="harvested">{t("statusHarvested")}</option>
                     <option value="on_field">{t("statusOnField")}</option>
@@ -70,10 +70,10 @@ export default function InventoryEditModal({
                     <option value="sold">{t("statusSold")}</option>
                   </select>
                 </Field>
-                <Field label="مقدار کل">
+                <Field label={t("create.totalQuantity")}>
                   <PersianNumberInput className={inv.input} value={form.totalQuantity} onChange={(v) => setForm({ ...form, totalQuantity: v })} />
                 </Field>
-                <Field label="قیمت">
+                <Field label={t("lot.price")}>
                   <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start">
                     <div className="min-w-0 flex-1">
                       <PersianPriceInput
@@ -91,14 +91,14 @@ export default function InventoryEditModal({
                     />
                   </div>
                 </Field>
-                <Field label="حداقل سفارش">
+                <Field label={t("create.minOrder")}>
                   <PersianNumberInput className={inv.input} value={form.minimumOrderQuantity} onChange={(v) => setForm({ ...form, minimumOrderQuantity: v })} />
                 </Field>
               </div>
             </div>
 
             <div>
-              <h3 className="mb-3 text-sm font-bold text-slate-800">جزئیات نمایش</h3>
+              <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.displayDetails")}</h3>
               <InventoryDisplayDetailsEditor
                 value={form.displayContent}
                 onChange={(displayContent) => setForm({ ...form, displayContent })}
@@ -123,13 +123,13 @@ export default function InventoryEditModal({
 
             {attributeDefs.length > 0 ? (
               <div>
-                <h3 className="mb-3 text-sm font-bold text-slate-800">مشخصات فنی و بسته‌بندی</h3>
+                <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.technicalPackaging")}</h3>
                 <AttributeFields defs={attributeDefs} values={attributeValues} onChange={(id, val) => setAttributeValues((v) => ({ ...v, [id]: val }))} />
               </div>
             ) : null}
 
             <div>
-              <h3 className="mb-3 text-sm font-bold text-slate-800">قیمت‌گذاری پلکانی</h3>
+              <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.tieredPricing")}</h3>
               <TieredPricingEditor
                 tiers={form.tieredPricing}
                 unit={form.unit}
@@ -146,10 +146,10 @@ export default function InventoryEditModal({
 
         <div className={inv.modalFooter}>
           <button type="button" onClick={onClose} className={inv.btnSecondary} disabled={saving}>
-            انصراف
+            {t("editModal.cancel")}
           </button>
           <button type="button" onClick={onSave} className={inv.btnPrimary} disabled={saving}>
-            {saving ? "در حال ذخیره…" : "ذخیره تغییرات"}
+            {saving ? t("editModal.saving") : t("editModal.saveChanges")}
           </button>
         </div>
       </div>

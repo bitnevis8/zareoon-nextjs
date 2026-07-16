@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { API_ENDPOINTS } from "../config/api";
+import { useMemo, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import HorizontalScrollRow from "./HorizontalScrollRow";
 import AvailableProductCompactCard from "./AvailableProductCompactCard";
@@ -12,6 +11,8 @@ import {
   getLatestAvailableProducts,
   groupAvailableProducts,
 } from "../utils/availableProducts";
+import { useFullCatalog, useInventoryLots } from "../hooks/useCatalogProducts";
+import { ProductScrollSkeleton } from "./ui/Skeleton";
 
 const CARD_CLASS = "shrink-0 w-[7.75rem] min-[380px]:w-[8.25rem] sm:w-[8.75rem] md:w-[9.25rem] snap-start";
 
@@ -29,40 +30,18 @@ export default function LatestAvailableProductsSection({
 }) {
   const { language, t, isRTL } = useLanguage();
   const [groupByCategory, setGroupByCategory] = useState(false);
-  const [fetchedLots, setFetchedLots] = useState([]);
-  const [fetchedProducts, setFetchedProducts] = useState([]);
-  const [fetchLoading, setFetchLoading] = useState(autoFetch);
 
-  useEffect(() => {
-    if (!autoFetch) return;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const [resLots, resAll] = await Promise.all([
-          fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" }),
-        ]);
-        const [dl, dAll] = await Promise.all([resLots.json(), resAll.json()]);
-        if (!cancelled) {
-          setFetchedLots(dl.data || []);
-          setFetchedProducts(dAll.data || []);
-        }
-      } catch {
-        // Non-blocking: section shows empty state if fetch fails.
-      } finally {
-        if (!cancelled) setFetchLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [autoFetch]);
+  const { products: fetchedProducts, loading: productsLoading } = useFullCatalog({
+    // Homepage: wait until section is shown; do not compete with root tiles.
+    enabled: autoFetch && !allProductsProp,
+  });
+  const { lots: fetchedLots, loading: lotsLoading } = useInventoryLots({
+    enabled: autoFetch && !inventoryLotsProp,
+  });
 
   const inventoryLots = autoFetch ? fetchedLots : inventoryLotsProp || [];
   const allProducts = autoFetch ? fetchedProducts : allProductsProp || [];
-  const loading = autoFetch ? fetchLoading : loadingProp;
+  const loading = autoFetch ? productsLoading || lotsLoading : loadingProp;
 
   const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
 
@@ -143,20 +122,8 @@ export default function LatestAvailableProductsSection({
       </div>
 
       {loading ? (
-        <div className="flex gap-3 overflow-x-auto pb-1 product-scroll-row">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className={`${CARD_CLASS} overflow-hidden rounded-xl border border-slate-200 bg-white animate-pulse`}
-            >
-              <div className="aspect-[4/3] bg-slate-200" />
-              <div className="space-y-2 p-2">
-                <div className="h-3 bg-slate-200 rounded w-full" />
-                <div className="h-3 bg-slate-200 rounded w-2/3" />
-                <div className="h-2.5 bg-slate-100 rounded w-1/2" />
-              </div>
-            </div>
-          ))}
+        <div aria-busy="true" aria-label="Loading">
+          <ProductScrollSkeleton count={6} />
         </div>
       ) : availableProducts.length > 0 ? (
         groupByCategory && showGroupToggle ? (

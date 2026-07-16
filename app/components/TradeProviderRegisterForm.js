@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -64,6 +65,7 @@ function resolveVipMessage(vipCategories, categoryId, language, t) {
 }
 
 export default function TradeProviderRegisterForm() {
+  const ts = useTranslations("supplier.tradeProvider");
   const { t, isRTL, language } = useLanguage();
   const auth = useAuth();
   const router = useRouter();
@@ -331,7 +333,7 @@ export default function TradeProviderRegisterForm() {
                   onChange={handleChange}
                   required
                   className={inputClass}
-                  placeholder="مثلاً شرکت بازرسی آریا فولاد قرن"
+                  placeholder={ts("companyNamePlaceholder")}
                 />
               </label>
             ) : (
@@ -380,7 +382,7 @@ export default function TradeProviderRegisterForm() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="block sm:col-span-2">
                 <span className="text-sm font-medium text-slate-700">{t("tradeProviderRoutes")}</span>
-                <input name="countriesRoutes" value={form.countriesRoutes} onChange={handleChange} className={inputClass} placeholder="ایران — ترکیه — امارات" />
+                <input name="countriesRoutes" value={form.countriesRoutes} onChange={handleChange} className={inputClass} placeholder={ts("routesPlaceholder")} />
               </label>
               <label className="block sm:col-span-2">
                 <span className="text-sm font-medium text-slate-700">{t("tradeProviderLicenses")}</span>

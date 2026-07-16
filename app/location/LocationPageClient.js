@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { API_ENDPOINTS } from '../config/api';
 
 export default function LocationPageClient({ locationData }) {
+  const t = useTranslations('location');
   const [provinces, setProvinces] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +15,6 @@ export default function LocationPageClient({ locationData }) {
       if (!locationData) return;
       
       try {
-        // دریافت استان‌ها (divisionType = 1) که والدشان ایران است
         const response = await fetch(API_ENDPOINTS.locations.getChildren(locationData.id));
         const data = await response.json();
         
@@ -34,9 +35,9 @@ export default function LocationPageClient({ locationData }) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">اطلاعات مکان یافت نشد</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">{t('notFound.title')}</h1>
           <Link href="/" className="text-blue-600 hover:text-blue-800">
-            بازگشت به صفحه اصلی
+            {t('notFound.backHome')}
           </Link>
         </div>
       </div>
@@ -45,7 +46,6 @@ export default function LocationPageClient({ locationData }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -63,9 +63,7 @@ export default function LocationPageClient({ locationData }) {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Location Info */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">
@@ -73,22 +71,21 @@ export default function LocationPageClient({ locationData }) {
             </h2>
             {locationData.population && (
               <div className="text-sm text-gray-500">
-                جمعیت: {locationData.population.toLocaleString()} نفر
+                {t('population', { count: locationData.population.toLocaleString() })}
               </div>
             )}
           </div>
           
           {locationData.latitude && locationData.longitude && (
             <div className="text-sm text-gray-600 mb-4">
-              مختصات: {locationData.latitude}, {locationData.longitude}
+              {t('coordinates', { lat: locationData.latitude, lng: locationData.longitude })}
             </div>
           )}
         </div>
 
-        {/* Provinces Box */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            استان‌ها
+            {t('provinces')}
           </h3>
           
           {loading ? (
@@ -111,7 +108,7 @@ export default function LocationPageClient({ locationData }) {
                   </div>
                   {province.population && (
                     <div className="text-xs text-gray-500 mt-1">
-                      جمعیت: {province.population.toLocaleString()} نفر
+                      {t('population', { count: province.population.toLocaleString() })}
                     </div>
                   )}
                 </Link>
@@ -122,4 +119,4 @@ export default function LocationPageClient({ locationData }) {
       </div>
     </div>
   );
-} 
+}

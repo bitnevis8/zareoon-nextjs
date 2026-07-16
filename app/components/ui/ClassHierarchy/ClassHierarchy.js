@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function ClassHierarchy() {
+  const t = useTranslations('home.classHierarchy');
   const [classes, setClasses] = useState([]);
   const [hierarchicalClasses, setHierarchicalClasses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,10 +23,10 @@ export default function ClassHierarchy() {
           const data = await response.json();
           setClasses(data.classes || []);
         } else {
-          setError('خطا در دریافت کلاس‌ها');
+          setError(t('fetchError'));
         }
       } catch (error) {
-        setError('خطا در اتصال به سرور');
+        setError(t('connectionError'));
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +89,7 @@ export default function ClassHierarchy() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            در حال بارگذاری کلاس‌ها...
+            {t('loading')}
           </div>
         </div>
       </div>
@@ -113,9 +115,9 @@ export default function ClassHierarchy() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ کلاسی یافت نشد</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('empty')}</h3>
           <p className="text-gray-500">
-            در حال حاضر هیچ کلاسی در سیستم موجود نیست.
+            {t('emptyDetail')}
           </p>
         </div>
       </div>
@@ -194,8 +196,8 @@ export default function ClassHierarchy() {
             {/* Footer with class info */}
             <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
               <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>تعداد زیرمجموعه: {parentClass.children?.length || 0}</span>
-                <span>ترتیب: {parentClass.sortOrder || 0}</span>
+                <span>{t('childrenCount', { count: parentClass.children?.length || 0 })}</span>
+                <span>{t('sortOrder', { order: parentClass.sortOrder || 0 })}</span>
               </div>
             </div>
           </div>
@@ -205,20 +207,20 @@ export default function ClassHierarchy() {
       {/* Summary */}
       <div className="mt-8 bg-blue-50 rounded-lg p-4">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">خلاصه دسته‌بندی</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">{t('summaryTitle')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="bg-white rounded p-3">
-              <div className="font-medium text-gray-900">کلاس‌های اصلی</div>
+              <div className="font-medium text-gray-900">{t('mainClasses')}</div>
               <div className="text-2xl font-bold text-blue-600">{hierarchicalClasses.length}</div>
             </div>
             <div className="bg-white rounded p-3">
-              <div className="font-medium text-gray-900">کلاس‌های فرعی</div>
+              <div className="font-medium text-gray-900">{t('subClasses')}</div>
               <div className="text-2xl font-bold text-green-600">
                 {hierarchicalClasses.reduce((total, parent) => total + (parent.children?.length || 0), 0)}
               </div>
             </div>
             <div className="bg-white rounded p-3">
-              <div className="font-medium text-gray-900">مجموع کلاس‌ها</div>
+              <div className="font-medium text-gray-900">{t('totalClasses')}</div>
               <div className="text-2xl font-bold text-purple-600">
                 {hierarchicalClasses.length + hierarchicalClasses.reduce((total, parent) => total + (parent.children?.length || 0), 0)}
               </div>

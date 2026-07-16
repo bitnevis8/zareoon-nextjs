@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useLanguage } from "../context/LanguageContext";
 import { getStockLegend } from "../utils/stockUtils";
 
@@ -25,7 +26,8 @@ export default function CatalogGuidePanel({
   className = "",
 }) {
   const { t } = useLanguage();
-  const legendItems = getStockLegend(t);
+  const tShared = useTranslations("shared");
+  const legendItems = getStockLegend(tShared);
 
   if (!showCategoryGuide && !showStockLegend) return null;
 

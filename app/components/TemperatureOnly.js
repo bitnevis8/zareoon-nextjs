@@ -1,24 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-const API_KEY = "7959b45847d0131c5cf5a823b1fa0d9a";
-const TEHRAN_COORDS = { lat: 35.6892, lon: 51.3890 };
-
-async function getCityCoords(city) {
-  if (!city || city === "تهران") return TEHRAN_COORDS;
-  const res = await fetch(
-    `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`
-  );
-  if (!res.ok) return TEHRAN_COORDS;
-  const data = await res.json();
-  if (data && data.length > 0) {
-    return { lat: data[0].lat, lon: data[0].lon };
-  }
-  return TEHRAN_COORDS;
-}
+import { useTranslations } from 'next-intl';
+import { getCityCoords, getWeatherIcon, WEATHER_CONFIG } from '@/app/config/weather';
 
 export default function TemperatureOnly({ locationName }) {
+  const t = useTranslations('home.weather');
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,25 +20,23 @@ export default function TemperatureOnly({ locationName }) {
       try {
         setLoading(true);
         setError(null);
-        
-        // Get coordinates
+
         const coords = await getCityCoords(locationName);
-        
-        // Fetch current weather
+        const { API_KEY } = WEATHER_CONFIG;
+
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric`
         );
-        
+
         if (!response.ok) {
-          throw new Error('خطا در دریافت آب و هوا');
+          throw new Error(t('fetchErrorShort'));
         }
-        
+
         const data = await response.json();
         setWeatherData({
           temp: data.main.temp,
           condition: data.weather[0].main
         });
-        
       } catch (err) {
         setError(true);
         console.error('Weather fetch error:', err);
@@ -61,33 +46,11 @@ export default function TemperatureOnly({ locationName }) {
     };
 
     fetchWeather();
-  }, [locationName]);
+  }, [locationName, t]);
 
   const formatTemperature = (temp) => {
     if (!temp) return '—';
     return `${Math.round(temp)}°C`;
-  };
-
-  const getWeatherIcon = (condition) => {
-    const iconMap = {
-      'Clear': '☀️',
-      'Clouds': '☁️',
-      'Rain': '🌧️',
-      'Drizzle': '🌦️',
-      'Snow': '❄️',
-      'Thunderstorm': '⛈️',
-      'Mist': '🌫️',
-      'Fog': '🌫️',
-      'Haze': '🌫️',
-      'Smoke': '🌫️',
-      'Dust': '🌪️',
-      'Sand': '🌪️',
-      'Ash': '🌋',
-      'Squall': '💨',
-      'Tornado': '🌪️'
-    };
-    
-    return iconMap[condition] || '🌤️';
   };
 
   if (loading) {

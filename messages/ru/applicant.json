@@ -1,0 +1,123 @@
+{
+  "steps": {
+    "requestType": "",
+    "category": "",
+    "details": ""
+  },
+  "requestTypes": {
+    "product": {
+      "label": "",
+      "description": ""
+    },
+    "service": {
+      "label": "",
+      "description": ""
+    }
+  },
+  "type": {
+    "product": "",
+    "service": ""
+  },
+  "status": {
+    "open": "",
+    "closed": "",
+    "fulfilled": "",
+    "cancelled": ""
+  },
+  "errors": {
+    "selectRequestType": "",
+    "selectProductCategory": "",
+    "selectServiceCategory": "",
+    "loginRequired": "",
+    "titleRequired": "",
+    "descriptionRequired": "",
+    "phoneRequired": "",
+    "categoryRequired": "",
+    "invalidServerResponse": "",
+    "sessionExpired": "",
+    "submitFailed": "",
+    "generic": ""
+  },
+  "success": {
+    "notified": "",
+    "submitted": ""
+  },
+  "form": {
+    "step1Hint": "",
+    "step2ProductHint": "",
+    "step2ServiceHint": "",
+    "productCategory": "",
+    "serviceCategory": "",
+    "loadingCategories": "",
+    "noProductCategories": "",
+    "selectPlaceholder": "",
+    "subcategory": "",
+    "subservice": "",
+    "wholeCategory": "",
+    "title": "",
+    "titlePlaceholderProduct": "",
+    "titlePlaceholderService": "",
+    "description": "",
+    "descriptionPlaceholder": "",
+    "approxQuantity": "",
+    "quantityPlaceholder": "",
+    "unit": "",
+    "unitPlaceholder": "",
+    "phone": "",
+    "company": "",
+    "allowPhoneContact": "",
+    "notes": "",
+    "continue": "",
+    "back": "",
+    "submitting": "",
+    "submit": "",
+    "newRequest": ""
+  },
+  "home": {
+    "title": "",
+    "subtitle": "",
+    "newRequestLink": "",
+    "myRequests": "",
+    "viewAll": "",
+    "noRequests": ""
+  },
+  "contact": {
+    "ariaLabel": "",
+    "call": "",
+    "chat": ""
+  },
+  "requestsList": {
+    "title": "",
+    "subtitle": "",
+    "empty": ""
+  },
+  "requestDetail": {
+    "backToRequests": "",
+    "needDescription": "",
+    "quantity": "",
+    "phone": "",
+    "company": "",
+    "notes": ""
+  },
+  "submitPage": {
+    "title": "",
+    "subtitle": ""
+  },
+  "incoming": {
+    "seller": {
+      "title": "",
+      "subtitle": ""
+    },
+    "services": {
+      "title": "",
+      "subtitle": ""
+    },
+    "empty": "",
+    "newBadge": "",
+    "backToRequests": "",
+    "respondHint": "",
+    "phoneHiddenHint": "",
+    "applicant": "",
+    "email": ""
+  }
+}

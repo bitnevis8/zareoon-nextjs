@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { getInitials } from "../userUtils";
 
 export default function UserAvatar({ user, size = "md" }) {
+  const t = useTranslations("users");
   const sizes = {
     sm: "h-9 w-9 text-xs",
     md: "h-11 w-11 text-sm",
@@ -15,7 +17,7 @@ export default function UserAvatar({ user, size = "md" }) {
     return (
       <Image
         src={user.avatar}
-        alt={user.firstName || "کاربر"}
+        alt={user.firstName || t("defaultUserName")}
         width={px[size] || 44}
         height={px[size] || 44}
         className={`${sizes[size] || sizes.md} shrink-0 rounded-full object-cover ring-2 ring-white`}

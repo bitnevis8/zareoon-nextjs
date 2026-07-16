@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import { inv } from "@/app/dashboard/supplier/inventory/inventoryTheme";
 import UserAvatar from "./UserAvatar";
 import {
@@ -12,6 +13,9 @@ import {
 } from "../userUtils";
 
 export default function UserCard({ user, currentUserId, onView, onEdit, onDelete, onInventory }) {
+  const t = useTranslations("users");
+  const tShared = useTranslations("shared");
+  const emptyValue = t("emptyValue");
   const roles = getUserRoles(user);
   const isSelf = currentUserId && user.id === currentUserId;
   const supplier = isSupplierUser(user);
@@ -28,16 +32,16 @@ export default function UserCard({ user, currentUserId, onView, onEdit, onDelete
                 user.isActive !== false ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
               }`}
             >
-              {user.isActive !== false ? "فعال" : "غیرفعال"}
+              {user.isActive !== false ? t("active") : t("inactive")}
             </span>
           </div>
           <h3 className="truncate text-base font-bold text-slate-900">
-            {fullName(user)}
-            {isSelf ? <span className="mr-1 text-xs font-normal text-slate-400">(شما)</span> : null}
+            {fullName(user, t("defaultUserName"))}
+            {isSelf ? <span className="mr-1 text-xs font-normal text-slate-400">{t("table.you")}</span> : null}
           </h3>
           {user.username ? <p className="text-xs text-slate-500">@{user.username}</p> : null}
           <p className="mt-1 font-mono text-sm text-slate-700" dir="ltr">
-            {user.mobile || user.email || "—"}
+            {user.mobile || user.email || emptyValue}
           </p>
         </div>
       </div>
@@ -45,11 +49,11 @@ export default function UserCard({ user, currentUserId, onView, onEdit, onDelete
       <div className="space-y-3 p-4">
         <div className="flex flex-wrap gap-1">
           {roles.length === 0 ? (
-            <span className="text-xs text-slate-400">بدون نقش</span>
+            <span className="text-xs text-slate-400">{t("card.noRole")}</span>
           ) : (
             roles.map((role) => (
               <span key={role.id || role.name} className={roleBadgeClass(role.name)}>
-                {getRoleLabel(role)}
+                {getRoleLabel(role, tShared)}
               </span>
             ))
           )}
@@ -57,24 +61,24 @@ export default function UserCard({ user, currentUserId, onView, onEdit, onDelete
 
         <div className="flex flex-wrap gap-3 text-xs text-slate-500">
           <span className={user.isEmailVerified ? "text-emerald-600" : ""}>
-            ایمیل {user.isEmailVerified ? "✓" : "✗"}
+            {t("table.email")} {user.isEmailVerified ? "✓" : "✗"}
           </span>
           <span className={user.isMobileVerified ? "text-emerald-600" : ""}>
-            موبایل {user.isMobileVerified ? "✓" : "✗"}
+            {t("table.mobile")} {user.isMobileVerified ? "✓" : "✗"}
           </span>
-          <span>عضویت: {formatDate(user.createdAt)}</span>
+          <span>{t("card.membership")}: {formatDate(user.createdAt, emptyValue)}</span>
         </div>
 
         <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
           <button type="button" onClick={() => onView(user)} className={`${inv.btnSecondary} flex-1 sm:flex-none`}>
-            مشاهده
+            {t("view")}
           </button>
           <button type="button" onClick={() => onEdit(user)} className={`${inv.btnSecondary} flex-1 sm:flex-none`}>
-            ویرایش
+            {t("edit")}
           </button>
           {supplier && onInventory ? (
             <button type="button" onClick={() => onInventory(user)} className={`${inv.btnSecondary} flex-1 sm:flex-none`}>
-              محصولات
+              {t("table.products")}
             </button>
           ) : null}
           {!isSelf ? (
@@ -83,7 +87,7 @@ export default function UserCard({ user, currentUserId, onView, onEdit, onDelete
               onClick={() => onDelete(user)}
               className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
             >
-              حذف
+              {t("delete")}
             </button>
           ) : null}
         </div>

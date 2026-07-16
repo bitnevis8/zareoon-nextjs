@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { normalizeCatalogProduct } from "../components/productCatalogUtils";
 
 export function useProductCatalog() {
+  const t = useTranslations("inventory");
   const [catalogItems, setCatalogItems] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState("");
@@ -19,11 +21,11 @@ export function useProductCatalog() {
       setCatalogItems((json?.data || []).map(normalizeCatalogProduct));
     } catch {
       setCatalogItems([]);
-      setCatalogError("بارگذاری دسته‌بندی محصولات ناموفق بود.");
+      setCatalogError(t("catalogLoadFailed"));
     } finally {
       setCatalogLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     reloadCatalog();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/context/AuthContext";
 import { generateCatalogPdf } from "@/app/utils/catalogPdf/generateCatalogPdf";
 import { canDownloadCatalogPdf } from "@/app/utils/catalogPdfAccess";
@@ -20,6 +21,7 @@ export default function CatalogPdfDownload({
   block = false,
 }) {
   const auth = useAuth();
+  const t = useTranslations("catalog");
   const user = userProp ?? auth?.user ?? null;
   const allowed = canDownloadCatalogPdf({ user, scope, productIsOrderable, supplierUserId });
 
@@ -32,7 +34,7 @@ export default function CatalogPdfDownload({
   const download = async () => {
     setError("");
     setLoading(true);
-    setProgress("در حال آماده‌سازی…");
+    setProgress(t("pdf.preparing"));
     try {
       await generateCatalogPdf({
         scope,
@@ -42,18 +44,19 @@ export default function CatalogPdfDownload({
         supplierUserId,
         productIsOrderable,
         user,
+        t,
         onProgress: (p) => {
           if (typeof p === "string" && p.startsWith("page-")) {
             const [, cur, total] = p.split("-");
-            setProgress(`صفحه ${cur} از ${total}`);
-          } else if (p === "loading") setProgress("بارگذاری داده…");
-          else if (p === "rendering") setProgress("آماده‌سازی صفحات…");
-          else if (p === "generating") setProgress("ساخت PDF…");
+            setProgress(t("pdf.pageProgress", { current: cur, total }));
+          } else if (p === "loading") setProgress(t("pdf.loadingData"));
+          else if (p === "rendering") setProgress(t("pdf.renderingPages"));
+          else if (p === "generating") setProgress(t("pdf.generating"));
         },
       });
     } catch (e) {
       console.error(e);
-      setError(e?.message || "خطا در ساخت PDF. دوباره تلاش کنید.");
+      setError(e?.message || t("pdf.buildError"));
     } finally {
       setLoading(false);
       setProgress("");
@@ -75,7 +78,7 @@ export default function CatalogPdfDownload({
         {loading ? (
           <>
             <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
-            <span className="max-w-[140px] truncate">{progress || "در حال ساخت…"}</span>
+            <span className="max-w-[140px] truncate">{progress || t("pdf.building")}</span>
           </>
         ) : (
           <>
@@ -87,7 +90,7 @@ export default function CatalogPdfDownload({
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            {label || "دانلود PDF"}
+            {label || t("downloadPdfDefault")}
           </>
         )}
       </button>

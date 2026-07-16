@@ -2,7 +2,7 @@
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { buildMapNavigationLinks } from "@/app/utils/mapNavigationLinks";
 import { sortMediaItems } from "@/app/components/catalog/CatalogMediaLightbox";
-import { getLotSupplier, getLotSupplierDisplayName, getLotSupplierPhone } from "@/app/utils/catalogLotSupplier";
+import { getLotSupplier, getLotSupplierDisplay, getLotSupplierDisplayName, getLotSupplierPhone } from "@/app/utils/catalogLotSupplier";
 
 function absOrigin() {
   if (typeof window !== "undefined" && window.location?.origin) return window.location.origin;
@@ -200,12 +200,12 @@ function pdfProductUrl(productId) {
   return `${PDF_SITE_URL}/catalog/${productId}`;
 }
 
-function pdfWatermarkPattern(logo) {
+function pdfWatermarkPattern(logo, t) {
   if (!logo) return "";
   const tile = `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:150px;height:100px">
       <img src="${logo}" style="height:28px;width:auto;max-width:72px;object-fit:contain" alt="" />
-      <span style="font-size:12px;font-weight:900;color:#047857;font-family:Tahoma,Arial,sans-serif">زارعون</span>
+      <span style="font-size:12px;font-weight:900;color:#047857;font-family:Tahoma,Arial,sans-serif">${esc(t("pdf.brandName"))}</span>
       <span style="font-size:10px;font-weight:700;color:#059669;letter-spacing:0.06em;font-family:Tahoma,Arial,sans-serif">zareoon.ir</span>
     </div>
   `;
@@ -219,42 +219,37 @@ function pdfWatermarkPattern(logo) {
   `;
 }
 
-function wrapImageWithWatermark(imageHtml, logo) {
+function wrapImageWithWatermark(imageHtml, logo, t) {
   return `
     <div style="position:relative;display:inline-block;line-height:0;max-width:100%;max-height:100%;vertical-align:middle">
       ${imageHtml}
-      ${pdfWatermarkPattern(logo)}
+      ${pdfWatermarkPattern(logo, t)}
     </div>
   `;
 }
 
-const COUNTRY_LABELS = {
-  IR: "ایران",
-  TR: "ترکیه",
-  AE: "امارات",
-  AF: "افغانستان",
-  IQ: "عراق",
-};
+
+function countryLabel(code, t) {
+  if (!code) return "—";
+  try {
+    return t(`pdf.countries.${code}`);
+  } catch {
+    return code;
+  }
+}
 
 function lotAvailable(lot) {
   return Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
 }
 
-function lotSupplierLabel(lot) {
-  const name = getLotSupplierDisplayName(lot);
-  const mobile = getLotSupplierPhone(lot);
-  if (name && mobile) return `${name} · ${mobile}`;
-  if (name) return name;
-  if (mobile) return mobile;
-  const supplier = getLotSupplier(lot);
-  if (supplier?.username) return supplier.username;
-  return `بار #${lot.id}`;
+function lotSupplierLabel(lot, t) {
+  return getLotSupplierDisplay(lot, t).label;
 }
 
-function lotSupplierName(lot) {
+function lotSupplierName(lot, t) {
   const name = getLotSupplierDisplayName(lot);
   const mobile = getLotSupplierPhone(lot);
-  return name || getLotSupplier(lot)?.username || mobile || `بار #${lot.id}`;
+  return name || getLotSupplier(lot)?.username || mobile || getLotSupplierDisplay(lot, t).label;
 }
 
 function lotsWithCoords(lots) {
@@ -265,17 +260,22 @@ function lotsWithCoords(lots) {
   });
 }
 
-function lotPriceText(lot) {
+function lotPriceText(lot, t) {
   if (lot.tieredPricing?.length) {
     return lot.tieredPricing
-      .map((t) => {
-        const max = t.maxQuantity ? formatNum(t.maxQuantity) : "∞";
-        return `${formatNum(t.minQuantity)} – ${max} ${lot.unit}: ${formatNum(t.pricePerUnit)} تومان`;
+      .map((tier) => {
+        const max = tier.maxQuantity ? formatNum(tier.maxQuantity) : "∞";
+        return t("pdf.tierPriceRow", {
+          min: formatNum(tier.minQuantity),
+          max,
+          unit: lot.unit,
+          price: formatNum(tier.pricePerUnit),
+        });
       })
       .join(" / ");
   }
-  if (lot.price) return `${formatNum(lot.price)} تومان`;
-  return "تماس بگیرید";
+  if (lot.price) return `${formatNum(lot.price)} ${t("currencyToman")}`;
+  return t("pdf.contactForPrice");
 }
 
 function infoTableRow(label, value, { highlight = false, alt = false } = {}) {
@@ -287,8 +287,8 @@ function infoTableRow(label, value, { highlight = false, alt = false } = {}) {
   </tr>`;
 }
 
-function singleLotInfoPageHtml(product, lot) {
-  const supplier = lotSupplierLabel(lot);
+function singleLotInfoPageHtml(product, lot, t) {
+  const supplier = lotSupplierLabel(lot, t);
   const available = lotAvailable(lot);
 
   let rowIndex = 0;
@@ -299,52 +299,52 @@ function singleLotInfoPageHtml(product, lot) {
   };
 
   const rows = [
-    addRow("نام محصول", esc(product.name), { highlight: true }),
-    addRow("درجه کیفیت", esc(lot.qualityGrade || "—"), { highlight: true }),
-    addRow("تامین‌کننده", esc(supplier)),
-    addRow("موجودی قابل عرضه", `${formatNum(available)} <span style="font-weight:600;color:#64748b">${esc(lot.unit || product.unit || "")}</span>`, {
+    addRow(t("pdf.productName"), esc(product.name), { highlight: true }),
+    addRow(t("pdf.qualityGrade"), esc(lot.qualityGrade || t("notSet")), { highlight: true }),
+    addRow(t("supplier"), esc(supplier)),
+    addRow(t("pdf.availableStock"), `${formatNum(available)} <span style="font-weight:600;color:#64748b">${esc(lot.unit || product.unit || "")}</span>`, {
       highlight: true,
     }),
-    addRow("قیمت", `<span style="color:#047857">${lotPriceText(lot)}</span>`, { highlight: true }),
+    addRow(t("pdf.price"), `<span style="color:#047857">${lotPriceText(lot, t)}</span>`, { highlight: true }),
     lot.minimumOrderQuantity
-      ? addRow("حداقل سفارش", `${formatNum(lot.minimumOrderQuantity)} ${esc(lot.unit || product.unit || "")}`)
+      ? addRow(t("pdf.minimumOrder"), `${formatNum(lot.minimumOrderQuantity)} ${esc(lot.unit || product.unit || "")}`)
       : "",
-    lot.locationLabel ? addRow("محل بارگیری", esc(lot.locationLabel)) : "",
-    addRow("شناسه بار", `<span dir="ltr">#${lot.id}</span>`),
+    lot.locationLabel ? addRow(t("pdf.loadingLocation"), esc(lot.locationLabel)) : "",
+    addRow(t("pdf.lotId"), `<span dir="ltr">#${lot.id}</span>`),
   ].filter(Boolean);
 
   for (const attr of lot.attributes || []) {
-    rows.push(addRow(esc(attr.definition?.name || "مشخصه"), esc(attr.value ?? "—")));
+    rows.push(addRow(esc(attr.definition?.name || t("pdf.attributeFallback")), esc(attr.value ?? t("notSet"))));
   }
 
   const lotDescriptionBlock = lot.description
     ? `<div style="margin-top:16px;border:1px solid #e2e8f0;border-radius:14px;background:#fafafa;padding:14px 16px">
-        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#0f172a">توضیحات این بار</p>
+        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#0f172a">${esc(t("pdf.lotDescriptionTitle"))}</p>
         <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(lot.description)}</p>
       </div>`
     : "";
 
   const productDescriptionBlock = product.description
     ? `<div style="margin-top:16px;border:1px solid #d1fae5;border-radius:14px;background:linear-gradient(180deg,#f0fdf4 0%,#fff 100%);padding:14px 16px">
-        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#047857">درباره محصول</p>
+        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#047857">${esc(t("pdf.aboutProduct"))}</p>
         <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(product.description)}</p>
       </div>`
     : "";
 
   return `
     <div>
-      <h2 style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;border-bottom:3px solid #10b981;padding-bottom:10px">اطلاعات بار</h2>
-      <p style="margin:0 0 14px;font-size:13px;font-weight:700;color:#047857">تامین‌کننده: ${esc(lotSupplierName(lot))}</p>
+      <h2 style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;border-bottom:3px solid #10b981;padding-bottom:10px">${esc(t("pdf.lotInfoTitle"))}</h2>
+      <p style="margin:0 0 14px;font-size:13px;font-weight:700;color:#047857">${esc(t("pdf.supplierPrefix"))}: ${esc(lotSupplierName(lot, t))}</p>
       <div style="margin-bottom:14px;text-align:center">
-        <span data-pdf-link="${pdfProductUrl(product.id)}" style="display:inline-block;font-size:13px;font-weight:700;color:#059669;text-decoration:underline;padding:4px 6px">مشاهده صفحه محصول و ثبت سفارش</span>
+        <span data-pdf-link="${pdfProductUrl(product.id)}" style="display:inline-block;font-size:13px;font-weight:700;color:#059669;text-decoration:underline;padding:4px 6px">${esc(t("pdf.viewProductAndOrder"))}</span>
       </div>
       <table dir="rtl" style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
         <thead>
           <tr>
-            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:right">مشخصات و موجودی</th>
+            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:right">${esc(t("pdf.lotInfoTableHeader"))}</th>
           </tr>
         </thead>
-        <tbody>${rows.join("") || `<tr><td colspan="2" style="padding:16px;text-align:center;color:#94a3b8;font-size:12px">اطلاعاتی ثبت نشده</td></tr>`}</tbody>
+        <tbody>${rows.join("") || `<tr><td colspan="2" style="padding:16px;text-align:center;color:#94a3b8;font-size:12px">${esc(t("pdf.noInfoRegistered"))}</td></tr>`}</tbody>
       </table>
       ${lotDescriptionBlock}
       ${productDescriptionBlock}
@@ -352,19 +352,19 @@ function singleLotInfoPageHtml(product, lot) {
   `;
 }
 
-function mapPageHtml(lot, mapImageDataUrl, logo) {
+function mapPageHtml(lot, mapImageDataUrl, logo, t) {
   const located = lotsWithCoords([lot]);
   if (!located.length) return "";
 
-  const supplier = lotSupplierName(lot);
-  const mapBody = mapSectionHtml([lot], mapImageDataUrl, logo, { showHeader: false });
+  const supplier = lotSupplierName(lot, t);
+  const mapBody = mapSectionHtml([lot], mapImageDataUrl, logo, t, { showHeader: false });
 
   return `
     <div>
-      <h2 style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;border-bottom:3px solid #10b981;padding-bottom:10px">محل بارگیری</h2>
+      <h2 style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;border-bottom:3px solid #10b981;padding-bottom:10px">${esc(t("pdf.loadingLocationTitle"))}</h2>
       <p style="margin:0 0 14px;font-size:13px;color:#475569">
-        تامین‌کننده: <strong style="color:#047857">${esc(supplier)}</strong>
-        ${lot.qualityGrade ? ` · درجه <strong>${esc(lot.qualityGrade)}</strong>` : ""}
+        ${esc(t("pdf.supplierPrefix"))}: <strong style="color:#047857">${esc(supplier)}</strong>
+        ${lot.qualityGrade ? ` · ${esc(t("pdf.gradePrefix"))} <strong>${esc(lot.qualityGrade)}</strong>` : ""}
       </p>
       ${mapBody}
     </div>
@@ -372,7 +372,7 @@ function mapPageHtml(lot, mapImageDataUrl, logo) {
 }
 
 
-function pdfMapNavButtonsHtml(lots) {
+function pdfMapNavButtonsHtml(lots, t) {
   const located = lotsWithCoords(lots);
   if (!located.length) return "";
 
@@ -380,11 +380,11 @@ function pdfMapNavButtonsHtml(lots) {
     .map((lot) => {
       const links = buildMapNavigationLinks(lot.latitude, lot.longitude);
       if (!links) return "";
-      const lotLabel = lot.locationLabel || `بار #${lot.id}`;
+      const lotLabel = lot.locationLabel || t("lotNumber", { id: lot.id });
       const title =
         located.length > 1
           ? `<p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#475569">${esc(lotLabel)}</p>`
-          : `<p style="margin:0 0 8px;font-size:11px;font-weight:600;color:#64748b;text-align:center">مسیریابی و اشتراک‌گذاری موقعیت</p>`;
+          : `<p style="margin:0 0 8px;font-size:11px;font-weight:600;color:#64748b;text-align:center">${esc(t("pdf.navigateShare"))}</p>`;
 
       const btn = (url, label, color) =>
         `<span data-pdf-link="${url}" style="display:flex;align-items:center;justify-content:center;min-height:34px;padding:6px 4px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:10px;font-weight:700;color:${color};text-align:center;cursor:pointer">${label}</span>`;
@@ -393,9 +393,9 @@ function pdfMapNavButtonsHtml(lots) {
         <div style="border-top:1px solid #e2e8f0;background:#f8fafc;padding:10px 12px">
           ${title}
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
-            ${btn(links.google, "گوگل مپ", "#334155")}
-            ${btn(links.neshan, "نشان", "#c2410c")}
-            ${btn(links.balad, "بلد", "#1d4ed8")}
+            ${btn(links.google, esc(t("pdf.openGoogleMaps")), "#334155")}
+            ${btn(links.neshan, esc(t("pdf.openNeshan")), "#c2410c")}
+            ${btn(links.balad, esc(t("pdf.openBalad")), "#1d4ed8")}
             ${btn(links.waze, "Waze", "#0369a1")}
           </div>
         </div>
@@ -404,7 +404,7 @@ function pdfMapNavButtonsHtml(lots) {
     .join("");
 }
 
-function mapSectionHtml(lots, mapImageDataUrl, logo, { showHeader = true } = {}) {
+function mapSectionHtml(lots, mapImageDataUrl, logo, t, { showHeader = true } = {}) {
   const located = lotsWithCoords(lots);
   if (!located.length) return "";
 
@@ -412,7 +412,7 @@ function mapSectionHtml(lots, mapImageDataUrl, logo, { showHeader = true } = {})
     .map((lot) => {
       const lat = parseFloat(lot.latitude).toFixed(5);
       const lng = parseFloat(lot.longitude).toFixed(5);
-      const name = lot.locationLabel || `بار #${lot.id}`;
+      const name = lot.locationLabel || t("lotNumber", { id: lot.id });
       return `${esc(name)} <span dir="ltr" style="color:#64748b;font-size:10px">(${lat}, ${lng})</span>`;
     })
     .join("<br/>");
@@ -423,18 +423,18 @@ function mapSectionHtml(lots, mapImageDataUrl, logo, { showHeader = true } = {})
   const mapImg = mapImageDataUrl
     ? `<div style="position:relative;width:100%;height:300px;overflow:hidden">
         <img src="${mapImageDataUrl}" style="display:block;width:100%;height:100%;object-fit:cover;background:#e2e8f0" alt="" />
-        ${pdfWatermarkPattern(logo)}
-        <span data-pdf-link="${mapClickUrl}" style="position:absolute;inset:0;z-index:4;display:block;cursor:pointer" title="مسیریابی"></span>
-        <span style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;background:rgba(255,255,255,0.92);border:1px solid #d1fae5;border-radius:999px;padding:4px 12px;font-size:10px;font-weight:700;color:#047857;white-space:nowrap">کلیک برای مسیریابی</span>
+        ${pdfWatermarkPattern(logo, t)}
+        <span data-pdf-link="${mapClickUrl}" style="position:absolute;inset:0;z-index:4;display:block;cursor:pointer" title="${esc(t("pdf.navigateTitle"))}"></span>
+        <span style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;background:rgba(255,255,255,0.92);border:1px solid #d1fae5;border-radius:999px;padding:4px 12px;font-size:10px;font-weight:700;color:#047857;white-space:nowrap">${esc(t("pdf.clickToNavigate"))}</span>
       </div>`
     : `<div style="height:300px;background:linear-gradient(135deg,#e2e8f0 0%,#f8fafc 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
         <span style="font-size:32px">📍</span>
-        <span style="font-size:12px;color:#64748b">نقشه در دسترس نیست</span>
+        <span style="font-size:12px;color:#64748b">${esc(t("pdf.mapUnavailable"))}</span>
       </div>`;
 
   const headerBlock = showHeader
     ? `<div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0">
-        <p style="margin:0;font-size:13px;font-weight:800;color:#0f172a">محل بارگیری</p>
+        <p style="margin:0;font-size:13px;font-weight:800;color:#0f172a">${esc(t("pdf.loadingLocationTitle"))}</p>
         <p style="margin:6px 0 0;font-size:11px;line-height:1.8;color:#475569">${labels}</p>
       </div>`
     : `<div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0">
@@ -445,16 +445,16 @@ function mapSectionHtml(lots, mapImageDataUrl, logo, { showHeader = true } = {})
     <div style="margin-top:0;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
       ${headerBlock}
       ${mapImg}
-      ${pdfMapNavButtonsHtml(lots)}
+      ${pdfMapNavButtonsHtml(lots, t)}
     </div>
   `;
 }
 
-function productInfoPageHtml(product, lots) {
-  if (lots.length === 1) return singleLotInfoPageHtml(product, lots[0]);
+function productInfoPageHtml(product, lots, t) {
+  if (lots.length === 1) return singleLotInfoPageHtml(product, lots[0], t);
   const totalAvailable = lots.reduce((sum, lot) => sum + lotAvailable(lot), 0);
   const grades = [...new Set(lots.map((l) => l.qualityGrade).filter(Boolean))];
-  const country = COUNTRY_LABELS[product.supplyCountry] || product.supplyCountry || "—";
+  const country = countryLabel(product.supplyCountry, t);
   const origin = [country, product.supplyCity].filter(Boolean).join(" — ");
 
   let rowIndex = 0;
@@ -465,39 +465,39 @@ function productInfoPageHtml(product, lots) {
   };
 
   const rows = [
-    addRow("نام محصول", esc(product.name), { highlight: true }),
-    addRow("واحد سنجش", esc(product.unit || "—")),
-    addRow("مبدأ تأمین", esc(origin)),
-    addRow("تعداد بار فعال", formatNum(lots.length)),
-    addRow("موجودی قابل عرضه", `${formatNum(totalAvailable)} <span style="font-weight:600;color:#64748b">${esc(product.unit || "")}</span>`, {
+    addRow(t("pdf.productName"), esc(product.name), { highlight: true }),
+    addRow(t("pdf.unitOfMeasure"), esc(product.unit || t("notSet"))),
+    addRow(t("pdf.supplyOrigin"), esc(origin)),
+    addRow(t("pdf.activeLotsCount"), formatNum(lots.length)),
+    addRow(t("pdf.availableStock"), `${formatNum(totalAvailable)} <span style="font-weight:600;color:#64748b">${esc(product.unit || "")}</span>`, {
       highlight: true,
     }),
-    grades.length ? addRow("درجه‌های موجود", esc(grades.join("، "))) : "",
+    grades.length ? addRow(t("pdf.availableGrades"), esc(grades.join("، "))) : "",
   ].filter(Boolean);
 
   const descriptionBlock = product.description
     ? `<div style="margin-top:18px;border:1px solid #d1fae5;border-radius:14px;background:linear-gradient(180deg,#f0fdf4 0%,#fff 100%);padding:14px 16px">
-        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#047857">درباره محصول</p>
+        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#047857">${esc(t("pdf.aboutProduct"))}</p>
         <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(product.description)}</p>
       </div>`
     : "";
 
   return `
     <div>
-      <h2 style="margin:0 0 14px;font-size:20px;font-weight:800;color:#0f172a;border-bottom:3px solid #10b981;padding-bottom:10px">اطلاعات محصول</h2>
+      <h2 style="margin:0 0 14px;font-size:20px;font-weight:800;color:#0f172a;border-bottom:3px solid #10b981;padding-bottom:10px">${esc(t("pdf.productInfoTitle"))}</h2>
       <div style="margin-bottom:14px;text-align:center">
-        <span data-pdf-link="${pdfProductUrl(product.id)}" style="display:inline-block;font-size:13px;font-weight:700;color:#059669;text-decoration:underline;padding:4px 6px">مشاهده صفحه محصول و ثبت سفارش</span>
+        <span data-pdf-link="${pdfProductUrl(product.id)}" style="display:inline-block;font-size:13px;font-weight:700;color:#059669;text-decoration:underline;padding:4px 6px">${esc(t("pdf.viewProductAndOrder"))}</span>
       </div>
       <table dir="rtl" style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
         <thead>
           <tr>
-            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:right">مشخصات کلی</th>
+            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:right">${esc(t("pdf.productInfoTableHeader"))}</th>
           </tr>
         </thead>
         <tbody>${rows.join("")}</tbody>
       </table>
       ${descriptionBlock}
-      ${!lots.length ? `<p style="margin-top:16px;font-size:12px;color:#94a3b8;text-align:center">موجودی فعالی ثبت نشده</p>` : ""}
+      ${!lots.length ? `<p style="margin-top:16px;font-size:12px;color:#94a3b8;text-align:center">${esc(t("pdf.noActiveStock"))}</p>` : ""}
     </div>
   `;
 }
@@ -512,29 +512,29 @@ function productCoverHtml(product, logo) {
   `;
 }
 
-function supplierImagePageHtml(src, imageMap, logo, lot) {
+function supplierImagePageHtml(src, imageMap, logo, lot, t) {
   const data = imageMap[src] || src;
   if (!data) return null;
 
-  const supplierName = lotSupplierName(lot);
+  const supplierName = lotSupplierName(lot, t);
   const grade = lot.qualityGrade || "";
   const img = `<img src="${data}" crossorigin="anonymous" style="display:block;max-width:100%;max-height:${PAGE_SPEC.heightPx - 130}px;width:auto;height:auto;object-fit:contain;margin:0 auto" alt="" />`;
 
   return `
     <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;padding:16px 16px 44px">
       <div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0">
-        ${wrapImageWithWatermark(img, logo)}
+        ${wrapImageWithWatermark(img, logo, t)}
       </div>
       <div style="flex-shrink:0;margin-top:10px;width:100%;text-align:center;padding:10px 16px 0;border-top:1px solid #e2e8f0">
-        <p style="margin:0;font-size:11px;font-weight:600;color:#64748b">تصویر مربوط به تامین‌کننده</p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#64748b">${esc(t("pdf.supplierImageCaption"))}</p>
         <p style="margin:5px 0 0;font-size:15px;font-weight:800;color:#047857">${esc(supplierName)}</p>
-        ${grade ? `<p style="margin:4px 0 0;font-size:12px;font-weight:600;color:#475569">درجه ${esc(grade)} · بار #${lot.id}</p>` : `<p style="margin:4px 0 0;font-size:12px;color:#64748b">بار #${lot.id}</p>`}
+        ${grade ? `<p style="margin:4px 0 0;font-size:12px;font-weight:600;color:#475569">${esc(t("pdf.gradeLotLine", { grade, id: lot.id }))}</p>` : `<p style="margin:4px 0 0;font-size:12px;color:#64748b">${esc(t("lotNumber", { id: lot.id }))}</p>`}
       </div>
     </div>
   `;
 }
 
-export async function fetchCatalogPdfData({ scope = "full", productId, categoryId, lotId, supplierUserId }) {
+export async function fetchCatalogPdfData({ scope = "full", productId, categoryId, lotId, supplierUserId, t }) {
   const [allProducts, allLots] = await Promise.all([
     fetchJson(API_ENDPOINTS.supplier.products.getAll),
     fetchJson(API_ENDPOINTS.supplier.inventoryLots.getAll),
@@ -560,8 +560,8 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
 
     const lotEntry = sections[0]?.lots?.[0];
     const title = lotEntry
-      ? `${product.name} — ${lotSupplierName(lotEntry)}`
-      : productMap.get(Number(productId))?.name || "کاتالوگ تامین‌کننده";
+      ? `${product.name} — ${lotSupplierName(lotEntry, t)}`
+      : productMap.get(Number(productId))?.name || t("pdf.titleSupplier");
 
     const imageMap = await preloadImages(allImageUrls);
     return {
@@ -612,10 +612,10 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
     sections.push({ product, lots: enrichedLots });
   }
 
-  let title = "کاتالوگ محصولات زارعون";
+  let title = t("pdf.titleFull");
   if (scope === "product" && productId) title = productMap.get(Number(productId))?.name || title;
   else if (scope === "category" && categoryId) title = productMap.get(Number(categoryId))?.name || title;
-  else if (scope === "supplier-own") title = "کاتالوگ محصولات من";
+  else if (scope === "supplier-own") title = t("pdf.titleMyProducts");
 
   const imageMap = await preloadImages(allImageUrls);
 
@@ -639,7 +639,7 @@ function sortLotsForPdf(lots) {
   });
 }
 
-export function buildPdfPages(data) {
+export function buildPdfPages(data, t) {
   const spec = PAGE_SPEC;
   const { imageMap } = data;
   const origin = absOrigin();
@@ -669,24 +669,24 @@ export function buildPdfPages(data) {
     const orderedLots = sortLotsForPdf(section.lots);
 
     if (!orderedLots.length) {
-      pages.push(pageShell(`<div style="height:100%;overflow:hidden">${productInfoPageHtml(section.product, [])}</div>`));
+      pages.push(pageShell(`<div style="height:100%;overflow:hidden">${productInfoPageHtml(section.product, [], t)}</div>`));
       continue;
     }
 
     for (const lot of orderedLots) {
       pages.push(
-        pageShell(`<div style="height:100%;overflow:auto">${singleLotInfoPageHtml(section.product, lot)}</div>`)
+        pageShell(`<div style="height:100%;overflow:auto">${singleLotInfoPageHtml(section.product, lot, t)}</div>`)
       );
 
       if (lotsWithCoords([lot]).length) {
-        const mapHtml = mapPageHtml(lot, lot.mapImageDataUrl, logo);
+        const mapHtml = mapPageHtml(lot, lot.mapImageDataUrl, logo, t);
         if (mapHtml) {
           pages.push(pageShell(`<div style="height:100%;overflow:hidden">${mapHtml}</div>`));
         }
       }
 
       for (const src of lot.images || []) {
-        const imgPage = supplierImagePageHtml(src, imageMap, logo, lot);
+        const imgPage = supplierImagePageHtml(src, imageMap, logo, lot, t);
         if (imgPage) pages.push(imagePageShell(imgPage));
       }
     }

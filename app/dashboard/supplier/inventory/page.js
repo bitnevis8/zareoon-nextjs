@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
-import { useLanguage } from "@/app/context/LanguageContext";
+import { useTranslations } from "next-intl";
 import InventoryStats from "./components/InventoryStats";
 import InventoryLotCard from "./components/InventoryLotCard";
 import InventoryLotTable from "./components/InventoryLotTable";
@@ -26,7 +26,7 @@ export default function InventoryListPage() {
   const searchParams = useSearchParams();
   const scope = searchParams.get("scope");
   const { user, allowed, isOwnScope, loading: authLoading } = useRequireSupplierArea(scope);
-  const { t } = useLanguage();
+  const t = useTranslations("inventory");
   const { items, products, farmerNameMap, loading, reload } = useInventoryLots(user, isOwnScope);
 
   const showFarmerFilter = !isOwnScope && isAdmin(user);
@@ -56,7 +56,7 @@ export default function InventoryListPage() {
   const activeFilterCount = countActiveFilters(filters);
 
   const remove = async (id) => {
-    if (!window.confirm("این موجودی حذف شود؟")) return;
+    if (!window.confirm(t("page.deleteConfirm"))) return;
     await fetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
     reload();
   };
@@ -168,12 +168,12 @@ export default function InventoryListPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {isAdmin(user) ? (
-            <CatalogPdfDownload scope="full" label="دانلود PDF کاتالوگ" variant="dashboard" user={user} />
+            <CatalogPdfDownload scope="full" label={t("page.downloadCatalogPdf")} variant="dashboard" user={user} />
           ) : isOwnScope && user?.id ? (
             <CatalogPdfDownload
               scope="supplier-own"
               supplierUserId={user.id}
-              label="دانلود کاتالوگ محصولات من"
+              label={t("page.downloadMyCatalog")}
               variant="dashboard"
               user={user}
             />
@@ -182,21 +182,20 @@ export default function InventoryListPage() {
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
           </svg>
-          ثبت موجودی جدید
+          {t("page.createNew")}
           </Link>
         </div>
       </div>
 
-      <InventoryStats items={items} t={t} />
+      <InventoryStats items={items} />
 
-      <Section title="فیلتر و جستجو" desc="موجودی‌ها را سریع پیدا کنید">
+      <Section title={t("page.sectionFilterTitle")} desc={t("page.sectionFilterDesc")}>
         <InventoryFilters
           filters={filters}
           setFilters={setFilters}
           products={products}
           farmers={farmers}
           showFarmerFilter={showFarmerFilter}
-          t={t}
           resultCount={filteredItems.length}
           totalCount={items.length}
           activeCount={activeFilterCount}
@@ -204,7 +203,7 @@ export default function InventoryListPage() {
         />
       </Section>
 
-      <Section title="نتایج" desc={`${filteredItems.length} مورد`}>
+      <Section title={t("page.sectionResultsTitle")} desc={t("page.sectionResultsCount", { count: filteredItems.length })}>
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
@@ -215,21 +214,21 @@ export default function InventoryListPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
             <p className="font-semibold text-slate-700">
-              {items.length === 0 ? "موجودی ثبت نشده" : "نتیجه‌ای یافت نشد"}
+              {items.length === 0 ? t("page.emptyNoInventory") : t("page.emptyNoResults")}
             </p>
             <p className="mt-1 text-sm text-slate-500">
-              {items.length === 0 ? "اولین بار خود را ثبت کنید" : "فیلترها را تغییر دهید یا جستجو را پاک کنید"}
+              {items.length === 0 ? t("page.emptyCreateFirst") : t("page.emptyAdjustFilters")}
             </p>
             {items.length === 0 ? (
               <Link
                 href={isOwnScope ? "/dashboard/supplier/inventory/create?scope=own" : "/dashboard/supplier/inventory/create"}
                 className={`${inv.btnPrimary} mt-4`}
               >
-                ثبت موجودی جدید
+                {t("page.createNew")}
               </Link>
             ) : (
               <button type="button" className={`${inv.btnSecondary} mt-4`} onClick={() => setFilters(DEFAULT_FILTERS)}>
-                پاک کردن فیلترها
+                {t("filters.clearFilters")}
               </button>
             )}
           </div>
@@ -242,7 +241,6 @@ export default function InventoryListPage() {
                   lot={x}
                   productName={productName(x.productId)}
                   farmerName={farmerNameMap.get(x.farmerId)}
-                  t={t}
                   onView={openView}
                   onEdit={openEdit}
                   onMedia={openMedia}
@@ -254,7 +252,6 @@ export default function InventoryListPage() {
               items={filteredItems}
               products={products}
               farmerNameMap={farmerNameMap}
-              t={t}
               onView={openView}
               onEdit={openEdit}
               onMedia={openMedia}
@@ -269,7 +266,6 @@ export default function InventoryListPage() {
           lot={selectedLot}
           productName={lotProductName}
           farmerName={lotFarmerName}
-          t={t}
           onClose={closeModals}
           onEdit={openEdit}
           onMedia={openMedia}
@@ -285,7 +281,6 @@ export default function InventoryListPage() {
           attributeDefs={editAttributeDefs}
           attributeValues={editAttributeValues}
           setAttributeValues={setEditAttributeValues}
-          t={t}
           saving={editSaving}
           onClose={closeModals}
           onSave={saveEdit}

@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
 
 export default function CompleteRegistrationPage() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -56,19 +59,19 @@ export default function CompleteRegistrationPage() {
 
     // اعتبارسنجی
     if (!formData.fullName.trim()) {
-      setError("نام کامل الزامی است");
+      setError(t("fullNameRequired"));
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("رمز عبور باید حداقل 6 کاراکتر باشد");
+      setError(t("passwordMinLength"));
       setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("رمز عبور و تکرار آن مطابقت ندارند");
+      setError(t("passwordMismatch"));
       setLoading(false);
       return;
     }
@@ -97,11 +100,11 @@ export default function CompleteRegistrationPage() {
         console.log("🔍 AuthContext updated, redirecting to dashboard");
         router.push("/dashboard");
       } else {
-        setError(data.message || "خطا در تکمیل ثبت‌نام");
+        setError(data.message || t("registrationError"));
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setError("خطا در ارتباط با سرور");
+      setError(t("serverError"));
     } finally {
       setLoading(false);
     }
@@ -120,7 +123,7 @@ export default function CompleteRegistrationPage() {
       <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بارگذاری...</p>
+          <p className="text-gray-600">{tCommon("loading")}</p>
         </div>
       </div>
     );
@@ -134,17 +137,17 @@ export default function CompleteRegistrationPage() {
           <div className="w-20 h-20 bg-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-white text-2xl">✓</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">تکمیل ثبت‌نام</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("completeRegistrationTitle")}</h1>
           <p className="text-gray-600 text-sm mt-2">
-            جهت ثبت‌نام در زارعون اطلاعات خواسته شده را وارد کنید.
+            {t("completeRegistrationSubtitle")}
           </p>
         </div>
         
         {/* عنوان موبایل */}
         <div className="text-center mb-8 md:hidden">
-          <h1 className="text-2xl font-bold text-gray-800">تکمیل ثبت‌نام</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("completeRegistrationTitle")}</h1>
           <p className="text-gray-600 text-sm mt-2">
-            جهت ثبت‌نام در زارعون اطلاعات خواسته شده را وارد کنید.
+            {t("completeRegistrationSubtitle")}
           </p>
         </div>
 
@@ -153,14 +156,14 @@ export default function CompleteRegistrationPage() {
           {/* نام کامل */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              نام کامل
+              {t("fullNameLabel")}
             </label>
             <input
               type="text"
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              placeholder="دوستان با چه اسمی شما را صدا می‌زنند؟"
+              placeholder={t("fullNamePlaceholder")}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
@@ -169,7 +172,7 @@ export default function CompleteRegistrationPage() {
           {/* ایمیل */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              ایمیل (اختیاری)
+              {t("emailOptionalLabel")}
             </label>
             <input
               type="email"
@@ -179,13 +182,13 @@ export default function CompleteRegistrationPage() {
               placeholder="example@gmail.com"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <p className="text-xs text-gray-500 mt-1">ایمیل اختیاری است</p>
+            <p className="text-xs text-gray-500 mt-1">{t("emailOptionalHint")}</p>
           </div>
 
           {/* موبایل */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              موبایل
+              {t("mobileLabelLocked")}
             </label>
             <div className="flex">
               <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
@@ -198,13 +201,13 @@ export default function CompleteRegistrationPage() {
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg bg-gray-50 text-gray-500"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">شماره موبایل قابل ویرایش نیست</p>
+            <p className="text-xs text-gray-500 mt-1">{t("mobileLockedHint")}</p>
           </div>
 
           {/* رمز عبور */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              رمز عبور
+              {t("passwordLabel")}
             </label>
             <div className="relative">
               <input
@@ -229,7 +232,7 @@ export default function CompleteRegistrationPage() {
           {/* تکرار رمز عبور */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              تکرار رمز عبور
+              {t("confirmPasswordLabel")}
             </label>
             <div className="relative">
               <input
@@ -237,7 +240,7 @@ export default function CompleteRegistrationPage() {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                placeholder="تکرار رمز عبور را وارد کنید"
+                placeholder={t("confirmPasswordPlaceholder")}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -253,11 +256,11 @@ export default function CompleteRegistrationPage() {
 
           {/* قوانین */}
           <div className="text-center text-sm text-gray-600">
-            ورود/ثبت‌نام شما به معنای پذیرش{" "}
+            {t("termsPrefix")}{" "}
             <Link href="/terms" className="text-blue-600 hover:text-blue-800">
-              قوانین
+              {t("termsLink")}
             </Link>{" "}
-            می‌باشد
+            {t("termsSuffix")}
           </div>
 
           {/* نمایش خطا */}
@@ -273,7 +276,7 @@ export default function CompleteRegistrationPage() {
             disabled={loading}
             className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
           >
-            {loading ? "در حال تکمیل..." : "تکمیل ثبت نام"}
+            {loading ? t("completing") : t("completeRegistrationBtn")}
           </button>
         </form>
       </div>

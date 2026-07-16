@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-// Removed: API calls to articles module
+import { useTranslations } from 'next-intl';
 
 const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, className = '' }) => {
+  const t = useTranslations('location');
   const [tags, setTags] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [testData, setTestData] = useState(null);
 
   useEffect(() => {
-    // Articles module removed. Disable tags fetching.
     setLoading(false);
     setTags({ totalTags: 0, groupedTags: {} });
   }, [locationId, locationName]);
@@ -36,7 +35,7 @@ const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, cl
           onClick={testDataHandler}
           className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded"
         >
-          تست داده‌ها
+          {t('tags.testData')}
         </button>
       </div>
     );
@@ -45,12 +44,12 @@ const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, cl
   if (!tags || tags.totalTags === 0) {
     return (
       <div className={`text-gray-500 text-sm ${className}`}>
-        تگ مرتبطی برای این لوکیشن یافت نشد
+        {t('tags.empty')}
         <button 
           onClick={testDataHandler}
           className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded"
         >
-          تست داده‌ها
+          {t('tags.testData')}
         </button>
       </div>
     );
@@ -59,7 +58,7 @@ const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, cl
   return (
     <div className={`space-y-4 ${className}`}>
       <h3 className="text-lg font-semibold text-gray-800 mb-3">
-        تگ‌های مرتبط
+        {t('tags.title')}
       </h3>
       
       <div className="space-y-4">
@@ -84,4 +83,4 @@ const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, cl
   );
 };
 
-export default LocationRelatedTags; 
+export default LocationRelatedTags;

@@ -1,8 +1,17 @@
-/** گزینه‌های نوع هویت (Account entity_type) */
-export const ENTITY_TYPE_OPTIONS = [
-  { value: "individual", label: "شخص حقیقی" },
-  { value: "company", label: "شرکت (شخص حقوقی)" },
-  { value: "trader", label: "تاجر مستقل" },
-  { value: "manufacturer", label: "تولیدکننده / کارگاه" },
-  { value: "distributor", label: "پخش‌کننده" },
+export const ENTITY_TYPE_VALUES = [
+  "individual",
+  "company",
+  "trader",
+  "manufacturer",
+  "distributor",
 ];
+
+export function getEntityTypeOptions(t) {
+  return ENTITY_TYPE_VALUES.map((value) => ({
+    value,
+    label: t(`entityTypes.${value}`),
+  }));
+}
+
+/** @deprecated use getEntityTypeOptions(t) */
+export const ENTITY_TYPE_OPTIONS = ENTITY_TYPE_VALUES.map((value) => ({ value, label: value }));

@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "title": "جستجو | زارعون"
+  },
+  "closeModal": "بستن جستجو",
+  "modalPlaceholder": "جست‌وجو در محصولات و دسته‌ها...",
+  "resultsCount": "{count} نتیجه یافت شد",
+  "stockKilograms": "{amount} کیلوگرم",
+  "tryOtherKeywords": "کلمات کلیدی دیگری امتحان کنید",
+  "clearAll": "پاک کردن همه",
+  "searchProducts": "جستجو در محصولات",
+  "typeProductOrCategory": "نام محصول یا دسته را تایپ کنید"
+}

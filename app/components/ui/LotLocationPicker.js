@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import SearchBox from "./Map/SearchBox";
 
 const Map = dynamic(() => import("./Map/Map"), { ssr: false });
@@ -37,6 +38,7 @@ function MapPanel({
   compact = true,
   onRequestFullscreen,
   onCloseFullscreen,
+  t,
 }) {
   return (
     <div
@@ -58,8 +60,8 @@ function MapPanel({
         {compact ? (
           <button
             type="button"
-            title="نمایش تمام‌صفحه"
-            aria-label="نمایش تمام‌صفحه"
+            title={t("lotLocationPicker.fullscreenTitle")}
+            aria-label={t("lotLocationPicker.fullscreenAria")}
             onClick={onRequestFullscreen}
             className="pointer-events-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-md ring-1 ring-slate-200 transition hover:bg-emerald-50 hover:text-emerald-800 active:scale-95"
           >
@@ -68,8 +70,8 @@ function MapPanel({
         ) : (
           <button
             type="button"
-            title="بستن"
-            aria-label="بستن نقشه تمام‌صفحه"
+            title={t("lotLocationPicker.close")}
+            aria-label={t("lotLocationPicker.closeFullscreenAria")}
             onClick={onCloseFullscreen}
             className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-md ring-1 ring-slate-200 transition hover:bg-rose-50 hover:text-rose-700 active:scale-95"
           >
@@ -103,13 +105,13 @@ function MapPanel({
             className="shrink-0 rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-rose-600 hover:bg-white sm:text-[11px]"
             onClick={() => onPositionChange?.({ latitude: null, longitude: null })}
           >
-            حذف
+            {t("lotLocationPicker.delete")}
           </button>
         </div>
       ) : (
         <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[500]">
           <p className="rounded-md bg-black/45 px-2 py-1 text-center text-[10px] text-white backdrop-blur-sm sm:text-[11px]">
-            {compact ? "برای انتخاب دقیق‌تر، نقشه را تمام‌صفحه کنید" : "روی نقشه کلیک کنید یا جستجو کنید"}
+            {compact ? t("lotLocationPicker.hintCompact") : t("lotLocationPicker.hintExpanded")}
           </p>
         </div>
       )}
@@ -124,6 +126,7 @@ export default function LotLocationPicker({
   onLocationLabelChange,
   onPositionChange,
 }) {
+  const t = useTranslations("shared");
   const [fullscreen, setFullscreen] = useState(false);
 
   const lat = latitude != null && latitude !== "" ? parseFloat(latitude) : null;
@@ -132,7 +135,7 @@ export default function LotLocationPicker({
   const center = hasCoords ? [lat, lng] : [35.7219, 51.3347];
 
   const markers = hasCoords
-    ? [{ latitude: lat, longitude: lng, name: locationLabel || "موقعیت" }]
+    ? [{ latitude: lat, longitude: lng, name: locationLabel || t("lotLocationPicker.defaultMarkerName") }]
     : [];
 
   const closeFullscreen = useCallback(() => setFullscreen(false), []);
@@ -158,56 +161,49 @@ export default function LotLocationPicker({
     center,
     markers,
     onPositionChange,
+    t,
   };
 
   return (
     <div className="space-y-2">
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">عنوان موقعیت</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600">{t("lotLocationPicker.locationLabel")}</label>
         <input
           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-100"
-          placeholder="مثلاً انبار، مزرعه، محل بارگیری"
+          placeholder={t("lotLocationPicker.locationPlaceholder")}
           value={locationLabel || ""}
           onChange={(e) => onLocationLabelChange?.(e.target.value)}
         />
       </div>
 
-      <MapPanel
-        {...mapPanelProps}
-        compact
-        onRequestFullscreen={() => setFullscreen(true)}
-      />
+      <MapPanel {...mapPanelProps} compact onRequestFullscreen={() => setFullscreen(true)} />
 
       {fullscreen ? (
         <div className="fixed inset-0 z-[9999] flex flex-col bg-white">
           <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-3 py-2.5 sm:px-4">
             <div>
-              <p className="text-sm font-bold text-slate-900">انتخاب موقعیت روی نقشه</p>
-              <p className="text-xs text-slate-500">کلیک کنید یا جستجو کنید — Esc برای بستن</p>
+              <p className="text-sm font-bold text-slate-900">{t("lotLocationPicker.modalTitle")}</p>
+              <p className="text-xs text-slate-500">{t("lotLocationPicker.modalHint")}</p>
             </div>
             <button
               type="button"
               onClick={closeFullscreen}
               className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-              aria-label="بستن"
+              aria-label={t("lotLocationPicker.close")}
             >
               <CloseIcon />
             </button>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            <MapPanel
-              {...mapPanelProps}
-              compact={false}
-              onCloseFullscreen={closeFullscreen}
-            />
+            <MapPanel {...mapPanelProps} compact={false} onCloseFullscreen={closeFullscreen} />
           </div>
 
           <div className="shrink-0 border-t border-slate-200 px-3 py-3 sm:px-4">
-            <label className="mb-1 block text-xs font-medium text-slate-600">عنوان موقعیت</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t("lotLocationPicker.locationLabel")}</label>
             <input
               className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-100"
-              placeholder="مثلاً انبار، مزرعه، محل بارگیری"
+              placeholder={t("lotLocationPicker.locationPlaceholder")}
               value={locationLabel || ""}
               onChange={(e) => onLocationLabelChange?.(e.target.value)}
             />
@@ -216,7 +212,7 @@ export default function LotLocationPicker({
               onClick={closeFullscreen}
               className="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
-              تأیید موقعیت
+              {t("lotLocationPicker.confirmLocation")}
             </button>
           </div>
         </div>

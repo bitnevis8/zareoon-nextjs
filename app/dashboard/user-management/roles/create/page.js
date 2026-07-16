@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function CreateRole() {
+  const t = useTranslations("users");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,14 +14,14 @@ export default function CreateRole() {
     name: "",
     nameEn: "",
     nameFa: "",
-    description: ""
+    description: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -42,11 +44,11 @@ export default function CreateRole() {
       if (data.success) {
         router.push("/dashboard/user-management/roles");
       } else {
-        setError(data.message || "خطا در ایجاد نقش");
+        setError(data.message || t("roles.createError"));
       }
-    } catch (error) {
-      setError("خطا در ارتباط با سرور");
-      console.error("Error creating role:", error);
+    } catch (err) {
+      setError(t("serverError"));
+      console.error("Error creating role:", err);
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ export default function CreateRole() {
     <div className="p-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">افزودن نقش جدید</h1>
+          <h1 className="text-2xl font-bold">{t("roles.createTitle")}</h1>
         </div>
 
         {error && (
@@ -69,7 +71,7 @@ export default function CreateRole() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نام نقش
+                {t("roles.roleName")}
               </label>
               <input
                 type="text"
@@ -78,13 +80,13 @@ export default function CreateRole() {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: admin"
+                placeholder={t("roles.namePlaceholder")}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نام انگلیسی
+                {t("roles.nameEn")}
               </label>
               <input
                 type="text"
@@ -93,13 +95,13 @@ export default function CreateRole() {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: admin یا super_admin"
+                placeholder={t("roles.nameEnPlaceholder")}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                نام فارسی
+                {t("roles.nameFa")}
               </label>
               <input
                 type="text"
@@ -108,13 +110,13 @@ export default function CreateRole() {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: مدیر سیستم"
+                placeholder={t("roles.nameFaPlaceholder")}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                توضیحات
+                {t("roles.description")}
               </label>
               <textarea
                 name="description"
@@ -122,7 +124,7 @@ export default function CreateRole() {
                 onChange={handleChange}
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="توضیحات مربوط به نقش..."
+                placeholder={t("roles.descriptionPlaceholder")}
               />
             </div>
           </div>
@@ -133,18 +135,18 @@ export default function CreateRole() {
               onClick={() => router.back()}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
-              انصراف
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
             >
-              {loading ? "در حال ثبت..." : "ثبت نقش"}
+              {loading ? t("form.submitting") : t("roles.submitRole")}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-} 
+}

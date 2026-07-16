@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useLanguage } from "@/app/context/LanguageContext";
+import { useTranslations } from "next-intl";
 
 const SUPPORT_PHONE = "09393387148";
 
+const GUIDE_STEP_KEYS = ["1", "2", "3"];
+
 export function CartPageNav() {
+  const t = useTranslations("cart");
+
   return (
     <header className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
-      <nav className="flex flex-wrap items-center gap-1 text-xs text-slate-500 sm:text-sm" aria-label="مسیر">
+      <nav className="flex flex-wrap items-center gap-1 text-xs text-slate-500 sm:text-sm" aria-label={t("breadcrumbAria")}>
         <Link href="/" className="transition-colors hover:text-emerald-700">
-          صفحه اصلی
+          {t("home")}
         </Link>
         <span className="text-slate-300">/</span>
-        <span className="font-semibold text-slate-800">سبد خرید</span>
+        <span className="font-semibold text-slate-800">{t("title")}</span>
       </nav>
       <div className="flex flex-wrap items-center gap-2">
         <Link
@@ -23,7 +27,7 @@ export function CartPageNav() {
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          بازگشت به فروشگاه
+          {t("backToShop")}
         </Link>
         <Link
           href="/dashboard"
@@ -32,7 +36,7 @@ export function CartPageNav() {
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
           </svg>
-          داشبورد
+          {t("dashboard")}
         </Link>
       </div>
     </header>
@@ -40,24 +44,7 @@ export function CartPageNav() {
 }
 
 export function CartGuide() {
-  const { t } = useLanguage();
-  const steps = [
-    {
-      n: "۱",
-      title: "بررسی اقلام",
-      desc: "محصول، درجه و مقدار هر قلم را در سبد خود بررسی کنید.",
-    },
-    {
-      n: "۲",
-      title: "نهایی کردن سفارش",
-      desc: "با زدن دکمه نهایی کردن، درخواست شما برای تیم زارعون ثبت می‌شود.",
-    },
-    {
-      n: "۳",
-      title: "تماس و هماهنگی",
-      desc: "پس از ثبت، با شما تماس گرفته می‌شود تا رزرو و تحویل هماهنگ شود.",
-    },
-  ];
+  const t = useTranslations("cart");
 
   return (
     <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -67,17 +54,17 @@ export function CartGuide() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </span>
-        راهنمای ثبت سفارش
+        {t("guideTitle")}
       </h2>
       <ol className="space-y-3">
-        {steps.map((s) => (
-          <li key={s.n} className="flex gap-3">
+        {GUIDE_STEP_KEYS.map((key) => (
+          <li key={key} className="flex gap-3">
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
-              {s.n}
+              {t(`guideSteps.${key}.n`)}
             </span>
             <div>
-              <p className="text-sm font-semibold text-slate-800">{s.title}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{s.desc}</p>
+              <p className="text-sm font-semibold text-slate-800">{t(`guideSteps.${key}.title`)}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{t(`guideSteps.${key}.desc`)}</p>
             </div>
           </li>
         ))}
@@ -86,7 +73,7 @@ export function CartGuide() {
         {t("cartReservationNote")}
       </div>
       <p className="mt-3 text-xs text-slate-500">
-        پشتیبانی:{" "}
+        {t("support")}{" "}
         <a href={`tel:${SUPPORT_PHONE}`} className="font-semibold text-emerald-700 hover:underline" dir="ltr">
           {SUPPORT_PHONE}
         </a>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import AsyncSelect from "react-select/async";
 import { selectStyles } from "../inventoryTheme";
 import {
@@ -11,8 +12,6 @@ import {
   isCategoryNode,
   isSelectableProductNode,
 } from "./productCatalogUtils";
-
-const ROOT_CRUMB = { id: null, name: "دسته‌های اصلی" };
 
 function ModeTab({ active, children, onClick }) {
   return (
@@ -92,8 +91,10 @@ export default function ProductCatalogPicker({
   onSelectProduct,
   loadProductOptions,
 }) {
+  const t = useTranslations("inventory");
+  const rootCrumb = useMemo(() => ({ id: null, name: t("catalog.rootCategories") }), [t]);
   const [mode, setMode] = useState("category");
-  const [path, setPath] = useState([ROOT_CRUMB]);
+  const [path, setPath] = useState([rootCrumb]);
 
   const { byId, childrenByParent } = useMemo(() => buildCatalogIndex(catalogItems), [catalogItems]);
 
@@ -136,15 +137,20 @@ export default function ProductCatalogPicker({
     setPath((prev) => prev.slice(0, index + 1));
   };
 
+  const crumbLabel = (crumb, index) => {
+    if (index === 0 && crumb.id === null) return t("catalog.rootCategories");
+    return crumb.name;
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="border-b border-slate-100 px-2.5 py-2 sm:px-3">
         <div className="flex gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
           <ModeTab active={mode === "category"} onClick={() => setMode("category")}>
-            دسته‌بندی
+            {t("catalog.category")}
           </ModeTab>
           <ModeTab active={mode === "search"} onClick={() => setMode("search")}>
-            جستجو
+            {t("catalog.search")}
           </ModeTab>
         </div>
       </div>
@@ -153,7 +159,7 @@ export default function ProductCatalogPicker({
         <div className="border-b border-emerald-100 bg-emerald-50/60 px-2.5 py-2 sm:px-3">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold text-emerald-700">نوع محصول انتخاب‌شده</p>
+              <p className="text-[10px] font-semibold text-emerald-700">{t("catalog.selectedProductType")}</p>
               <p className="truncate text-sm font-bold text-slate-900">{selectedLabel}</p>
               {selectedPath ? (
                 <p className="mt-0.5 truncate text-[11px] text-slate-500">{selectedPath}</p>
@@ -164,7 +170,7 @@ export default function ProductCatalogPicker({
               onClick={() => onSelectProduct("")}
               className="shrink-0 rounded-md border border-emerald-200 bg-white px-2 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50"
             >
-              تغییر
+              {t("catalog.change")}
             </button>
           </div>
         </div>
@@ -173,14 +179,14 @@ export default function ProductCatalogPicker({
       <div className="p-2.5 sm:p-3">
         {mode === "search" ? (
           <div>
-            <p className="mb-1.5 text-[11px] text-slate-500">نام نوع محصول را جستجو کنید.</p>
+            <p className="mb-1.5 text-[11px] text-slate-500">{t("catalog.searchProductHint")}</p>
             <AsyncSelect
               cacheOptions
               styles={selectStyles}
               defaultOptions={fallbackProducts.map((p) => ({ value: p.id, label: p.name }))}
               loadOptions={loadProductOptions}
-              placeholder="جستجوی نوع محصول…"
-              noOptionsMessage={() => "موردی یافت نشد"}
+              placeholder={t("catalog.searchProductPlaceholder")}
+              noOptionsMessage={() => t("create.noOptions")}
               onChange={(opt) => onSelectProduct(opt?.value || "")}
               value={selectedProductId ? { value: selectedProductId, label: selectedLabel } : null}
             />
@@ -200,7 +206,7 @@ export default function ProductCatalogPicker({
                 onClick={onRetryCatalog}
                 className="mt-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-100"
               >
-                تلاش مجدد
+                {t("catalog.retry")}
               </button>
             ) : null}
           </div>
@@ -214,12 +220,12 @@ export default function ProductCatalogPicker({
                   className="inline-flex shrink-0 items-center gap-0.5 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   <ChevronIcon />
-                  بازگشت
+                  {t("catalog.back")}
                 </button>
               ) : null}
               <nav
                 className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5 text-[11px] text-slate-500"
-                aria-label="مسیر دسته‌بندی"
+                aria-label={t("catalog.breadcrumbAria")}
               >
                 {path.map((crumb, index) => (
                   <span key={`${crumb.id}-${index}`} className="inline-flex min-w-0 items-center gap-0.5">
@@ -233,7 +239,7 @@ export default function ProductCatalogPicker({
                           : "hover:bg-slate-100 hover:text-slate-800"
                       }`}
                     >
-                      {crumb.name}
+                      {crumbLabel(crumb, index)}
                     </button>
                   </span>
                 ))}
@@ -245,7 +251,7 @@ export default function ProductCatalogPicker({
                 <div className="space-y-1">
                   {categories.length > 1 ? (
                     <p className="px-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                      دسته‌ها ({categories.length.toLocaleString("fa-IR")})
+                      {t("catalog.categoriesCount", { count: categories.length.toLocaleString("fa-IR") })}
                     </p>
                   ) : null}
                   {categories.map((item) => (
@@ -265,7 +271,7 @@ export default function ProductCatalogPicker({
                     <hr className="border-slate-100" />
                   ) : null}
                   <p className="px-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    انواع محصول ({productsHere.length.toLocaleString("fa-IR")})
+                    {t("catalog.productTypesCount", { count: productsHere.length.toLocaleString("fa-IR") })}
                   </p>
                   {productsHere.map((item) => (
                     <ProductRow
@@ -281,8 +287,8 @@ export default function ProductCatalogPicker({
               {!categories.length && !productsHere.length ? (
                 <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-2 py-4 text-center text-xs text-slate-500">
                   {canGoBack
-                    ? "زیردسته یا نوع محصولی در این سطح نیست."
-                    : "دسته اصلی‌ای ثبت نشده است."}
+                    ? t("catalog.emptyNoSubcategories")
+                    : t("catalog.emptyNoRootCategories")}
                 </p>
               ) : null}
             </div>

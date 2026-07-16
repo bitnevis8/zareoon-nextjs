@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { getAuthHeaders } from "@/app/utils/authHeaders";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
@@ -38,6 +39,7 @@ function normalizeHashtagInput(raw) {
 }
 
 export default function SupplierPostComposer({ onSubmit, posting }) {
+  const t = useTranslations("supplier.postComposer");
   const fileRef = useRef(null);
   const [text, setText] = useState("");
   const [hashtagInput, setHashtagInput] = useState("");
@@ -60,7 +62,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
       headers: getAuthHeaders(),
     });
     const json = await res.json();
-    if (!json?.success) throw new Error(json?.message || "خطا در آپلود تصویر");
+    if (!json?.success) throw new Error(json?.message || t("uploadError"));
     return json.data.downloadUrl;
   };
 
@@ -71,7 +73,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
 
     const slots = MAX_IMAGES - images.length;
     if (slots <= 0) {
-      setError(`حداکثر ${MAX_IMAGES} تصویر مجاز است`);
+      setError(t("maxImages", { max: MAX_IMAGES }));
       return;
     }
 
@@ -87,7 +89,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
       }
       setImages((prev) => [...prev, ...uploaded].slice(0, MAX_IMAGES));
     } catch (err) {
-      setError(err.message || "خطا در آپلود");
+      setError(err.message || t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -101,7 +103,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
     const tag = normalizeHashtagInput(hashtagInput);
     if (!tag) return;
     if (tag.length < 2) {
-      setError("هر هشتگ حداقل ۲ کاراکتر باشد");
+      setError(t("hashtagMinLength"));
       return;
     }
     if (hashtags.includes(tag)) {
@@ -109,7 +111,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
       return;
     }
     if (hashtags.length >= MAX_HASHTAGS) {
-      setError(`حداکثر ${MAX_HASHTAGS} هشتگ مجاز است`);
+      setError(t("maxHashtags", { max: MAX_HASHTAGS }));
       return;
     }
     setHashtags((prev) => [...prev, tag]);
@@ -148,7 +150,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
-        placeholder="یک به‌روزرسانی برای دنبال‌کنندگان بنویسید…"
+        placeholder={t("placeholder")}
         className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
       />
 
@@ -167,7 +169,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
                 type="button"
                 onClick={() => removeImage(index)}
                 className="absolute left-1 top-1 rounded-full bg-black/55 px-1.5 py-0.5 text-[10px] font-bold text-white"
-                aria-label="حذف تصویر"
+                aria-label={t("removeImage")}
               >
                 ×
               </button>
@@ -178,7 +180,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
 
       <div className="mt-3">
         <label className="mb-1 block text-xs font-semibold text-slate-600">
-          هشتگ‌ها ({hashtags.length}/{MAX_HASHTAGS})
+          {t("hashtags", { current: hashtags.length, max: MAX_HASHTAGS })}
         </label>
         <div className="flex flex-wrap gap-1.5">
           {hashtags.map((tag) => (
@@ -191,7 +193,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
                 type="button"
                 onClick={() => setHashtags((prev) => prev.filter((t) => t !== tag))}
                 className="text-emerald-600 hover:text-emerald-900"
-                aria-label={`حذف ${tag}`}
+                aria-label={t("removeHashtag", { tag })}
               >
                 ×
               </button>
@@ -205,7 +207,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
               value={hashtagInput}
               onChange={(e) => setHashtagInput(e.target.value)}
               onKeyDown={onHashtagKeyDown}
-              placeholder="مثلاً خرما"
+              placeholder={t("hashtagPlaceholder")}
               className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
             />
             <button
@@ -214,7 +216,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
               disabled={!normalizeHashtagInput(hashtagInput)}
               className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 disabled:opacity-40"
             >
-              افزودن
+              {t("addHashtag")}
             </button>
           </div>
         ) : null}
@@ -238,7 +240,9 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
             disabled={uploading || images.length >= MAX_IMAGES}
             className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            {uploading ? "در حال آپلود…" : `📷 تصویر (${images.length}/${MAX_IMAGES})`}
+            {uploading
+              ? t("uploading")
+              : t("uploadImage", { current: images.length, max: MAX_IMAGES })}
           </button>
         </div>
         <button
@@ -247,7 +251,7 @@ export default function SupplierPostComposer({ onSubmit, posting }) {
           disabled={!canSubmit}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {posting ? "در حال انتشار…" : "انتشار پست"}
+          {posting ? t("publishing") : t("publish")}
         </button>
       </div>
     </div>

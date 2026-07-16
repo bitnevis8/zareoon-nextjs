@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import AsyncSelect from "react-select/async";
 import LotLocationPicker from "@/app/components/ui/LotLocationPicker";
 import AttributeFields from "@/app/components/ui/AttributeFields";
@@ -31,7 +32,7 @@ function StepBlock({ step, title, children }) {
   );
 }
 
-function PricingModeSwitch({ mode, onChange }) {
+function PricingModeSwitch({ mode, onChange, t }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-0.5">
       <div className="grid grid-cols-2 gap-0.5">
@@ -44,7 +45,7 @@ function PricingModeSwitch({ mode, onChange }) {
               : "text-slate-600 hover:bg-white/70"
           }`}
         >
-          معمولی
+          {t("create.simple")}
         </button>
         <button
           type="button"
@@ -55,7 +56,7 @@ function PricingModeSwitch({ mode, onChange }) {
               : "text-slate-600 hover:bg-white/70"
           }`}
         >
-          پلکانی
+          {t("create.tiered")}
         </button>
       </div>
     </div>
@@ -77,7 +78,6 @@ export default function InventoryCreatePanel({
   setAttributeValues,
   loadProductOptions,
   loadFarmerOptions,
-  t,
   saving,
   onSubmit,
   onAddTier,
@@ -88,9 +88,11 @@ export default function InventoryCreatePanel({
   onPendingImagesChange,
   onPendingVideosChange,
 }) {
+  const t = useTranslations("inventory");
+  const tShared = useTranslations("shared");
   const supplier = isSupplier(user);
   const exchangeRates = useExchangeRatesMap();
-  const priceCurrencyLabel = getCurrencyDefinition(form.priceCurrency).shortLabel;
+  const priceCurrencyLabel = getCurrencyDefinition(form.priceCurrency, tShared).shortLabel;
   const [pricingMode, setPricingMode] = useState(
     () => (form.tieredPricing?.length > 0 ? "tiered" : "simple")
   );
@@ -117,19 +119,19 @@ export default function InventoryCreatePanel({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (pricingMode === "simple" && !String(form.price || "").trim()) {
-      alert("لطفاً قیمت واحد را وارد کنید یا «قیمت‌گذاری پلکانی» را انتخاب کنید.");
+      alert(t("create.alertUnitPrice"));
       return;
     }
     if (pricingMode === "tiered") {
       if (!form.tieredPricing?.length) {
-        alert("حداقل یک سطح قیمت برای قیمت‌گذاری پلکانی تعریف کنید.");
+        alert(t("create.alertTierMin"));
         return;
       }
       const invalid = form.tieredPricing.some(
         (tier) => !String(tier.minQuantity || "").trim() || !String(tier.pricePerUnit || "").trim()
       );
       if (invalid) {
-        alert("برای هر سطح، حداقل مقدار و قیمت واحد را پر کنید.");
+        alert(t("create.alertTierFields"));
         return;
       }
     }
@@ -139,14 +141,12 @@ export default function InventoryCreatePanel({
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
-        <h2 className="text-base font-bold text-slate-900 sm:text-lg">ثبت موجودی جدید</h2>
-        <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">
-          نوع محصول را انتخاب کنید و جزئیات موجودی را تکمیل کنید
-        </p>
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">{t("create.title")}</h2>
+        <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">{t("create.subtitle")}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 px-3 py-3 sm:space-y-5 sm:px-4 sm:py-4">
-        <StepBlock step="۱" title="انتخاب نوع محصول">
+        <StepBlock step={t("create.step1Number")} title={t("create.step1")}>
           <ProductCatalogPicker
             catalogItems={catalogItems}
             catalogLoading={catalogLoading}
@@ -159,14 +159,14 @@ export default function InventoryCreatePanel({
           />
           {!supplier ? (
             <div className="mt-3">
-              <Field label="تأمین‌کننده" compact>
+              <Field label={t("create.supplier")} compact>
                 <AsyncSelect
                   cacheOptions
                   styles={selectStyles}
                   defaultOptions
                   loadOptions={loadFarmerOptions}
-                  placeholder="انتخاب تأمین‌کننده…"
-                  noOptionsMessage={() => "موردی یافت نشد"}
+                  placeholder={t("create.selectSupplier")}
+                  noOptionsMessage={() => t("create.noOptions")}
                   onChange={(opt) =>
                     setForm({ ...form, farmerId: opt?.value || "", farmerLabel: opt?.label || "" })
                   }
@@ -187,17 +187,17 @@ export default function InventoryCreatePanel({
           ) : null}
         </StepBlock>
 
-        <StepBlock step="۲" title="موجودی و قیمت">
+        <StepBlock step={t("create.step2Number")} title={t("create.step2")}>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <Field label="واحد" compact>
+            <Field label={t("create.unit")} compact>
               <input
                 className={inv.inputCompact}
-                placeholder="kg، تن…"
+                placeholder={t("create.unitPlaceholder")}
                 value={form.unit}
                 onChange={(e) => setForm({ ...form, unit: e.target.value })}
               />
             </Field>
-            <Field label="درجه کیفیت" compact>
+            <Field label={t("create.qualityGrade")} compact>
               <select
                 className={inv.selectCompact}
                 value={form.qualityGrade}
@@ -210,7 +210,7 @@ export default function InventoryCreatePanel({
                 ))}
               </select>
             </Field>
-            <Field label="وضعیت" compact>
+            <Field label={t("create.status")} compact>
               <select
                 className={inv.selectCompact}
                 value={form.status}
@@ -222,14 +222,14 @@ export default function InventoryCreatePanel({
                 <option value="sold">{t("statusSold")}</option>
               </select>
             </Field>
-            <Field label="مقدار کل" compact>
+            <Field label={t("create.totalQuantity")} compact>
               <PersianNumberInput
                 className={inv.inputCompact}
                 value={form.totalQuantity}
                 onChange={(v) => setForm({ ...form, totalQuantity: v })}
               />
             </Field>
-            <Field label="حداقل سفارش" className="col-span-2 sm:col-span-1" compact>
+            <Field label={t("create.minOrder")} className="col-span-2 sm:col-span-1" compact>
               <PersianNumberInput
                 className={inv.inputCompact}
                 value={form.minimumOrderQuantity}
@@ -239,12 +239,12 @@ export default function InventoryCreatePanel({
           </div>
 
           <div className="mt-3 space-y-2.5 border-t border-slate-100 pt-3">
-            <Field label="نوع قیمت" compact>
-              <PricingModeSwitch mode={pricingMode} onChange={handlePricingModeChange} />
+            <Field label={t("create.priceType")} compact>
+              <PricingModeSwitch mode={pricingMode} onChange={handlePricingModeChange} t={t} />
             </Field>
 
             {pricingMode === "simple" ? (
-              <Field label={`قیمت واحد (${priceCurrencyLabel})`} compact>
+              <Field label={t("create.unitPrice", { currency: priceCurrencyLabel })} compact>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start">
                   <div className="min-w-0 flex-1">
                     <PersianPriceInput
@@ -253,7 +253,7 @@ export default function InventoryCreatePanel({
                       onChange={(v) => setForm({ ...form, price: v })}
                       currency={form.priceCurrency}
                       exchangeRates={exchangeRates}
-                      placeholder="مثلاً ۵۰٬۰۰۰"
+                      placeholder={t("create.unitPricePlaceholder")}
                     />
                   </div>
                   <PriceCurrencySelect
@@ -278,7 +278,7 @@ export default function InventoryCreatePanel({
           </div>
         </StepBlock>
 
-        <StepBlock step="۳" title="جزئیات نمایش">
+        <StepBlock step={t("create.step3Number")} title={t("create.step3")}>
           <div className="space-y-3">
             <InventoryDisplayDetailsEditor
               value={form.displayContent}
@@ -295,7 +295,7 @@ export default function InventoryCreatePanel({
           </div>
         </StepBlock>
 
-        <StepBlock step="۴" title="موقعیت و مشخصات">
+        <StepBlock step={t("create.step4Number")} title={t("create.step4")}>
           <div className="space-y-3">
             <LotLocationPicker
               latitude={form.latitude}
@@ -312,7 +312,7 @@ export default function InventoryCreatePanel({
             />
             {attributeDefs.length > 0 ? (
               <div className="rounded-lg border border-slate-200 p-2.5 sm:p-3">
-                <p className="mb-2 text-xs font-semibold text-slate-700">مشخصات فنی</p>
+                <p className="mb-2 text-xs font-semibold text-slate-700">{t("create.technicalSpecs")}</p>
                 <AttributeFields
                   defs={attributeDefs}
                   values={attributeValues}
@@ -330,7 +330,7 @@ export default function InventoryCreatePanel({
             disabled={saving}
             className={`${inv.btnPrimaryBlock} sm:mr-auto sm:w-auto sm:min-w-[140px] sm:px-6 sm:py-2.5`}
           >
-            {saving ? "در حال ثبت…" : "ثبت موجودی"}
+            {saving ? t("create.saving") : t("create.submit")}
           </button>
         </div>
       </form>

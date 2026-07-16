@@ -1,106 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import { useLanguage } from "@/app/context/LanguageContext";
-
-const GUIDE_SECTIONS = [
-  {
-    id: "intro",
-    title: "داشبورد زارعون چیست؟",
-    accent: "slate",
-    icon: "home",
-    summary:
-      "از اینجا سه نقش اصلی خود را مدیریت می‌کنید. با دکمه‌های بالای منو بین «متقاضی»، «فروشنده» و «خدمات» جابه‌جا شوید — می‌توانید هم‌زمان هر سه نقش را داشته باشید.",
-    items: [],
-  },
-  {
-    id: "applicant",
-    title: "بخش متقاضی",
-    accent: "emerald",
-    icon: "applicant",
-    summary:
-      "اگر به دنبال محصول یا خدمات هستید و می‌خواهید نیاز خود را ثبت کنید تا فروشندگان و ارائه‌دهندگان مرتبط مطلع شوند، از این بخش استفاده کنید.",
-    items: [
-      {
-        label: "ثبت درخواست",
-        desc: "نیازمندی محصول یا خدمات را با جزئیات ثبت کنید تا به افراد مرتبط ارسال شود.",
-      },
-      {
-        label: "درخواست‌های من",
-        desc: "وضعیت درخواست‌های قبلی را ببینید و پیگیری کنید.",
-      },
-      {
-        label: "سبد خرید",
-        desc: "محصولات انتخاب‌شده را نهایی و سفارش دهید.",
-      },
-      {
-        label: "سفارشات من",
-        desc: "سفارش‌های ثبت‌شده و وضعیت پیگیری آن‌ها را ببینید.",
-      },
-    ],
-  },
-  {
-    id: "seller",
-    title: "بخش فروشنده",
-    accent: "amber",
-    icon: "seller",
-    summary:
-      "اگر محصول دارید و می‌خواهید آن را به متقاضیان عرضه کنید، فروشنده شوید. پس از راه‌اندازی، یک صفحه فروشگاه اختصاصی خواهید داشت.",
-    items: [
-      {
-        label: "آدرس فروشگاه من",
-        desc: "لینک عمومی فروشگاه شما — با کلیک، صفحه فروشگاهتان را ببینید یا آدرس را تنظیم کنید.",
-      },
-      {
-        label: "فهرست محصولات من",
-        desc: "همه محصولات و موجودی‌های ثبت‌شده را مدیریت کنید.",
-      },
-      {
-        label: "ثبت موجودی جدید",
-        desc: "محصول جدید با قیمت، تصویر، موقعیت و جزئیات اضافه کنید.",
-      },
-      {
-        label: "سفارشات مشتری",
-        desc: "سفارش‌های دریافتی از خریداران را ببینید و پیگیری کنید.",
-      },
-      {
-        label: "مشاهده نیازمندی‌ها به محصولات من",
-        desc: "درخواست‌های متقاضیانی که به محصولات شما مرتبط‌اند را مشاهده کنید.",
-      },
-    ],
-  },
-  {
-    id: "services",
-    title: "بخش خدمات بازرگانی",
-    accent: "sky",
-    icon: "services",
-    summary:
-      "اگر در حوزه تجارت بین‌الملل خدمات می‌دهید (گمرک، حمل، بازرسی، مالی و …)، در این بخش عضو شوید و صفحه اختصاصی خدمات خود را بسازید.",
-    items: [
-      {
-        label: "صفحه خدمات من",
-        desc: "لینک عمومی صفحه شما — پس از عضویت و تأیید مدیر، مشتریان می‌توانند خدمات شما را ببینند.",
-      },
-      {
-        label: "عضویت در خدمات‌دهندگان",
-        desc: "خدمات خود را انتخاب کنید، اطلاعات شرکت یا حرفه‌ای‌تان را ثبت کنید و درخواست انتشار دهید.",
-      },
-      {
-        label: "صفحه خدمات من",
-        desc: "اطلاعات ثبت‌شده صفحه خود را ببینید و در صورت نیاز ویرایش کنید — پس از تأیید مدیر اعمال می‌شود.",
-      },
-      {
-        label: "سفارشات مشتری",
-        desc: "سفارش‌های مرتبط با خدمات شما را پیگیری کنید.",
-      },
-      {
-        label: "مشاهده نیازمندی‌ها به خدمات من",
-        desc: "درخواست‌های متقاضیانی که به خدمات شما مرتبط‌اند را ببینید و پاسخ دهید.",
-      },
-    ],
-  },
-];
 
 const ACCENT_STYLES = {
   slate: {
@@ -210,8 +113,112 @@ function GuideSectionCard({ section }) {
   );
 }
 
+function useGuideSections() {
+  const t = useTranslations("dashboard.guide");
+
+  return useMemo(
+    () => [
+      {
+        id: "intro",
+        title: t("sections.intro.title"),
+        accent: "slate",
+        icon: "home",
+        summary: t("sections.intro.summary"),
+        items: [],
+      },
+      {
+        id: "applicant",
+        title: t("sections.applicant.title"),
+        accent: "emerald",
+        icon: "applicant",
+        summary: t("sections.applicant.summary"),
+        items: [
+          {
+            label: t("sections.applicant.items.submitRequest.label"),
+            desc: t("sections.applicant.items.submitRequest.desc"),
+          },
+          {
+            label: t("sections.applicant.items.myRequests.label"),
+            desc: t("sections.applicant.items.myRequests.desc"),
+          },
+          {
+            label: t("sections.applicant.items.cart.label"),
+            desc: t("sections.applicant.items.cart.desc"),
+          },
+          {
+            label: t("sections.applicant.items.myOrders.label"),
+            desc: t("sections.applicant.items.myOrders.desc"),
+          },
+        ],
+      },
+      {
+        id: "seller",
+        title: t("sections.seller.title"),
+        accent: "amber",
+        icon: "seller",
+        summary: t("sections.seller.summary"),
+        items: [
+          {
+            label: t("sections.seller.items.storeUrl.label"),
+            desc: t("sections.seller.items.storeUrl.desc"),
+          },
+          {
+            label: t("sections.seller.items.myProducts.label"),
+            desc: t("sections.seller.items.myProducts.desc"),
+          },
+          {
+            label: t("sections.seller.items.createInventory.label"),
+            desc: t("sections.seller.items.createInventory.desc"),
+          },
+          {
+            label: t("sections.seller.items.customerOrders.label"),
+            desc: t("sections.seller.items.customerOrders.desc"),
+          },
+          {
+            label: t("sections.seller.items.incomingProducts.label"),
+            desc: t("sections.seller.items.incomingProducts.desc"),
+          },
+        ],
+      },
+      {
+        id: "services",
+        title: t("sections.services.title"),
+        accent: "sky",
+        icon: "services",
+        summary: t("sections.services.summary"),
+        items: [
+          {
+            label: t("sections.services.items.publicPage.label"),
+            desc: t("sections.services.items.publicPage.desc"),
+          },
+          {
+            label: t("sections.services.items.register.label"),
+            desc: t("sections.services.items.register.desc"),
+          },
+          {
+            label: t("sections.services.items.myPage.label"),
+            desc: t("sections.services.items.myPage.desc"),
+          },
+          {
+            label: t("sections.services.items.customerOrders.label"),
+            desc: t("sections.services.items.customerOrders.desc"),
+          },
+          {
+            label: t("sections.services.items.incomingServices.label"),
+            desc: t("sections.services.items.incomingServices.desc"),
+          },
+        ],
+      },
+    ],
+    [t]
+  );
+}
+
 export default function DashboardGuideModal({ open, onClose }) {
-  const { t, isRTL } = useLanguage();
+  const t = useTranslations("dashboard.guide");
+  const tCommon = useTranslations("common");
+  const { isRTL } = useLanguage();
+  const guideSections = useGuideSections();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -245,7 +252,7 @@ export default function DashboardGuideModal({ open, onClose }) {
         type="button"
         className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
         onClick={onClose}
-        aria-label={t("close")}
+        aria-label={tCommon("close")}
       />
 
       <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
@@ -256,20 +263,18 @@ export default function DashboardGuideModal({ open, onClose }) {
                 <GuideIcon name="help" className="h-6 w-6" />
               </span>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">زارعون</p>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">{t("brand")}</p>
                 <h2 id="dashboard-guide-title" className="text-base font-black text-slate-900 sm:text-lg">
-                  راهنمای داشبورد
+                  {t("title")}
                 </h2>
-                <p className="mt-1 text-xs leading-6 text-slate-600 sm:text-sm">
-                  هر بخش برای چه کسی است و چه کارهایی می‌توانید انجام دهید
-                </p>
+                <p className="mt-1 text-xs leading-6 text-slate-600 sm:text-sm">{t("subtitle")}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-              aria-label={t("close")}
+              aria-label={tCommon("close")}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -279,13 +284,12 @@ export default function DashboardGuideModal({ open, onClose }) {
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:space-y-4 sm:px-6 sm:py-5">
-          {GUIDE_SECTIONS.map((section) => (
+          {guideSections.map((section) => (
             <GuideSectionCard key={section.id} section={section} />
           ))}
 
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-3 text-xs leading-6 text-slate-600">
-            <span className="font-bold text-slate-800">نکته:</span> برای جابه‌جایی بین بخش‌ها، از دکمه‌های
-            «متقاضی»، «فروشنده» و «خدمات» بالای منوی کناری استفاده کنید.
+            <span className="font-bold text-slate-800">{t("tipPrefix")}</span> {t("tipText")}
           </div>
         </div>
 
@@ -295,7 +299,7 @@ export default function DashboardGuideModal({ open, onClose }) {
             onClick={onClose}
             className="flex h-10 w-full items-center justify-center rounded-xl bg-slate-900 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            متوجه شدم
+            {t("dismiss")}
           </button>
         </div>
       </div>
@@ -305,15 +309,17 @@ export default function DashboardGuideModal({ open, onClose }) {
 }
 
 export function DashboardGuideTrigger({ onClick }) {
+  const t = useTranslations("dashboard.guide");
+
   return (
     <button
       type="button"
       onClick={onClick}
       className="inline-flex items-center gap-1 rounded-lg px-1.5 py-1 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-emerald-800"
-      aria-label="راهنمای داشبورد"
+      aria-label={t("triggerLabel")}
     >
       <GuideIcon name="help" className="h-3.5 w-3.5" />
-      <span>راهنما</span>
+      <span>{t("triggerShort")}</span>
     </button>
   );
 }

@@ -6,13 +6,13 @@ export function getUserRoles(user) {
   return user.roles || [];
 }
 
-export function getRoleLabel(role) {
-  return getRoleLabelFa(role);
+export function getRoleLabel(role, t) {
+  return getRoleLabelFa(role, t);
 }
 
-export function fullName(user) {
+export function fullName(user, fallback = "—") {
   const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
-  return name || user?.username || user?.email || "کاربر";
+  return name || user?.username || user?.email || fallback;
 }
 
 export function getInitials(user) {
@@ -25,8 +25,8 @@ export function isSupplierUser(user) {
   return isSupplier(user);
 }
 
-export function formatDate(date) {
-  if (!date) return "—";
+export function formatDate(date, empty = "—") {
+  if (!date) return empty;
   try {
     return new Date(date).toLocaleDateString("fa-IR", {
       year: "numeric",
@@ -34,7 +34,7 @@ export function formatDate(date) {
       day: "numeric",
     });
   } catch {
-    return "—";
+    return empty;
   }
 }
 

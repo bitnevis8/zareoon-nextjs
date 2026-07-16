@@ -6,12 +6,12 @@ export const DEFAULT_FILTERS = {
 };
 
 export const SORT_OPTIONS = [
-  { value: "id-asc", sortBy: "id", sortOrder: "asc", label: "شناسه (صعودی)" },
-  { value: "id-desc", sortBy: "id", sortOrder: "desc", label: "شناسه (نزولی)" },
-  { value: "firstName-asc", sortBy: "firstName", sortOrder: "asc", label: "نام (الفبا)" },
-  { value: "lastName-asc", sortBy: "lastName", sortOrder: "asc", label: "نام خانوادگی (الفبا)" },
-  { value: "createdAt-desc", sortBy: "createdAt", sortOrder: "desc", label: "جدیدترین" },
-  { value: "createdAt-asc", sortBy: "createdAt", sortOrder: "asc", label: "قدیمی‌ترین" },
+  { value: "id-asc", sortBy: "id", sortOrder: "asc", labelKey: "sort.idAsc" },
+  { value: "id-desc", sortBy: "id", sortOrder: "desc", labelKey: "sort.idDesc" },
+  { value: "firstName-asc", sortBy: "firstName", sortOrder: "asc", labelKey: "sort.firstNameAsc" },
+  { value: "lastName-asc", sortBy: "lastName", sortOrder: "asc", labelKey: "sort.lastNameAsc" },
+  { value: "createdAt-desc", sortBy: "createdAt", sortOrder: "desc", labelKey: "sort.newest" },
+  { value: "createdAt-asc", sortBy: "createdAt", sortOrder: "asc", labelKey: "sort.oldest" },
 ];
 
 export function countActiveFilters(filters) {

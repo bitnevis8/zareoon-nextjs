@@ -7,6 +7,7 @@ import { API_ENDPOINTS } from "../config/api";
 import { getProductStockClass, calculateAvailableStock } from "../utils/stockUtils";
 import { resolveMediaUrl } from "../utils/mediaUrl";
 import { useLanguage } from "../context/LanguageContext";
+import { useTranslations } from "next-intl";
 
 export default function SearchModal({
   isOpen,
@@ -17,6 +18,7 @@ export default function SearchModal({
   onExploreRequest,
 }) {
   const { t } = useLanguage();
+  const tSearch = useTranslations("search");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -131,7 +133,7 @@ export default function SearchModal({
               onClick={handleClose}
               className="text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-all duration-200"
             >
-              بستن جستجو
+              {tSearch("closeModal")}
             </button>
           </div>
           
@@ -141,7 +143,7 @@ export default function SearchModal({
               ref={inputRef}
               type="text"
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm text-right search-modal"
-              placeholder="جست‌وجو در محصولات و دسته‌ها..."
+              placeholder={tSearch("modalPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ direction: 'rtl' }}
@@ -187,7 +189,7 @@ export default function SearchModal({
               ) : searchResults.length > 0 ? (
                 <div className="space-y-2">
                   <div className="text-xs text-gray-500 mb-3">
-                    {searchResults.length} نتیجه یافت شد
+                    {tSearch("resultsCount", { count: searchResults.length })}
                   </div>
                   {searchResults.map((item) => {
                     const availableStock = calculateAvailableStock(item, allProducts, inventoryLots);
@@ -215,11 +217,11 @@ export default function SearchModal({
                                 ? 'bg-blue-100 text-blue-800' 
                                 : 'bg-purple-100 text-purple-800'
                             }`}>
-                              {item.isOrderable ? 'محصول' : 'دسته'}
+                              {item.isOrderable ? t("product") : t("category")}
                             </span>
                             {availableStock > 0 && (
                               <span className="text-xs text-green-600 font-medium">
-                                {availableStock.toLocaleString()} کیلوگرم
+                                {tSearch("stockKilograms", { amount: availableStock.toLocaleString() })}
                               </span>
                             )}
                           </div>
@@ -240,8 +242,8 @@ export default function SearchModal({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <div className="text-gray-600 text-sm font-medium mb-1">چیزی یافت نشد</div>
-                  <div className="text-xs text-gray-400">کلمات کلیدی دیگری امتحان کنید</div>
+                  <div className="text-gray-600 text-sm font-medium mb-1">{t("nothingFound")}</div>
+                  <div className="text-xs text-gray-400">{tSearch("tryOtherKeywords")}</div>
                 </div>
               )}
             </div>
@@ -251,12 +253,12 @@ export default function SearchModal({
               {recentSearches.length > 0 ? (
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium text-gray-900 text-sm">جستجوهای اخیر</h3>
+                    <h3 className="font-medium text-gray-900 text-sm">{t("mobileSearchRecent")}</h3>
                     <button
                       onClick={clearRecentSearches}
                       className="text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all duration-200"
                     >
-                      پاک کردن همه
+                      {tSearch("clearAll")}
                     </button>
                   </div>
                   <div className="space-y-1">
@@ -285,8 +287,8 @@ export default function SearchModal({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <div className="text-gray-700 text-sm font-medium mb-1">جستجو در محصولات</div>
-                  <div className="text-gray-500 text-xs">نام محصول یا دسته را تایپ کنید</div>
+                  <div className="text-gray-700 text-sm font-medium mb-1">{tSearch("searchProducts")}</div>
+                  <div className="text-gray-500 text-xs">{tSearch("typeProductOrCategory")}</div>
                 </div>
               )}
             </div>

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "titleDefault": "زارعون - بازار آنلاین خرید و فروش",
+    "titleTemplate": "%s | زارعون",
+    "description": "زارعون؛ بازار آنلاین خرید و فروش انواع محصولات و کالاها. جست‌وجو، مقایسه و سفارش از تأمین‌کنندگان معتبر در سراسر کشور.",
+    "keywords": ["زارعون", "بازار آنلاین", "خرید و فروش", "تأمین‌کننده", "خرید عمده", "فروش عمده", "بازار کالا"],
+    "creator": "زارعون",
+    "openGraphTitle": "زارعون - بازار آنلاین خرید و فروش",
+    "openGraphDescription": "بazar آنلاین برای خرید و فروش انواع محصولات و کالاها.",
+    "openGraphImageAlt": "زارعون",
+    "twitterTitle": "زارعون - بازار آنلاین خرید و فروش",
+    "twitterDescription": "بازار آنلاین؛ جست‌وجو، مقایسه و سفارش."
+  },
+  "avatarFallbackInitial": "ک",
+  "userFallback": "کاربر",
+  "sidebar": {
+    "tradeServicesSection": "خدمات بازرگانی",
+    "providerMembership": "عضویت در خدمات‌دهندگان",
+    "myServicesPage": "صفحه خدمات من",
+    "customerOrders": "سفارشات مشتری",
+    "incomingServiceRequests": "مشاهده نیازمندی‌ها به خدمات من",
+    "myShopUrl": "آدرس فروشگاه من",
+    "configureShopUrl": "تنظیم آدرس فروشگاه"
+  },
+  "emailVerification": {
+    "title": "ایمیل شما تأیید نشده است",
+    "prompt": "کد ارسال‌شده به {email} را وارد کنید.",
+    "codePlaceholder": "کد تأیید",
+    "verifyButton": "تأیید ایمیل",
+    "resend": "ارسال مجدد",
+    "resending": "...",
+    "errorUserEmailUnavailable": "اطلاعات کاربر یا ایمیل در دسترس نیست.",
+    "errorCodeRequired": "لطفا کد تایید را وارد کنید.",
+    "errorVerifyFailed": "خطا در تایید ایمیل.",
+    "errorServer": "خطا در ارتباط با سرور.",
+    "errorResendFailed": "خطا در ارسال مجدد کد."
+  }
+}

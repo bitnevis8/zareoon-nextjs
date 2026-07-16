@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import SimpleBarChart from "./SimpleBarChart";
 import { dash } from "./dashboardTheme";
 
 export default function SupplierDashboardHome({ user }) {
+  const t = useTranslations("dashboard");
   const [loading, setLoading] = useState(true);
   const [lots, setLots] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -37,12 +39,40 @@ export default function SupplierDashboardHome({ user }) {
     };
   }, [userId]);
 
-  const statusItems = [
-    { label: "قابل عرضه", value: lots.filter((l) => l.status === "harvested").length, color: "bg-emerald-500" },
-    { label: "در مزرعه", value: lots.filter((l) => l.status === "on_field").length, color: "bg-lime-500" },
-    { label: "رزرو شده", value: lots.filter((l) => l.status === "reserved").length, color: "bg-amber-500" },
-    { label: "فروخته شده", value: lots.filter((l) => l.status === "sold").length, color: "bg-sky-500" },
-  ];
+  const statusItems = useMemo(
+    () => [
+      {
+        label: t("supplierHome.lotStatus.harvested"),
+        value: lots.filter((l) => l.status === "harvested").length,
+        color: "bg-emerald-500",
+      },
+      {
+        label: t("supplierHome.lotStatus.onField"),
+        value: lots.filter((l) => l.status === "on_field").length,
+        color: "bg-lime-500",
+      },
+      {
+        label: t("supplierHome.lotStatus.reserved"),
+        value: lots.filter((l) => l.status === "reserved").length,
+        color: "bg-amber-500",
+      },
+      {
+        label: t("supplierHome.lotStatus.sold"),
+        value: lots.filter((l) => l.status === "sold").length,
+        color: "bg-sky-500",
+      },
+    ],
+    [lots, t]
+  );
+
+  const actionLinks = useMemo(
+    () => [
+      { href: "/dashboard/supplier/inventory?scope=own", label: t("myProducts") },
+      { href: "/dashboard/supplier/inventory/create?scope=own", label: t("createInventoryNew") },
+      { href: "/dashboard/supplier/orders?scope=own", label: t("customerOrders") },
+    ],
+    [t]
+  );
 
   if (loading) {
     return (
@@ -55,50 +85,39 @@ export default function SupplierDashboardHome({ user }) {
   return (
     <div className={dash.page}>
       <header>
-        <h1 className={dash.pageTitle}>داشبورد فروشنده</h1>
-        <p className={dash.pageSubtitle}>
-          {user?.firstName} عزیز، محصولات خود را عرضه کنید و سفارشات مشتری را پیگیری کنید.
-        </p>
+        <h1 className={dash.pageTitle}>{t("supplierHome.title")}</h1>
+        <p className={dash.pageSubtitle}>{t("supplierHome.subtitle", { name: user?.firstName || "" })}</p>
       </header>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className={`${dash.card} p-4`}>
-          <p className="text-xs text-slate-500">فهرست محصولات من</p>
+          <p className="text-xs text-slate-500">{t("supplierHome.stats.myProducts")}</p>
           <p className="mt-1 text-2xl font-semibold text-emerald-700">{lots.length.toLocaleString("fa-IR")}</p>
         </div>
         <div className={`${dash.card} p-4`}>
-          <p className="text-xs text-slate-500">سفارشات مشتری</p>
+          <p className="text-xs text-slate-500">{t("supplierHome.stats.customerOrders")}</p>
           <p className="mt-1 text-2xl font-semibold text-slate-800">{orders.length.toLocaleString("fa-IR")}</p>
         </div>
         <div className={`${dash.card} col-span-2 p-4 sm:col-span-1`}>
-          <p className="text-xs text-slate-500">در انتظار</p>
+          <p className="text-xs text-slate-500">{t("supplierHome.stats.pending")}</p>
           <p className="mt-1 text-2xl font-semibold text-amber-700">
             {orders.filter((o) => o.status === "pending").length.toLocaleString("fa-IR")}
           </p>
         </div>
       </div>
 
-      <SimpleBarChart title="وضعیت محصولات" items={statusItems} />
+      <SimpleBarChart title={t("supplierHome.productStatusChart")} items={statusItems} />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Link
-          href="/dashboard/supplier/inventory?scope=own"
-          className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
-        >
-          فهرست محصولات من
-        </Link>
-        <Link
-          href="/dashboard/supplier/inventory/create?scope=own"
-          className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
-        >
-          ثبت موجودی جدید
-        </Link>
-        <Link
-          href="/dashboard/supplier/orders?scope=own"
-          className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
-        >
-          سفارشات مشتری
-        </Link>
+        {actionLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
     </div>
   );

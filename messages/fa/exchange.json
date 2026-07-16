@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "title": "نرخ ارز",
+    "description": "قیمت لحظه‌ای دلار، یورو، درهم و سایر ارزهای مطرح"
+  },
+  "nav": {
+    "home": "صفحه اصلی",
+    "current": "نرخ ارز"
+  },
+  "header": {
+    "title": "نرخ ارز",
+    "subtitle": "قیمت لحظه‌ای ارزهای مطرح بر اساس بازار — منبع:",
+    "defaultSource": "TGJU",
+    "calendarHint": "کلیک برای تقویم بعدی"
+  },
+  "fetch": {
+    "label": "زمان واکشی:",
+    "refreshing": "در حال به‌روزرسانی…",
+    "refresh": "به‌روزرسانی"
+  },
+  "converter": {
+    "title": "مبدل ارز",
+    "subtitle": "تبدیل بین ارزهای نمایش‌داده‌شده بر اساس آخرین نرخ بازار",
+    "amountLabel": "مبلغ مبدأ",
+    "resultLabel": "نتیجه",
+    "swapAriaLabel": "جابجایی ارز مبدأ و مقصد",
+    "swapTitle": "جابجایی",
+    "rateLine": "<one>۱ {fromCode}</one><approx>≈</approx><highlight>{rateValue} {toCode}</highlight>"
+  },
+  "errors": {
+    "fetchFailed": "خطا در دریافت نرخ ارز",
+    "serverError": "خطا در ارتباط با سرور"
+  },
+  "rates": {
+    "title": "نرخ لحظه‌ای ارزها",
+    "cryptoSuffix": " · رمزارز",
+    "currencyUnit": "ریال"
+  },
+  "change": {
+    "percent": "{arrow} {value}٪"
+  },
+  "footer": "نرخ‌ها هر ۵ دقیقه از منبع رسمی به‌روز می‌شوند. مبدل بر اساس همین نرخ‌ها محاسبه می‌شود.",
+  "currencies": {
+    "IRR": "ریال ایران"
+  },
+  "apiKeys": [
+    { "id": "price_dollar_rl", "labelKey": "USD", "code": "USD", "kind": "fiat" },
+    { "id": "price_eur", "labelKey": "EUR", "code": "EUR", "kind": "fiat" },
+    { "id": "price_aed", "labelKey": "AED", "code": "AED", "kind": "fiat" },
+    { "id": "price_rub", "labelKey": "RUB", "code": "RUB", "kind": "fiat" },
+    { "id": "price_gbp", "labelKey": "GBP", "code": "GBP", "kind": "fiat" },
+    { "id": "price_try", "labelKey": "TRY", "code": "TRY", "kind": "fiat" },
+    { "id": "price_cny", "labelKey": "CNY", "code": "CNY", "kind": "fiat" },
+    { "id": "price_sar", "labelKey": "SAR", "code": "SAR", "kind": "fiat" },
+    { "id": "price_cad", "labelKey": "CAD", "code": "CAD", "kind": "fiat" },
+    { "id": "price_chf", "labelKey": "CHF", "code": "CHF", "kind": "fiat" },
+    { "id": "price_jpy", "labelKey": "JPY", "code": "JPY", "kind": "fiat" },
+    { "id": "price_aud", "labelKey": "AUD", "code": "AUD", "kind": "fiat" },
+    { "id": "crypto-tether-irr", "labelKey": "USDT", "code": "USDT", "kind": "crypto" },
+    { "id": "crypto-bitcoin-irr", "labelKey": "BTC", "code": "BTC", "kind": "crypto" },
+    { "id": "crypto-ethereum-irr", "labelKey": "ETH", "code": "ETH", "kind": "crypto" }
+  ]
+}

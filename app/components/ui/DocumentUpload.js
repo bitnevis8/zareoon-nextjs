@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { getAuthHeaders } from "@/app/utils/authHeaders";
 
 export default function DocumentUpload({ onUploadSuccess, className = "" }) {
+  const t = useTranslations("shared");
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
-    
-    files.forEach(file => {
-      // بررسی نوع فایل
+
+    files.forEach((file) => {
       const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'image/jpeg',
-        'image/png'
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "image/jpeg",
+        "image/png",
       ];
 
       if (!allowedTypes.includes(file.type)) {
-        alert(`فرمت فایل ${file.name} مجاز نیست`);
+        alert(t("documentUpload.invalidFormat", { name: file.name }));
         return;
       }
 
-      // بررسی اندازه فایل (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert(`حجم فایل ${file.name} نباید بیشتر از 5 مگابایت باشد`);
+        alert(t("documentUpload.fileTooLarge", { name: file.name }));
         return;
       }
 
@@ -41,7 +41,7 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       const response = await fetch(API_ENDPOINTS.fileUpload.uploadUserDocument, {
         method: "POST",
@@ -53,17 +53,17 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
       const result = await response.json();
 
       if (result.success) {
-        setUploadedFiles(prev => [...prev, result.data]);
+        setUploadedFiles((prev) => [...prev, result.data]);
         if (onUploadSuccess) {
           onUploadSuccess(result.data);
         }
-        alert(`مدرک ${file.name} با موفقیت آپلود شد`);
+        alert(t("documentUpload.uploadSuccess", { name: file.name }));
       } else {
-        alert(result.message || 'خطا در آپلود مدرک');
+        alert(result.message || t("documentUpload.uploadError"));
       }
     } catch (error) {
-      console.error('Upload error:', error);
-      alert('خطا در آپلود مدرک');
+      console.error("Upload error:", error);
+      alert(t("documentUpload.uploadError"));
     } finally {
       setUploading(false);
     }
@@ -80,28 +80,27 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
       const result = await response.json();
 
       if (result.success) {
-        setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-        alert('مدرک با موفقیت حذف شد');
+        setUploadedFiles((prev) => prev.filter((file) => file.id !== fileId));
+        alert(t("documentUpload.deleteSuccess"));
       } else {
-        alert(result.message || 'خطا در حذف مدرک');
+        alert(result.message || t("documentUpload.deleteError"));
       }
     } catch (error) {
-      console.error('Delete error:', error);
-      alert('خطا در حذف مدرک');
+      console.error("Delete error:", error);
+      alert(t("documentUpload.deleteError"));
     }
   };
 
   const getFileIcon = (mimeType) => {
-    if (mimeType.includes('pdf')) return '📄';
-    if (mimeType.includes('word')) return '📝';
-    if (mimeType.includes('image')) return '🖼️';
-    return '📎';
+    if (mimeType.includes("pdf")) return "📄";
+    if (mimeType.includes("word")) return "📝";
+    if (mimeType.includes("image")) return "🖼️";
+    return "📎";
   };
 
   return (
     <div className={`document-upload ${className}`}>
       <div className="space-y-4">
-        {/* انتخاب فایل */}
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
           <input
             ref={fileInputRef}
@@ -112,24 +111,18 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
             className="hidden"
             id="document-upload"
           />
-          <label
-            htmlFor="document-upload"
-            className="cursor-pointer"
-          >
+          <label htmlFor="document-upload" className="cursor-pointer">
             <div className="text-4xl mb-2">📁</div>
             <p className="text-lg font-medium text-gray-700">
-              {uploading ? 'در حال آپلود...' : 'انتخاب مدارک'}
+              {uploading ? t("documentUpload.uploading") : t("documentUpload.selectDocuments")}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
-              PDF, Word, تصاویر - حداکثر 5 مگابایت
-            </p>
+            <p className="text-sm text-gray-500 mt-1">{t("documentUpload.hint")}</p>
           </label>
         </div>
 
-        {/* لیست فایل‌های آپلود شده */}
         {uploadedFiles.length > 0 && (
           <div className="space-y-2">
-            <h3 className="font-medium text-gray-700">مدارک آپلود شده:</h3>
+            <h3 className="font-medium text-gray-700">{t("documentUpload.uploadedTitle")}</h3>
             {uploadedFiles.map((file) => (
               <div
                 key={file.id}
@@ -139,9 +132,7 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
                   <span className="text-2xl">{getFileIcon(file.mimeType)}</span>
                   <div>
                     <p className="font-medium text-sm">{file.originalName}</p>
-                    <p className="text-xs text-gray-500">
-                      {(file.size / 1024).toFixed(1)} KB
-                    </p>
+                    <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -151,13 +142,13 @@ export default function DocumentUpload({ onUploadSuccess, className = "" }) {
                     rel="noopener noreferrer"
                     className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
                   >
-                    مشاهده
+                    {t("documentUpload.view")}
                   </a>
                   <button
                     onClick={() => deleteFile(file.id)}
                     className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
                   >
-                    حذف
+                    {t("documentUpload.delete")}
                   </button>
                 </div>
               </div>

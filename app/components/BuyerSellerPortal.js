@@ -8,104 +8,67 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { canActAsSeller, DASHBOARD_PERSONAS } from "@/app/utils/dashboardPersona";
 
-const cardShell =
-  "group relative flex h-full w-full min-h-[11.25rem] flex-col overflow-hidden rounded-xl border border-emerald-100/90 bg-white p-3 text-right shadow-[0_2px_12px_rgba(6,78,59,0.06)] transition duration-300 active:scale-[0.99] sm:min-h-0 sm:rounded-2xl sm:border-slate-200/80 sm:p-5 sm:shadow-[0_4px_20px_rgba(15,23,42,0.04)] md:p-6 md:hover:-translate-y-1 md:hover:border-emerald-200 md:hover:shadow-[0_12px_32px_rgba(6,95,70,0.1)]";
-
-function ApplicantIcon({ className = "h-5 w-5 sm:h-6 sm:w-6" }) {
+function ShopPreviewMock({ t, isRTL }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-6 4h4"
-      />
-    </svg>
-  );
-}
-
-function SellerIcon({ className = "h-5 w-5 sm:h-6 sm:w-6" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M12 11v.01"
-      />
-    </svg>
-  );
-}
-
-function PortalCardContent({ badge, icon: Icon, title, description, cta, variant }) {
-  const isApplicant = variant === "applicant";
-
-  return (
-    <>
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 transition group-hover:opacity-100"
-        aria-hidden
-      />
-
-      <div className="mb-2.5 flex items-center justify-between gap-2 sm:mb-4 sm:items-start sm:gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-100 bg-emerald-50 text-emerald-700 sm:h-12 sm:w-12 sm:rounded-xl sm:bg-gradient-to-br sm:from-emerald-50 sm:to-white sm:shadow-sm">
-          <Icon />
+    <div
+      className="relative mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-[0_20px_50px_rgba(6,78,59,0.12)] backdrop-blur-sm"
+      aria-hidden
+    >
+      <div className="relative h-28 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-800 sm:h-32">
+        <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_80%_60%,#a7f3d0,transparent_40%)]" />
+        <div className="absolute bottom-0 start-0 end-0 h-10 bg-gradient-to-t from-white/90 to-transparent" />
+        <div
+          className={`absolute -bottom-7 ${isRTL ? "right-5" : "left-5"} flex h-14 w-14 items-center justify-center rounded-2xl border-4 border-white bg-emerald-50 text-2xl shadow-md`}
+        >
+          🌾
         </div>
-        <span className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 sm:px-2.5 sm:py-1 sm:text-[11px]">
-          {badge}
-        </span>
       </div>
 
-      <h3 className="text-xs font-bold leading-5 text-slate-900 sm:text-base sm:leading-7 sm:font-bold lg:text-lg">
-        {title}
-      </h3>
-      <p className="mt-1 flex-1 text-[11px] leading-[1.35rem] text-slate-600 line-clamp-3 sm:mt-2 sm:text-sm sm:leading-7 sm:line-clamp-none">
-        {description}
-      </p>
+      <div className={`px-5 pb-5 pt-10 ${isRTL ? "text-right" : "text-left"}`}>
+        <p className="text-[11px] font-semibold tracking-wide text-emerald-700">{t("buyerSellerPortalPreviewEyebrow")}</p>
+        <h3 className="mt-1 text-base font-bold text-slate-900 sm:text-lg">{t("buyerSellerPortalPreviewName")}</h3>
+        <p className="mt-1 text-xs leading-5 text-slate-500">{t("buyerSellerPortalPreviewBio")}</p>
 
-      <span
-        className={`mt-2.5 inline-flex min-h-9 w-full items-center justify-center rounded-lg px-2 py-1.5 text-[11px] font-semibold transition sm:mt-5 sm:min-h-11 sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-sm ${
-          isApplicant
-            ? "border border-emerald-600/15 bg-emerald-600 text-white group-hover:bg-emerald-700"
-            : "border border-emerald-200 bg-emerald-50 text-emerald-800 group-hover:border-emerald-300 group-hover:bg-emerald-100 sm:border-emerald-600/30 sm:bg-white sm:group-hover:bg-emerald-50"
-        }`}
-      >
-        {cta}
-      </span>
-    </>
-  );
-}
+        <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-[10px] text-slate-600 dir-ltr">
+          <span className="text-emerald-600">zareoon.ir</span>
+          <span>/tamin/</span>
+          <span className="font-semibold text-slate-800">your-shop</span>
+        </div>
 
-function PortalCard({ badge, title, description, cta, href, icon, variant, useAuth, onBeforeNavigate, onClick }) {
-  const content = (
-    <PortalCardContent
-      badge={badge}
-      icon={icon}
-      title={title}
-      description={description}
-      cta={cta}
-      variant={variant}
-    />
-  );
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {[
+            { value: "۱۲۸", label: t("buyerSellerPortalPreviewStatFollowers") },
+            { value: "۲۴", label: t("buyerSellerPortalPreviewStatProducts") },
+            { value: "۱٫۲هزار", label: t("buyerSellerPortalPreviewStatViews") },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-xl bg-emerald-50/80 px-2 py-2 text-center">
+              <p className="text-sm font-bold text-emerald-900">{stat.value}</p>
+              <p className="text-[10px] font-medium text-emerald-800">{stat.label}</p>
+            </div>
+          ))}
+        </div>
 
-  if (onClick) {
-    return (
-      <button type="button" onClick={onClick} className={cardShell}>
-        {content}
-      </button>
-    );
-  }
+        <div className="mt-4 flex gap-2">
+          <span className="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
+            {t("buyerSellerPortalPreviewFollow")}
+          </span>
+          <span className="inline-flex flex-1 items-center justify-center rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-800">
+            {t("buyerSellerPortalPreviewContact")}
+          </span>
+        </div>
 
-  if (useAuth) {
-    return (
-      <AuthRequiredButton href={href} onClick={onBeforeNavigate} className={cardShell}>
-        {content}
-      </AuthRequiredButton>
-    );
-  }
-
-  return (
-    <Link href={href} onClick={onBeforeNavigate} className={cardShell}>
-      {content}
-    </Link>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {["🥜", "🌿", "📦"].map((emoji, i) => (
+            <div
+              key={i}
+              className="flex aspect-square items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-xl"
+            >
+              {emoji}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -130,56 +93,114 @@ export default function BuyerSellerPortal({ className = "" }) {
     setPersona(DASHBOARD_PERSONAS.APPLICANT);
   };
 
+  const benefits = [
+    t("buyerSellerPortalBenefit1"),
+    t("buyerSellerPortalBenefit2"),
+    t("buyerSellerPortalBenefit3"),
+    t("buyerSellerPortalBenefit4"),
+  ];
+
+  const sellerCtaClass =
+    "inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-900/15 transition hover:bg-emerald-800 active:scale-[0.99] sm:w-auto sm:min-w-[12rem]";
+  const buyerCtaClass =
+    "inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-emerald-200/80 bg-white/80 px-5 py-2.5 text-sm font-semibold text-emerald-900 backdrop-blur transition hover:border-emerald-300 hover:bg-white active:scale-[0.99] sm:w-auto sm:min-w-[12rem]";
+
   return (
     <section
-      className={`w-full space-y-3 sm:space-y-4 ${className}`}
+      className={`w-full ${className}`}
       dir={isRTL ? "rtl" : "ltr"}
       aria-labelledby="buyer-seller-portal-title"
     >
-      <div className="hidden space-y-1 text-center sm:block">
-        <h2 id="buyer-seller-portal-title" className="text-base font-bold text-slate-800 sm:text-lg">
-          {t("buyerSellerPortalSectionTitle")}
-        </h2>
-        <p className="mx-auto max-w-2xl text-sm leading-7 text-slate-500">{t("buyerSellerPortalSectionDesc")}</p>
-      </div>
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-teal-50/40 to-slate-50 shadow-[0_12px_40px_rgba(6,78,59,0.08)] sm:rounded-3xl">
+        <div
+          className="pointer-events-none absolute -start-16 -top-20 h-56 w-56 rounded-full bg-emerald-300/25 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 -end-10 h-64 w-64 rounded-full bg-teal-200/30 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgba(6,95,70,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(6,95,70,0.04)_1px,transparent_1px)] [background-size:28px_28px]"
+          aria-hidden
+        />
 
-      <div className="overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-[0_2px_16px_rgba(6,78,59,0.07)] sm:border-0 sm:bg-transparent sm:shadow-none">
-        <div className="border-b border-emerald-50 bg-emerald-50/60 px-3 py-2.5 sm:hidden">
-          <h2 className="text-xs font-bold text-emerald-800">
-            {t("buyerSellerPortalSectionTitle")}
-          </h2>
-          <p className="mt-0.5 text-[11px] leading-5 text-emerald-700/80">{t("buyerSellerPortalSectionDesc")}</p>
+        <div className="relative grid items-center gap-8 p-5 sm:gap-10 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12 lg:p-10">
+          <div className={`${isRTL ? "text-right" : "text-left"}`}>
+            <p className="mb-2 inline-flex items-center rounded-full border border-emerald-200/80 bg-white/70 px-3 py-1 text-[11px] font-semibold text-emerald-800 backdrop-blur">
+              {t("buyerSellerPortalBadge")}
+            </p>
+
+            <h2
+              id="buyer-seller-portal-title"
+              className="text-balance text-xl font-extrabold leading-snug tracking-tight text-slate-900 sm:text-2xl lg:text-[1.75rem] lg:leading-snug"
+            >
+              {t("buyerSellerPortalSectionTitle")}
+            </h2>
+
+            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 sm:text-[15px] sm:leading-8">
+              {t("buyerSellerPortalSectionDesc")}
+            </p>
+
+            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 sm:leading-8">
+              {t("buyerSellerPortalFriendlyNote")}
+            </p>
+
+            <ul className="mt-5 space-y-2.5">
+              {benefits.map((text) => (
+                <li key={text} className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white">
+                    ✓
+                  </span>
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+              {seller ? (
+                <Link href={sellerHref} className={sellerCtaClass}>
+                  {t("buyerSellerPortalSellerCta")}
+                </Link>
+              ) : (
+                <AuthRequiredButton href={sellerHref} className={sellerCtaClass}>
+                  {t("buyerSellerPortalSellerCta")}
+                </AuthRequiredButton>
+              )}
+
+              {user ? (
+                <button type="button" onClick={goApplicantForm} className={buyerCtaClass}>
+                  {t("buyerSellerPortalBuyerCta")}
+                </button>
+              ) : (
+                <AuthRequiredButton
+                  href="/dashboard/submit-request"
+                  onClick={prepareApplicant}
+                  className={buyerCtaClass}
+                >
+                  {t("buyerSellerPortalBuyerCta")}
+                </AuthRequiredButton>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs leading-6 text-slate-500">
+              {t("buyerSellerPortalHint")}{" "}
+              <Link href="/pricing" className="font-semibold text-emerald-700 underline-offset-2 hover:underline">
+                {t("buyerSellerPortalPricingLink")}
+              </Link>
+            </p>
+          </div>
+
+          <div className="relative">
+            <p className={`mb-3 text-center text-xs font-semibold text-emerald-800/80 lg:mb-4 ${isRTL ? "lg:text-right" : "lg:text-left"}`}>
+              {t("buyerSellerPortalPreviewCaption")}
+            </p>
+            <div className="origin-center transition duration-500 hover:-translate-y-1 hover:rotate-[-0.5deg]">
+              <ShopPreviewMock t={t} isRTL={isRTL} />
+            </div>
+          </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-2.5 p-2.5 sm:grid-cols-2 sm:gap-4 sm:p-0">
-          <PortalCard
-            variant="applicant"
-            badge={t("buyerSellerPortalApplicantBadge")}
-            icon={ApplicantIcon}
-            title={t("buyerSellerPortalBuyerTitle")}
-            description={t("buyerSellerPortalBuyerDesc")}
-            cta={t("buyerSellerPortalBuyerCta")}
-            href="/dashboard/submit-request"
-            useAuth={!user}
-            onClick={user ? goApplicantForm : undefined}
-            onBeforeNavigate={prepareApplicant}
-          />
-          <PortalCard
-            variant="seller"
-            badge={t("buyerSellerPortalSellerBadge")}
-            icon={SellerIcon}
-            title={t("buyerSellerPortalSellerTitle")}
-            description={t("buyerSellerPortalSellerDesc")}
-            cta={t("buyerSellerPortalSellerCta")}
-            href={sellerHref}
-            useAuth={!seller}
-          />
-        </div>
       </div>
-
-      <p className="text-center text-[11px] leading-5 text-slate-400 sm:text-xs sm:leading-6">
-        {t("buyerSellerPortalHint")}
-      </p>
     </section>
   );
 }

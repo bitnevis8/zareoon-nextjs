@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 function fileKey(file) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-function DropZone({ kind, accept, hint, files, onAdd, onRemove, icon }) {
+function DropZone({ kind, accept, hint, files, onAdd, onRemove, icon, t }) {
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -50,10 +51,10 @@ function DropZone({ kind, accept, hint, files, onAdd, onRemove, icon }) {
           {icon}
         </span>
         <p className="text-xs font-bold text-slate-800 sm:text-sm">
-          {kind === "image" ? "افزودن تصویر" : "افزودن ویدیو"}
+          {kind === "image" ? t("media.addImage") : t("media.addVideo")}
         </p>
         <p className="mt-0.5 text-[10px] text-slate-500 sm:text-[11px]">{hint}</p>
-        <p className="mt-1.5 text-[10px] font-medium text-emerald-700">کلیک یا کشیدن فایل</p>
+        <p className="mt-1.5 text-[10px] font-medium text-emerald-700">{t("media.clickOrDrag")}</p>
       </div>
 
       <input
@@ -71,17 +72,19 @@ function DropZone({ kind, accept, hint, files, onAdd, onRemove, icon }) {
       {files.length > 0 ? (
         <div className={`mt-2 grid gap-1.5 ${kind === "image" ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-1"}`}>
           {files.map((file) => (
-            <DraftPreview key={fileKey(file)} file={file} kind={kind} onRemove={() => onRemove(file)} />
+            <DraftPreview key={fileKey(file)} file={file} kind={kind} onRemove={() => onRemove(file)} t={t} />
           ))}
         </div>
       ) : (
-        <p className="mt-1.5 text-center text-[10px] text-slate-400">هنوز {kind === "image" ? "تصویری" : "ویدیویی"} انتخاب نشده</p>
+        <p className="mt-1.5 text-center text-[10px] text-slate-400">
+          {kind === "image" ? t("media.noImageSelected") : t("media.noVideoSelected")}
+        </p>
       )}
     </div>
   );
 }
 
-function DraftPreview({ file, kind, onRemove }) {
+function DraftPreview({ file, kind, onRemove, t }) {
   const [url, setUrl] = useState("");
 
   useEffect(() => {
@@ -101,7 +104,7 @@ function DraftPreview({ file, kind, onRemove }) {
             onClick={onRemove}
             className="shrink-0 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600"
           >
-            حذف
+            {t("media.remove")}
           </button>
         </div>
       </div>
@@ -116,7 +119,7 @@ function DraftPreview({ file, kind, onRemove }) {
         type="button"
         onClick={onRemove}
         className="absolute left-1 top-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white sm:opacity-0 sm:transition sm:group-hover:opacity-100"
-        aria-label="حذف"
+        aria-label={t("media.remove")}
       >
         ×
       </button>
@@ -125,6 +128,8 @@ function DraftPreview({ file, kind, onRemove }) {
 }
 
 export default function InventoryMediaDraftUpload({ images = [], videos = [], onImagesChange, onVideosChange }) {
+  const t = useTranslations("inventory");
+
   const addImages = (incoming) => {
     const existing = new Set(images.map(fileKey));
     const next = [...images, ...incoming.filter((f) => !existing.has(fileKey(f)))];
@@ -145,35 +150,35 @@ export default function InventoryMediaDraftUpload({ images = [], videos = [], on
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-slate-700">رسانه عرضه</p>
+        <p className="text-xs font-semibold text-slate-700">{t("media.draftTitle")}</p>
         {total > 0 ? (
           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-            {total.toLocaleString("fa-IR")} فایل
+            {t("media.filesCount", { count: total.toLocaleString("fa-IR") })}
           </span>
         ) : null}
       </div>
-      <p className="text-[11px] leading-5 text-slate-500">
-        تصاویر و ویدیوها پس از ثبت موجودی در صفحه کاتالوگ نمایش داده می‌شوند.
-      </p>
+      <p className="text-[11px] leading-5 text-slate-500">{t("media.draftHint")}</p>
 
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <DropZone
           kind="image"
           accept="image/jpeg,image/png,image/webp,image/gif"
-          hint="JPG، PNG، WebP"
+          hint={t("media.imageHint")}
           files={images}
           onAdd={addImages}
           onRemove={removeImage}
           icon="🖼️"
+          t={t}
         />
         <DropZone
           kind="video"
           accept="video/mp4,video/webm,video/quicktime"
-          hint="MP4، WebM"
+          hint={t("media.videoHint")}
           files={videos}
           onAdd={addVideos}
           onRemove={removeVideo}
           icon="🎬"
+          t={t}
         />
       </div>
     </div>

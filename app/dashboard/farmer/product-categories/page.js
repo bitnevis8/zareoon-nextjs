@@ -1,8 +1,10 @@
 ﻿"use client";
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 export default function ProductCategoriesPage() {
+  const t = useTranslations("product");
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({ name: "", parentId: "", slug: "" });
   const [loading, setLoading] = useState(false);
@@ -41,12 +43,12 @@ export default function ProductCategoriesPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">دسته‌بندی محصولات</h1>
+      <h1 className="text-xl font-bold mb-4">{t("categories.title")}</h1>
       <form onSubmit={create} className="bg-white p-4 rounded-md shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-2">
-        <input className="border p-2 rounded" placeholder="نام" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
+        <input className="border p-2 rounded" placeholder={t("categories.namePlaceholder")} value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
         <input className="border p-2 rounded" placeholder="Slug" value={form.slug} onChange={(e)=>setForm({...form, slug:e.target.value})} />
-        <input className="border p-2 rounded" placeholder="ParentId (اختیاری)" value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})} />
-        <button disabled={loading} className="bg-blue-600 text-white rounded px-4">{loading?"...":"افزودن"}</button>
+        <input className="border p-2 rounded" placeholder={t("categories.parentIdPlaceholder")} value={form.parentId} onChange={(e)=>setForm({...form, parentId:e.target.value})} />
+        <button disabled={loading} className="bg-blue-600 text-white rounded px-4">{loading ? t("ellipsis") : t("add")}</button>
       </form>
 
       <div className="bg-white rounded-md shadow overflow-x-auto">
@@ -54,10 +56,10 @@ export default function ProductCategoriesPage() {
           <thead>
             <tr className="bg-gray-100 text-gray-700">
               <th className="p-2 cursor-pointer" onClick={()=> setSortBy(prev=> (prev==='id' ? (setSortOrder(sortOrder==='ASC'?'DESC':'ASC'), 'id') : (setSortOrder('ASC'), 'id')))}>ID</th>
-              <th className="p-2 cursor-pointer" onClick={()=> setSortBy(prev=> (prev==='name' ? (setSortOrder(sortOrder==='ASC'?'DESC':'ASC'), 'name') : (setSortOrder('ASC'), 'name')))}>نام</th>
+              <th className="p-2 cursor-pointer" onClick={()=> setSortBy(prev=> (prev==='name' ? (setSortOrder(sortOrder==='ASC'?'DESC':'ASC'), 'name') : (setSortOrder('ASC'), 'name')))}>{t("name")}</th>
               <th className="p-2">Slug</th>
               <th className="p-2 cursor-pointer" onClick={()=> setSortBy(prev=> (prev==='parentId' ? (setSortOrder(sortOrder==='ASC'?'DESC':'ASC'), 'parentId') : (setSortOrder('ASC'), 'parentId')))}>ParentId</th>
-              <th className="p-2">عملیات</th>
+              <th className="p-2">{t("actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -68,7 +70,7 @@ export default function ProductCategoriesPage() {
                 <td className="p-2">{x.slug || "-"}</td>
                 <td className="p-2">{x.parentId ?? "-"}</td>
                 <td className="p-2">
-                  <button onClick={()=>remove(x.id)} className="text-red-600">حذف</button>
+                  <button onClick={()=>remove(x.id)} className="text-red-600">{t("delete")}</button>
                 </td>
               </tr>
             ))}

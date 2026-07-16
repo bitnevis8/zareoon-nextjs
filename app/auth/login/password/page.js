@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
 
 export default function LoginPasswordPage() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -61,11 +64,11 @@ export default function LoginPasswordPage() {
         console.log("🔍 AuthContext updated, redirecting to dashboard");
         router.push("/dashboard");
       } else {
-        setError(data.message || "رمز عبور اشتباه است");
+        setError(data.message || t("wrongPassword"));
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("خطا در ارتباط با سرور");
+      setError(t("serverError"));
     } finally {
       setLoading(false);
     }
@@ -96,7 +99,7 @@ export default function LoginPasswordPage() {
       <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">در حال بارگذاری...</p>
+          <p className="text-gray-600">{tCommon("loading")}</p>
         </div>
       </div>
     );
@@ -108,15 +111,15 @@ export default function LoginPasswordPage() {
         {/* هدر */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">ورود</h1>
+            <h1 className="text-xl font-bold text-gray-800">{t("loginTitle")}</h1>
             <p className="text-gray-600 text-sm mt-1">
-              با {formatIdentifier(identifier)}
+              {t("loginWith", { identifier: formatIdentifier(identifier) })}
             </p>
           </div>
           <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
             <Image
               src="/images/logo.png"
-              alt="لوگو زارعون"
+              alt={t("logoAlt")}
               width={48}
               height={48}
               className="w-full h-full object-contain"
@@ -130,21 +133,21 @@ export default function LoginPasswordPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              رمز عبور خود را وارد کنید تا وارد اکانت شوید.
+              {t("passwordHint")}
             </p>
           </div>
 
           {/* رمز عبور */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              رمز عبور
+              {t("passwordLabel")}
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="رمز عبور خود را وارد کنید"
+                placeholder={t("passwordPlaceholder")}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -168,7 +171,7 @@ export default function LoginPasswordPage() {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="rememberMe" className="mr-2 block text-sm text-gray-700">
-              مرا به خاطر بسپار
+              {t("rememberMe")}
             </label>
           </div>
 
@@ -185,7 +188,7 @@ export default function LoginPasswordPage() {
             disabled={loading || !password.trim()}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
           >
-            {loading ? "در حال ورود..." : "ادامه"}
+            {loading ? t("loggingIn") : t("continue")}
           </button>
 
           {/* گزینه‌های اضافی */}
@@ -195,7 +198,7 @@ export default function LoginPasswordPage() {
               onClick={handleForgotPassword}
               className="w-full text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              رمز عبور را فراموشی کردید؟
+              {t("forgotPassword")}
             </button>
 
             <div className="relative">
@@ -203,7 +206,7 @@ export default function LoginPasswordPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">یا</span>
+                <span className="px-2 bg-white text-gray-500">{t("or")}</span>
               </div>
             </div>
 
@@ -212,7 +215,7 @@ export default function LoginPasswordPage() {
               onClick={handleSMSLogin}
               className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-200"
             >
-              دریافت کد ورود از طریق پیامک
+              {t("smsLogin")}
             </button>
           </div>
         </form>
@@ -220,7 +223,7 @@ export default function LoginPasswordPage() {
         {/* لینک‌های اضافی */}
         <div className="mt-6 text-center">
           <Link href="/auth/login" className="text-sm text-gray-600 hover:text-gray-800">
-            تغییر شماره موبایل
+            {t("changeMobile")}
           </Link>
         </div>
         </div>

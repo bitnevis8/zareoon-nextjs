@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useMemo, useState, useRef, use as usePromise } from "react";
+import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { getProductStockClass, calculateAvailableStock } from "@/app/utils/stockUtils";
+import { calculateAvailableStock } from "@/app/utils/stockUtils";
 import { formatLocalizedNumber, getLocalizedText, localizeUnit } from "@/app/utils/localize";
 import CartStatusBanner from "@/app/components/CartStatusBanner";
 import CatalogBreadcrumb, { buildCatalogPath } from "@/app/components/CatalogBreadcrumb";
@@ -16,31 +17,56 @@ import CatalogGradeOffers from "@/app/components/catalog/CatalogGradeOffers";
 import { buildLotGalleryItems } from "@/app/utils/catalogGradeMedia";
 import CatalogMediaLightbox, { sortMediaItems, buildProductGalleryItems } from "@/app/components/catalog/CatalogMediaLightbox";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
+import CatalogPageSkeleton from "@/app/components/CatalogPageSkeleton";
 import { sortCatalogItems } from "@/app/utils/productSort";
 import { authFetch } from "@/app/utils/authHeaders";
-import { isAdmin, shouldShowSupplierPanel } from "@/app/utils/roles";
+import { isAdmin } from "@/app/utils/roles";
+import { useNavigationLoading } from "@/app/context/NavigationLoadingContext";
+import {
+  useCatalogChildren,
+  useCatalogProduct,
+  useFullCatalog,
+  useInventoryLots,
+  useBackgroundCatalogWarmup,
+  prefetchCatalogChildren,
+} from "@/app/hooks/useCatalogProducts";
 
 export default function CatalogItemPage({ params }) {
-  // Next.js 15: params is a Promise; unwrap with React.use()
   const { id } = usePromise(params);
   const auth = useAuth();
-  const { t, language, isRTL } = useLanguage();
+  const { language, isRTL } = useLanguage();
+  const t = useTranslations("catalog");
+  const { start: startNavLoading, done: doneNavLoading } = useNavigationLoading();
   const userPhone = auth?.user?.mobile || auth?.user?.phone || null;
   const user = auth?.user;
   const admin = isAdmin(user);
-  const canAddProduct = shouldShowSupplierPanel(user);
-  const [item, setItem] = useState(null);
-  const [children, setChildren] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
-  const [inventoryLots, setInventoryLots] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [lots, setLots] = useState([]);
-  // سفارش‌دهی به‌ازای هر بار در ردیف‌ها انجام می‌شود
+
+  // Homepage warms these SWR keys — open category without waiting for the full tree.
+  const { product: item } = useCatalogProduct(id);
+  const { children: rawChildren, loading: childrenLoading, hasCache: childrenCached } =
+    useCatalogChildren(id);
+  const { products: allProducts, loading: catalogLoading } = useFullCatalog({
+    enabled: Boolean(item),
+  });
+  const { lots: inventoryLots, loading: lotsLoading } = useInventoryLots({
+    enabled: Boolean(item),
+  });
+
+  const children = useMemo(
+    () => sortCatalogItems(rawChildren || [], language),
+    [rawChildren, language]
+  );
+
+  useBackgroundCatalogWarmup(children.filter((c) => !c.isOrderable).slice(0, 16));
+
+  // Static root (or warmed cache) means product is ready immediately.
+  const coreReady = Boolean(item) && (childrenCached || !childrenLoading);
+  const loading = !coreReady;
+
   const [lotQtyById, setLotQtyById] = useState({});
   const [placingLotId, setPlacingLotId] = useState(null);
   const [orderMsg, setOrderMsg] = useState("");
-  const [orderMsgType, setOrderMsgType] = useState("info"); // 'success' | 'error' | 'info'
-  // Media state for lots
+  const [orderMsgType, setOrderMsgType] = useState("info");
   const [lotMediaCounts, setLotMediaCounts] = useState(new Map());
   const [productMedia, setProductMedia] = useState([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -51,16 +77,16 @@ export default function CatalogItemPage({ params }) {
   const mediaCacheRef = useRef(new Map());
   const [lotMediaPreview, setLotMediaPreview] = useState(new Map());
   const [activeOfferGrade, setActiveOfferGrade] = useState(null);
-
-  // Cart info for this product
   const [cartTotalQty, setCartTotalQty] = useState(0);
-  const [cartUnit, setCartUnit] = useState('');
+  const [cartUnit, setCartUnit] = useState("");
+
   const fetchCart = useCallback(async () => {
     try {
       const r = await authFetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: "no-store" });
       const j = await r.json();
       const items = j?.data?.items || [];
-      let sum = 0; let unit = cartUnit;
+      let sum = 0;
+      let unit = cartUnit;
       for (const it of items) {
         if (Number(it.productId) === Number(id)) {
           const q = parseFloat(it.quantity || 0);
@@ -69,64 +95,77 @@ export default function CatalogItemPage({ params }) {
         }
       }
       setCartTotalQty(sum);
-      setCartUnit(unit || item?.unit || '');
+      setCartUnit(unit || item?.unit || "");
     } catch {}
   }, [id, cartUnit, item?.unit]);
 
   const loadLotMediaCounts = useCallback(async (lotId) => {
     try {
-      const r = await fetch(`${API_ENDPOINTS.fileUpload.getFilesByModule('inventory')}?entityId=${encodeURIComponent(lotId)}`, { cache: 'no-store' });
+      const r = await fetch(
+        `${API_ENDPOINTS.fileUpload.getFilesByModule("inventory")}?entityId=${encodeURIComponent(lotId)}`,
+        { cache: "no-store" }
+      );
       const j = await r.json();
       if (j?.success) {
         const arr = Array.isArray(j.data) ? j.data : [];
         const sorted = sortMediaItems(arr);
-        setLotMediaCounts(prev => new Map(prev).set(lotId, {
-          images: sorted.filter(it => String(it.mimeType||'').startsWith('image/')).length,
-          videos: sorted.filter(it => String(it.mimeType||'').startsWith('video/')).length,
-        }));
-        setLotMediaPreview(prev => new Map(prev).set(lotId, sorted));
+        setLotMediaCounts((prev) =>
+          new Map(prev).set(lotId, {
+            images: sorted.filter((it) => String(it.mimeType || "").startsWith("image/")).length,
+            videos: sorted.filter((it) => String(it.mimeType || "").startsWith("video/")).length,
+          })
+        );
+        setLotMediaPreview((prev) => new Map(prev).set(lotId, sorted));
       }
     } catch {}
   }, []);
 
   useEffect(() => {
-    if (!id) return;
+    if (!loading) {
+      doneNavLoading();
+      return;
+    }
+    startNavLoading();
+    return () => doneNavLoading();
+  }, [loading, startNavLoading, doneNavLoading]);
+
+  useEffect(() => {
+    fetchCart();
+  }, [id, fetchCart]);
+
+  useEffect(() => {
+    if (!children.length) return;
+    const subs = children.filter((c) => !c.isOrderable).slice(0, 8);
+    let cancelled = false;
     (async () => {
-      try {
-        const [ri, rc, rl, rall] = await Promise.all([
-          fetch(API_ENDPOINTS.farmer.products.getById(id), { cache: "no-store" }),
-          fetch(`${API_ENDPOINTS.farmer.products.getAll}?parentId=${id}`, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.farmer.inventoryLots.getAll, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.farmer.products.getAll, { cache: "no-store" }),
-        ]);
-        const di = await ri.json();
-        const dc = await rc.json();
-        const dl = await rl.json();
-        const dall = await rall.json();
-        const childItems = sortCatalogItems(dc.data || [], language);
-        setItem(di.data || null);
-        setChildren(childItems);
-        setLots(dl.data || []);
-        setInventoryLots(dl.data || []);
-        setAllProducts(dall.data || []);
-        fetchCart();
-      } finally {
-        setLoading(false);
+      for (const sub of subs) {
+        if (cancelled) break;
+        try {
+          await prefetchCatalogChildren(sub.id);
+        } catch {}
       }
     })();
-  }, [id, fetchCart, language]);
+    return () => {
+      cancelled = true;
+    };
+  }, [children]);
 
   const productById = useMemo(() => {
     const map = new Map();
     for (const p of allProducts) map.set(p.id, p);
+    if (item) map.set(item.id, item);
+    for (const c of children) map.set(c.id, c);
     return map;
-  }, [allProducts]);
+  }, [allProducts, item, children]);
 
   const breadcrumbPath = useMemo(() => buildCatalogPath(item, productById), [item, productById]);
 
-  // Inventory summary for this product (no farmer names)
   const productIdNum = Number(id);
-  const filteredLots = useMemo(() => (lots || []).filter(l => l.productId === productIdNum), [lots, productIdNum]);
+  const lots = inventoryLots;
+  const filteredLots = useMemo(
+    () => (lots || []).filter((l) => l.productId === productIdNum),
+    [lots, productIdNum]
+  );
   const summary = useMemo(() => {
     let total = 0;
     let reserved = 0;
@@ -141,6 +180,13 @@ export default function CatalogItemPage({ params }) {
       lots: filteredLots,
     };
   }, [filteredLots]);
+
+  useEffect(() => {
+    if (!filteredLots.length) return;
+    filteredLots.slice(0, 12).forEach((l) => {
+      if (!lotMediaCounts.has(l.id)) loadLotMediaCounts(l.id);
+    });
+  }, [filteredLots, lotMediaCounts, loadLotMediaCounts]);
 
   const openMediaGallery = useCallback(async ({ module, entityId, startMediaId = null, startIndex = null, productItem = null, galleryTitle: titleOverride = null }) => {
     const cacheKey = `${module}:${entityId}`;
@@ -198,18 +244,6 @@ export default function CatalogItemPage({ params }) {
     }
   }, [filteredLots]);
 
-  // Prefetch media counts for the visible lots
-  useEffect(() => {
-    (async () => {
-      const ids = filteredLots.map(l => l.id);
-      for (const id of ids) {
-        if (!lotMediaCounts.has(id)) {
-          loadLotMediaCounts(id);
-        }
-      }
-    })();
-  }, [filteredLots, lotMediaCounts, loadLotMediaCounts]);
-
   // Load product-level media counts
   useEffect(() => {
     if (!productIdNum) return;
@@ -244,7 +278,7 @@ export default function CatalogItemPage({ params }) {
       const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
       if (v > available + 1e-9) {
         setOrderMsgType("error");
-        setOrderMsg(`حداکثر قابل سفارش از این بار: ${available.toFixed(3)} ${lot.unit || ""}`);
+        setOrderMsg(t("orderMaxFromLot", { quantity: available.toFixed(3), unit: lot.unit || "" }));
         return;
       }
       setPlacingLotId(lot.id);
@@ -262,14 +296,14 @@ export default function CatalogItemPage({ params }) {
           body: JSON.stringify(payload),
         });
         const j = await res.json();
-        if (!res.ok || !j?.success) throw new Error(j?.message || "خطا در افزودن به بار");
+        if (!res.ok || !j?.success) throw new Error(j?.message || t("addToCartError"));
         setOrderMsgType("success");
         const contactNote = userPhone ? ` (${userPhone})` : "";
         setOrderMsg(`${t("orderAdded")}${contactNote}`);
         fetchCart();
       } catch (e) {
         setOrderMsgType("error");
-        setOrderMsg(e.message || "خطا در افزودن به بار");
+        setOrderMsg(e.message || t("addToCartError"));
       } finally {
         setPlacingLotId(null);
       }
@@ -277,16 +311,18 @@ export default function CatalogItemPage({ params }) {
     [lotQtyById, productIdNum, userPhone, t, fetchCart, auth?.user]
   );
 
-  const stockClass = item ? getProductStockClass(item, allProducts, inventoryLots) : "bg-white";
+  if (loading || !item) {
+    return <CatalogPageSkeleton variant="category" />;
+  }
 
-  // محاسبه قیمت تقریبی حذف شد چون سفارش در سطح بار انجام می‌شود
+  const stockExtrasLoading = (catalogLoading || lotsLoading) && !allProducts.length;
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-5 overflow-x-hidden px-3 py-3 pb-24 sm:space-y-6 sm:px-6 sm:py-4 sm:pb-6">
       <CartStatusBanner />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
-        {!loading && item ? (
+        {item ? (
           <CatalogPdfDownload
             scope={item.isOrderable ? "product" : "category"}
             productId={item.isOrderable ? productIdNum : undefined}
@@ -303,7 +339,6 @@ export default function CatalogItemPage({ params }) {
       <CatalogProductHero
         item={item}
         language={language}
-        t={t}
         productMedia={productMedia}
         productIdNum={productIdNum}
         openMediaGallery={openMediaGallery}
@@ -317,7 +352,6 @@ export default function CatalogItemPage({ params }) {
           item={item}
           lots={filteredLots}
           language={language}
-          t={t}
           activeGrade={activeOfferGrade}
           onActiveGradeChange={setActiveOfferGrade}
           isAdmin={admin}
@@ -338,7 +372,7 @@ export default function CatalogItemPage({ params }) {
       )}
 
       {item?.description && filteredLots.length === 0 ? (
-        <CatalogProductDescription description={item.description} t={t} />
+        <CatalogProductDescription description={item.description} />
       ) : null}
 
       {/* Category stock summary (for non-orderable items) */}
@@ -388,15 +422,14 @@ export default function CatalogItemPage({ params }) {
         onIndexChange={setGalleryIndex}
         loading={galleryLoading}
         titleOverride={galleryTitle}
-        t={t}
         isRTL={isRTL}
       />
 
-      {!loading && !item?.isOrderable ? (
+      {item && !item.isOrderable ? (
         <LatestAvailableProductsSection
           inventoryLots={inventoryLots}
           allProducts={allProducts}
-          loading={loading}
+          loading={stockExtrasLoading}
           scopeCategoryId={item.id}
           scopeCategoryName={getLocalizedText(item, language)}
           variant="catalog"
@@ -405,7 +438,7 @@ export default function CatalogItemPage({ params }) {
       ) : null}
 
       {/* Subcategories and products */}
-      {!loading && children.length > 0 && (
+      {children.length > 0 && (
         <CatalogChildrenGrid
           items={children}
           allProducts={allProducts}
@@ -414,7 +447,7 @@ export default function CatalogItemPage({ params }) {
         />
       )}
 
-      {!loading && !item?.isOrderable && children.length === 0 ? (
+      {!item?.isOrderable && children.length === 0 ? (
         <div className="rounded-xl border bg-white p-6 text-center text-sm text-slate-500">
           {t("noItemsRegistered")}
         </div>

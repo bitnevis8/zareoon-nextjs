@@ -1,6 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export default function AttributeFields({ defs = [], values = {}, onChange, className = "", compact = false }) {
+  const t = useTranslations("shared");
+
   if (!defs.length) return null;
 
   const labelClass = compact ? "mb-0.5 text-xs font-medium text-slate-600" : "mb-1 text-sm font-medium text-gray-700";
@@ -27,8 +31,8 @@ export default function AttributeFields({ defs = [], values = {}, onChange, clas
               onChange={(e) => onChange(def.id, e.target.value)}
             >
               <option value="">—</option>
-              <option value="true">بلی</option>
-              <option value="false">خیر</option>
+              <option value="true">{t("attributeFields.yes")}</option>
+              <option value="false">{t("attributeFields.no")}</option>
             </select>
           ) : def.type === "date" ? (
             <input
