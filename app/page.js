@@ -54,11 +54,11 @@ function HomeContent() {
   }, [auth?.user]);
 
   return (
-    <main className="page-shell pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4 section-stack">
-      <section className="text-center space-y-4 sm:space-y-6 lg:space-y-8">
-        <div className="flex justify-center max-lg:mt-1">
+    <main className="pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4">
+      <section className="page-shell section-stack text-center space-y-4 sm:space-y-6 lg:space-y-8">
+        <div className="mx-auto w-full max-w-xl px-1 sm:px-2">
           <div
-            className="inline-flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/95 px-1 py-2 shadow-sm sm:gap-2 sm:rounded-full sm:px-3"
+            className="flex w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/95 px-1 py-2 shadow-sm sm:gap-2 sm:rounded-full sm:px-3"
             role="group"
             aria-label="Language"
           >
@@ -69,7 +69,7 @@ function HomeContent() {
                   key={option.code}
                   type="button"
                   onClick={() => setLanguage(option.code)}
-                  className={`inline-flex min-h-[3.12rem] min-w-[3.12rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-1 text-[9px] font-semibold leading-none transition-all sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:py-2 sm:text-sm ${
+                  className={`inline-flex min-h-[3.12rem] min-w-[3.12rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-1 text-[9px] font-semibold leading-none transition-all sm:min-h-0 sm:min-w-0 sm:flex-1 sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-2 sm:py-2 sm:text-sm ${
                     isActive
                       ? "border-green-600 bg-green-600 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -123,9 +123,9 @@ function HomeContent() {
           })}
         </div>
 
-        <MarketplaceDisclaimer className="mt-2" />
-
         <MainCategoryGrid className="w-full" id="product-categories" />
+
+        <MarketplaceDisclaimer className="mt-2" />
 
         <LazyWhenVisible
           id="latest-available"
@@ -135,14 +135,17 @@ function HomeContent() {
         >
           <LatestAvailableProductsSection autoFetch variant="homepage" className="w-full" />
         </LazyWhenVisible>
+      </section>
 
-        <LazyWhenVisible
-          minHeight="22rem"
-          fallback={<SectionSkeleton minHeight="22rem" className="mt-2" variant="portal" />}
-        >
-          <BuyerSellerPortal className="w-full" />
-        </LazyWhenVisible>
+      <LazyWhenVisible
+        className="mt-5 w-full sm:mt-6 lg:mt-8"
+        minHeight="22rem"
+        fallback={<SectionSkeleton minHeight="22rem" className="mx-4 mt-2 sm:mx-6" variant="portal" />}
+      >
+        <BuyerSellerPortal />
+      </LazyWhenVisible>
 
+      <section className="page-shell section-stack mt-5 sm:mt-6 lg:mt-8">
         <LazyWhenVisible
           minHeight="20rem"
           fallback={<SectionSkeleton minHeight="20rem" className="mt-2" variant="services" />}

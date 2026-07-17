@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { SITE_PHONE } from "@/app/config/siteContact";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { authFetch } from "@/app/utils/authHeaders";
 
@@ -45,7 +46,7 @@ export default function CartStatusBanner() {
         </div>
       </div>
       <div className="mt-2 text-xs text-blue-600">
-        {t("cartReservationNote")} {t("supportContact")}: 09393387148
+        {t("cartReservationNote")} {t("supportContact")}: {SITE_PHONE}
       </div>
     </div>
   );

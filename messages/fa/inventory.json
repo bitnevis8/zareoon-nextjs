@@ -65,7 +65,8 @@
     "successCreated": "موجودی با موفقیت ثبت شد",
     "successRedirecting": "در حال انتقال به لیست…",
     "alertSelectProduct": "لطفاً نوع محصول را انتخاب کنید",
-    "alertEnterQuantity": "مقدار کل را وارد کنید"
+    "alertEnterQuantity": "مقدار کل را وارد کنید",
+    "alertListingBlocked": "ثبت موجودی برای این محصول مجاز نیست (سیاست فهرست‌بندی)."
   },
   "create": {
     "title": "ثبت موجودی جدید",
@@ -83,6 +84,12 @@
     "noOptions": "موردی یافت نشد",
     "unit": "واحد",
     "unitPlaceholder": "kg، تن…",
+    "packagingType": "نوع بسته‌بندی",
+    "packagingPlaceholder": "انتخاب بسته‌بندی…",
+    "productFilters": "فیلترها و مشخصات محصول",
+    "hsCode": "کد HS",
+    "attributeSet": "مجموعه ویژگی",
+    "listingModeratedNote": "این محصول تحت نظارت فهرست می‌شود؛ پس از ثبت ممکن است بررسی شود.",
     "qualityGrade": "درجه کیفیت",
     "status": "وضعیت",
     "totalQuantity": "مقدار کل",

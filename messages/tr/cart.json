@@ -1,0 +1,67 @@
+{
+  "title": "",
+  "breadcrumbAria": "",
+  "home": "",
+  "backToShop": "",
+  "dashboard": "",
+  "subtitle": "",
+  "subtitleWithName": "",
+  "empty": "",
+  "grade": "",
+  "productId": "",
+  "quantity": "",
+  "kilogram": "",
+  "remove": "",
+  "myOrders": "",
+  "collapse": "",
+  "expand": "",
+  "noOrdersYet": "",
+  "orderNumber": "",
+  "productFallback": "",
+  "gradeLine": "",
+  "pendingAllocation": "",
+  "summaryTitle": "",
+  "itemCount": "",
+  "totalQuantity": "",
+  "checkout": "",
+  "checkingOut": "",
+  "checkoutFooter": "",
+  "checkoutError": "",
+  "checkoutUnexpectedError": "",
+  "checkoutSuccess": "",
+  "guideTitle": "",
+  "guideSteps": {
+    "1": {
+      "n": "",
+      "title": "",
+      "desc": ""
+    },
+    "2": {
+      "n": "",
+      "title": "",
+      "desc": ""
+    },
+    "3": {
+      "n": "",
+      "title": "",
+      "desc": ""
+    }
+  },
+  "cartReservationNote": "",
+  "support": "",
+  "orderStatus": {
+    "pending": "",
+    "reserved": "",
+    "completed": "",
+    "cancelled": ""
+  },
+  "itemStatus": {
+    "pending": "",
+    "approved": "",
+    "processing": "",
+    "shipped": "",
+    "delivered": "",
+    "cancelled": "",
+    "rejected": ""
+  }
+}

@@ -1,116 +1,78 @@
 {
-  "eyebrow": "شبکه خدمات تجارت خارجی",
+  "eyebrow": "شبکه خدمات‌دهندگان بازرگانی",
   "title": "خدمات بازرگانی و تجارت بین‌الملل",
-  "subtitle": "یافتن شرکت یا متخصص در واردات، صادرات، حمل، گمرک، بازرسی و امور مالی.",
+  "subtitle": "شرکت‌ها و متخصصان حوزه‌های بازرسی، حمل، گمرک، مالی و سایر خدمات تجاری را پیدا کنید یا خودتان عضو شوید.",
   "providerHint": "فهرست شرکت‌ها و متخصصان هر حوزه — با اطلاعات تماس، مجوز، سابقه و امتیاز.",
   "providerRegisterNote": "خدمات خود را معرفی کنید، مشتریان جدید پیدا کنید و با پروفایل اختصاصی در شبکه تجارت بین‌المللی حضور داشته باشید.",
   "categories": [
     {
+      "id": "inspection-standards",
+      "icon": "inspection-standards",
+      "title": "بازرسی، آزمون و صدور گواهینامه",
+      "description": "بازرسی کالا، کنترل کیفیت، آزمون آزمایشگاهی، گواهی بازرسی، استانداردها و بازرسی قبل از حمل (PSI).",
+      "children": [
+        { "id": "cargo-inspection", "title": "بازرسی کالا" },
+        { "id": "quality-control", "title": "کنترل کیفیت (QC)" },
+        { "id": "testing", "title": "آزمون و آزمایش کالا" },
+        { "id": "inspection-certificate", "title": "صدور گواهی بازرسی" },
+        { "id": "standards-certification", "title": "استاندارد و گواهینامه‌ها" },
+        { "id": "pre-shipment-inspection", "title": "بازرسی قبل از حمل (PSI)" }
+      ]
+    },
+    {
+      "id": "packaging-prep",
+      "icon": "packaging-prep",
+      "title": "بسته‌بندی و آماده‌سازی کالا",
+      "description": "بسته‌بندی صادراتی، لیبل و چاپ تجاری، پالت‌بندی و استانداردسازی بسته‌بندی برای حمل بین‌المللی.",
+      "children": [
+        { "id": "export-packaging", "title": "بسته‌بندی صادراتی" },
+        { "id": "commercial-labeling", "title": "لیبل و چاپ تجاری" },
+        { "id": "palletizing", "title": "پالت‌بندی" },
+        { "id": "packaging-standards", "title": "استانداردسازی بسته‌بندی" }
+      ]
+    },
+    {
       "id": "import-export",
       "icon": "import-export",
       "title": "خدمات واردات و صادرات",
-      "description": "مدیریت واردات و صادرات، سورسینگ، یافتن خریدار و تأمین‌کننده خارجی، نمایندگی تجاری و مدیریت اسناد.",
+      "description": "مدیریت واردات و صادرات، سورسینگ، یافتن خریدار و تأمین‌کننده خارجی و نمایندگی تجاری.",
       "children": [
-        {
-          "id": "import-mgmt",
-          "title": "مدیریت واردات کالا"
-        },
-        {
-          "id": "export-mgmt",
-          "title": "مدیریت صادرات کالا"
-        },
-        {
-          "id": "sourcing",
-          "title": "تأمین و سورسینگ کالا"
-        },
-        {
-          "id": "find-buyer",
-          "title": "پیدا کردن خریدار خارجی"
-        },
-        {
-          "id": "find-supplier",
-          "title": "پیدا کردن تأمین‌کننده خارجی"
-        },
-        {
-          "id": "commercial-agency",
-          "title": "نمایندگی تجاری و فروش"
-        },
-        {
-          "id": "trade-documents",
-          "title": "مدیریت اسناد تجاری"
-        }
+        { "id": "import-mgmt", "title": "مدیریت واردات کالا" },
+        { "id": "export-mgmt", "title": "مدیریت صادرات کالا" },
+        { "id": "sourcing", "title": "تأمین و سورسینگ کالا" },
+        { "id": "find-buyer", "title": "پیدا کردن خریدار خارجی" },
+        { "id": "find-supplier", "title": "پیدا کردن تأمین‌کننده خارجی" },
+        { "id": "commercial-agency", "title": "نمایندگی تجاری و فروش" }
       ]
     },
     {
       "id": "intl-logistics",
       "icon": "intl-logistics",
       "title": "حمل‌ونقل و لجستیک بین‌المللی",
-      "description": "حمل دریایی، هوایی، زمینی، ریلی و ترکیبی؛ فورواردر، کریری، کانتینر و انبارداری بین‌المللی.",
+      "description": "حمل دریایی، هوایی، زمینی، ریلی و ترکیبی؛ فورواردر، کریری، کانتینر و انبارداری.",
       "children": [
-        {
-          "id": "sea-freight",
-          "title": "حمل دریایی"
-        },
-        {
-          "id": "air-freight",
-          "title": "حمل هوایی"
-        },
-        {
-          "id": "road-freight",
-          "title": "حمل زمینی"
-        },
-        {
-          "id": "rail-freight",
-          "title": "حمل ریلی"
-        },
-        {
-          "id": "multimodal",
-          "title": "حمل ترکیبی"
-        },
-        {
-          "id": "forwarder-carrier",
-          "title": "فورواردر و کریری"
-        },
-        {
-          "id": "container-services",
-          "title": "خدمات کانتینری"
-        },
-        {
-          "id": "warehousing",
-          "title": "انبارداری و نگهداری کالا"
-        }
+        { "id": "sea-freight", "title": "حمل دریایی" },
+        { "id": "air-freight", "title": "حمل هوایی" },
+        { "id": "road-freight", "title": "حمل زمینی" },
+        { "id": "rail-freight", "title": "حمل ریلی" },
+        { "id": "multimodal", "title": "حمل ترکیبی" },
+        { "id": "forwarder-carrier", "title": "فورواردر و کریری" },
+        { "id": "container-services", "title": "خدمات کانتینری" },
+        { "id": "warehousing", "title": "انبارداری و نگهداری کالا" }
       ]
     },
     {
       "id": "customs-clearance",
       "icon": "customs-clearance",
       "title": "گمرک و ترخیص کالا",
-      "description": "ترخیص، کارگزاری گمرکی، ثبت سفارش، مجوزهای واردات و صادرات، ارزش‌گذاری و مشاوره امور گمرکی.",
+      "description": "ترخیص، کارگزاری گمرکی، ثبت سفارش، مجوزهای واردات و صادرات و مشاوره امور گمرکی.",
       "children": [
-        {
-          "id": "customs-brokerage",
-          "title": "ترخیص کالا"
-        },
-        {
-          "id": "customs-agent",
-          "title": "کارگزار گمرکی"
-        },
-        {
-          "id": "order-registration",
-          "title": "ثبت سفارش"
-        },
-        {
-          "id": "import-export-permits",
-          "title": "اخذ مجوزهای واردات و صادرات"
-        },
-        {
-          "id": "customs-valuation",
-          "title": "ارزش‌گذاری کالا"
-        },
-        {
-          "id": "customs-consulting",
-          "title": "مشاوره امور گمرکی"
-        }
+        { "id": "customs-brokerage", "title": "ترخیص کالا" },
+        { "id": "customs-agent", "title": "کارگزار گمرکی" },
+        { "id": "order-registration", "title": "ثبت سفارش" },
+        { "id": "import-export-permits", "title": "اخذ مجوزهای واردات و صادرات" },
+        { "id": "customs-valuation", "title": "ارزش‌گذاری کالا" },
+        { "id": "customs-consulting", "title": "مشاوره امور گمرکی" }
       ]
     },
     {
@@ -119,58 +81,11 @@
       "title": "خدمات مالی و پرداخت بین‌المللی",
       "description": "اعتبار اسنادی، حواله ارزی، پرداخت‌های بین‌المللی، تأمین مالی تجارت و خدمات ارزی.",
       "children": [
-        {
-          "id": "letter-of-credit",
-          "title": "اعتبار اسنادی (LC)"
-        },
-        {
-          "id": "telegraphic-transfer",
-          "title": "حواله ارزی (TT)"
-        },
-        {
-          "id": "intl-payments",
-          "title": "پرداخت‌های بین‌المللی"
-        },
-        {
-          "id": "trade-finance",
-          "title": "تأمین مالی تجارت"
-        },
-        {
-          "id": "fx-trade-services",
-          "title": "خدمات ارزی تجاری"
-        }
-      ]
-    },
-    {
-      "id": "inspection-standards",
-      "icon": "inspection-standards",
-      "title": "بازرسی و استاندارد",
-      "description": "بازرسی کالا، کنترل کیفیت، آزمون، گواهی بازرسی، استانداردها و PSI قبل از حمل.",
-      "children": [
-        {
-          "id": "cargo-inspection",
-          "title": "بازرسی کالا"
-        },
-        {
-          "id": "quality-control",
-          "title": "کنترل کیفیت (QC)"
-        },
-        {
-          "id": "testing",
-          "title": "آزمون و آزمایش کالا"
-        },
-        {
-          "id": "inspection-certificate",
-          "title": "صدور گواهی بازرسی"
-        },
-        {
-          "id": "standards-certification",
-          "title": "استاندارد و گواهینامه‌ها"
-        },
-        {
-          "id": "pre-shipment-inspection",
-          "title": "بازرسی قبل از حمل (PSI)"
-        }
+        { "id": "letter-of-credit", "title": "اعتبار اسنادی (LC)" },
+        { "id": "telegraphic-transfer", "title": "حواله ارزی (TT)" },
+        { "id": "intl-payments", "title": "پرداخت‌های بین‌المللی" },
+        { "id": "trade-finance", "title": "تأمین مالی تجارت" },
+        { "id": "fx-trade-services", "title": "خدمات ارزی تجاری" }
       ]
     },
     {
@@ -179,102 +94,35 @@
       "title": "بیمه و مدیریت ریسک",
       "description": "بیمه باربری، بیمه حمل بین‌المللی، بیمه اعتبار صادراتی و مدیریت ریسک تجارت.",
       "children": [
-        {
-          "id": "cargo-insurance",
-          "title": "بیمه باربری"
-        },
-        {
-          "id": "intl-transport-insurance",
-          "title": "بیمه حمل‌ونقل بین‌المللی"
-        },
-        {
-          "id": "export-credit-insurance",
-          "title": "بیمه اعتبار صادراتی"
-        },
-        {
-          "id": "trade-risk-mgmt",
-          "title": "مدیریت ریسک تجارت"
-        }
+        { "id": "cargo-insurance", "title": "بیمه باربری" },
+        { "id": "intl-transport-insurance", "title": "بیمه حمل‌ونقل بین‌المللی" },
+        { "id": "export-credit-insurance", "title": "بیمه اعتبار صادراتی" },
+        { "id": "trade-risk-mgmt", "title": "مدیریت ریسک تجارت" }
       ]
     },
     {
       "id": "legal-trade",
       "icon": "legal-trade",
       "title": "خدمات حقوقی و قراردادهای تجاری",
-      "description": "قراردادهای بین‌المللی، تنظیم قرارداد فروش، مشاوره حقوق تجارت، حل اختلاف و ثبت شرکت.",
+      "description": "قراردادهای بین‌المللی، تنظیم قرارداد فروش، مشاوره حقوق تجارت و حل اختلاف.",
       "children": [
-        {
-          "id": "intl-contracts",
-          "title": "قراردادهای بین‌المللی"
-        },
-        {
-          "id": "sales-contracts",
-          "title": "تنظیم قرارداد فروش"
-        },
-        {
-          "id": "trade-law-advice",
-          "title": "مشاوره حقوق تجارت"
-        },
-        {
-          "id": "dispute-resolution",
-          "title": "حل اختلافات تجاری"
-        },
-        {
-          "id": "company-registration",
-          "title": "ثبت شرکت و نمایندگی"
-        }
+        { "id": "intl-contracts", "title": "قراردادهای بین‌المللی" },
+        { "id": "sales-contracts", "title": "تنظیم قرارداد فروش" },
+        { "id": "trade-law-advice", "title": "مشاوره حقوق تجارت" },
+        { "id": "dispute-resolution", "title": "حل اختلافات تجاری" },
+        { "id": "company-registration", "title": "ثبت شرکت و نمایندگی" }
       ]
     },
     {
       "id": "market-development",
       "icon": "market-development",
       "title": "بازاریابی و توسعه بازار",
-      "description": "تحقیقات بازار خارجی، بازاریابی صادراتی، تبلیغات بین‌المللی، جذب خریدار و نمایشگاه.",
+      "description": "تحقیقات بازار خارجی، بازاریابی صادراتی، تبلیغات بین‌المللی و جذب خریدار.",
       "children": [
-        {
-          "id": "market-research",
-          "title": "تحقیقات بازار خارجی"
-        },
-        {
-          "id": "export-marketing",
-          "title": "بازاریابی صادراتی"
-        },
-        {
-          "id": "intl-advertising",
-          "title": "تبلیغات بین‌المللی"
-        },
-        {
-          "id": "buyer-acquisition",
-          "title": "جذب خریدار خارجی"
-        },
-        {
-          "id": "trade-fairs",
-          "title": "حضور در نمایشگاه‌های بین‌المللی"
-        }
-      ]
-    },
-    {
-      "id": "packaging-prep",
-      "icon": "packaging-prep",
-      "title": "بسته‌بندی و آماده‌سازی کالا",
-      "description": "بسته‌بندی صادراتی، لیبل و چاپ تجاری، پالت‌بندی و استانداردسازی بسته‌بندی.",
-      "children": [
-        {
-          "id": "export-packaging",
-          "title": "بسته‌بندی صادراتی"
-        },
-        {
-          "id": "commercial-labeling",
-          "title": "لیبل و چاپ تجاری"
-        },
-        {
-          "id": "palletizing",
-          "title": "پالت‌بندی"
-        },
-        {
-          "id": "packaging-standards",
-          "title": "استانداردسازی بسته‌بندی"
-        }
+        { "id": "market-research", "title": "تحقیقات بازار خارجی" },
+        { "id": "export-marketing", "title": "بازاریابی صادراتی" },
+        { "id": "intl-advertising", "title": "تبلیغات بین‌المللی" },
+        { "id": "buyer-acquisition", "title": "جذب خریدار خارجی" }
       ]
     },
     {
@@ -283,26 +131,131 @@
       "title": "خدمات تجاری تخصصی",
       "description": "ترجمه و مترجم تجاری، آموزش تجارت بین‌الملل، مشاوره صادرات/واردات و نماینده محلی.",
       "children": [
-        {
-          "id": "trade-translation",
-          "title": "ترجمه تخصصی تجاری"
-        },
-        {
-          "id": "negotiation-interpreter",
-          "title": "مترجم مذاکرات تجاری"
-        },
-        {
-          "id": "trade-training",
-          "title": "آموزش تجارت بین‌الملل"
-        },
-        {
-          "id": "trade-consulting",
-          "title": "مشاوره صادرات و واردات"
-        },
-        {
-          "id": "local-representative",
-          "title": "خدمات نماینده محلی در کشورها"
-        }
+        { "id": "trade-translation", "title": "ترجمه تخصصی تجاری" },
+        { "id": "negotiation-interpreter", "title": "مترجم مذاکرات تجاری" },
+        { "id": "trade-training", "title": "آموزش تجارت بین‌الملل" },
+        { "id": "trade-consulting", "title": "مشاوره صادرات و واردات" },
+        { "id": "local-representative", "title": "خدمات نماینده محلی در کشورها" }
+      ]
+    },
+    {
+      "id": "intl-certificates",
+      "icon": "intl-certificates",
+      "title": "گواهینامه‌ها و مجوزهای بین‌المللی",
+      "description": "اخذ و تمدید گواهینامه‌های بین‌المللی، مجوزهای صادراتی و مدارک انطباق محصول.",
+      "children": [
+        { "id": "product-certificates", "title": "گواهینامه‌های محصول" },
+        { "id": "export-licenses", "title": "مجوزهای صادرات" },
+        { "id": "origin-certificates", "title": "گواهی مبدأ" },
+        { "id": "halal-organic-certs", "title": "گواهی حلال، ارگانیک و مشابه" }
+      ]
+    },
+    {
+      "id": "export-compliance",
+      "icon": "export-compliance",
+      "title": "انطباق مقررات و استانداردهای صادرات (Compliance)",
+      "description": "رعایت مقررات صادرات، تحریم‌ها، استانداردهای مقصد و الزامات قانونی بازارهای هدف.",
+      "children": [
+        { "id": "export-regulations", "title": "مقررات صادرات" },
+        { "id": "sanctions-screening", "title": "بررسی تحریم و محدودیت‌ها" },
+        { "id": "destination-standards", "title": "استانداردهای کشور مقصد" },
+        { "id": "compliance-audit", "title": "ممیزی انطباق تجاری" }
+      ]
+    },
+    {
+      "id": "trade-documents",
+      "icon": "trade-documents",
+      "title": "مدیریت و تهیه اسناد تجاری",
+      "description": "تهیه، کنترل و مدیریت اسناد حمل، اینکوترمز، فاکتور تجاری، پکینگ‌لیست و اسناد بانکی.",
+      "children": [
+        { "id": "shipping-docs", "title": "اسناد حمل" },
+        { "id": "commercial-invoice", "title": "فاکتور و پکینگ‌لیست" },
+        { "id": "incoterms-docs", "title": "اسناد اینکوترمز" },
+        { "id": "bank-trade-docs", "title": "اسناد بانکی و LC" }
+      ]
+    },
+    {
+      "id": "supply-chain",
+      "icon": "supply-chain",
+      "title": "مدیریت زنجیره تأمین و تأمین کالا",
+      "description": "طراحی و مدیریت زنجیره تأمین، تأمین پایدار کالا، کنترل موجودی و هماهنگی تأمین‌کنندگان.",
+      "children": [
+        { "id": "scm-design", "title": "طراحی زنجیره تأمین" },
+        { "id": "supplier-management", "title": "مدیریت تأمین‌کنندگان" },
+        { "id": "procurement", "title": "تأمین و خرید کالا" },
+        { "id": "inventory-planning", "title": "برنامه‌ریزی موجودی" }
+      ]
+    },
+    {
+      "id": "ecommerce-marketplace",
+      "icon": "ecommerce-marketplace",
+      "title": "تجارت الکترونیک بین‌المللی و مارکت‌پلیس‌ها",
+      "description": "راه‌اندازی فروش بین‌المللی آنلاین، حضور در مارکت‌پلیس‌ها و مدیریت فروشگاه صادراتی.",
+      "children": [
+        { "id": "marketplace-listing", "title": "حضور در مارکت‌پلیس‌ها" },
+        { "id": "cross-border-ecommerce", "title": "فروش فرامرزی آنلاین" },
+        { "id": "online-export-store", "title": "فروشگاه صادراتی آنلاین" },
+        { "id": "digital-catalog", "title": "کاتالوگ و ویترین دیجیتال" }
+      ]
+    },
+    {
+      "id": "trade-digital",
+      "icon": "trade-digital",
+      "title": "راهکارهای نرم‌افزاری و تحول دیجیتال تجارت",
+      "description": "نرم‌افزارهای تجارت، اتوماسیون فرآیندهای صادرات و واردات و تحول دیجیتال کسب‌وکار.",
+      "children": [
+        { "id": "trade-software", "title": "نرم‌افزارهای تجارت" },
+        { "id": "process-automation", "title": "اتوماسیون فرآیندها" },
+        { "id": "digital-transformation", "title": "تحول دیجیتال" },
+        { "id": "trade-data-analytics", "title": "تحلیل داده تجاری" }
+      ]
+    },
+    {
+      "id": "investment-consulting",
+      "icon": "investment-consulting",
+      "title": "مشاوره سرمایه‌گذاری و توسعه کسب‌وکار",
+      "description": "مشاوره سرمایه‌گذاری خارجی، توسعه بازار، امکان‌سنجی و رشد کسب‌وکارهای صادرات‌محور.",
+      "children": [
+        { "id": "fdi-consulting", "title": "مشاوره سرمایه‌گذاری خارجی" },
+        { "id": "business-growth", "title": "توسعه کسب‌وکار" },
+        { "id": "feasibility-studies", "title": "امکان‌سنجی پروژه‌ها" },
+        { "id": "export-strategy", "title": "استراتژی صادرات" }
+      ]
+    },
+    {
+      "id": "trade-events",
+      "icon": "trade-events",
+      "title": "نمایشگاه‌ها، رویدادها و هیئت‌های تجاری",
+      "description": "برگزاری و حضور در نمایشگاه‌های بین‌المللی، رویدادهای تجاری و هیئت‌های بازرگانی.",
+      "children": [
+        { "id": "trade-fairs", "title": "نمایشگاه‌های بین‌المللی" },
+        { "id": "b2b-matchmaking", "title": "رویدادهای B2B و مچ‌میکینگ" },
+        { "id": "trade-missions", "title": "هیئت‌های تجاری" },
+        { "id": "event-organization", "title": "برگزاری رویداد تجاری" }
+      ]
+    },
+    {
+      "id": "business-immigration",
+      "icon": "business-immigration",
+      "title": "خدمات مهاجرت و استقرار کسب‌وکار",
+      "description": "مشاوره مهاجرت کاری و تجاری، ثبت شرکت در خارج و استقرار کسب‌وکار در بازارهای هدف.",
+      "children": [
+        { "id": "business-visa", "title": "ویزای تجاری و کاری" },
+        { "id": "company-setup-abroad", "title": "ثبت شرکت در خارج" },
+        { "id": "relocation-support", "title": "استقرار و انتقال کسب‌وکار" },
+        { "id": "local-compliance-setup", "title": "انطباق محلی و راه‌اندازی" }
+      ]
+    },
+    {
+      "id": "esg-sustainability",
+      "icon": "esg-sustainability",
+      "title": "پایداری، ESG و الزامات زیست‌محیطی",
+      "description": "مشاوره ESG، گزارش پایداری، الزامات زیست‌محیطی صادرات و زنجیره تأمین سبز.",
+      "children": [
+        { "id": "esg-advisory", "title": "مشاوره ESG" },
+        { "id": "sustainability-reporting", "title": "گزارش پایداری" },
+        { "id": "environmental-compliance", "title": "الزامات زیست‌محیطی" },
+        { "id": "green-supply-chain", "title": "زنجیره تأمین سبز" }
       ]
     }
   ]

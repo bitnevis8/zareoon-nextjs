@@ -1,6 +1,6 @@
 {
-  "save": "",
-  "cancel": "",
-  "loading": "",
-  "close": ""
+  "save": "Сохранить",
+  "cancel": "Отмена",
+  "loading": "Загрузка…",
+  "close": "Закрыть"
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { API_ENDPOINTS } from '../../config/api';
 import { useRequireAdmin } from '@/app/hooks/useDashboardRole';
+import DataExportImportButtons from '@/app/components/dashboard/DataExportImportButtons';
 
 const ORDER_STATUS_KEYS = [
   'pending',
@@ -257,7 +258,14 @@ export default function OrderManagementPage() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">{t('management.subtitle')}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-slate-600">{t('management.subtitle')}</p>
+        <div className="flex flex-wrap gap-2">
+          <DataExportImportButtons section="orders" onImported={loadOrders} compact />
+          <DataExportImportButtons section="orderItems" compact />
+          <DataExportImportButtons section="orderRequestItems" compact />
+        </div>
+      </div>
 
       {/* Orders Table - Mobile First Design */}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">

@@ -3,14 +3,17 @@
   "escrow": "تضمین معاملات و حساب امانی",
   "cart": "سبد خرید",
   "myOrders": "سفارشات من",
-  "startSelling": "شروع فروشندگی",
+  "startSelling": "عضویت در فروشندگان",
   "submitRequest": "ثبت درخواست",
   "myRequests": "درخواست‌های من",
   "myProducts": "فهرست محصولات من",
   "newInventory": "ثبت موجودی جدید",
+  "shopSettings": "تنظیمات فروشگاه",
   "customerOrders": "سفارشات مشتری",
   "incomingToMyProducts": "مشاهده نیازمندی‌ها به محصولات من",
   "admin": {
+    "overview": "نمای مدیریت",
+    "managementHome": "خلاصه مدیریت",
     "userManagement": "مدیریت کاربران",
     "usersList": "لیست کاربران",
     "rolesList": "لیست نقش‌ها",
@@ -30,8 +33,8 @@
   },
   "sections": {
     "seller": "فروشنده",
-    "applicant": "متقاضی",
-    "servicesProvider": "ارائه‌دهنده خدمات",
+    "applicant": "خریدار",
+    "servicesProvider": "خدمات‌دهنده",
     "admin": "مدیریت"
   }
 }

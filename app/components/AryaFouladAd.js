@@ -18,7 +18,7 @@ function AdMainContent({ t }) {
         </div>
         <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 border border-amber-200/80 shadow-md overflow-hidden self-start">
           <Image
-            src="/images/afg.png"
+            src="/images/advertice/afg-insp.png"
             alt={t("adBrandName")}
             width={80}
             height={80}
@@ -109,7 +109,7 @@ export default function AryaFouladAd() {
         <div className="flex items-start gap-2.5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-1 border border-amber-200/80 shadow-sm overflow-hidden">
             <Image
-              src="/images/afg.png"
+              src="/images/advertice/afg-insp.png"
               alt=""
               width={40}
               height={40}

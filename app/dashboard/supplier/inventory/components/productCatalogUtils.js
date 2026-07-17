@@ -18,10 +18,22 @@ export function isCategoryNode(item, childrenByParent) {
   return getChildren(item.id, childrenByParent).length > 0;
 }
 
-export function isSelectableProductNode(item, childrenByParent) {
+export function isSelectableProductNode(item, childrenByParent, { isAdmin = false } = {}) {
   if (!item.isOrderable) return false;
-  if (!childrenByParent) return true;
-  return getChildren(item.id, childrenByParent).length === 0;
+  if (!childrenByParent) {
+    return canListByPolicy(item, isAdmin);
+  }
+  if (getChildren(item.id, childrenByParent).length > 0) return false;
+  return canListByPolicy(item, isAdmin);
+}
+
+function canListByPolicy(item, isAdmin) {
+  const policy = item.listingPolicy;
+  if (policy === "category-navigation-only") return false;
+  if ((policy === "pre-approval-required" || policy === "manual-review-only") && !isAdmin) {
+    return false;
+  }
+  return true;
 }
 
 export function buildCatalogIndex(items) {

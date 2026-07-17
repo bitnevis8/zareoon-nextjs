@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import Link from "next/link";
 import { getSupplyCountryOptions } from "@/app/utils/supplySource";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
+import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
 
 const emptyProductForm = {
   name: "",
@@ -157,6 +158,7 @@ export default function ProductsPage() {
         >
           {t("list.downloadEnglishCsv")}
         </a>
+        <DataExportImportButtons section="products" onImported={() => load(q.trim())} compact />
       </div>
       <form id="productForm" onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <input className="border p-2 rounded text-sm" placeholder={t("list.namePlaceholder")} value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />

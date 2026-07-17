@@ -32,6 +32,9 @@ export function isVipCategoryEnabled(vipCategories, categoryId) {
 }
 
 export function getVipCompanyName(providers, categoryId, t) {
+  if (categoryId === "inspection-standards" && t) {
+    return t("vip.inspectionStandardsCompany");
+  }
   if (!Array.isArray(providers) || !categoryId) return null;
 
   const match = providers.find((provider) => {
@@ -43,7 +46,6 @@ export function getVipCompanyName(providers, categoryId, t) {
   });
 
   if (match?.displayName) return match.displayName;
-  if (categoryId === "inspection-standards" && t) return t("vip.inspectionStandardsCompany");
   return null;
 }
 

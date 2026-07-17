@@ -182,6 +182,35 @@ export default function CatalogLotOfferCard({
           </div>
         ) : null}
 
+        {(lot.packagingType ||
+          lot.hsCode ||
+          (lot.filterValues && Object.keys(lot.filterValues).length > 0)) ? (
+          <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
+            <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("lotTradeDetailsTitle")}</p>
+            {lot.packagingType ? (
+              <DetailRow label={t("packagingType")} value={lot.packagingType} />
+            ) : null}
+            {lot.hsCode ? <DetailRow label={t("hsCode")} value={lot.hsCode} /> : null}
+            {lot.filterValues &&
+              Object.entries(lot.filterValues)
+                .filter(([k, v]) => v && k !== "hsCode")
+                .map(([k, v]) => (
+                  <DetailRow
+                    key={k}
+                    label={(() => {
+                      try {
+                        const tr = t(`filterKeys.${k}`);
+                        return tr && tr !== `filterKeys.${k}` ? tr : k;
+                      } catch {
+                        return k;
+                      }
+                    })()}
+                    value={String(v)}
+                  />
+                ))}
+          </div>
+        ) : null}
+
         {getLotSupplier(lot) && (supplier.mobile || supplier.name) ? (
           <div className={`border-t border-dashed border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
             <p className={`mb-2 text-xs ${catalogText.muted}`}>{t("supplier")}</p>

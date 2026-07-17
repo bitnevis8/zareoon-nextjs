@@ -46,6 +46,8 @@ export default function InventoryViewModal({ lot, productName, farmerName, onClo
           <div className="rounded-xl border border-slate-200 bg-slate-50/50 px-4">
             <Row label={t("lot.supplier")} value={farmerName} />
             <Row label={t("lot.unit")} value={lot.unit} />
+            {lot.packagingType ? <Row label={t("create.packagingType")} value={lot.packagingType} /> : null}
+            {lot.hsCode ? <Row label={t("create.hsCode")} value={lot.hsCode} /> : null}
             <Row label={t("lot.totalInventory")} value={`${parseFloat(lot.totalQuantity || 0).toLocaleString("fa-IR")} ${lot.unit}`} />
             <Row label={t("lot.reserved")} value={`${parseFloat(lot.reservedQuantity || 0).toLocaleString("fa-IR")} ${lot.unit}`} />
             <Row label={t("lot.available")} value={`${available.toLocaleString("fa-IR")} ${lot.unit}`} />
@@ -83,6 +85,14 @@ export default function InventoryViewModal({ lot, productName, farmerName, onClo
                   {lot.latitude}, {lot.longitude}
                 </p>
               ) : null}
+            </div>
+          ) : null}
+
+          {lot.filterValues && Object.keys(lot.filterValues).length > 0 ? (
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/50 px-4">
+              {Object.entries(lot.filterValues).map(([k, v]) => (
+                <Row key={k} label={k} value={String(v)} />
+              ))}
             </div>
           ) : null}
 

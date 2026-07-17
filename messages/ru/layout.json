@@ -1,46 +1,46 @@
 {
   "metadata": {
-    "titleDefault": "",
-    "titleTemplate": "",
-    "description": "",
+    "titleDefault": "Zareoon — онлайн-площадка",
+    "titleTemplate": "%s | Zareoon",
+    "description": "Zareoon — онлайн-площадка для покупки и продажи широкого ассортимента товаров. Ищите, сравнивайте и заказывайте у проверенных поставщиков по всей стране.",
     "keywords": [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      ""
+      "Zareoon",
+      "Онлайн-площадка",
+      "Покупка и продажа",
+      "Поставщик",
+      "Оптовые закупки",
+      "Оптовые продажи",
+      "Товарная площадка"
     ],
-    "creator": "",
-    "openGraphTitle": "",
-    "openGraphDescription": "",
-    "openGraphImageAlt": "",
-    "twitterTitle": "",
-    "twitterDescription": ""
+    "creator": "Zareoon",
+    "openGraphTitle": "Zareoon — онлайн-площадка",
+    "openGraphDescription": "Онлайн-площадка для покупки и продажи широкого ассортимента товаров.",
+    "openGraphImageAlt": "Zareoon",
+    "twitterTitle": "Zareoon — онлайн-площадка",
+    "twitterDescription": "Онлайн-площадка: поиск, сравнение и заказ."
   },
-  "avatarFallbackInitial": "",
-  "userFallback": "",
+  "avatarFallbackInitial": "П",
+  "userFallback": "Пользователь",
   "sidebar": {
-    "tradeServicesSection": "",
-    "providerMembership": "",
-    "myServicesPage": "",
-    "customerOrders": "",
-    "incomingServiceRequests": "",
-    "myShopUrl": "",
-    "configureShopUrl": ""
+    "tradeServicesSection": "Торговые услуги",
+    "providerMembership": "Стать поставщиком услуг",
+    "myServicesPage": "Моя страница услуг",
+    "customerOrders": "Заказы клиентов",
+    "incomingServiceRequests": "Посмотреть заявки на мои услуги",
+    "myShopUrl": "URL моего магазина",
+    "configureShopUrl": "Настроить URL магазина"
   },
   "emailVerification": {
-    "title": "",
-    "prompt": "",
-    "codePlaceholder": "",
-    "verifyButton": "",
-    "resend": "",
-    "resending": "",
-    "errorUserEmailUnavailable": "",
-    "errorCodeRequired": "",
-    "errorVerifyFailed": "",
-    "errorServer": "",
-    "errorResendFailed": ""
+    "title": "Ваш адрес электронной почты не подтверждён",
+    "prompt": "Введите код, отправленный на {email}.",
+    "codePlaceholder": "Код подтверждения",
+    "verifyButton": "Подтвердить электронную почту",
+    "resend": "Отправить повторно",
+    "resending": "...",
+    "errorUserEmailUnavailable": "Информация о пользователе или адрес электронной почты недоступны.",
+    "errorCodeRequired": "Введите код подтверждения.",
+    "errorVerifyFailed": "Не удалось подтвердить адрес электронной почты.",
+    "errorServer": "Не удалось подключиться к серверу.",
+    "errorResendFailed": "Не удалось повторно отправить код."
   }
 }

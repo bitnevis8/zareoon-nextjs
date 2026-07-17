@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "../../../context/LanguageContext";
+import EnamadFooterBadge from "../../legal/EnamadFooterBadge";
 import EnamadSeal from "../../legal/EnamadSeal";
+import {
+  SITE_ADDRESS,
+  SITE_EMAIL,
+  SITE_EMAIL_MAILTO,
+  SITE_PHONE,
+  SITE_PHONE_TEL,
+} from "@/app/config/siteContact";
 
 const LEGAL_LINKS = [
   { href: "/about", key: "about" },
@@ -34,6 +42,22 @@ export default function Footer({ className = "" }) {
             <p className="max-w-md text-center text-[11px] leading-5 text-slate-400 sm:text-right">
               زارعون بستر معرفی است؛ خریدار و فروشنده مستقیم ارتباط می‌گیرند و مسئولیت معامله با خودشان است.
             </p>
+
+            <div className="flex max-w-md flex-col items-center gap-1.5 text-center text-xs text-slate-600 sm:items-start sm:text-right">
+              <p className="font-semibold text-slate-700">{t("supportContact")}</p>
+              <a
+                href={SITE_PHONE_TEL}
+                className="font-semibold text-emerald-700 tabular-nums hover:underline"
+                dir="ltr"
+              >
+                {SITE_PHONE}
+              </a>
+              <a href={SITE_EMAIL_MAILTO} className="break-all text-emerald-700 hover:underline" dir="ltr">
+                {SITE_EMAIL}
+              </a>
+              <p className="text-[11px] leading-5 text-slate-500">{SITE_ADDRESS}</p>
+            </div>
+
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:justify-start">
               <Link href="/" className="text-slate-500 transition hover:text-emerald-700">
                 {t("home")}
@@ -60,7 +84,10 @@ export default function Footer({ className = "" }) {
                 </Link>
               ))}
             </nav>
-            <EnamadSeal className="mt-1" />
+            <div className="mt-2 flex flex-wrap items-end justify-center gap-3 sm:justify-end">
+              <EnamadFooterBadge />
+              <EnamadSeal />
+            </div>
           </div>
         </div>
       </div>

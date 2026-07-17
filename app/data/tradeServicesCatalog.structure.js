@@ -9,6 +9,16 @@ export const SHARED_CATEGORY_IDS = [
   "legal-trade",
   "market-development",
   "specialized-trade",
+  "intl-certificates",
+  "export-compliance",
+  "trade-documents",
+  "supply-chain",
+  "ecommerce-marketplace",
+  "trade-digital",
+  "investment-consulting",
+  "trade-events",
+  "business-immigration",
+  "esg-sustainability",
 ];
 
 /** Legacy service-request slugs → current L1 category id */
@@ -20,7 +30,7 @@ export const LEGACY_SERVICE_TYPE_MAP = {
   inspection: "inspection-standards",
   insurance: "insurance-risk",
   consulting: "specialized-trade",
-  documents: "import-export",
+  documents: "trade-documents",
 };
 
 export const L1_CATEGORY_IDS = [...SHARED_CATEGORY_IDS];

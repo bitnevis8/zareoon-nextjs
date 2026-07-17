@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
+import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
 
 export default function RolesList() {
   const t = useTranslations("users");
@@ -61,15 +62,17 @@ export default function RolesList() {
   return (
     <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-4 md:p-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">{t("roles.title")}</h1>
-
-        <div className="flex justify-end mb-6">
-          <button
-            onClick={() => router.push("/dashboard/user-management/roles/create")}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out"
-          >
-            {t("roles.addRole")}
-          </button>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{t("roles.title")}</h1>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <DataExportImportButtons section="roles" onImported={fetchRoles} compact />
+            <button
+              onClick={() => router.push("/dashboard/user-management/roles/create")}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out"
+            >
+              {t("roles.addRole")}
+            </button>
+          </div>
         </div>
 
         {error && (

@@ -20,6 +20,7 @@ import UserFilters from "./components/UserFilters";
 import UserTable from "./components/UserTable";
 import UserCard from "./components/UserCard";
 import DeleteUserModal from "./components/DeleteUserModal";
+import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
 
 function Toast({ message, type, onClose, closeLabel }) {
   useEffect(() => {
@@ -135,6 +136,12 @@ export default function UserManagementPage() {
             </svg>
             {t("page.addUser")}
           </Link>
+          <DataExportImportButtons
+            section="users"
+            onImported={reload}
+            compact
+          />
+          <DataExportImportButtons section="userRoles" compact />
         </div>
       </div>
 

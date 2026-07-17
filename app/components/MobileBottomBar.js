@@ -164,7 +164,7 @@ export default function MobileBottomBar() {
       id: "search",
       label: t("mobileSearchTab"),
       icon: "search",
-      href: "/search",
+      href: "/search?mode=explore",
       active: isSearchActive,
     },
     {
@@ -202,7 +202,7 @@ export default function MobileBottomBar() {
       id: "search",
       label: t("mobileSearchTab"),
       icon: "search",
-      href: "/search",
+      href: "/search?mode=explore",
       active: isSearchActive,
     },
     {

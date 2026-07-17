@@ -81,6 +81,13 @@ export function localizeUnit(unit, language) {
   return units[normalized]?.[language] || units[normalized]?.fa || unit;
 }
 
+export function localizePackaging(packaging, language) {
+  if (!packaging) return "";
+  const key = String(packaging).toLowerCase();
+  const packs = i18nData.packaging || {};
+  return packs[key]?.[language] || packs[key]?.fa || packaging;
+}
+
 export function localizeStatus(status, t) {
   const map = {
     on_field: "statusOnField",

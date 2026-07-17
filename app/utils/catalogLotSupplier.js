@@ -1,4 +1,6 @@
 /** کاربر تأمین‌کنندهٔ یک لات — سازگار با پاسخ قدیمی `farmer` */
+import { providerPublicPath } from "@/app/utils/providerPublicPath";
+
 export function getLotSupplier(lot) {
   return lot?.supplier ?? lot?.farmer ?? null;
 }
@@ -7,11 +9,11 @@ export function getLotSupplierProfileUrl(lot) {
   const supplier = getLotSupplier(lot);
   if (!supplier?.id) return null;
   const slug = supplier.account?.profileSlug || supplier.profileSlug;
-  if (slug) return `/tamin/${slug}`;
+  if (slug) return providerPublicPath(slug);
   if (supplier.username && !String(supplier.username).startsWith("temp")) {
-    return `/tamin/${supplier.username}`;
+    return providerPublicPath(supplier.username);
   }
-  return `/tamin/${supplier.id}`;
+  return providerPublicPath(supplier.id);
 }
 
 export function getLotSupplierDisplayName(lot) {

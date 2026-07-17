@@ -130,13 +130,18 @@ function ListingResultCard({ row, language, t, onNavigate }) {
   );
 }
 
-export default function MobileExploreSearch() {
+export default function MobileExploreSearch({
+  variant = "page",
+  initialQuery = "",
+  onRequestClose,
+}) {
   const { t, language, isRTL } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef(null);
+  const isModal = variant === "modal";
 
-  const [query, setQuery] = useState(() => searchParams.get("q") || "");
+  const [query, setQuery] = useState(() => initialQuery || searchParams.get("q") || "");
   const [filter, setFilter] = useState(() => {
     const f = searchParams.get("filter");
     return SEARCH_FILTERS.includes(f) ? f : "all";
@@ -187,12 +192,19 @@ export default function MobileExploreSearch() {
   }, [language]);
 
   useEffect(() => {
+    if (isModal) return;
     const q = searchParams.get("q") || "";
     const f = searchParams.get("filter");
     const urlFilter = f && SEARCH_FILTERS.includes(f) ? f : "all";
     setQuery((prev) => (prev !== q ? q : prev));
     setFilter((prev) => (prev !== urlFilter ? urlFilter : prev));
-  }, [searchParams]);
+  }, [searchParams, isModal]);
+
+  useEffect(() => {
+    if (isModal && initialQuery != null) {
+      setQuery(initialQuery);
+    }
+  }, [isModal, initialQuery]);
 
   useEffect(() => {
     if (parsed.term) return;
@@ -248,6 +260,7 @@ export default function MobileExploreSearch() {
 
   const syncUrl = useCallback(
     (nextQuery, nextFilter = filter) => {
+      if (isModal) return;
       const params = new URLSearchParams();
       params.set("mode", "explore");
       const trimmed = nextQuery.trim();
@@ -255,7 +268,7 @@ export default function MobileExploreSearch() {
       if (nextFilter && nextFilter !== "all") params.set("filter", nextFilter);
       router.replace(`/search?${params.toString()}`, { scroll: false });
     },
-    [filter, router]
+    [filter, router, isModal]
   );
 
   const handleSubmit = (e) => {
@@ -271,15 +284,18 @@ export default function MobileExploreSearch() {
 
   const handleResultNavigate = (href, label) => {
     if (label) saveRecent(label.startsWith("#") ? label : label);
+    onRequestClose?.();
     router.push(href);
   };
 
   const filterChips = [
-    { id: "all", label: t("mobileSearchFilterAll") },
-    { id: "listings", label: t("mobileSearchFilterListings") },
-    { id: "types", label: t("mobileSearchFilterTypes") },
-    { id: "hashtag", label: t("mobileSearchFilterHashtag") },
+    { id: "all", label: t("mobileSearchFilterAll"), descKey: "mobileSearchFilterAllDesc" },
+    { id: "types", label: t("mobileSearchFilterTypes"), descKey: "mobileSearchFilterTypesDesc" },
+    { id: "listings", label: t("mobileSearchFilterListings"), descKey: "mobileSearchFilterListingsDesc" },
+    { id: "hashtag", label: t("mobileSearchFilterHashtag"), descKey: "mobileSearchFilterHashtagDesc" },
   ];
+
+  const activeFilterChip = filterChips.find((chip) => chip.id === filter) || filterChips[0];
 
   const popularTags = useMemo(
     () => rootCategories.slice(0, 10).map((c) => ({ id: c.id, label: `#${getLocalizedText(c, language)}` })),
@@ -294,11 +310,13 @@ export default function MobileExploreSearch() {
   const renderExplore = () => {
     if (loadingData) {
       return (
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className={`animate-pulse rounded-lg bg-slate-200 ${i % 5 === 0 ? "row-span-2 aspect-[3/4]" : "aspect-square"}`}
+              className={`animate-pulse rounded-lg bg-slate-200 ${
+                !isModal && i % 5 === 0 ? "row-span-2 aspect-[3/4]" : "aspect-square"
+              }`}
             />
           ))}
         </div>
@@ -329,24 +347,48 @@ export default function MobileExploreSearch() {
     }
 
     return (
-      <div className="grid grid-cols-2 gap-1.5 auto-rows-min sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 lg:gap-2.5">
+      <div
+        className={`grid grid-cols-2 gap-1.5 auto-rows-min sm:grid-cols-3 lg:gap-2.5 ${
+          isModal ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+        }`}
+      >
         {exploreListings.map((row, index) => (
-          <ListingExploreTile key={row.lot.id} row={row} language={language} t={t} tall={index % 5 === 0} />
+          <ListingExploreTile
+            key={row.lot.id}
+            row={row}
+            language={language}
+            t={t}
+            tall={!isModal && index % 5 === 0}
+          />
         ))}
       </div>
     );
   };
 
-  const splitResultsOnDesktop = hasSearch && filter === "all" && types.length > 0 && listings.length > 0;
+  const splitResultsOnDesktop = !isModal && hasSearch && filter === "all" && types.length > 0 && listings.length > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col max-lg:min-h-[calc(100dvh-var(--site-mobile-top-chrome)-4.25rem-env(safe-area-inset-bottom))] lg:max-w-7xl lg:px-6 lg:py-6">
-      <header className="mb-4 hidden lg:block">
-        <h1 className="text-2xl font-bold text-slate-900">{t("searchAdvanced")}</h1>
-        <p className="mt-1 text-sm text-slate-500">{t("mobileSearchHint")}</p>
-      </header>
+    <div
+      className={
+        isModal
+          ? "flex h-full min-h-0 w-full flex-col"
+          : "mx-auto flex w-full max-w-3xl flex-col max-lg:min-h-[calc(100dvh-var(--site-mobile-top-chrome)-4.25rem-env(safe-area-inset-bottom))] lg:max-w-7xl lg:px-6 lg:py-6"
+      }
+    >
+      {!isModal ? (
+        <header className="mb-4 hidden lg:block">
+          <h1 className="text-2xl font-bold text-slate-900">{t("searchAdvanced")}</h1>
+          <p className="mt-1 text-sm text-slate-500">{t("mobileSearchHint")}</p>
+        </header>
+      ) : null}
 
-      <div className="sticky top-0 z-20 border-b border-slate-100 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-4 lg:static lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:px-5 lg:py-4 lg:shadow-sm">
+      <div
+        className={`shrink-0 border-b border-slate-100 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-4 ${
+          isModal
+            ? "sticky top-0 z-10"
+            : "sticky top-0 z-20 lg:static lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:px-5 lg:py-4 lg:shadow-sm"
+        }`}
+      >
         <form onSubmit={handleSubmit} className="relative">
           <span
             className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-slate-400 ${
@@ -402,11 +444,14 @@ export default function MobileExploreSearch() {
         </div>
 
         <p className="mt-2 text-[11px] leading-5 text-slate-500 lg:text-xs">
-          {hasSearch ? t("mobileSearchActiveHint") : t("mobileSearchHint")}
+          {t(activeFilterChip.descKey)}
         </p>
       </div>
-
-      <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 lg:px-0 lg:py-5">
+      <div
+        className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4 ${
+          isModal ? "pb-6" : "lg:px-0 lg:py-5"
+        }`}
+      >
         {!hasSearch ? (
           <div className="space-y-5">
             {recentSearches.length > 0 ? (
@@ -432,6 +477,7 @@ export default function MobileExploreSearch() {
                       onClick={() => {
                         setQuery(item);
                         syncUrl(item, item.startsWith("#") ? "hashtag" : filter);
+                        if (item.startsWith("#")) setFilter("hashtag");
                       }}
                       className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700"
                     >
@@ -485,7 +531,13 @@ export default function MobileExploreSearch() {
             ))}
           </div>
         ) : (
-          <div className={splitResultsOnDesktop ? "space-y-5 xl:grid xl:grid-cols-12 xl:items-start xl:gap-6 xl:space-y-0" : "space-y-5"}>
+          <div
+            className={
+              splitResultsOnDesktop
+                ? "space-y-5 xl:grid xl:grid-cols-12 xl:items-start xl:gap-6 xl:space-y-0"
+                : "space-y-5"
+            }
+          >
             {filter === "hashtag" && hashtagTags.length > 0 ? (
               <section className={splitResultsOnDesktop ? "xl:col-span-12" : ""}>
                 <h2 className="mb-2 text-xs font-bold text-slate-700">{t("mobileSearchMatchingTags")}</h2>
@@ -527,7 +579,11 @@ export default function MobileExploreSearch() {
             {showListings && listings.length > 0 ? (
               <section className={splitResultsOnDesktop ? "xl:col-span-8" : ""}>
                 <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchListingsSection")}</h2>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                <div
+                  className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${
+                    isModal ? "lg:grid-cols-3 xl:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+                  }`}
+                >
                   {listings.map((row) => (
                     <ListingResultCard
                       key={row.lot.id}

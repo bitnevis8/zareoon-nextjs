@@ -1,50 +1,50 @@
 {
   "import-export": [
     {
-      "id": "",
+      "id": "p-ie-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Торговая компания Pars Export",
+        "en": "Pars Export Trading Co.",
+        "ru": "Pars Export Trading"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Иран — Ирак — ОАЭ",
+        "en": "Iran — Iraq — UAE",
+        "ru": "Иран — Ирак — ОАЭ"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Управление экспортом",
+          "Поиск поставщиков",
+          "Поиск покупателей"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Export management",
+          "Sourcing",
+          "Buyer matching"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "Экспорт",
+          "Сорсинг",
+          "Поиск покупателей"
         ]
       },
       "licenses": {
         "fa": [
-          "",
-          ""
+          "Коммерческая карта",
+          "Экспортная лицензия"
         ],
         "en": [
-          "",
-          ""
+          "Trade card",
+          "Export license"
         ],
         "ru": [
-          ""
+          "Торговая карта"
         ]
       },
       "experienceYears": 14,
@@ -52,45 +52,45 @@
       "reviewCount": 62
     },
     {
-      "id": "",
+      "id": "p-ie-2",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Консультант по импорту — г-н Резаи",
+        "en": "Import Advisor — Mr. Rezaei",
+        "ru": "Консультант по импорту"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Физическое лицо",
+        "en": "Individual",
+        "ru": "Частное лицо"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Китай — Турция — Иран",
+        "en": "China — Turkey — Iran",
+        "ru": "Китай — Турция — Иран"
       },
       "services": {
         "fa": [
-          "",
-          ""
+          "Управление импортом",
+          "Поиск международных поставщиков"
         ],
         "en": [
-          "",
-          ""
+          "Import management",
+          "Foreign supplier sourcing"
         ],
         "ru": [
-          "",
-          ""
+          "Импорт",
+          "Поиск поставщиков"
         ]
       },
       "licenses": {
         "fa": [
-          ""
+          "Сертификат бизнес-консультанта"
         ],
         "en": [
-          ""
+          "Trade consulting certificate"
         ],
         "ru": [
-          ""
+          "Сертификат консультанта"
         ]
       },
       "experienceYears": 9,
@@ -100,48 +100,48 @@
   ],
   "intl-logistics": [
     {
-      "id": "",
+      "id": "p-log-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания морских перевозок Khalij",
+        "en": "Gulf Sea Freight Co.",
+        "ru": "Gulf Sea Freight"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Бендер-Аббас — Джебель-Али — Стамбул",
+        "en": "Bandar Abbas — Jebel Ali — Istanbul",
+        "ru": "Bandar Abbas — Jebel Ali — Istanbul"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Морские перевозки",
+          "Экспедирование грузов",
+          "контейнер"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Sea freight",
+          "Forwarding",
+          "Containers"
         ],
         "ru": [
-          "",
-          ""
+          "Морские перевозки",
+          "Экспедирование"
         ]
       },
       "licenses": {
         "fa": [
-          "",
-          ""
+          "Лицензия экспедитора",
+          "IATA/FMC partner"
         ],
         "en": [
-          ""
+          "Forwarding license"
         ],
         "ru": [
-          ""
+          "Лицензия экспедитора"
         ]
       },
       "experienceYears": 18,
@@ -151,48 +151,48 @@
   ],
   "customs-clearance": [
     {
-      "id": "",
+      "id": "p-cus-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Агент по таможенному оформлению — г-жа Ахмади",
+        "en": "Customs Broker — Ms. Ahmadi",
+        "ru": "Таможенный брокер"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Физическое лицо",
+        "en": "Individual",
+        "ru": "Частное лицо"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Таможня имама Хомейни — порт Шахид-Раджаи",
+        "en": "Imam Khomeini — Shahid Rajaee ports",
+        "ru": "Порты Ирана"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Таможенное оформление",
+          "Регистрация импортного заказа",
+          "Импортная лицензия"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Clearance",
+          "Order registration",
+          "Import permits"
         ],
         "ru": [
-          "",
-          ""
+          "Оформление",
+          "Регистрация заказа"
         ]
       },
       "licenses": {
         "fa": [
-          "",
-          ""
+          "Коммерческая карта",
+          "Сертификат таможенного брокера"
         ],
         "en": [
-          ""
+          "Customs broker license"
         ],
         "ru": [
-          ""
+          "Лицензия брокера"
         ]
       },
       "experienceYears": 11,
@@ -202,48 +202,48 @@
   ],
   "intl-finance": [
     {
-      "id": "",
+      "id": "p-fin-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Novin Trade Finance Services",
+        "en": "Novin Trade Finance",
+        "ru": "Novin Trade Finance"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Иран — Европа — Центральная Азия",
+        "en": "Iran — Europe — Central Asia",
+        "ru": "Иран — Европа — Центральная Азия"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Аккредитив",
+          "Валютный перевод",
+          "Финансирование"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "L/C",
+          "T/T",
+          "Trade finance"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "Аккредитив",
+          "T/T",
+          "Финансирование"
         ]
       },
       "licenses": {
         "fa": [
-          ""
+          "Лицензия на валютные услуги"
         ],
         "en": [
-          ""
+          "FX services license"
         ],
         "ru": [
-          ""
+          "Валютная лицензия"
         ]
       },
       "experienceYears": 16,
@@ -253,49 +253,49 @@
   ],
   "inspection-standards": [
     {
-      "id": "",
+      "id": "p-ins-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания по контролю качества — партнёр SGS",
+        "en": "SGS-Partner Quality Inspection",
+        "ru": "SGS-Partner Inspection"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Завод происхождения — порт погрузки",
+        "en": "Origin factory — loading port",
+        "ru": "Завод — порт"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "QC",
+          "PSI",
+          "Инспекционный сертификат"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "QC",
+          "PSI",
+          "Inspection certificates"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "QC",
+          "PSI",
+          "Сертификаты"
         ]
       },
       "licenses": {
         "fa": [
-          "",
-          ""
+          "ISO 17020",
+          "Лицензия на инспекционную деятельность"
         ],
         "en": [
-          ""
+          "ISO 17020"
         ],
         "ru": [
-          ""
+          "ISO 17020"
         ]
       },
       "experienceYears": 20,
@@ -305,45 +305,45 @@
   ],
   "insurance-risk": [
     {
-      "id": "",
+      "id": "p-insur-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Asia International Cargo Insurance",
+        "en": "Asia International Cargo Insurance",
+        "ru": "Asia Cargo Insurance"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Все морские и воздушные маршруты",
+        "en": "All sea & air routes",
+        "ru": "Все морские и авиа маршруты"
       },
       "services": {
         "fa": [
-          "",
-          ""
+          "Страхование грузов",
+          "Страхование экспортных кредитов"
         ],
         "en": [
-          "",
-          ""
+          "Cargo insurance",
+          "Export credit insurance"
         ],
         "ru": [
-          "",
-          ""
+          "Страхование груза",
+          "Экспортное кредитное страхование"
         ]
       },
       "licenses": {
         "fa": [
-          ""
+          "Лицензия Центрального страхования"
         ],
         "en": [
-          ""
+          "Central insurance license"
         ],
         "ru": [
-          ""
+          "Страховая лицензия"
         ]
       },
       "experienceYears": 13,
@@ -353,49 +353,49 @@
   ],
   "legal-trade": [
     {
-      "id": "",
+      "id": "p-leg-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Юридическая фирма по международным договорам",
+        "en": "Intl Contracts Law Firm",
+        "ru": "Международное право"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Иран — Германия — Турция",
+        "en": "Iran — Germany — Turkey",
+        "ru": "Иран — Германия — Турция"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Договор купли-продажи",
+          "Разрешение споров",
+          "Регистрация представительства"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Sales contracts",
+          "Dispute resolution",
+          "Agency registration"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "Договоры",
+          "Споры",
+          "Регистрация"
         ]
       },
       "licenses": {
         "fa": [
-          "",
-          ""
+          "Лицензия адвоката",
+          "Член коллегии адвокатов"
         ],
         "en": [
-          ""
+          "Bar membership"
         ],
         "ru": [
-          ""
+          "Членство в коллегии"
         ]
       },
       "experienceYears": 15,
@@ -405,48 +405,48 @@
   ],
   "market-development": [
     {
-      "id": "",
+      "id": "p-mkt-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Агентство экспортного маркетинга Europe",
+        "en": "Europe Export Marketing Agency",
+        "ru": "Europe Export Marketing"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Восточная Европа — Ближний Восток",
+        "en": "Eastern Europe — Middle East",
+        "ru": "Восточная Европа — Ближний Восток"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Исследование рынка",
+          "Привлечение покупателей",
+          "Торговые выставки"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Market research",
+          "Buyer acquisition",
+          "Trade fairs"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "Исследование рынка",
+          "Покупатели",
+          "Выставки"
         ]
       },
       "licenses": {
         "fa": [
-          ""
+          "Лицензия на международный маркетинг"
         ],
         "en": [
-          ""
+          "Intl marketing license"
         ],
         "ru": [
-          ""
+          "Лицензия маркетинга"
         ]
       },
       "experienceYears": 10,
@@ -456,49 +456,49 @@
   ],
   "packaging-prep": [
     {
-      "id": "",
+      "id": "p-pkg-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Pack Plus Export Packaging",
+        "en": "PackPlus Export Packaging",
+        "ru": "PackPlus Packaging"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Компания",
+        "en": "Company",
+        "ru": "Компания"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Завод — склад — порт",
+        "en": "Factory — warehouse — port",
+        "ru": "Завод — склад — порт"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Экспортная упаковка",
+          "Паллетирование",
+          "Маркировка"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Export packaging",
+          "Palletizing",
+          "Labeling"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "Упаковка",
+          "Паллетирование",
+          "Этикетки"
         ]
       },
       "licenses": {
         "fa": [
-          "",
-          ""
+          "ISO 22000",
+          "Стандарт упаковки"
         ],
         "en": [
-          ""
+          "ISO 22000"
         ],
         "ru": [
-          ""
+          "ISO 22000"
         ]
       },
       "experienceYears": 8,
@@ -508,48 +508,48 @@
   ],
   "specialized-trade": [
     {
-      "id": "",
+      "id": "p-spec-1",
       "name": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Консультант по экспорту — д-р Карими",
+        "en": "Export Consultant — Dr. Karimi",
+        "ru": "Консультант по экспорту"
       },
       "entityType": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "Физическое лицо",
+        "en": "Individual",
+        "ru": "Частное лицо"
       },
       "routes": {
-        "fa": "",
-        "en": "",
-        "ru": ""
+        "fa": "СНГ — Ближний Восток — Африка",
+        "en": "CIS — Middle East — Africa",
+        "ru": "СНГ — Ближний Восток — Африка"
       },
       "services": {
         "fa": [
-          "",
-          "",
-          ""
+          "Консультации по экспорту",
+          "Обучение",
+          "Местный представитель"
         ],
         "en": [
-          "",
-          "",
-          ""
+          "Export consulting",
+          "Training",
+          "Local representative"
         ],
         "ru": [
-          "",
-          "",
-          ""
+          "Консалтинг",
+          "Обучение",
+          "Представитель"
         ]
       },
       "licenses": {
         "fa": [
-          ""
+          "MBA в области международной торговли"
         ],
         "en": [
-          ""
+          "Intl trade MBA"
         ],
         "ru": [
-          ""
+          "MBA ВЭД"
         ]
       },
       "experienceYears": 17,

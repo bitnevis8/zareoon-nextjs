@@ -4,6 +4,7 @@ import Link from "next/link";
 import AsyncSelect from "react-select/async";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
+import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
 
 export default function AttributesPage() {
   const t = useTranslations("product");
@@ -100,7 +101,10 @@ export default function AttributesPage() {
 
   return (
     <div className="p-2 sm:p-4">
-      <h1 className="text-lg sm:text-xl font-bold mb-4">{t("attributes.title")}</h1>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-lg sm:text-xl font-bold">{t("attributes.title")}</h1>
+        <DataExportImportButtons section="attributeDefinitions" onImported={load} compact />
+      </div>
       <form onSubmit={create} className="bg-white p-3 sm:p-4 rounded-md shadow mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         <select className="border p-2 rounded" value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value, categoryId: "", productId: "" })}>
           <option value="category">{t("attributes.scopeCategory")}</option>

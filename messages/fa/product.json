@@ -185,10 +185,11 @@
     "saveSettingsError": "خطا در ذخیره تنظیمات"
   },
   "supplierProfile": {
-    "suppliersOnly": "این بخش فقط برای تأمین‌کنندگان است.",
+    "suppliersOnly": "برای دسترسی به فروشگاه، ابتدا در فروشندگان عضو شوید.",
+    "joinSellersCta": "عضویت در فروشندگان",
     "title": "حساب کاربری عمومی",
     "subtitle": "یک حساب (Account) با نوع هویت (Entity Type) — فیلدهای تخصصی در جدول پروفایل پویا ذخیره می‌شوند.",
-    "urlHint": "آدرس: zareoon.ir/tamin/[نام-کاربری]",
+    "urlHint": "آدرس: zareoon.ir/providers/[نام-کاربری]",
     "viewPublicPage": "مشاهده صفحه عمومی ←",
     "entityTypeLabel": "نوع هویت (Entity Type)",
     "profileSlugLabel": "نام کاربری صفحه",

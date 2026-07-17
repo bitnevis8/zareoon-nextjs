@@ -49,13 +49,24 @@ export default function CatalogProductHero({
         {item?.slug ? <p className={`text-sm ${catalogText.subtle}`}>{item.slug}</p> : null}
         {item?.isOrderable ? (
           <span className={`inline-flex rounded-lg px-3 py-1.5 text-sm font-medium ${catalogBadge.success}`}>
-            {t("orderable")} • {localizeUnit(item?.unit || "-", language)}
+            {t("orderable")} • {localizeUnit(item?.unit || item?.defaultMeasurementUnit || "-", language)}
           </span>
         ) : (
           <span className={`inline-flex rounded-lg px-3 py-1.5 text-sm font-medium ${catalogBadge.neutral}`}>
             {t("nonOrderableCategoryRole")}
           </span>
         )}
+        {item?.listingPolicy && item.listingPolicy !== "category-navigation-only" ? (
+          <span className={`inline-flex rounded-lg px-3 py-1.5 text-xs font-medium ${catalogBadge.neutral}`}>
+            {(() => {
+              try {
+                return t(`listingPolicies.${item.listingPolicy}`);
+              } catch {
+                return item.listingPolicy;
+              }
+            })()}
+          </span>
+        ) : null}
       </div>
 
       {cartTotalQty > 0 ? (

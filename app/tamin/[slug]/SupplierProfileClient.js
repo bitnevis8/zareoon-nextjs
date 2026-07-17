@@ -235,7 +235,7 @@ export default function SupplierProfileClient({ slug }) {
                 ) : null}
                 {profile.headline ? <p className="mt-1 text-sm text-slate-600">{profile.headline}</p> : null}
                 <p className="mt-1 text-xs text-slate-400">
-                  zareoon.ir/tamin/{profile.profileSlug}
+                  zareoon.ir/providers/{profile.profileSlug}
                 </p>
               </div>
             </div>

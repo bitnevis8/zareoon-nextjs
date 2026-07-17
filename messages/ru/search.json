@@ -1,13 +1,13 @@
 {
   "metadata": {
-    "title": ""
+    "title": "Поиск | Zareoon"
   },
-  "closeModal": "",
-  "modalPlaceholder": "",
-  "resultsCount": "",
-  "stockKilograms": "",
-  "tryOtherKeywords": "",
-  "clearAll": "",
-  "searchProducts": "",
-  "typeProductOrCategory": ""
+  "closeModal": "Закрыть поиск",
+  "modalPlaceholder": "Поиск товаров и категорий...",
+  "resultsCount": "Найдено результатов: {count}",
+  "stockKilograms": "{amount} кг",
+  "tryOtherKeywords": "Попробуйте другие ключевые слова",
+  "clearAll": "Очистить всё",
+  "searchProducts": "Искать товары",
+  "typeProductOrCategory": "Введите название товара или категории"
 }

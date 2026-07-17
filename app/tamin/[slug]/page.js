@@ -1,14 +1,8 @@
-import { getTranslations } from "next-intl/server";
-import SupplierProfileClient from "./SupplierProfileClient";
+import { redirect } from "next/navigation";
+import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
-export async function generateMetadata() {
-  const t = await getTranslations("supplier.metadata");
-  return {
-    title: t("pageTitle"),
-  };
-}
-
-export default async function SupplierPublicPage({ params }) {
+/** Legacy `/tamin/:slug` → `/providers/:slug` */
+export default async function TaminLegacyRedirect({ params }) {
   const { slug } = await params;
-  return <SupplierProfileClient slug={slug} />;
+  redirect(providerPublicPath(slug) || "/");
 }

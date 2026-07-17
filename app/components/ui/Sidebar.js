@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/context/AuthContext';
-import { isAdmin, isSupplier, shouldShowSupplierPanel } from '@/app/utils/roles';
+import { isAdmin, shouldShowSellerPanel } from '@/app/utils/roles';
 import { isSidebarNavActive, isAdminSectionActive } from '@/app/utils/sidebarNavMatch';
 import { useDashboardPersona } from '@/app/context/DashboardPersonaContext';
 import { useMyTradeServiceProvider } from '@/app/hooks/useMyTradeServiceProvider';
@@ -15,6 +15,7 @@ import SidebarMobileUserHeader from '@/app/components/ui/SidebarMobileUserHeader
 import SidebarSellerShopUrl from '@/app/components/ui/SidebarSellerShopUrl';
 import SidebarServicesPageUrl from '@/app/components/ui/SidebarServicesPageUrl';
 import SidebarServicesSection from '@/app/components/ui/SidebarServicesSection';
+import SidebarSellerSection from '@/app/components/ui/SidebarSellerSection';
 
 const ESCROW_MENU_PATH = '/dashboard/escrow';
 
@@ -24,6 +25,13 @@ function useSidebarMenus() {
   return useMemo(
     () => ({
       adminMenuSections: [
+        {
+          id: 'overview',
+          title: t('admin.overview'),
+          submenu: [
+            { title: t('admin.managementHome'), path: '/dashboard/management' },
+          ],
+        },
         {
           id: 'users',
           title: t('admin.userManagement'),
@@ -60,11 +68,11 @@ function useSidebarMenus() {
         { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own' },
         { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own' },
         { title: t('customerOrders'), path: '/dashboard/supplier/orders?scope=own' },
+        { title: t('shopSettings'), path: '/dashboard/supplier-profile' },
       ],
       sellerMenuLinksSecondary: [
         { title: t('incomingToMyProducts'), path: '/dashboard/incoming-requests' },
       ],
-      sellerMenuLinksStart: [{ title: t('startSelling'), path: '/dashboard/supplier-profile' }],
       applicantMenuLinksBeforeEscrow: [
         { title: t('submitRequest'), path: '/dashboard/submit-request' },
         { title: t('myRequests'), path: '/dashboard/applicant-requests' },
@@ -76,7 +84,6 @@ function useSidebarMenus() {
       primaryLinks: [{ title: t('dashboard'), path: '/dashboard' }],
       escrowMenuTitle: t('escrow'),
       sectionApplicant: t('sections.applicant'),
-      sectionSeller: t('sections.seller'),
       sectionAdmin: t('sections.admin'),
     }),
     [t]
@@ -184,13 +191,11 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
     adminMenuSections,
     sellerMenuLinksPrimary,
     sellerMenuLinksSecondary,
-    sellerMenuLinksStart,
     applicantMenuLinksBeforeEscrow,
     applicantMenuLinksAfterEscrow,
     primaryLinks,
     escrowMenuTitle,
     sectionApplicant,
-    sectionSeller,
     sectionAdmin,
   } = menus;
   const pathname = usePathname();
@@ -199,15 +204,13 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
   const user = auth?.user;
   const { isApplicantView, isSellerView, isServicesView, canSwitchPersona, hydrated } = useDashboardPersona();
 
-  const canSell = shouldShowSupplierPanel(user);
+  const canSell = shouldShowSellerPanel(user);
   const showAdmin = isAdmin(user);
-  const implicitOwnScope = isSupplier(user) && !isAdmin(user);
+  const implicitOwnScope = canSell && !isAdmin(user);
   const navMatchOptions = useMemo(() => ({ implicitOwnScope }), [implicitOwnScope]);
   const showApplicantNav = isApplicantView;
   const showSellerNav = isSellerView;
   const showServicesNav = isServicesView;
-  const sellerMenuLinks = canSell ? sellerMenuLinksPrimary : sellerMenuLinksStart;
-  const sellerMenuLinksExtra = canSell ? sellerMenuLinksSecondary : [];
   const { provider: myServiceProvider, loading: serviceProviderLoading, hasProvider: hasServiceProvider, refresh: refreshMyServiceProvider } =
     useMyTradeServiceProvider(isServicesView && !!user);
   const { pendingCount: pendingProviderRequests, refresh: refreshPendingProviderCount } = usePendingTradeProviderCount(
@@ -315,42 +318,15 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
         ) : null}
 
         {showSellerNav ? (
-          <>
-            <SectionLabel>{sectionSeller}</SectionLabel>
-            <div className="space-y-0.5">
-              {sellerMenuLinks.map((item) => (
-                <NavItem
-                  key={item.path}
-                  href={item.path}
-                  label={item.title}
-                  active={isActive(item.path)}
-                  onClick={onLinkClick}
-                />
-              ))}
-              {sellerMenuLinksExtra.length > 0 ? (
-                <>
-                  <MenuDivider />
-                  {sellerMenuLinksExtra.map((item) => (
-                    <NavItem
-                      key={item.path}
-                      href={item.path}
-                      label={item.title}
-                      active={isActive(item.path)}
-                      onClick={onLinkClick}
-                    />
-                  ))}
-                </>
-              ) : null}
-              <MenuDivider />
-              <NavItem
-                href={ESCROW_MENU_PATH}
-                label={escrowMenuTitle}
-                active={isActive(ESCROW_MENU_PATH)}
-                onClick={onLinkClick}
-              />
-              <MenuDivider />
-            </div>
-          </>
+          <SidebarSellerSection
+            canSell={canSell}
+            isActive={isActive}
+            onLinkClick={onLinkClick}
+            primaryLinks={sellerMenuLinksPrimary}
+            secondaryLinks={sellerMenuLinksSecondary}
+            escrowHref={ESCROW_MENU_PATH}
+            escrowLabel={escrowMenuTitle}
+          />
         ) : null}
 
         {showServicesNav ? (

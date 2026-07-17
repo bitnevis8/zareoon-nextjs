@@ -1,7 +1,7 @@
 {
-  "fetchClasses": "",
-  "fetchTags": "",
-  "fetchExchangeRates": "",
-  "uploadFailed": "",
-  "catalogPdfForbidden": ""
+  "fetchClasses": "Не удалось получить классы",
+  "fetchTags": "Не удалось получить теги",
+  "fetchExchangeRates": "Не удалось получить курсы валют",
+  "uploadFailed": "Не удалось загрузить файл",
+  "catalogPdfForbidden": "У вас нет разрешения на скачивание этого каталога."
 }

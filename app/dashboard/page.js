@@ -14,20 +14,26 @@ import { dash } from "../components/dashboard/dashboardTheme";
 
 function DashboardContent() {
   const { user } = useAuth();
-  const { isSellerView, isServicesView } = useDashboardPersona();
+  const { isSellerView, isServicesView, isApplicantView } = useDashboardPersona();
   const admin = isAdmin(user);
   const t = useTranslations("dashboard");
 
-  if (admin) {
-    return <AdminDashboardHome user={user} />;
-  }
-
+  // هر تب «در نقش» داشبورد خودش را دارد
   if (isServicesView) {
     return <TradeServicesDashboardHome user={user} />;
   }
 
   if (isSellerView) {
     return <SupplierDashboardHome user={user} />;
+  }
+
+  if (isApplicantView) {
+    return <ApplicantDashboardHome user={user} />;
+  }
+
+  // مدیر بدون persona فعال → نمای مدیریت
+  if (admin) {
+    return <AdminDashboardHome user={user} />;
   }
 
   if (user) {

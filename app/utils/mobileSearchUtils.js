@@ -2,7 +2,7 @@ import { getLocalizedText, getLocalizedLotLabel } from "./localize";
 import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
 import { buildAvailableProducts, buildProductByIdMap } from "./availableProducts";
 
-export const SEARCH_FILTERS = ["all", "listings", "types", "hashtag"];
+export const SEARCH_FILTERS = ["all", "types", "listings", "hashtag"];
 
 export function parseSearchQuery(raw) {
   const trimmed = raw.trim();

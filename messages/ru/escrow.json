@@ -1,413 +1,413 @@
 {
-  "menuTitle": "",
-  "pageTitle": "",
-  "tagline": "",
-  "settingsTitle": "",
-  "depositLabel": "",
-  "createSuccess": "",
-  "createFormTitle": "",
-  "newContract": "",
-  "emptyList": "",
-  "userFallback": "",
-  "genericHint": "",
-  "defaultStatusTitle": "",
+  "menuTitle": "Гарантия сделки и эскроу",
+  "pageTitle": "Гарантия сделки и эскроу",
+  "tagline": "Необязательный инструмент для координации средств между сторонами; окончательная ответственность за сделку остаётся за покупателем и продавцом.",
+  "settingsTitle": "Настройки гарантии сделки",
+  "depositLabel": "Гарантийный взнос",
+  "createSuccess": "Соглашение о гарантии сделки создано",
+  "createFormTitle": "Создать соглашение о гарантии сделки",
+  "newContract": "Новое соглашение",
+  "emptyList": "Соглашения о гарантии сделки ещё не созданы.",
+  "userFallback": "Пользователь {id}",
+  "genericHint": "Выберите подходящий шаг в разделе «Следующие действия». Каждая кнопка содержит объяснение действия.",
+  "defaultStatusTitle": "Статус соглашения",
   "roles": {
-    "buyer": "",
-    "seller": "",
-    "admin": ""
+    "buyer": "Покупатель",
+    "seller": "Продавец",
+    "admin": "Администратор"
   },
   "agreementStatus": {
-    "draft": "",
-    "awaiting_payment": "",
-    "funds_locked": "",
-    "in_progress": "",
-    "partially_released": "",
-    "fully_released": "",
-    "refunded": "",
-    "cancelled": "",
-    "expired": "",
-    "disputed": "",
-    "completed": ""
+    "draft": "Черновик",
+    "awaiting_payment": "Ожидает оплаты",
+    "funds_locked": "Средства заблокированы",
+    "in_progress": "В процессе",
+    "partially_released": "Частично перечислено",
+    "fully_released": "Полностью перечислено",
+    "refunded": "Возвращено",
+    "cancelled": "Отменена",
+    "expired": "Истекло",
+    "disputed": "Спор",
+    "completed": "Завершён"
   },
   "milestoneStatus": {
-    "pending": "",
-    "in_review": "",
-    "approved": "",
-    "released": "",
-    "cancelled": ""
+    "pending": "В ожидании",
+    "in_review": "На рассмотрении",
+    "approved": "Одобрен",
+    "released": "Перечислено",
+    "cancelled": "Отменена"
   },
   "releaseStatus": {
-    "pending": "",
-    "approved": "",
-    "completed": "",
-    "rejected": "",
-    "cancelled": ""
+    "pending": "Ожидает одобрения покупателя",
+    "approved": "Одобрен",
+    "completed": "Завершён",
+    "rejected": "Отклонён",
+    "cancelled": "Отменена"
   },
   "refundStatus": {
-    "pending": "",
-    "approved": "",
-    "completed": "",
-    "rejected": ""
+    "pending": "Ожидает одобрения администратора",
+    "approved": "Одобрен",
+    "completed": "Завершён",
+    "rejected": "Отклонён"
   },
   "disputeStatus": {
-    "filed": "",
-    "under_review": "",
-    "resolved_buyer": "",
-    "resolved_seller": "",
-    "resolved_split": "",
-    "closed": "",
-    "withdrawn": ""
+    "filed": "Подано",
+    "under_review": "На рассмотрении",
+    "resolved_buyer": "Решено в пользу покупателя",
+    "resolved_seller": "Решено в пользу продавца",
+    "resolved_split": "Решено с разделением средств",
+    "closed": "Закрыта",
+    "withdrawn": "Отмена"
   },
   "ledgerType": {
-    "deposit_lock": "",
-    "platform_fee": "",
-    "release_to_seller": "",
-    "refund_to_buyer": "",
-    "adjustment": ""
+    "deposit_lock": "Блокировка гарантийного взноса",
+    "platform_fee": "Комиссия платформы",
+    "release_to_seller": "Перечисление продавцу",
+    "refund_to_buyer": "Возврат покупателю",
+    "adjustment": "Корректировка"
   },
   "workflowSteps": {
     "draft": {
-      "label": "",
-      "desc": ""
+      "label": "Черновик",
+      "desc": "Соглашение создано"
     },
     "awaiting_payment": {
-      "label": "",
-      "desc": ""
+      "label": "Ожидает оплаты",
+      "desc": "Покупатель должен внести гарантийный взнос"
     },
     "funds_locked": {
-      "label": "",
-      "desc": ""
+      "label": "Средства заблокированы",
+      "desc": "Средства хранятся на эскроу-счёте"
     },
     "in_progress": {
-      "label": "",
-      "desc": ""
+      "label": "В процессе",
+      "desc": "Доставка и подтверждение этапов"
     },
     "completed": {
-      "label": "",
-      "desc": ""
+      "label": "Завершено",
+      "desc": "Сделка завершена"
     }
   },
   "statusGuides": {
     "draft": {
-      "title": "",
-      "bodyAdmin": "",
-      "bodyBuyer": "",
-      "bodySeller": "",
-      "bodyDefault": ""
+      "title": "Соглашение ещё не активно",
+      "bodyAdmin": "Соглашение находится в черновике. Нажмите «Активировать», чтобы подготовить его к оплате и дать покупателю возможность внести гарантийную сумму.",
+      "bodyBuyer": "После согласования деталей с продавцом активируйте соглашение, а затем внесите гарантийный взнос.",
+      "bodySeller": "После достижения договорённости с покупателем активируйте соглашение, чтобы покупатель мог внести гарантийную сумму.",
+      "bodyDefault": "Текущий статус: черновик. Ваша роль: {role}."
     },
     "awaiting_payment": {
-      "title": "",
-      "bodyBuyer": "",
-      "bodyDefault": ""
+      "title": "Ожидается оплата гарантийного взноса",
+      "bodyBuyer": "Сначала создайте «Запрос на оплату», затем оплатите через платёжный шлюз. Пока шлюз не подключён, администратор может имитировать оплату с помощью «Демонстрационного подтверждения».",
+      "bodyDefault": "Покупатель должен внести гарантийный взнос. После блокировки средств начинается процесс доставки и перечисления."
     },
     "funds_locked": {
-      "title": "",
-      "bodyDefault": ""
+      "title": "Гарантийный взнос заблокирован",
+      "bodyDefault": "Средства безопасно удерживаются Zareoon. Продавец должен выполнить обязательства, а покупатель — подтвердить этапы после доставки, чтобы средства могли быть перечислены."
     },
     "in_progress": {
-      "title": "",
-      "bodyDefault": ""
+      "title": "Сделка выполняется",
+      "bodyDefault": "Последовательно подтверждайте каждый этап доставки. После завершения всех этапов средства будут перечислены продавцу."
     },
     "partially_released": {
-      "title": "",
-      "bodyDefault": ""
+      "title": "Часть средств перечислена",
+      "bodyDefault": "Часть средств всё ещё находится на эскроу-счёте. Завершите оставшиеся этапы или отправьте запрос на перечисление."
     },
     "disputed": {
-      "title": "",
-      "bodyDefault": ""
+      "title": "Спор подан",
+      "bodyDefault": "Команда Zareoon или администратор должны рассмотреть и разрешить спор. До его разрешения средства останутся заблокированными."
     },
     "completed": {
-      "title": "",
-      "bodyDefault": ""
+      "title": "Соглашение завершено",
+      "bodyDefault": "Все этапы выполнены, процесс завершён."
     },
     "cancelled": {
-      "title": "",
-      "bodyDefault": ""
+      "title": "Соглашение отменено",
+      "bodyDefault": "Это соглашение больше не активно."
     }
   },
   "actions": {
     "activate": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": ""
+      "title": "Активировать соглашение",
+      "shortLabel": "Активировать",
+      "description": "Соглашение выйдет из статуса черновика и будет готово к оплате гарантийного взноса. После этого покупатель должен внести гарантийную сумму.",
+      "who": "Покупатель, продавец или администратор",
+      "variant": "primary"
     },
     "createPaymentIntent": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": ""
+      "title": "Создать запрос на оплату",
+      "shortLabel": "Запрос на оплату",
+      "description": "Будет создан официальный запрос на оплату гарантийного взноса. После подключения платёжного шлюза покупатель оплатит эту сумму через него.",
+      "who": "Покупатель или администратор",
+      "variant": "primary"
     },
     "confirmPaymentDemo": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": "",
-      "badge": ""
+      "title": "Подтвердить оплату (деморежим)",
+      "shortLabel": "Демонстрационное подтверждение",
+      "description": "Только для тестирования системы — имитирует подтверждение банка. В рабочем режиме это автоматически выполняет платёжный шлюз, и кнопка не требуется.",
+      "who": "Администратор (деморежим)",
+      "variant": "demo",
+      "badge": "Демо"
     },
     "requestRelease": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": ""
+      "title": "Запросить перечисление продавцу",
+      "shortLabel": "Запрос на перечисление",
+      "description": "Продавец запрашивает перечисление части заблокированных средств. Покупатель или администратор должен одобрить запрос.",
+      "who": "Продавец или администратор",
+      "variant": "primary"
     },
     "cancel": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": ""
+      "title": "Отменить соглашение",
+      "shortLabel": "Отмена",
+      "description": "Соглашение будет отменено. Если средства не были заблокированы, отмена выполняется просто. В противном случае может потребоваться возврат.",
+      "who": "Любая сторона или администратор",
+      "variant": "danger"
     },
     "openDispute": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": ""
+      "title": "Подать спор",
+      "shortLabel": "Подать спор",
+      "description": "Подайте спор, если товар или услуга не соответствуют соглашению либо другая сторона не выполняет обязательства. Средства останутся заблокированными до разрешения спора.",
+      "who": "Покупатель или продавец",
+      "variant": "warning"
     },
     "requestRefund": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": ""
+      "title": "Запросить возврат",
+      "shortLabel": "Возврат",
+      "description": "Запросить возврат заблокированных средств покупателю. Администратор должен рассмотреть и одобрить запрос.",
+      "who": "Покупатель, продавец или администратор",
+      "variant": "secondary"
     }
   },
   "list": {
-    "closeForm": "",
-    "newContract": "",
-    "loading": "",
-    "emptyTitle": "",
-    "emptyHint": "",
-    "createFirst": "",
-    "listAria": "",
-    "buyer": "",
-    "seller": "",
-    "dealTotal": "",
-    "locked": "",
-    "released": ""
+    "closeForm": "Закрыть форму",
+    "newContract": "Новое соглашение",
+    "loading": "Загрузка…",
+    "emptyTitle": "Соглашения о гарантии сделки ещё не созданы.",
+    "emptyHint": "Используйте «Новое соглашение», чтобы создать соглашение в роли покупателя или продавца.",
+    "createFirst": "Создать первое соглашение",
+    "listAria": "Список соглашений",
+    "buyer": "Покупатель",
+    "seller": "Продавец",
+    "dealTotal": "Общая сумма сделки",
+    "locked": "Заблокировано",
+    "released": "Перечислено"
   },
   "search": {
-    "placeholder": "",
-    "clearAria": "",
-    "minChars": "",
-    "searching": "",
-    "hint": "",
-    "noResults": "",
-    "buyerHint": "",
-    "sellerHint": ""
+    "placeholder": "Имя, фамилия или номер мобильного телефона…",
+    "clearAria": "Очистить выбор",
+    "minChars": "Для поиска введите не менее {count} символов",
+    "searching": "Поиск…",
+    "hint": "Введите имя или номер мобильного телефона, чтобы найти вторую сторону",
+    "noResults": "Пользователи не найдены",
+    "buyerHint": "Не менее 2 символов имени, фамилии или номера мобильного телефона",
+    "sellerHint": "Не менее 2 символов имени, фамилии или номера мобильного телефона"
   },
   "form": {
-    "createTitle": "",
-    "partiesTitle": "",
-    "partiesHint": "",
-    "buyerYou": "",
-    "sellerYou": "",
-    "buyer": "",
-    "seller": "",
-    "partySelfNote": "",
-    "dealDetails": "",
-    "dealTitle": "",
-    "dealTitlePlaceholder": "",
-    "totalAmount": "",
-    "description": "",
-    "descriptionPlaceholder": "",
-    "holdSectionTitle": "",
-    "holdSectionHint": "",
+    "createTitle": "Создать соглашение о гарантии сделки",
+    "partiesTitle": "Стороны сделки",
+    "partiesHint": "И покупатель, и продавец должны быть зарегистрированными пользователями Zareoon. Нельзя выбрать себя одновременно покупателем и продавцом.",
+    "buyerYou": "Покупатель (вы)",
+    "sellerYou": "Продавец (вы)",
+    "buyer": "Покупатель",
+    "seller": "Продавец",
+    "partySelfNote": "Вы создаёте соглашение в этой роли",
+    "dealDetails": "Сведения о сделке",
+    "dealTitle": "Название сделки",
+    "dealTitlePlaceholder": "например, продажа 10 тонн экспортного шафрана",
+    "totalAmount": "Общая сумма ({currency})",
+    "description": "Описание (необязательно)",
+    "descriptionPlaceholder": "Условия доставки, упаковка, график и т. д.",
+    "holdSectionTitle": "Сумма, блокируемая на эскроу-счёте",
+    "holdSectionHint": "Эта сумма удерживается Zareoon до выполнения обязательств.",
     "holdModes": {
       "auto": {
-        "label": "",
-        "desc": ""
+        "label": "Рекомендация Zareoon",
+        "desc": "На основе системных правил"
       },
       "percent": {
-        "label": "",
-        "desc": ""
+        "label": "Пользовательский процент",
+        "desc": "От общей суммы сделки"
       },
       "full": {
-        "label": "",
-        "desc": ""
+        "label": "Полное удержание",
+        "desc": "100% суммы сделки"
       },
       "custom_amount": {
-        "label": "",
-        "desc": ""
+        "label": "Пользовательская сумма",
+        "desc": "Указанная вами сумма"
       }
     },
-    "percentOfDeal": "",
-    "percentRange": "",
-    "lockAmount": "",
-    "milestonesTitle": "",
-    "milestonePreset": "",
-    "buyerApproval": "",
-    "sellerConfirmation": "",
-    "summaryTitle": "",
-    "currency": "",
-    "dealCurrency": "",
-    "depositPreview": "",
-    "depositPercentOfDeal": "",
-    "platformFee": "",
-    "calculatingDeposit": "",
-    "summaryHint": "",
-    "submitting": "",
-    "submit": "",
-    "footerNote": "",
-    "loginRequired": "",
-    "partiesRequired": "",
-    "samePartyError": "",
-    "createSuccess": "",
-    "createError": "",
-    "genericError": ""
+    "percentOfDeal": "Процент от сделки",
+    "percentRange": " ({min}–{max}%)",
+    "lockAmount": "Заблокированная сумма ({currency})",
+    "milestonesTitle": "Этапы перечисления",
+    "milestonePreset": "График перечислений продавцу",
+    "buyerApproval": "· Одобрение покупателя",
+    "sellerConfirmation": "· Подтверждение продавца",
+    "summaryTitle": "Сводка соглашения",
+    "currency": "Валюта",
+    "dealCurrency": "Валюта сделки",
+    "depositPreview": "Гарантийный взнос:",
+    "depositPercentOfDeal": "Эквивалент {percent}% суммы сделки",
+    "platformFee": "Комиссия:",
+    "calculatingDeposit": "Расчёт гарантийного взноса…",
+    "summaryHint": "После указания сторон и суммы здесь появится предварительный расчёт гарантийного взноса.",
+    "submitting": "Создание…",
+    "submit": "Создать соглашение",
+    "footerNote": "Само создание соглашения не блокирует средства. Zareoon не является стороной сделки; ответственность за соглашение, оплату и споры несут стороны.",
+    "loginRequired": "Сначала войдите в свою учётную запись",
+    "partiesRequired": "Укажите покупателя и продавца",
+    "samePartyError": "Покупатель и продавец не могут быть одним лицом",
+    "createSuccess": "Соглашение о гарантии сделки создано",
+    "createError": "Ошибка создания соглашения",
+    "genericError": "Ошибка"
   },
   "currencies": {
     "IRR": {
-      "label": "",
-      "shortLabel": "",
-      "hint": ""
+      "label": "Иранский риал",
+      "shortLabel": "риал",
+      "hint": "Национальная валюта — указывайте суммы в риалах"
     },
     "USD": {
-      "label": "",
-      "shortLabel": "",
-      "hint": ""
+      "label": "Доллар США",
+      "shortLabel": "Доллар",
+      "hint": "Доллар США (USD)"
     },
     "EUR": {
-      "label": "",
-      "shortLabel": "",
-      "hint": ""
+      "label": "Евро",
+      "shortLabel": "Евро",
+      "hint": "Евро (EUR)"
     },
     "AED": {
-      "label": "",
-      "shortLabel": "",
-      "hint": ""
+      "label": "Дирхам ОАЭ",
+      "shortLabel": "Дирхам",
+      "hint": "Дирхам ОАЭ (AED)"
     },
     "TRY": {
-      "label": "",
-      "shortLabel": "",
-      "hint": ""
+      "label": "Турецкая лира",
+      "shortLabel": "Лира",
+      "hint": "Турецкая лира (TRY)"
     }
   },
   "events": {
-    "agreement_created": "",
-    "awaiting_payment": "",
-    "payment_intent_created": "",
-    "payment_confirmed_funds_locked": "",
-    "milestone_confirmed": "",
-    "release_requested": "",
-    "funds_released": "",
-    "agreement_completed": "",
-    "refund_requested": "",
-    "refund_completed": "",
-    "dispute_opened": "",
-    "dispute_resolved": "",
-    "agreement_cancelled": ""
+    "agreement_created": "Соглашение создано",
+    "awaiting_payment": "Ожидает оплаты",
+    "payment_intent_created": "Запрос на оплату",
+    "payment_confirmed_funds_locked": "Оплата подтверждена, средства заблокированы",
+    "milestone_confirmed": "Этап подтверждён",
+    "release_requested": "Запрос на перечисление",
+    "funds_released": "Средства перечислены",
+    "agreement_completed": "Соглашение завершено",
+    "refund_requested": "Запрошен возврат",
+    "refund_completed": "Возврат выполнен",
+    "dispute_opened": "Спор открыт",
+    "dispute_resolved": "Спор разрешён",
+    "agreement_cancelled": "Соглашение отменено"
   },
   "detail": {
-    "loading": "",
-    "loadFailed": "",
-    "notFound": "",
-    "backToList": "",
-    "backLink": "",
-    "you": "",
-    "workflowTitle": "",
-    "availableRelease": "",
-    "nextActions": "",
-    "yourRole": "",
-    "noDirectAction": "",
-    "milestonesTitle": "",
-    "milestonesHint": "",
-    "noMilestones": "",
-    "releasesTitle": "",
-    "approveRelease": "",
-    "disputeSection": "",
-    "disputeHint": "",
-    "disputePlaceholder": "",
-    "fileDispute": "",
-    "disputeItem": "",
-    "adminResolveHint": "",
-    "adminNotesPlaceholder": "",
-    "resolveDispute": "",
-    "refundItem": "",
-    "approveRefund": "",
-    "contractInfo": "",
-    "expiresAt": "",
-    "platformFeeLabel": "",
-    "timeline": "",
-    "noEvents": "",
-    "ledgerTitle": "",
-    "ledgerHint": "",
-    "ledgerColType": "",
-    "ledgerColAmount": "",
-    "ledgerColNote": "",
-    "actionAllowedFor": "",
-    "actionBusy": "",
-    "buyerConfirm": "",
-    "buyerConfirmed": "",
-    "buyerConfirmTitle": "",
-    "sellerConfirm": "",
-    "sellerConfirmed": "",
-    "sellerConfirmTitle": "",
-    "operationFailed": "",
-    "done": "",
+    "loading": "Загрузка соглашения…",
+    "loadFailed": "Ошибка загрузки",
+    "notFound": "Соглашение не найдено или у вас нет к нему доступа.",
+    "backToList": "Вернуться к списку",
+    "backLink": "← Соглашения о гарантии сделки",
+    "you": "(Вы)",
+    "workflowTitle": "Процесс соглашения",
+    "availableRelease": "Доступно для перечисления",
+    "nextActions": "Следующие действия",
+    "yourRole": "Ваша роль:",
+    "noDirectAction": "На этом этапе от вас не требуется прямых действий. Проверьте этапы доставки или временную шкалу.",
+    "milestonesTitle": "Этапы перечисления средств",
+    "milestonesHint": "После блокировки гарантийного взноса средства перечисляются по этим этапам с подтверждением покупателя/продавца.",
+    "noMilestones": "Этапы не определены.",
+    "releasesTitle": "Запросы на перечисление",
+    "approveRelease": "Одобрить перечисление",
+    "disputeSection": "Споры и возвраты",
+    "disputeHint": "При проблемах с доставкой или качеством сначала согласуйте вопрос с другой стороной. Если договориться не удаётся, подайте спор.",
+    "disputePlaceholder": "Кратко опишите спор…",
+    "fileDispute": "Подать спор",
+    "disputeItem": "Спор №{id} — {status}",
+    "adminResolveHint": "Как администратор, выберите результат спора:",
+    "adminNotesPlaceholder": "Примечания администратора",
+    "resolveDispute": "Разрешение споров",
+    "refundItem": "Возврат {amount} — {status}",
+    "approveRefund": "Одобрить возврат (администратор)",
+    "contractInfo": "Информация о соглашении",
+    "expiresAt": "Срок действия",
+    "platformFeeLabel": "Комиссия",
+    "timeline": "Временная шкала",
+    "noEvents": "События пока не зарегистрированы.",
+    "ledgerTitle": "Финансовый реестр",
+    "ledgerHint": "Все операции, связанные с этим соглашением, регистрируются прозрачно.",
+    "ledgerColType": "Тип",
+    "ledgerColAmount": "Сумма",
+    "ledgerColNote": "Описание",
+    "actionAllowedFor": "Разрешено для:",
+    "actionBusy": "Обработка…",
+    "buyerConfirm": "Подтвердить как покупатель",
+    "buyerConfirmed": "Покупатель подтвердил ✓",
+    "buyerConfirmTitle": "Этим действием вы подтверждаете выполнение обязательства по данному этапу",
+    "sellerConfirm": "Подтвердить как продавец",
+    "sellerConfirmed": "Продавец подтвердил ✓",
+    "sellerConfirmTitle": "Подтвердите, что продавец выполнил обязательство по этому этапу",
+    "operationFailed": "Операция не выполнена",
+    "done": "Завершён",
     "resolveOptions": {
-      "seller": "",
-      "buyer": "",
-      "split": "",
-      "closed": ""
+      "seller": "Перечисление продавцу",
+      "buyer": "Возврат покупателю",
+      "split": "Разделить (50/50)",
+      "closed": "Закрыть без финансовой операции"
     },
     "dialogs": {
       "cancel": {
-        "title": "",
-        "description": "",
-        "confirm": "",
-        "reasonRequired": "",
-        "placeholder": ""
+        "title": "Отменить соглашение",
+        "description": "После отмены соглашение не будет продолжено. Укажите причину.",
+        "confirm": "Отменить соглашение",
+        "reasonRequired": "Введите причину отмены",
+        "placeholder": "Причина отмены…"
       },
       "release": {
-        "title": "",
-        "description": "",
-        "confirm": "",
-        "amountLabel": "",
-        "noteLabel": "",
-        "notePlaceholder": "",
-        "amountRequired": "",
-        "defaultReason": ""
+        "title": "Запрос на перечисление",
+        "description": "Максимальная запрашиваемая сумма: {amount}",
+        "confirm": "Подать заявку",
+        "amountLabel": "Сумма перечисления",
+        "noteLabel": "Примечание (необязательно)",
+        "notePlaceholder": "например, первый этап доставки выполнен",
+        "amountRequired": "Введите допустимую сумму",
+        "defaultReason": "Запрос продавца на перечисление"
       },
       "refund": {
-        "title": "",
-        "description": "",
-        "confirm": "",
-        "reasonRequired": "",
-        "placeholder": ""
+        "title": "Запросить возврат",
+        "description": "Запросить возврат заблокированных средств покупателю. Администратор должен его одобрить.",
+        "confirm": "Подать заявку",
+        "reasonRequired": "Введите причину возврата",
+        "placeholder": "Причина запроса на возврат…"
       }
     }
   },
   "settings": {
-    "subtitle": "",
-    "contractsLink": "",
-    "loadError": "",
-    "loading": "",
-    "defaultDeposit": "",
-    "defaultPercent": "",
-    "minPercent": "",
-    "maxPercent": "",
-    "platformFee": "",
-    "allowFullHold": "",
-    "allowCustom": "",
-    "releasePolicy": "",
-    "releaseNeedsBuyer": "",
-    "sellerCanRequest": "",
-    "sellerReleaseNeedsBuyer": "",
-    "defaultMilestone": "",
-    "verifiedSeller": "",
-    "verifiedHint": "",
-    "verifiedPercent": "",
-    "saveVerifiedRule": "",
-    "verifiedSaved": "",
-    "saving": "",
-    "save": "",
-    "saved": "",
-    "saveError": ""
+    "subtitle": "Процент по умолчанию, диапазон гарантийного взноса, полное удержание суммы сделки, политика перечисления и график этапов",
+    "contractsLink": "Соглашения о гарантии сделки",
+    "loadError": "Ошибка загрузки настроек гарантии сделки",
+    "loading": "Загрузка настроек…",
+    "defaultDeposit": "Гарантийный взнос по умолчанию",
+    "defaultPercent": "Процент гарантийного взноса по умолчанию (%)",
+    "minPercent": "Минимально допустимый (%)",
+    "maxPercent": "Максимально допустимый (%)",
+    "platformFee": "Комиссия платформы (%)",
+    "allowFullHold": "Разрешить удержание 100% общей суммы сделки",
+    "allowCustom": "Разрешить пользовательскую сумму / процент",
+    "releasePolicy": "Политика перечисления (стандарт B2B)",
+    "releaseNeedsBuyer": "Для перечисления требуется одобрение покупателя",
+    "sellerCanRequest": "Продавец может подать запрос на перечисление",
+    "sellerReleaseNeedsBuyer": "Запрос продавца требует одобрения покупателя",
+    "defaultMilestone": "График этапов перечисления по умолчанию",
+    "verifiedSeller": "Проверенный продавец",
+    "verifiedHint": "Процент гарантийного взноса для проверенных продавцов с подтверждённой историей (имеет приоритет над общим правилом)",
+    "verifiedPercent": "Процент гарантийного взноса (%)",
+    "saveVerifiedRule": "Сохранить VIP-правило",
+    "verifiedSaved": "Правило для проверенного продавца сохранено",
+    "saving": "Сохранение…",
+    "save": "Сохранить настройки",
+    "saved": "Сохранено",
+    "saveError": "Ошибка сохранения"
   }
 }

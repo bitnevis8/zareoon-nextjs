@@ -4,18 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { authFetch } from "@/app/utils/authHeaders";
+import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
 function resolveShopPath(profile, user) {
   const slug = profile?.profileSlug?.trim();
-  if (slug) return `/tamin/${slug}`;
+  if (slug) return providerPublicPath(slug);
 
   const username = profile?.user?.username ?? user?.username;
   if (username && !String(username).startsWith("temp")) {
-    return `/tamin/${username}`;
+    return providerPublicPath(username);
   }
 
   const id = profile?.userId ?? profile?.user?.id ?? user?.id ?? user?.userId;
-  if (id) return `/tamin/${id}`;
+  if (id) return providerPublicPath(id);
 
   return null;
 }

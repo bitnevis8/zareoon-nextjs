@@ -5,30 +5,22 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
-import { getRoleLabel } from "@/app/utils/roles";
-import SimpleBarChart from "./SimpleBarChart";
-import { dash } from "./dashboardTheme";
-
-function KpiCard({ label, value, hint, tone = "emerald", href }) {
-  const tones = {
-    emerald: "border-emerald-100 bg-emerald-50/60 text-emerald-900",
-    sky: "border-sky-100 bg-sky-50/60 text-sky-900",
-    amber: "border-amber-100 bg-amber-50/60 text-amber-900",
-    violet: "border-violet-100 bg-violet-50/60 text-violet-900",
-  };
-  const inner = (
-    <div className={`${dash.card} p-4 transition hover:shadow-md ${tones[tone] || tones.emerald}`}>
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums">{value.toLocaleString("fa-IR")}</p>
-      {hint ? <p className="mt-1 text-xs opacity-75">{hint}</p> : null}
-    </div>
-  );
-  return href ? <Link href={href}>{inner}</Link> : inner;
-}
+import {
+  DashAction,
+  DashActionGrid,
+  DashEmpty,
+  DashHero,
+  DashKpi,
+  DashKpiGrid,
+  DashListCard,
+  DashLoading,
+  DashPage,
+  DashSection,
+} from "./DashboardHomeKit";
 
 export default function AdminDashboardHome({ user }) {
-  const t = useTranslations("dashboard");
-  const tShared = useTranslations("shared");
+  const t = useTranslations("dashboard.homeAdmin");
+  const tDash = useTranslations("dashboard");
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -36,10 +28,7 @@ export default function AdminDashboardHome({ user }) {
   const [tradeProviders, setTradeProviders] = useState([]);
 
   const orderStatusLabel = (status) =>
-    t.has(`adminHome.orderStatus.${status}`) ? t(`adminHome.orderStatus.${status}`) : status;
-
-  const providerStatusLabel = (status) =>
-    t.has(`adminHome.providerStatus.${status}`) ? t(`adminHome.providerStatus.${status}`) : status;
+    tDash.has(`adminHome.orderStatus.${status}`) ? tDash(`adminHome.orderStatus.${status}`) : status;
 
   useEffect(() => {
     let cancelled = false;
@@ -78,101 +67,45 @@ export default function AdminDashboardHome({ user }) {
   const pendingProviders = tradeProviders.filter((p) => p.status === "pending").length;
   const activeLots = lots.filter((l) => l.status === "harvested" || l.status === "on_field").length;
 
-  const orderChart = useMemo(() => {
-    const counts = {};
-    orders.forEach((o) => {
-      const key = o.status || "unknown";
-      counts[key] = (counts[key] || 0) + 1;
-    });
-    return Object.entries(counts).map(([key, value]) => ({
-      label: orderStatusLabel(key),
-      value,
-      color: key === "pending" ? "bg-amber-500" : key === "completed" ? "bg-emerald-500" : "bg-sky-500",
-    }));
-  }, [orders, t]);
-
-  const roleChart = useMemo(() => {
-    const counts = {};
-    const noRoleLabel = t("adminHome.noRole");
-    users.forEach((u) => {
-      const roles = u.userRoles?.length ? u.userRoles : u.roles || [];
-      roles.forEach((r) => {
-        const label = getRoleLabel(r, tShared);
-        counts[label] = (counts[label] || 0) + 1;
-      });
-      if (!roles.length) counts[noRoleLabel] = (counts[noRoleLabel] || 0) + 1;
-    });
-    return Object.entries(counts).map(([label, value]) => ({ label, value, color: "bg-violet-500" }));
-  }, [users, t, tShared]);
-
-  const providerChart = useMemo(() => {
-    const counts = {};
-    tradeProviders.forEach((p) => {
-      const key = p.status || "pending";
-      counts[key] = (counts[key] || 0) + 1;
-    });
-    return Object.entries(counts).map(([key, value]) => ({
-      label: providerStatusLabel(key),
-      value,
-      color: key === "pending" ? "bg-amber-500" : key === "approved" ? "bg-emerald-500" : "bg-rose-500",
-    }));
-  }, [tradeProviders, t]);
-
   const recentOrders = useMemo(
     () =>
       [...orders]
         .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-        .slice(0, 5),
+        .slice(0, 6),
     [orders]
   );
 
-  const quickLinks = useMemo(
-    () => [
-      { href: "/dashboard/user-management/users", label: t("userManagement") },
-      { href: "/dashboard/supplier/inventory", label: t("inventoryList") },
-      { href: "/dashboard/order-management", label: t("orderManagement") },
-      { href: "/dashboard/trade-service-provider-requests", label: t("providerRequests") },
-      { href: "/dashboard/trade-service-providers", label: t("adminHome.quickLinks.providers") },
-      { href: "/dashboard/settings", label: t("settings") },
-    ],
-    [t]
-  );
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
-      </div>
-    );
-  }
+  if (loading) return <DashLoading />;
 
   return (
-    <div className={dash.page}>
-      <header>
-        <h1 className={dash.pageTitle}>{t("adminHome.title")}</h1>
-        <p className={dash.pageSubtitle}>{t("adminHome.subtitle", { name: user?.firstName || "" })}</p>
-      </header>
+    <DashPage>
+      <DashHero
+        tone="emerald"
+        badge={t("badge")}
+        title={t("title", { name: user?.firstName || "" })}
+        subtitle={t("subtitle")}
+      />
 
-      <div className={dash.gridKpi}>
-        <KpiCard label={t("adminHome.kpi.users")} value={users.length} href="/dashboard/user-management/users" tone="violet" />
-        <KpiCard
-          label={t("adminHome.kpi.orders")}
+      <DashKpiGrid>
+        <DashKpi label={t("kpi.users")} value={users.length} href="/dashboard/user-management/users" tone="violet" />
+        <DashKpi
+          label={t("kpi.orders")}
           value={orders.length}
-          hint={t("adminHome.kpi.pendingOrders", { count: pendingOrders.toLocaleString("fa-IR") })}
+          hint={t("kpi.pendingOrders", { count: pendingOrders })}
           href="/dashboard/order-management"
           tone="amber"
         />
-        <KpiCard
-          label={t("adminHome.kpi.activeProducts")}
+        <DashKpi
+          label={t("kpi.products")}
           value={activeLots}
-          hint={t("adminHome.kpi.lotsHint", { count: lots.length.toLocaleString("fa-IR") })}
+          hint={t("kpi.lotsTotal", { count: lots.length })}
           href="/dashboard/supplier/inventory"
           tone="emerald"
         />
-        <KpiCard
-          label={t("adminHome.kpi.providers")}
+        <DashKpi
+          label={t("kpi.providers")}
           value={tradeProviders.length}
-          hint={t("adminHome.kpi.pendingProviders", { count: pendingProviders.toLocaleString("fa-IR") })}
+          hint={t("kpi.pendingProviders", { count: pendingProviders })}
           href={
             pendingProviders > 0
               ? "/dashboard/trade-service-provider-requests"
@@ -180,70 +113,65 @@ export default function AdminDashboardHome({ user }) {
           }
           tone="sky"
         />
-      </div>
+      </DashKpiGrid>
 
-      <div className={dash.grid2}>
-        <SimpleBarChart title={t("adminHome.charts.orderStatus")} items={orderChart} />
-        <SimpleBarChart title={t("adminHome.charts.usersByRole")} items={roleChart} />
-      </div>
-
-      <SimpleBarChart title={t("adminHome.charts.providerStatus")} items={providerChart} />
-
-      <div className={dash.card}>
-        <div className={dash.cardHeader}>
-          <h3 className={dash.cardTitle}>{t("adminHome.recentOrders.title")}</h3>
-          <Link href="/dashboard/order-management" className="text-xs font-medium text-emerald-700 hover:underline">
-            {t("adminHome.recentOrders.viewAll")}
-          </Link>
+      {(pendingOrders > 0 || pendingProviders > 0) && (
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {pendingOrders > 0 ? (
+            <Link
+              href="/dashboard/order-management"
+              className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-950"
+            >
+              {t("alert.pendingOrders", { count: pendingOrders })}
+            </Link>
+          ) : null}
+          {pendingProviders > 0 ? (
+            <Link
+              href="/dashboard/trade-service-provider-requests"
+              className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-bold text-sky-950"
+            >
+              {t("alert.pendingProviders", { count: pendingProviders })}
+            </Link>
+          ) : null}
         </div>
-        <div className={dash.tableWrap}>
-          <table className={dash.table}>
-            <thead>
-              <tr className="bg-slate-50">
-                <th className={dash.th}>#</th>
-                <th className={dash.th}>{t("adminHome.recentOrders.status")}</th>
-                <th className={dash.th}>{t("adminHome.recentOrders.date")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {recentOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className={dash.empty}>
-                    {t("adminHome.recentOrders.empty")}
-                  </td>
-                </tr>
-              ) : (
-                recentOrders.map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-50/80">
-                    <td className={`${dash.td} font-mono text-slate-600`}>{o.id}</td>
-                    <td className={dash.td}>{orderStatusLabel(o.status)}</td>
-                    <td className={`${dash.td} text-slate-500`}>
-                      {o.createdAt
-                        ? new Date(o.createdAt).toLocaleDateString("fa-IR", {
-                            month: "short",
-                            day: "numeric",
-                          })
-                        : "—"}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {quickLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`${dash.card} flex h-11 items-center px-4 text-sm font-medium text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50/40`}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
-    </div>
+      <DashSection title={t("actionsTitle")}>
+        <DashActionGrid>
+          <DashAction href="/dashboard/user-management/users" title={t("actions.users")} desc={t("actions.usersDesc")} tone="violet" />
+          <DashAction href="/dashboard/order-management" title={t("actions.orders")} desc={t("actions.ordersDesc")} tone="amber" />
+          <DashAction href="/dashboard/supplier/inventory" title={t("actions.inventory")} desc={t("actions.inventoryDesc")} tone="emerald" />
+          <DashAction href="/dashboard/trade-service-provider-requests" title={t("actions.providers")} desc={t("actions.providersDesc")} tone="sky" />
+          <DashAction href="/dashboard/settings" title={t("actions.settings")} desc={t("actions.settingsDesc")} tone="violet" />
+          <DashAction href="/dashboard/homepage-order" title={t("actions.homepage")} desc={t("actions.homepageDesc")} tone="emerald" />
+        </DashActionGrid>
+      </DashSection>
+
+      <DashSection title={t("recentOrders")} actionHref="/dashboard/order-management" actionLabel={t("viewAll")}>
+        {recentOrders.length === 0 ? (
+          <DashEmpty>{t("emptyOrders")}</DashEmpty>
+        ) : (
+          <div className="space-y-2">
+            {recentOrders.map((o) => (
+              <DashListCard
+                key={o.id}
+                href="/dashboard/order-management"
+                title={`${t("orderHash")}${o.id}`}
+                meta={
+                  o.createdAt
+                    ? new Date(o.createdAt).toLocaleDateString("fa-IR", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "—"
+                }
+                badge={orderStatusLabel(o.status)}
+              />
+            ))}
+          </div>
+        )}
+      </DashSection>
+    </DashPage>
   );
 }

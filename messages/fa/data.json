@@ -21,7 +21,35 @@
   },
   "units": {
     "kg": { "fa": "کیلوگرم", "en": "kg", "ru": "кг", "ar": "كجم" },
-    "ton": { "fa": "تن", "en": "ton", "ru": "т", "ar": "طن" }
+    "ton": { "fa": "تن", "en": "ton", "ru": "т", "ar": "طن" },
+    "liter": { "fa": "لیتر", "en": "liter", "ru": "л", "ar": "لتر" },
+    "meter": { "fa": "متر", "en": "meter", "ru": "м", "ar": "متر" },
+    "sqm": { "fa": "متر مربع", "en": "sqm", "ru": "м²", "ar": "م²" },
+    "piece": { "fa": "عدد", "en": "piece", "ru": "шт", "ar": "قطعة" },
+    "unit": { "fa": "واحد", "en": "unit", "ru": "ед", "ar": "وحدة" },
+    "set": { "fa": "ست", "en": "set", "ru": "набор", "ar": "طقم" },
+    "pair": { "fa": "جفت", "en": "pair", "ru": "пара", "ar": "زوج" },
+    "roll": { "fa": "رول", "en": "roll", "ru": "рулон", "ar": "لفة" },
+    "sheet": { "fa": "ورق", "en": "sheet", "ru": "лист", "ar": "ورقة" },
+    "ream": { "fa": "بند", "en": "ream", "ru": "стопа", "ar": "رزمة" },
+    "line": { "fa": "خط", "en": "line", "ru": "линия", "ar": "خط" },
+    "bar": { "fa": "شمش", "en": "bar", "ru": "пруток", "ar": "قضيب" }
+  },
+  "packaging": {
+    "bag": { "fa": "کیسه", "en": "bag" },
+    "sack": { "fa": "گونی", "en": "sack" },
+    "box": { "fa": "جعبه", "en": "box" },
+    "carton": { "fa": "کارتن", "en": "carton" },
+    "crate": { "fa": "جعبه چوبی", "en": "crate" },
+    "pallet": { "fa": "پالت", "en": "pallet" },
+    "container": { "fa": "کانتینر", "en": "container" },
+    "drum": { "fa": "بشکه", "en": "drum" },
+    "bottle": { "fa": "بطری", "en": "bottle" },
+    "jar": { "fa": "شیشه", "en": "jar" },
+    "can": { "fa": "قوطی", "en": "can" },
+    "pack": { "fa": "بسته", "en": "pack" },
+    "bundle": { "fa": "باندل", "en": "bundle" },
+    "ibc-tank": { "fa": "مخزن IBC", "en": "IBC tank" }
   },
   "calendars": {
     "months": ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"],

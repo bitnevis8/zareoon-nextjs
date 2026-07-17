@@ -1,123 +1,123 @@
 {
   "steps": {
-    "requestType": "",
-    "category": "",
-    "details": ""
+    "requestType": "Тип заявки",
+    "category": "Категория",
+    "details": "Подробности"
   },
   "requestTypes": {
     "product": {
-      "label": "",
-      "description": ""
+      "label": "Покупатель товара",
+      "description": "Нужно купить или найти товар? Продавцы соответствующей категории получат уведомление."
     },
     "service": {
-      "label": "",
-      "description": ""
+      "label": "Заказчик услуги",
+      "description": "Нужны торговые услуги? Поставщики соответствующего направления получат уведомление."
     }
   },
   "type": {
-    "product": "",
-    "service": ""
+    "product": "Товар",
+    "service": "Услуги"
   },
   "status": {
-    "open": "",
-    "closed": "",
-    "fulfilled": "",
-    "cancelled": ""
+    "open": "Открыта",
+    "closed": "Закрыта",
+    "fulfilled": "Выполнена",
+    "cancelled": "Отменена"
   },
   "errors": {
-    "selectRequestType": "",
-    "selectProductCategory": "",
-    "selectServiceCategory": "",
-    "loginRequired": "",
-    "titleRequired": "",
-    "descriptionRequired": "",
-    "phoneRequired": "",
-    "categoryRequired": "",
-    "invalidServerResponse": "",
-    "sessionExpired": "",
-    "submitFailed": "",
-    "generic": ""
+    "selectRequestType": "Выберите тип заявки.",
+    "selectProductCategory": "Выберите категорию товара.",
+    "selectServiceCategory": "Выберите категорию услуги.",
+    "loginRequired": "Чтобы подать заявку, необходимо войти в систему.",
+    "titleRequired": "Укажите заголовок заявки.",
+    "descriptionRequired": "Опишите вашу потребность.",
+    "phoneRequired": "Укажите контактный номер.",
+    "categoryRequired": "Выберите категорию.",
+    "invalidServerResponse": "Ответ сервера некорректен. Проверьте API.",
+    "sessionExpired": "Срок действия сеанса истёк. Войдите снова.",
+    "submitFailed": "Не удалось подать заявку",
+    "generic": "Ошибка"
   },
   "success": {
-    "notified": "",
-    "submitted": ""
+    "notified": "Заявка отправлена, уведомлено продавцов/поставщиков: {count}.",
+    "submitted": "Заявка отправлена. Соответствующие продавцы и поставщики услуг получат уведомление."
   },
   "form": {
-    "step1Hint": "",
-    "step2ProductHint": "",
-    "step2ServiceHint": "",
-    "productCategory": "",
-    "serviceCategory": "",
-    "loadingCategories": "",
-    "noProductCategories": "",
-    "selectPlaceholder": "",
-    "subcategory": "",
-    "subservice": "",
-    "wholeCategory": "",
-    "title": "",
-    "titlePlaceholderProduct": "",
-    "titlePlaceholderService": "",
-    "description": "",
-    "descriptionPlaceholder": "",
-    "approxQuantity": "",
-    "quantityPlaceholder": "",
-    "unit": "",
-    "unitPlaceholder": "",
-    "phone": "",
-    "company": "",
-    "allowPhoneContact": "",
-    "notes": "",
-    "continue": "",
-    "back": "",
-    "submitting": "",
-    "submit": "",
-    "newRequest": ""
+    "step1Hint": "Сначала укажите, нужен вам товар или услуга:",
+    "step2ProductHint": "Выберите соответствующую категорию товара, чтобы уведомить продавцов этой категории:",
+    "step2ServiceHint": "Выберите категорию услуги, чтобы уведомить поставщиков этого направления:",
+    "productCategory": "Категория товара",
+    "serviceCategory": "Категория услуги",
+    "loadingCategories": "Загрузка категорий…",
+    "noProductCategories": "Категории товаров не найдены. Обратитесь в службу поддержки.",
+    "selectPlaceholder": "Выберите…",
+    "subcategory": "Подкатегория (более точная)",
+    "subservice": "Подуслуга (более точная)",
+    "wholeCategory": "Вся категория",
+    "title": "Заголовок заявки",
+    "titlePlaceholderProduct": "Например: закупка 50 тонн пшеницы 1-го сорта",
+    "titlePlaceholderService": "Например: требуется таможенное оформление в порту Бендер-Аббас",
+    "description": "Описание потребности",
+    "descriptionPlaceholder": "Подробности, технические характеристики, место доставки, требуемые сроки и т. д.",
+    "approxQuantity": "Примерное количество",
+    "quantityPlaceholder": "Например: 100",
+    "unit": "Единица измерения",
+    "unitPlaceholder": "Например: тонна",
+    "phone": "Контактный номер",
+    "company": "Название компании / организации",
+    "allowPhoneContact": "Я разрешаю продавцам и поставщикам услуг связываться со мной по телефону. Во всех случаях они также могут использовать внутренний чат.",
+    "notes": "Дополнительные примечания",
+    "continue": "Продолжить",
+    "back": "Назад",
+    "submitting": "Отправка…",
+    "submit": "Подать заявку",
+    "newRequest": "Подать новую заявку"
   },
   "home": {
-    "title": "",
-    "subtitle": "",
-    "newRequestLink": "",
-    "myRequests": "",
-    "viewAll": "",
-    "noRequests": ""
+    "title": "Панель заявителя",
+    "subtitle": "Уважаемый(-ая) {name}, подайте заявку на товар или услугу, чтобы соответствующие продавцы и поставщики получили уведомление.",
+    "newRequestLink": "Подать новую заявку ←",
+    "myRequests": "Мои заявки",
+    "viewAll": "Показать всё",
+    "noRequests": "Вы ещё не подавали заявки."
   },
   "contact": {
-    "ariaLabel": "",
-    "call": "",
-    "chat": ""
+    "ariaLabel": "Связаться с заявителем",
+    "call": "Позвонить",
+    "chat": "Чат"
   },
   "requestsList": {
-    "title": "",
-    "subtitle": "",
-    "empty": ""
+    "title": "Мои заявки",
+    "subtitle": "Список заявок, поданных вами как заявителем",
+    "empty": "Заявок пока нет."
   },
   "requestDetail": {
-    "backToRequests": "",
-    "needDescription": "",
-    "quantity": "",
-    "phone": "",
-    "company": "",
-    "notes": ""
+    "backToRequests": "← Вернуться к заявкам",
+    "needDescription": "Описание потребности",
+    "quantity": "Количество",
+    "phone": "Контактный номер",
+    "company": "Компания / организация",
+    "notes": "Дополнительные примечания"
   },
   "submitPage": {
-    "title": "",
-    "subtitle": ""
+    "title": "Подать заявку",
+    "subtitle": "Выберите тип потребности (товар или услуга), подходящую категорию и укажите подробности. Соответствующие продавцы или поставщики получат уведомление."
   },
   "incoming": {
     "seller": {
-      "title": "",
-      "subtitle": ""
+      "title": "Посмотреть заявки на мои товары",
+      "subtitle": "Заявки покупателей, соответствующие предлагаемым вами товарам"
     },
     "services": {
-      "title": "",
-      "subtitle": ""
+      "title": "Посмотреть заявки на мои услуги",
+      "subtitle": "Заявки заказчиков, соответствующие предоставляемым вами услугам"
     },
-    "empty": "",
-    "newBadge": "",
-    "backToRequests": "",
-    "respondHint": "",
-    "phoneHiddenHint": "",
-    "applicant": "",
-    "email": ""
+    "empty": "Новых заявок для вас нет.",
+    "newBadge": "Новая",
+    "backToRequests": "← Вернуться к заявкам",
+    "respondHint": "Ответить на эту заявку:",
+    "phoneHiddenHint": "Заявитель не разрешил показывать номер телефона — используйте чат.",
+    "applicant": "Заявитель",
+    "email": "Электронная почта"
   }
 }

@@ -14,6 +14,9 @@ import LatestAvailableProductsSection from "@/app/components/LatestAvailableProd
 import CatalogProductHero from "@/app/components/catalog/CatalogProductHero";
 import CatalogProductDescription from "@/app/components/catalog/CatalogProductDescription";
 import CatalogGradeOffers from "@/app/components/catalog/CatalogGradeOffers";
+import CatalogLotFilters from "@/app/components/catalog/CatalogLotFilters";
+import CatalogTradeCompliance from "@/app/components/catalog/CatalogTradeCompliance";
+import { lotMatchesFilterValues } from "@/app/utils/productCatalogSchema";
 import { buildLotGalleryItems } from "@/app/utils/catalogGradeMedia";
 import CatalogMediaLightbox, { sortMediaItems, buildProductGalleryItems } from "@/app/components/catalog/CatalogMediaLightbox";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
@@ -77,6 +80,7 @@ export default function CatalogItemPage({ params }) {
   const mediaCacheRef = useRef(new Map());
   const [lotMediaPreview, setLotMediaPreview] = useState(new Map());
   const [activeOfferGrade, setActiveOfferGrade] = useState(null);
+  const [lotFilters, setLotFilters] = useState({});
   const [cartTotalQty, setCartTotalQty] = useState(0);
   const [cartUnit, setCartUnit] = useState("");
 
@@ -162,9 +166,13 @@ export default function CatalogItemPage({ params }) {
 
   const productIdNum = Number(id);
   const lots = inventoryLots;
-  const filteredLots = useMemo(
+  const productLots = useMemo(
     () => (lots || []).filter((l) => l.productId === productIdNum),
     [lots, productIdNum]
+  );
+  const filteredLots = useMemo(
+    () => productLots.filter((l) => lotMatchesFilterValues(l, lotFilters)),
+    [productLots, lotFilters]
   );
   const summary = useMemo(() => {
     let total = 0;
@@ -182,11 +190,15 @@ export default function CatalogItemPage({ params }) {
   }, [filteredLots]);
 
   useEffect(() => {
-    if (!filteredLots.length) return;
-    filteredLots.slice(0, 12).forEach((l) => {
+    setLotFilters({});
+  }, [id]);
+
+  useEffect(() => {
+    if (!productLots.length) return;
+    productLots.slice(0, 12).forEach((l) => {
       if (!lotMediaCounts.has(l.id)) loadLotMediaCounts(l.id);
     });
-  }, [filteredLots, lotMediaCounts, loadLotMediaCounts]);
+  }, [productLots, lotMediaCounts, loadLotMediaCounts]);
 
   const openMediaGallery = useCallback(async ({ module, entityId, startMediaId = null, startIndex = null, productItem = null, galleryTitle: titleOverride = null }) => {
     const cacheKey = `${module}:${entityId}`;
@@ -344,8 +356,27 @@ export default function CatalogItemPage({ params }) {
         openMediaGallery={openMediaGallery}
         cartTotalQty={cartTotalQty}
         cartUnit={cartUnit}
-        hideMediaOnMobile={filteredLots.length > 0}
+        hideMediaOnMobile={filteredLots.length > 0 || productLots.length > 0}
       />
+
+      {item?.isOrderable ? <CatalogTradeCompliance product={item} /> : null}
+
+      {productLots.length > 0 ? (
+        <CatalogLotFilters
+          product={item}
+          lots={productLots}
+          activeFilters={lotFilters}
+          onChange={(key, value) =>
+            setLotFilters((prev) => {
+              const next = { ...prev };
+              if (!value) delete next[key];
+              else next[key] = value;
+              return next;
+            })
+          }
+          onClear={() => setLotFilters({})}
+        />
+      ) : null}
 
       {filteredLots.length > 0 && (
         <CatalogGradeOffers

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import AsyncSelect from "react-select/async";
 import LotLocationPicker from "@/app/components/ui/LotLocationPicker";
 import AttributeFields from "@/app/components/ui/AttributeFields";
+import ProductFilterFields from "@/app/components/ui/ProductFilterFields";
 import { Field } from "./Field";
 import TieredPricingEditor from "./TieredPricingEditor";
 import ProductCatalogPicker from "./ProductCatalogPicker";
@@ -17,6 +18,15 @@ import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/Persi
 import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
 import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
+import {
+  canSellerListProduct,
+  getAllowedMeasurementUnits,
+  getAllowedPackagingTypes,
+  getDefaultMeasurementUnit,
+  getLotFilterFieldKeys,
+} from "@/app/utils/productCatalogSchema";
+import { localizeUnit, localizePackaging } from "@/app/utils/localize";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 function StepBlock({ step, title, children }) {
   return (
@@ -90,6 +100,7 @@ export default function InventoryCreatePanel({
 }) {
   const t = useTranslations("inventory");
   const tShared = useTranslations("shared");
+  const { language } = useLanguage();
   const supplier = isSupplier(user);
   const exchangeRates = useExchangeRatesMap();
   const priceCurrencyLabel = getCurrencyDefinition(form.priceCurrency, tShared).shortLabel;
@@ -97,11 +108,49 @@ export default function InventoryCreatePanel({
     () => (form.tieredPricing?.length > 0 ? "tiered" : "simple")
   );
 
+  const selectedProduct = useMemo(() => {
+    const id = Number(form.productId);
+    if (!id) return null;
+    return (
+      (catalogItems || []).find((p) => Number(p.id) === id) ||
+      (products || []).find((p) => Number(p.id) === id) ||
+      null
+    );
+  }, [form.productId, catalogItems, products]);
+
+  const unitOptions = useMemo(() => getAllowedMeasurementUnits(selectedProduct), [selectedProduct]);
+  const packagingOptions = useMemo(() => getAllowedPackagingTypes(selectedProduct), [selectedProduct]);
+  const filterKeys = useMemo(() => getLotFilterFieldKeys(selectedProduct), [selectedProduct]);
+  const listingCheck = useMemo(
+    () => (selectedProduct ? canSellerListProduct(selectedProduct, { isAdmin: false }) : null),
+    [selectedProduct]
+  );
+
   useEffect(() => {
     if (!form.productId && !form.totalQuantity && !form.price && !form.tieredPricing?.length) {
       setPricingMode("simple");
     }
   }, [form.productId, form.totalQuantity, form.price, form.tieredPricing]);
+
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const defaultUnit = getDefaultMeasurementUnit(selectedProduct);
+    const allowed = getAllowedMeasurementUnits(selectedProduct);
+    setForm((f) => {
+      const next = { ...f };
+      let changed = false;
+      if (!f.unit || (allowed.length && !allowed.includes(f.unit))) {
+        next.unit = defaultUnit;
+        changed = true;
+      }
+      const packs = getAllowedPackagingTypes(selectedProduct);
+      if (f.packagingType && packs.length && !packs.includes(f.packagingType)) {
+        next.packagingType = "";
+        changed = true;
+      }
+      return changed ? next : f;
+    });
+  }, [selectedProduct, setForm]);
 
   const handlePricingModeChange = (mode) => {
     setPricingMode(mode);
@@ -154,10 +203,31 @@ export default function InventoryCreatePanel({
             onRetryCatalog={onRetryCatalog}
             fallbackProducts={products}
             selectedProductId={form.productId}
-            onSelectProduct={(id) => setForm({ ...form, productId: id || "" })}
+            onSelectProduct={(id) => {
+              const product =
+                (catalogItems || []).find((p) => Number(p.id) === Number(id)) ||
+                (products || []).find((p) => Number(p.id) === Number(id));
+              setForm({
+                ...form,
+                productId: id || "",
+                unit: product ? getDefaultMeasurementUnit(product) : form.unit,
+                packagingType: "",
+                filterValues: {},
+                hsCode: "",
+              });
+            }}
             loadProductOptions={loadProductOptions}
           />
-          {!supplier ? (
+          {listingCheck && listingCheck.warning ? (
+            <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-900">
+              {t("create.listingModeratedNote")}
+            </p>
+          ) : null}
+          {selectedProduct?.attributeSetId ? (
+            <p className="mt-1.5 text-[11px] text-slate-500">
+              {t("create.attributeSet")}: <span className="font-medium text-slate-700">{selectedProduct.attributeSetId}</span>
+            </p>
+          ) : null}          {!supplier ? (
             <div className="mt-3">
               <Field label={t("create.supplier")} compact>
                 <AsyncSelect
@@ -190,13 +260,51 @@ export default function InventoryCreatePanel({
         <StepBlock step={t("create.step2Number")} title={t("create.step2")}>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <Field label={t("create.unit")} compact>
-              <input
-                className={inv.inputCompact}
-                placeholder={t("create.unitPlaceholder")}
-                value={form.unit}
-                onChange={(e) => setForm({ ...form, unit: e.target.value })}
-              />
+              {unitOptions.length > 1 ? (
+                <select
+                  className={inv.selectCompact}
+                  value={form.unit}
+                  onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                >
+                  {unitOptions.map((u) => (
+                    <option key={u} value={u}>
+                      {localizeUnit(u, language) || u}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  className={inv.inputCompact}
+                  value={form.unit}
+                  onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                  placeholder={t("create.unitPlaceholder")}
+                  list={unitOptions.length ? "inventory-unit-options" : undefined}
+                />
+              )}
+              {unitOptions.length === 1 ? (
+                <datalist id="inventory-unit-options">
+                  {unitOptions.map((u) => (
+                    <option key={u} value={u} />
+                  ))}
+                </datalist>
+              ) : null}
             </Field>
+            {packagingOptions.length > 0 ? (
+              <Field label={t("create.packagingType")} compact>
+                <select
+                  className={inv.selectCompact}
+                  value={form.packagingType || ""}
+                  onChange={(e) => setForm({ ...form, packagingType: e.target.value })}
+                >
+                  <option value="">{t("create.packagingPlaceholder")}</option>
+                  {packagingOptions.map((p) => (
+                    <option key={p} value={p}>
+                      {localizePackaging(p, language)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : null}
             <Field label={t("create.qualityGrade")} compact>
               <select
                 className={inv.selectCompact}
@@ -238,6 +346,42 @@ export default function InventoryCreatePanel({
             </Field>
           </div>
 
+          {filterKeys.length > 0 ? (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/50 p-2.5 sm:p-3">
+              <p className="mb-2 text-xs font-semibold text-slate-700">{t("create.productFilters")}</p>
+              <ProductFilterFields
+                keys={filterKeys}
+                values={form.filterValues || {}}
+                onChange={(key, val) =>
+                  setForm({
+                    ...form,
+                    filterValues: { ...(form.filterValues || {}), [key]: val },
+                    ...(key === "hsCode" ? { hsCode: val } : {}),
+                  })
+                }
+                compact
+              />
+            </div>
+          ) : null}
+
+          {selectedProduct?.tradeCompliance?.hsCodeRequired && !filterKeys.includes("hsCode") ? (
+            <div className="mt-2">
+              <Field label={t("create.hsCode")} compact>
+                <input
+                  className={inv.inputCompact}
+                  value={form.hsCode || ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      hsCode: e.target.value,
+                      filterValues: { ...(form.filterValues || {}), hsCode: e.target.value },
+                    })
+                  }
+                  placeholder="e.g. 0802.51"
+                />
+              </Field>
+            </div>
+          ) : null}
           <div className="mt-3 space-y-2.5 border-t border-slate-100 pt-3">
             <Field label={t("create.priceType")} compact>
               <PricingModeSwitch mode={pricingMode} onChange={handlePricingModeChange} t={t} />

@@ -10,6 +10,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { isAdmin } from "@/app/utils/roles";
 import { showToast } from "@/app/utils/toast";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
+import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
 
 import {
   findCatalogService,
@@ -186,7 +187,12 @@ export default function TradeServiceProvidersDashboardContent({
             )}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <DataExportImportButtons
+            section="tradeServiceProviders"
+            onImported={loadProviders}
+            compact
+          />
           <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-900">
             {t("tradeProviders.pendingCount", { count: counts.pending.toLocaleString("fa-IR") })}
           </span>

@@ -1,307 +1,307 @@
 {
-  "eyebrow": "",
-  "title": "",
-  "subtitle": "",
-  "providerHint": "",
-  "providerRegisterNote": "",
+  "eyebrow": "Сеть услуг внешней торговли",
+  "title": "Услуги для бизнеса и международной торговли",
+  "subtitle": "Найдите компанию или специалиста по импорту, экспорту, перевозкам, таможне, инспекции и финансированию.",
+  "providerHint": "Каталог компаний и специалистов по каждому направлению, включая контактные данные, лицензии, опыт и оценки.",
+  "providerRegisterNote": "Представьте свои услуги, находите новых клиентов и развивайте присутствие в сети международной торговли с помощью отдельного профиля.",
   "categories": [
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "import-export",
+      "icon": "import-export",
+      "title": "Импортно-экспортные услуги",
+      "description": "Управление импортом и экспортом, поиск товаров, международных покупателей и поставщиков, коммерческое представительство и управление документами.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "import-mgmt",
+          "title": "Управление импортом товаров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "export-mgmt",
+          "title": "Управление экспортом товаров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "sourcing",
+          "title": "Закупка и поиск товаров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "find-buyer",
+          "title": "Поиск международных покупателей"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "find-supplier",
+          "title": "Поиск международных поставщиков"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "commercial-agency",
+          "title": "Коммерческое и торговое представительство"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-documents",
+          "title": "Управление торговыми документами"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "intl-logistics",
+      "icon": "intl-logistics",
+      "title": "Международные перевозки и логистика",
+      "description": "Морские, воздушные, автомобильные, железнодорожные и мультимодальные перевозки; экспедирование, услуги перевозчиков, контейнерные и международные складские услуги.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "sea-freight",
+          "title": "Морские перевозки"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "air-freight",
+          "title": "Авиаперевозки"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "road-freight",
+          "title": "Автомобильные перевозки"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "rail-freight",
+          "title": "Железнодорожные перевозки"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "multimodal",
+          "title": "Мультимодальные перевозки"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "forwarder-carrier",
+          "title": "Экспедиторские услуги и услуги перевозчиков"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "container-services",
+          "title": "Контейнерные услуги"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "warehousing",
+          "title": "Складирование и хранение товаров"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "customs-clearance",
+      "icon": "customs-clearance",
+      "title": "Таможня и оформление товаров",
+      "description": "Таможенное оформление, услуги таможенного брокера, регистрация импортных заказов, получение разрешений на импорт и экспорт, оценка товаров и таможенное консультирование.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "customs-brokerage",
+          "title": "Таможенное оформление товаров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "customs-agent",
+          "title": "Таможенный брокер"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "order-registration",
+          "title": "Регистрация импортного заказа"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "import-export-permits",
+          "title": "Получение разрешений на импорт и экспорт"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "customs-valuation",
+          "title": "Оценка товаров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "customs-consulting",
+          "title": "Таможенное консультирование"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "intl-finance",
+      "icon": "intl-finance",
+      "title": "Международные финансовые и платёжные услуги",
+      "description": "Аккредитивы, телеграфные переводы, международные платежи, торговое финансирование и валютные услуги.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "letter-of-credit",
+          "title": "Аккредитив (LC)"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "telegraphic-transfer",
+          "title": "Телеграфный перевод (TT)"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "intl-payments",
+          "title": "Международные платежи"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-finance",
+          "title": "Торговое финансирование"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "fx-trade-services",
+          "title": "Коммерческие валютные услуги"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "inspection-standards",
+      "icon": "inspection-standards",
+      "title": "Инспекция и стандарты",
+      "description": "Инспекция товаров, контроль качества, испытания, инспекционные сертификаты, стандарты и предотгрузочная инспекция (PSI).",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "cargo-inspection",
+          "title": "Инспекция товаров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "quality-control",
+          "title": "Контроль качества (QC)"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "testing",
+          "title": "Испытания продукции и лабораторный анализ"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "inspection-certificate",
+          "title": "Выдача инспекционных сертификатов"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "standards-certification",
+          "title": "Стандарты и сертификация"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "pre-shipment-inspection",
+          "title": "Предотгрузочная инспекция (PSI)"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "insurance-risk",
+      "icon": "insurance-risk",
+      "title": "Страхование и управление рисками",
+      "description": "Страхование грузов, международных перевозок и экспортных кредитов, а также управление торговыми рисками.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "cargo-insurance",
+          "title": "Страхование грузов"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "intl-transport-insurance",
+          "title": "Страхование международных перевозок"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "export-credit-insurance",
+          "title": "Страхование экспортных кредитов"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-risk-mgmt",
+          "title": "Управление торговыми рисками"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "legal-trade",
+      "icon": "legal-trade",
+      "title": "Юридические услуги и коммерческие договоры",
+      "description": "Международные договоры, составление договоров купли-продажи, консультации по торговому праву, разрешение споров и регистрация компаний.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "intl-contracts",
+          "title": "Международные договоры"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "sales-contracts",
+          "title": "Составление договора купли-продажи"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-law-advice",
+          "title": "Консультации по торговому праву"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "dispute-resolution",
+          "title": "Разрешение коммерческих споров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "company-registration",
+          "title": "Регистрация компаний и представительств"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "market-development",
+      "icon": "market-development",
+      "title": "Маркетинг и развитие рынка",
+      "description": "Исследование международных рынков, экспортный маркетинг, международная реклама, привлечение покупателей и участие в выставках.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "market-research",
+          "title": "Исследование международных рынков"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "export-marketing",
+          "title": "Экспортный маркетинг"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "intl-advertising",
+          "title": "Международная реклама"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "buyer-acquisition",
+          "title": "Привлечение международных покупателей"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-fairs",
+          "title": "Участие в международных выставках"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "packaging-prep",
+      "icon": "packaging-prep",
+      "title": "Упаковка и подготовка товаров",
+      "description": "Экспортная упаковка, коммерческая маркировка и печать, паллетирование и стандартизация упаковки.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "export-packaging",
+          "title": "Экспортная упаковка"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "commercial-labeling",
+          "title": "Коммерческая маркировка и печать"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "palletizing",
+          "title": "Паллетирование"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "packaging-standards",
+          "title": "Стандартизация упаковки"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "specialized-trade",
+      "icon": "specialized-trade",
+      "title": "Специализированные торговые услуги",
+      "description": "Специализированный письменный и устный перевод для торговли, обучение международной торговле, консультации по импорту и экспорту и местное представительство.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "trade-translation",
+          "title": "Специализированный торговый перевод"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "negotiation-interpreter",
+          "title": "Переводчик деловых переговоров"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-training",
+          "title": "Обучение международной торговле"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-consulting",
+          "title": "Консультации по импорту и экспорту"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "local-representative",
+          "title": "Услуги местного представителя по странам"
         }
       ]
     }

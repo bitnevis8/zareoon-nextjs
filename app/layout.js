@@ -72,7 +72,7 @@ export async function generateMetadata() {
       yandex: "your-yandex-verification-code",
     },
     other: {
-      enamad: "19617122",
+      enamad: "759645",
     },
   };
 }

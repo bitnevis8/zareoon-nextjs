@@ -11,10 +11,19 @@ import ruSite from "../../messages/ru/site.json";
 import arSite from "../../messages/ar/site.json";
 import urSite from "../../messages/ur/site.json";
 import fiSite from "../../messages/fi/site.json";
+import trSite from "../../messages/tr/site.json";
 
 const STORAGE_KEY = "site-language";
 
-const siteIntroSources = { fa: faSite, en: enSite, ru: ruSite, ar: arSite, ur: urSite, fi: fiSite };
+const siteIntroSources = {
+  fa: faSite,
+  en: enSite,
+  ru: ruSite,
+  ar: arSite,
+  ur: urSite,
+  fi: fiSite,
+  tr: trSite,
+};
 
 export const siteIntroByLang = Object.fromEntries(
   SITE_LANGUAGE_CODES.map((code) => {

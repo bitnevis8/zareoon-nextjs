@@ -1,23 +1,25 @@
 {
   "roles": {
-    "super_admin": "",
-    "admin": "",
-    "employee": "",
-    "supplier": "",
-    "farmer": "",
-    "customer": "",
-    "loader": "",
-    "driver": "",
-    "administrator": ""
+    "super_admin": "Super Admin",
+    "admin": "Admin",
+    "user": "User",
+    "seller": "Seller",
+    "service_provider": "Service Provider",
+    "customer": "User",
+    "supplier": "Seller",
+    "farmer": "Seller",
+    "loader": "Seller",
+    "employee": "Employee",
+    "administrator": "Admin"
   },
   "accountNav": {
-    "individual": "",
-    "company": "",
-    "trader": "",
-    "manufacturer": "",
-    "distributor": "",
-    "admin": "",
-    "user": ""
+    "individual": "User",
+    "company": "Company",
+    "trader": "Seller",
+    "manufacturer": "Seller",
+    "distributor": "Company",
+    "admin": "Admin",
+    "user": "User"
   },
   "currencies": {
     "TOMAN": {
@@ -141,7 +143,7 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": ""
+    "inspectionStandardsCompany": "Arya Foolad Gharn Engineering Inspection"
   },
   "attributeFields": {
     "yes": "",

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { SITE_PHONE } from "@/app/config/siteContact";
 
-const SUPPORT_PHONE = "09393387148";
+const SUPPORT_PHONE = SITE_PHONE;
 
 const GUIDE_STEP_KEYS = ["1", "2", "3"];
 

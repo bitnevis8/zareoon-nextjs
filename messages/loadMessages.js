@@ -35,6 +35,7 @@ export const MESSAGE_NAMESPACES = [
   "legacy",
   "users",
   "shared",
+  "backup",
 ];
 
 function deepMerge(target, source) {

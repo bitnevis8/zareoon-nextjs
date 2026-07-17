@@ -13,6 +13,7 @@ import InventoryEditModal from "./components/InventoryEditModal";
 import InventoryMediaModal from "./components/InventoryMediaModal";
 import InventoryFilters, { DEFAULT_FILTERS } from "./components/InventoryFilters";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
+import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
 import { useRequireSupplierArea } from "@/app/hooks/useDashboardRole";
 import { isAdmin } from "@/app/utils/roles";
 import { Section } from "./components/Field";
@@ -72,6 +73,9 @@ export default function InventoryListPage() {
     setEditForm({
       displayContent: hydrateDisplayContent(lot),
       unit: lot.unit || "",
+      packagingType: lot.packagingType || "",
+      filterValues: lot.filterValues && typeof lot.filterValues === "object" ? { ...lot.filterValues } : {},
+      hsCode: lot.hsCode || lot.filterValues?.hsCode || "",
       qualityGrade: lot.qualityGrade || "",
       totalQuantity: String(lot.totalQuantity ?? ""),
       price: lot.price == null ? "" : String(lot.price),
@@ -101,6 +105,9 @@ export default function InventoryListPage() {
       const displayFields = displayContentToApiPayload(editForm.displayContent);
       const payload = {
         unit: editForm.unit || null,
+        packagingType: editForm.packagingType || null,
+        filterValues: editForm.filterValues && Object.keys(editForm.filterValues).length ? editForm.filterValues : null,
+        hsCode: editForm.hsCode || editForm.filterValues?.hsCode || null,
         qualityGrade: editForm.qualityGrade || null,
         totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
         price: editForm.price !== "" ? Number(editForm.price) : null,
@@ -168,7 +175,10 @@ export default function InventoryListPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {isAdmin(user) ? (
-            <CatalogPdfDownload scope="full" label={t("page.downloadCatalogPdf")} variant="dashboard" user={user} />
+            <>
+              <CatalogPdfDownload scope="full" label={t("page.downloadCatalogPdf")} variant="dashboard" user={user} />
+              <DataExportImportButtons section="inventoryLots" onImported={reload} compact />
+            </>
           ) : isOwnScope && user?.id ? (
             <CatalogPdfDownload
               scope="supplier-own"
@@ -276,6 +286,7 @@ export default function InventoryListPage() {
         <InventoryEditModal
           lot={selectedLot}
           productName={lotProductName}
+          product={products.find((p) => Number(p.id) === Number(selectedLot.productId)) || null}
           form={editForm}
           setForm={setEditForm}
           attributeDefs={editAttributeDefs}

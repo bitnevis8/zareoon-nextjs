@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useTranslations } from "next-intl";
 import { useRequireSupplierArea } from "@/app/hooks/useDashboardRole";
-import { isSupplier } from "@/app/utils/roles";
+import { isAdmin, isSupplier } from "@/app/utils/roles";
 import InventoryCreatePanel from "../components/InventoryCreatePanel";
 import { inv } from "../inventoryTheme";
 import { INITIAL_FORM, EMPTY_TIER } from "../inventoryConstants";
@@ -15,6 +15,7 @@ import { useProductCatalog } from "../hooks/useProductCatalog";
 import { loadAttributeDefsForProduct } from "../inventoryUtils";
 import { displayContentToApiPayload } from "../utils/inventoryDisplayLocales";
 import { uploadMediaFiles } from "@/app/utils/mediaUploadClient";
+import { canSellerListProduct } from "@/app/utils/productCatalogSchema";
 
 export default function InventoryCreatePage() {
   const router = useRouter();
@@ -91,6 +92,16 @@ export default function InventoryCreatePage() {
       alert(t("page.alertEnterQuantity"));
       return;
     }
+    const selected =
+      catalogItems.find((p) => p.id === Number(form.productId)) ||
+      products.find((p) => p.id === Number(form.productId));
+    if (selected) {
+      const check = canSellerListProduct(selected, { isAdmin: isAdmin(user) });
+      if (!check.ok) {
+        alert(t("page.alertListingBlocked"));
+        return;
+      }
+    }
     setSaving(true);
     setSuccessMsg("");
     try {
@@ -103,6 +114,9 @@ export default function InventoryCreatePage() {
           productId: Number(form.productId),
           farmerId: ownFarmer ? Number(user?.userId ?? user?.id) : Number(form.farmerId) || 1,
           unit: form.unit,
+          packagingType: form.packagingType || null,
+          filterValues: form.filterValues && Object.keys(form.filterValues).length ? form.filterValues : null,
+          hsCode: form.hsCode || form.filterValues?.hsCode || null,
           qualityGrade: form.qualityGrade,
           totalQuantity: Number(form.totalQuantity),
           price: form.price ? Number(form.price) : null,
@@ -118,6 +132,10 @@ export default function InventoryCreatePage() {
         }),
       });
       const lotData = await lotRes.json();
+      if (!lotRes.ok || !lotData?.success) {
+        alert(lotData?.message || t("page.alertSelectProduct"));
+        return;
+      }
       const lotId = lotData?.data?.id;
       if (lotId && attributeDefs.length > 0) {
         const entries = Object.entries(attributeValues).filter(([, v]) => v !== undefined && v != null && String(v).trim() !== "");

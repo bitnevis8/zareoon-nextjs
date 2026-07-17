@@ -121,6 +121,7 @@ export const API_ENDPOINTS = {
     resendCode: `${API_BASE_URL}/user/auth/resend-code`,
     resendEmailCode: `${API_BASE_URL}/user/auth/resend-code/email`,
     completeRegistration: `${API_BASE_URL}/user/auth/complete-registration`,
+    becomeSeller: `${API_BASE_URL}/user/auth/become-seller`,
     me: `${API_BASE_URL}/user/auth/me`,
     updateProfile: `${API_BASE_URL}/user/auth/profile`,
     logout: `${API_BASE_URL}/user/auth/logout`,
@@ -369,6 +370,13 @@ export const API_ENDPOINTS = {
     getTrade: `${API_BASE_URL}/site-setting/trade`,
     updateTrade: `${API_BASE_URL}/site-setting/trade`,
     getVipPublic: `${API_BASE_URL}/site-setting/vip/public`,
+  },
+  backup: {
+    sections: `${API_BASE_URL}/backup/sections`,
+    exportFull: `${API_BASE_URL}/backup/export/full`,
+    exportSection: (section) => `${API_BASE_URL}/backup/export/${encodeURIComponent(section)}`,
+    importFull: `${API_BASE_URL}/backup/import/full`,
+    importSection: (section) => `${API_BASE_URL}/backup/import/${encodeURIComponent(section)}`,
   },
   messaging: {
     base: `${API_BASE_URL}/messaging`,

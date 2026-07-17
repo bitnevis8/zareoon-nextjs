@@ -2,22 +2,24 @@
   "roles": {
     "super_admin": "مدیر کل",
     "admin": "مدیر",
+    "user": "کاربر",
+    "seller": "فروشنده",
+    "service_provider": "خدمات‌دهنده",
+    "customer": "کاربر",
+    "supplier": "فروشنده",
+    "farmer": "فروشنده",
+    "loader": "فروشنده",
     "employee": "کارمند",
-    "supplier": "تأمین‌کننده",
-    "farmer": "تأمین‌کننده",
-    "customer": "کاربر معمولی",
-    "loader": "تأمین‌کننده",
-    "driver": "کارمند",
     "administrator": "مدیر"
   },
   "accountNav": {
-    "individual": "یوزر",
-    "company": "کمپانی",
-    "trader": "ساپلایر",
-    "manufacturer": "ساپلایر",
-    "distributor": "کمپانی",
-    "admin": "ادمین",
-    "user": "یوزر"
+    "individual": "کاربر",
+    "company": "شرکت",
+    "trader": "فروشنده",
+    "manufacturer": "فروشنده",
+    "distributor": "شرکت",
+    "admin": "مدیر",
+    "user": "کاربر"
   },
   "currencies": {
     "TOMAN": {
@@ -141,7 +143,7 @@
     "distributor": "پخش‌کننده"
   },
   "vip": {
-    "inspectionStandardsCompany": "آریا فولاد قرن"
+    "inspectionStandardsCompany": "بازرسی مهندسی آریا فولاد قرن"
   },
   "attributeFields": {
     "yes": "بلی",

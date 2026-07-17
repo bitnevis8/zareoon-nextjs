@@ -8,6 +8,7 @@ import ruTradeServices from "../../messages/ru/tradeServices.json";
 import arTradeServices from "../../messages/ar/tradeServices.json";
 import urTradeServices from "../../messages/ur/tradeServices.json";
 import fiTradeServices from "../../messages/fi/tradeServices.json";
+import trTradeServices from "../../messages/tr/tradeServices.json";
 import sampleTradeServiceProviders from "../../messages/fa/tradeServiceSamples.json";
 import {
   SHARED_CATEGORY_IDS,
@@ -32,6 +33,7 @@ const TRADE_SERVICES_BY_LOCALE = {
   ar: arTradeServices,
   ur: urTradeServices,
   fi: fiTradeServices,
+  tr: trTradeServices,
 };
 
 function localeTradeData(language) {

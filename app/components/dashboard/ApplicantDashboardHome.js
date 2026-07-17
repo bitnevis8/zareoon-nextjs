@@ -1,106 +1,114 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
-import ApplicantRequestForm from "./ApplicantRequestForm";
-import { dash } from "./dashboardTheme";
-
-function RequestTypeBadge({ type }) {
-  const t = useTranslations("applicant");
-  const isProduct = type === "product";
-  return (
-    <span
-      className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-        isProduct ? "bg-sky-100 text-sky-800" : "bg-violet-100 text-violet-800"
-      }`}
-    >
-      {isProduct ? t("type.product") : t("type.service")}
-    </span>
-  );
-}
+import {
+  DashAction,
+  DashActionGrid,
+  DashEmpty,
+  DashHero,
+  DashKpi,
+  DashKpiGrid,
+  DashListCard,
+  DashLoading,
+  DashPage,
+  DashSection,
+} from "./DashboardHomeKit";
 
 export default function ApplicantDashboardHome({ user }) {
-  const t = useTranslations("applicant");
-  const tCommon = useTranslations("common");
-
-  const statusLabel = (status) => (t.has(`status.${status}`) ? t(`status.${status}`) : status);
-  const [requests, setRequests] = useState([]);
+  const t = useTranslations("dashboard.homeBuyer");
+  const tApp = useTranslations("applicant");
   const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
 
-  const loadRequests = useCallback(async () => {
+  const statusLabel = (status) =>
+    tApp.has(`status.${status}`) ? tApp(`status.${status}`) : status;
+
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await authFetch(API_ENDPOINTS.applicantRequests.mine, {
-        cache: "no-store",
-      });
-      const json = await res.json();
-      setRequests(Array.isArray(json?.data) ? json.data : []);
+      const [rRes, oRes, cRes] = await Promise.all([
+        authFetch(API_ENDPOINTS.applicantRequests.mine, { cache: "no-store" }),
+        authFetch(API_ENDPOINTS.supplier.orders.getCustomerOrders, { cache: "no-store" }),
+        authFetch(`${API_ENDPOINTS.supplier.cart.base}/me`, { cache: "no-store" }),
+      ]);
+      const [rData, oData, cData] = await Promise.all([rRes.json(), oRes.json(), cRes.json()]);
+      setRequests(Array.isArray(rData?.data) ? rData.data : []);
+      setOrders(Array.isArray(oData?.data) ? oData.data : oData?.data?.rows || []);
+      const items = cData?.data?.items || cData?.data?.cart?.items || [];
+      setCartCount(Array.isArray(items) ? items.length : 0);
     } catch {
       setRequests([]);
+      setOrders([]);
+      setCartCount(0);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+    load();
+  }, [load]);
+
+  const openRequests = useMemo(
+    () => requests.filter((r) => r.status === "open" || r.status === "pending").length,
+    [requests]
+  );
+
+  if (loading) return <DashLoading />;
 
   return (
-    <div className={dash.page}>
-      <header className="mb-6">
-        <h1 className={dash.pageTitle}>{t("home.title")}</h1>
-        <p className={dash.pageSubtitle}>{t("home.subtitle", { name: user?.firstName || "" })}</p>
-      </header>
+    <DashPage>
+      <DashHero
+        tone="sky"
+        badge={t("badge")}
+        title={t("title", { name: user?.firstName || "" })}
+        subtitle={t("subtitle")}
+      />
 
-      <ApplicantRequestForm onSubmitted={() => loadRequests()} />
+      <DashKpiGrid>
+        <DashKpi label={t("kpi.requests")} value={requests.length} hint={t("kpi.openHint", { count: openRequests })} href="/dashboard/applicant-requests" tone="sky" />
+        <DashKpi label={t("kpi.cart")} value={cartCount} href="/cart" tone="emerald" />
+        <DashKpi label={t("kpi.orders")} value={orders.length} href="/dashboard/my-orders" tone="amber" />
+        <DashKpi label={t("kpi.open")} value={openRequests} href="/dashboard/applicant-requests" tone="violet" />
+      </DashKpiGrid>
 
-      <div className="mt-3">
-        <Link href="/dashboard/submit-request" className="text-xs font-semibold text-sky-700 hover:underline">
-          {t("home.newRequestLink")}
-        </Link>
-      </div>
+      <DashSection title={t("actionsTitle")}>
+        <DashActionGrid>
+          <DashAction href="/dashboard/submit-request" title={t("actions.submit")} desc={t("actions.submitDesc")} tone="sky" />
+          <DashAction href="/catalog/browse" title={t("actions.browse")} desc={t("actions.browseDesc")} tone="emerald" />
+          <DashAction href="/cart" title={t("actions.cart")} desc={t("actions.cartDesc")} tone="amber" />
+          <DashAction href="/dashboard/messages" title={t("actions.messages")} desc={t("actions.messagesDesc")} tone="violet" />
+        </DashActionGrid>
+      </DashSection>
 
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-bold text-slate-900">{t("home.myRequests")}</h2>
-          <Link href="/dashboard/applicant-requests" className="text-xs font-semibold text-sky-700 hover:underline">
-            {t("home.viewAll")}
-          </Link>
-        </div>
-
-        {loading ? (
-          <p className="text-sm text-slate-500">{tCommon("loading")}</p>
-        ) : requests.length === 0 ? (
-          <div className={`${dash.card} ${dash.cardBody}`}>
-            <p className="text-sm text-slate-600">{t("home.noRequests")}</p>
-          </div>
+      <DashSection title={t("recentRequests")} actionHref="/dashboard/applicant-requests" actionLabel={t("viewAll")}>
+        {requests.length === 0 ? (
+          <DashEmpty>
+            <p>{t("emptyRequests")}</p>
+            <Link href="/dashboard/submit-request" className="mt-3 inline-flex text-sm font-bold text-emerald-700 hover:underline">
+              {t("actions.submit")}
+            </Link>
+          </DashEmpty>
         ) : (
           <div className="space-y-2">
             {requests.slice(0, 5).map((item) => (
-              <Link
+              <DashListCard
                 key={item.id}
                 href={`/dashboard/applicant-requests/${item.id}`}
-                className={`${dash.card} block ${dash.cardBody} transition hover:border-sky-200 hover:bg-sky-50/20`}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900">{item.title}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{item.categoryLabel}</p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <RequestTypeBadge type={item.requestType} />
-                    <span className="text-[11px] text-slate-500">{statusLabel(item.status)}</span>
-                  </div>
-                </div>
-              </Link>
+                title={item.title}
+                meta={item.categoryLabel || "—"}
+                badge={statusLabel(item.status)}
+              />
             ))}
           </div>
         )}
-      </section>
-    </div>
+      </DashSection>
+    </DashPage>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import LotLocationPicker from "@/app/components/ui/LotLocationPicker";
 import AttributeFields from "@/app/components/ui/AttributeFields";
+import ProductFilterFields from "@/app/components/ui/ProductFilterFields";
 import { Field } from "./Field";
 import TieredPricingEditor from "./TieredPricingEditor";
 import InventoryDisplayDetailsEditor from "./InventoryDisplayDetailsEditor";
@@ -11,10 +13,18 @@ import { QUALITY_GRADES } from "../inventoryConstants";
 import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/PersianNumberInput";
 import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
 import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
+import {
+  getAllowedMeasurementUnits,
+  getAllowedPackagingTypes,
+  getLotFilterFieldKeys,
+} from "@/app/utils/productCatalogSchema";
+import { localizeUnit } from "@/app/utils/localize";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 export default function InventoryEditModal({
   lot,
   productName,
+  product = null,
   form,
   setForm,
   attributeDefs,
@@ -28,7 +38,12 @@ export default function InventoryEditModal({
   onUpdateTier,
 }) {
   const t = useTranslations("inventory");
+  const { language } = useLanguage();
   const exchangeRates = useExchangeRatesMap();
+
+  const unitOptions = useMemo(() => getAllowedMeasurementUnits(product), [product]);
+  const packagingOptions = useMemo(() => getAllowedPackagingTypes(product), [product]);
+  const filterKeys = useMemo(() => getLotFilterFieldKeys(product), [product]);
 
   if (!lot) return null;
 
@@ -53,17 +68,64 @@ export default function InventoryEditModal({
               <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.basicInfo")}</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Field label={t("lot.unit")}>
-                  <input className={inv.input} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+                  {unitOptions.length > 1 ? (
+                    <select
+                      className={inv.select}
+                      value={form.unit}
+                      onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                    >
+                      {unitOptions.map((u) => (
+                        <option key={u} value={u}>
+                          {localizeUnit(u, language) || u}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      className={inv.input}
+                      value={form.unit}
+                      onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                    />
+                  )}
                 </Field>
+                {packagingOptions.length > 0 || form.packagingType ? (
+                  <Field label={t("create.packagingType")}>
+                    <select
+                      className={inv.select}
+                      value={form.packagingType || ""}
+                      onChange={(e) => setForm({ ...form, packagingType: e.target.value })}
+                    >
+                      <option value="">{t("create.packagingPlaceholder")}</option>
+                      {(packagingOptions.length
+                        ? packagingOptions
+                        : [form.packagingType].filter(Boolean)
+                      ).map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                ) : null}
                 <Field label={t("create.qualityGrade")}>
-                  <select className={inv.select} value={form.qualityGrade} onChange={(e) => setForm({ ...form, qualityGrade: e.target.value })}>
+                  <select
+                    className={inv.select}
+                    value={form.qualityGrade}
+                    onChange={(e) => setForm({ ...form, qualityGrade: e.target.value })}
+                  >
                     {QUALITY_GRADES.map((g) => (
-                      <option key={g} value={g}>{g}</option>
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
                     ))}
                   </select>
                 </Field>
                 <Field label={t("create.status")}>
-                  <select className={inv.select} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  <select
+                    className={inv.select}
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  >
                     <option value="harvested">{t("statusHarvested")}</option>
                     <option value="on_field">{t("statusOnField")}</option>
                     <option value="reserved">{t("statusReserved")}</option>
@@ -71,7 +133,11 @@ export default function InventoryEditModal({
                   </select>
                 </Field>
                 <Field label={t("create.totalQuantity")}>
-                  <PersianNumberInput className={inv.input} value={form.totalQuantity} onChange={(v) => setForm({ ...form, totalQuantity: v })} />
+                  <PersianNumberInput
+                    className={inv.input}
+                    value={form.totalQuantity}
+                    onChange={(v) => setForm({ ...form, totalQuantity: v })}
+                  />
                 </Field>
                 <Field label={t("lot.price")}>
                   <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start">
@@ -92,10 +158,31 @@ export default function InventoryEditModal({
                   </div>
                 </Field>
                 <Field label={t("create.minOrder")}>
-                  <PersianNumberInput className={inv.input} value={form.minimumOrderQuantity} onChange={(v) => setForm({ ...form, minimumOrderQuantity: v })} />
+                  <PersianNumberInput
+                    className={inv.input}
+                    value={form.minimumOrderQuantity}
+                    onChange={(v) => setForm({ ...form, minimumOrderQuantity: v })}
+                  />
                 </Field>
               </div>
             </div>
+
+            {filterKeys.length > 0 ? (
+              <div>
+                <h3 className="mb-3 text-sm font-bold text-slate-800">{t("create.productFilters")}</h3>
+                <ProductFilterFields
+                  keys={filterKeys}
+                  values={form.filterValues || {}}
+                  onChange={(key, val) =>
+                    setForm({
+                      ...form,
+                      filterValues: { ...(form.filterValues || {}), [key]: val },
+                      ...(key === "hsCode" ? { hsCode: val } : {}),
+                    })
+                  }
+                />
+              </div>
+            ) : null}
 
             <div>
               <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.displayDetails")}</h3>
@@ -124,7 +211,11 @@ export default function InventoryEditModal({
             {attributeDefs.length > 0 ? (
               <div>
                 <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.technicalPackaging")}</h3>
-                <AttributeFields defs={attributeDefs} values={attributeValues} onChange={(id, val) => setAttributeValues((v) => ({ ...v, [id]: val }))} />
+                <AttributeFields
+                  defs={attributeDefs}
+                  values={attributeValues}
+                  onChange={(id, val) => setAttributeValues((v) => ({ ...v, [id]: val }))}
+                />
               </div>
             ) : null}
 

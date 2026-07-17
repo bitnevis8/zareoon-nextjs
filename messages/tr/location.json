@@ -1,0 +1,59 @@
+{
+  "loading": "",
+  "loadingChildren": "",
+  "notFound": {
+    "title": "",
+    "locationTitle": "",
+    "backHome": "",
+    "backToLocations": ""
+  },
+  "error": {
+    "title": "",
+    "fetchFailed": "",
+    "connectionFailed": ""
+  },
+  "provinces": "",
+  "population": "",
+  "populationShort": "",
+  "coordinates": "",
+  "coordinatesLabel": "",
+  "area": "",
+  "viewOnWikipedia": "",
+  "close": "",
+  "readMore": "",
+  "noWikiInfo": "",
+  "showLess": "",
+  "showMore": "",
+  "childrenTitles": {
+    "0": "",
+    "1": "",
+    "2": "",
+    "3": "",
+    "4": "",
+    "5": "",
+    "default": ""
+  },
+  "news": {
+    "title": "",
+    "fetchFailed": "",
+    "empty": "",
+    "viewAll": "",
+    "relativeTime": {
+      "now": "",
+      "minutesAgo": "",
+      "hoursAgo": "",
+      "daysAgo": "",
+      "monthsAgo": "",
+      "yearsAgo": ""
+    }
+  },
+  "tags": {
+    "title": "",
+    "empty": "",
+    "testData": ""
+  },
+  "iran": {
+    "countryName": "",
+    "matchToken": ""
+  }
+}

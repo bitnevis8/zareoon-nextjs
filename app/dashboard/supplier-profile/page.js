@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import { authFetch } from "@/app/utils/authHeaders";
-import { shouldShowSupplierPanel } from "@/app/utils/roles";
+import { shouldShowSellerPanel } from "@/app/utils/roles";
 import { getEntityTypeOptions } from "@/app/data/entityTypes";
 import { useAuth } from "@/app/context/AuthContext";
+import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
 const WEEK_DAY_KEYS = [
   "saturday",
@@ -163,8 +164,18 @@ function SupplierAccountEditor() {
     setSaving(false);
   };
 
-  if (!shouldShowSupplierPanel(auth?.user)) {
-    return <p className="p-8 text-center text-slate-600">{t("supplierProfile.suppliersOnly")}</p>;
+  if (!shouldShowSellerPanel(auth?.user)) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-12 text-center">
+        <p className="text-slate-700">{t("supplierProfile.suppliersOnly")}</p>
+        <Link
+          href="/dashboard/seller/join"
+          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-800"
+        >
+          {t("supplierProfile.joinSellersCta")}
+        </Link>
+      </div>
+    );
   }
 
   if (loading) {
@@ -175,7 +186,7 @@ function SupplierAccountEditor() {
     );
   }
 
-  const publicUrl = form.profileSlug ? `/tamin/${form.profileSlug}` : null;
+  const publicUrl = form.profileSlug ? providerPublicPath(form.profileSlug) : null;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">

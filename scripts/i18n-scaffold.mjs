@@ -51,6 +51,7 @@ const allLocales = new Set([
   "ru",
   "ur",
   "fi",
+  "tr",
 ]);
 
 for (const locale of allLocales) {

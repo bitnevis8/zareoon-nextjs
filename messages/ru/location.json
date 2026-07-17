@@ -1,59 +1,59 @@
 {
-  "loading": "",
-  "loadingChildren": "",
+  "loading": "Загрузка местоположений…",
+  "loadingChildren": "Загрузка…",
   "notFound": {
-    "title": "",
-    "locationTitle": "",
-    "backHome": "",
-    "backToLocations": ""
+    "title": "Информация о местоположении не найдена",
+    "locationTitle": "Местоположение не найдено",
+    "backHome": "Вернуться на главную",
+    "backToLocations": "Вернуться к местоположениям"
   },
   "error": {
-    "title": "",
-    "fetchFailed": "",
-    "connectionFailed": ""
+    "title": "Ошибка",
+    "fetchFailed": "Не удалось получить данные",
+    "connectionFailed": "Не удалось подключиться к серверу"
   },
-  "provinces": "",
-  "population": "",
-  "populationShort": "",
-  "coordinates": "",
-  "coordinatesLabel": "",
-  "area": "",
-  "viewOnWikipedia": "",
-  "close": "",
-  "readMore": "",
-  "noWikiInfo": "",
-  "showLess": "",
-  "showMore": "",
+  "provinces": "Провинции",
+  "population": "Население: {count}",
+  "populationShort": "{count} чел.",
+  "coordinates": "Координаты: {lat}, {lng}",
+  "coordinatesLabel": "Координаты:",
+  "area": "Площадь: {area} км²",
+  "viewOnWikipedia": "Посмотреть в Википедии",
+  "close": "Закрыть",
+  "readMore": "Читать далее",
+  "noWikiInfo": "Информация из Википедии недоступна",
+  "showLess": "Свернуть",
+  "showMore": "Показать больше",
   "childrenTitles": {
-    "0": "",
-    "1": "",
-    "2": "",
-    "3": "",
-    "4": "",
-    "5": "",
-    "default": ""
+    "0": "Провинции",
+    "1": "Округа",
+    "2": "Районы",
+    "3": "Сельские районы",
+    "4": "Города",
+    "5": "Деревни",
+    "default": "Административные единицы"
   },
   "news": {
-    "title": "",
-    "fetchFailed": "",
-    "empty": "",
-    "viewAll": "",
+    "title": "Новости о {name}",
+    "fetchFailed": "Не удалось получить новости",
+    "empty": "Для этого местоположения новости не найдены",
+    "viewAll": "Посмотреть все новости",
     "relativeTime": {
-      "now": "",
-      "minutesAgo": "",
-      "hoursAgo": "",
-      "daysAgo": "",
-      "monthsAgo": "",
-      "yearsAgo": ""
+      "now": "Только что",
+      "minutesAgo": "{count} мин. назад",
+      "hoursAgo": "{count} ч. назад",
+      "daysAgo": "{count} дн. назад",
+      "monthsAgo": "{count} мес. назад",
+      "yearsAgo": "{count} г. назад"
     }
   },
   "tags": {
-    "title": "",
-    "empty": "",
-    "testData": ""
+    "title": "Связанные теги",
+    "empty": "Для этого местоположения связанные теги не найдены",
+    "testData": "Тестовые данные"
   },
   "iran": {
-    "countryName": "",
-    "matchToken": ""
+    "countryName": "Иран",
+    "matchToken": "Иран"
   }
 }

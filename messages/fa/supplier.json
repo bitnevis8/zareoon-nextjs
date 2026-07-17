@@ -85,7 +85,7 @@
   },
   "tradeProvider": {
     "ownerPreviewBanner": "پیش‌نمایش صفحه شما — پس از تأیید مدیر، در فهرست عمومی خدمات نمایش داده می‌شود.",
-    "companyNamePlaceholder": "مثلاً شرکت بازرسی آریا فولاد قرن",
+    "companyNamePlaceholder": "مثلاً بازرسی مهندسی آریا فولاد قرن",
     "routesPlaceholder": "ایران — ترکیه — امارات",
     "memberCount": "{count} عضو",
     "memberCountEn": "{count} members",

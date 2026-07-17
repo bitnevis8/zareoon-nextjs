@@ -5,31 +5,57 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
-import SimpleBarChart from "./SimpleBarChart";
-import { dash } from "./dashboardTheme";
+import { canActAsSeller } from "@/app/utils/dashboardPersona";
+import {
+  DashAction,
+  DashActionGrid,
+  DashEmpty,
+  DashHero,
+  DashKpi,
+  DashKpiGrid,
+  DashListCard,
+  DashLoading,
+  DashPage,
+  DashSection,
+} from "./DashboardHomeKit";
 
 export default function SupplierDashboardHome({ user }) {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.homeSeller");
+  const tDash = useTranslations("dashboard");
   const [loading, setLoading] = useState(true);
   const [lots, setLots] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [incomingUnread, setIncomingUnread] = useState(0);
 
   const userId = user?.id ?? user?.userId;
+  const isSeller = canActAsSeller(user);
 
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
     (async () => {
       try {
-        const [lRes, oRes] = await Promise.all([
+        if (!isSeller) {
+          if (!cancelled) setLoading(false);
+          return;
+        }
+        const [lRes, oRes, nRes] = await Promise.all([
           authFetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
           authFetch(API_ENDPOINTS.supplier.orders.getMine, { cache: "no-store" }),
+          authFetch(API_ENDPOINTS.applicantRequests.unreadCount, { cache: "no-store" }),
         ]);
-        const [lData, oData] = await Promise.all([lRes.json(), oRes.json()]);
+        const [lData, oData, nData] = await Promise.all([lRes.json(), oRes.json(), nRes.json()]);
         if (cancelled) return;
         const allLots = lData?.data || [];
-        setLots(allLots.filter((l) => Number(l.farmerId) === Number(userId)));
+        setLots(allLots.filter((l) => Number(l.farmerId) === Number(userId) || Number(l.supplierId) === Number(userId)));
         setOrders(Array.isArray(oData?.data) ? oData.data : oData?.data?.rows || []);
+        setIncomingUnread(Number(nData?.data?.count ?? nData?.data ?? 0) || 0);
+      } catch {
+        if (!cancelled) {
+          setLots([]);
+          setOrders([]);
+          setIncomingUnread(0);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -37,88 +63,89 @@ export default function SupplierDashboardHome({ user }) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, isSeller]);
 
-  const statusItems = useMemo(
-    () => [
-      {
-        label: t("supplierHome.lotStatus.harvested"),
-        value: lots.filter((l) => l.status === "harvested").length,
-        color: "bg-emerald-500",
-      },
-      {
-        label: t("supplierHome.lotStatus.onField"),
-        value: lots.filter((l) => l.status === "on_field").length,
-        color: "bg-lime-500",
-      },
-      {
-        label: t("supplierHome.lotStatus.reserved"),
-        value: lots.filter((l) => l.status === "reserved").length,
-        color: "bg-amber-500",
-      },
-      {
-        label: t("supplierHome.lotStatus.sold"),
-        value: lots.filter((l) => l.status === "sold").length,
-        color: "bg-sky-500",
-      },
-    ],
-    [lots, t]
+  const pendingOrders = useMemo(
+    () => orders.filter((o) => o.status === "pending" || o.status === "reserved").length,
+    [orders]
   );
 
-  const actionLinks = useMemo(
-    () => [
-      { href: "/dashboard/supplier/inventory?scope=own", label: t("myProducts") },
-      { href: "/dashboard/supplier/inventory/create?scope=own", label: t("createInventoryNew") },
-      { href: "/dashboard/supplier/orders?scope=own", label: t("customerOrders") },
-    ],
-    [t]
+  const recentOrders = useMemo(
+    () =>
+      [...orders]
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .slice(0, 5),
+    [orders]
   );
 
-  if (loading) {
+  const statusLabel = (status) =>
+    tDash.has(`adminHome.orderStatus.${status}`) ? tDash(`adminHome.orderStatus.${status}`) : status;
+
+  if (loading) return <DashLoading />;
+
+  if (!isSeller) {
     return (
-      <div className="flex justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
-      </div>
+      <DashPage>
+        <DashHero tone="amber" badge={t("badge")} title={t("joinTitle")} subtitle={t("joinSubtitle")} />
+        <DashEmpty>
+          <p>{t("joinEmpty")}</p>
+          <Link
+            href="/dashboard/seller/join"
+            className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-800"
+          >
+            {t("joinCta")}
+          </Link>
+        </DashEmpty>
+      </DashPage>
     );
   }
 
   return (
-    <div className={dash.page}>
-      <header>
-        <h1 className={dash.pageTitle}>{t("supplierHome.title")}</h1>
-        <p className={dash.pageSubtitle}>{t("supplierHome.subtitle", { name: user?.firstName || "" })}</p>
-      </header>
+    <DashPage>
+      <DashHero
+        tone="amber"
+        badge={t("badge")}
+        title={t("title", { name: user?.firstName || "" })}
+        subtitle={t("subtitle")}
+      />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className={`${dash.card} p-4`}>
-          <p className="text-xs text-slate-500">{t("supplierHome.stats.myProducts")}</p>
-          <p className="mt-1 text-2xl font-semibold text-emerald-700">{lots.length.toLocaleString("fa-IR")}</p>
-        </div>
-        <div className={`${dash.card} p-4`}>
-          <p className="text-xs text-slate-500">{t("supplierHome.stats.customerOrders")}</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-800">{orders.length.toLocaleString("fa-IR")}</p>
-        </div>
-        <div className={`${dash.card} col-span-2 p-4 sm:col-span-1`}>
-          <p className="text-xs text-slate-500">{t("supplierHome.stats.pending")}</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-700">
-            {orders.filter((o) => o.status === "pending").length.toLocaleString("fa-IR")}
-          </p>
-        </div>
-      </div>
+      <DashKpiGrid>
+        <DashKpi label={t("kpi.products")} value={lots.length} href="/dashboard/supplier/inventory?scope=own" tone="emerald" />
+        <DashKpi label={t("kpi.orders")} value={orders.length} href="/dashboard/supplier/orders?scope=own" tone="amber" />
+        <DashKpi label={t("kpi.pending")} value={pendingOrders} href="/dashboard/supplier/orders?scope=own" tone="sky" />
+        <DashKpi label={t("kpi.incoming")} value={incomingUnread} href="/dashboard/incoming-requests" tone="violet" />
+      </DashKpiGrid>
 
-      <SimpleBarChart title={t("supplierHome.productStatusChart")} items={statusItems} />
+      <DashSection title={t("actionsTitle")}>
+        <DashActionGrid>
+          <DashAction href="/dashboard/supplier/inventory/create?scope=own" title={t("actions.addProduct")} desc={t("actions.addProductDesc")} tone="emerald" />
+          <DashAction href="/dashboard/supplier/inventory?scope=own" title={t("actions.myProducts")} desc={t("actions.myProductsDesc")} tone="amber" />
+          <DashAction href="/dashboard/supplier-profile" title={t("actions.shop")} desc={t("actions.shopDesc")} tone="sky" />
+          <DashAction href="/dashboard/incoming-requests" title={t("actions.incoming")} desc={t("actions.incomingDesc")} tone="violet" />
+        </DashActionGrid>
+      </DashSection>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        {actionLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`${dash.card} p-4 text-center text-sm font-medium text-slate-700 hover:bg-slate-50`}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
-    </div>
+      <DashSection title={t("recentOrders")} actionHref="/dashboard/supplier/orders?scope=own" actionLabel={t("viewAll")}>
+        {recentOrders.length === 0 ? (
+          <DashEmpty>{t("emptyOrders")}</DashEmpty>
+        ) : (
+          <div className="space-y-2">
+            {recentOrders.map((o) => (
+              <DashListCard
+                key={o.id}
+                href="/dashboard/supplier/orders?scope=own"
+                title={`${t("orderHash")}${o.id}`}
+                meta={
+                  o.createdAt
+                    ? new Date(o.createdAt).toLocaleDateString("fa-IR", { month: "short", day: "numeric" })
+                    : "—"
+                }
+                badge={statusLabel(o.status)}
+              />
+            ))}
+          </div>
+        )}
+      </DashSection>
+    </DashPage>
   );
 }

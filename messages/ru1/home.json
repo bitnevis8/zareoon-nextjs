@@ -1,0 +1,141 @@
+{
+  "logoAlt": "",
+  "news": {
+    "fetchError": "",
+    "statsTitle": "",
+    "total": "",
+    "today": "",
+    "week": "",
+    "month": "",
+    "loading": "",
+    "empty": "",
+    "latestTitle": "",
+    "readMore": "",
+    "viewAll": ""
+  },
+  "searchBox": {
+    "placeholder": "",
+    "tagFilterSingle": "",
+    "tagFilterMulti": "",
+    "resultsTitle": "",
+    "noResults": "",
+    "noResultsHint": "",
+    "searching": "",
+    "advancedCategories": "",
+    "simpleCategories": ""
+  },
+  "weather": {
+    "title": "",
+    "fetchError": "",
+    "fetchErrorShort": "",
+    "connectionError": "",
+    "connectionErrorShort": "",
+    "unavailable": "",
+    "unknown": "",
+    "today": "",
+    "tomorrow": "",
+    "humidity": "",
+    "wind": "",
+    "minTemp": "",
+    "maxTemp": "",
+    "viewMoreDetails": "",
+    "googleSearch": ""
+  },
+  "stock": {
+    "fetchError": "",
+    "unavailable": "",
+    "title": "",
+    "noBatches": "",
+    "grade": "",
+    "kgUnit": "",
+    "batchTotal": "",
+    "batchReserved": "",
+    "batchCount": "",
+    "noSubsets": "",
+    "loading": "",
+    "kgAvailable": "",
+    "kgTotal": "",
+    "kgReserved": "",
+    "batchesTitle": "",
+    "subsetsTitle": ""
+  },
+  "scroll": {
+    "pagination": "",
+    "page": "",
+    "scrollBack": "",
+    "scrollForward": ""
+  },
+  "categorySection": {
+    "empty": "",
+    "viewAllNews": "",
+    "secondsAgo": "",
+    "minutesAgo": "",
+    "hoursAgo": "",
+    "daysAgo": ""
+  },
+  "classHierarchy": {
+    "fetchError": "",
+    "connectionError": "",
+    "loading": "",
+    "empty": "",
+    "emptyDetail": "",
+    "title": "",
+    "subtitle": "",
+    "summaryTitle": "",
+    "mainClasses": "",
+    "subClasses": "",
+    "totalClasses": "",
+    "childrenCount": "",
+    "sortOrder": ""
+  },
+  "pricingManager": {
+    "title": "",
+    "minTierRequired": "",
+    "saveSuccess": "",
+    "saveError": "",
+    "serverError": "",
+    "productLabel": "",
+    "productFallback": "",
+    "qualityGradeLabel": "",
+    "unitLabel": "",
+    "totalStockLabel": "",
+    "minOrderLabel": "",
+    "minOrderPlaceholder": "",
+    "tieredTitle": "",
+    "addTierButton": "",
+    "noTiersYet": "",
+    "addFirstTierHint": "",
+    "level": "",
+    "remove": "",
+    "minQty": "",
+    "maxQty": "",
+    "unlimitedPlaceholder": "",
+    "pricePerUnit": "",
+    "description": "",
+    "descriptionPlaceholder": "",
+    "saving": "",
+    "save": ""
+  },
+  "userList": {
+    "deleteConfirm": "",
+    "deleteError": "",
+    "title": "",
+    "addUser": "",
+    "columns": {
+      "id": "",
+      "username": "",
+      "email": "",
+      "firstName": "",
+      "lastName": "",
+      "personnelNumber": "",
+      "actions": ""
+    }
+  },
+  "zoomImage": {
+    "closeBackground": ""
+  },
+  "simpleBarChart": {
+    "empty": ""
+  },
+  "avatarFallbackInitial": ""
+}

@@ -103,6 +103,9 @@ export default function InventoryCreatePage() {
           productId: Number(form.productId),
           farmerId: ownFarmer ? Number(user?.userId ?? user?.id) : Number(form.farmerId) || 1,
           unit: form.unit,
+          packagingType: form.packagingType || null,
+          filterValues: form.filterValues && Object.keys(form.filterValues).length ? form.filterValues : null,
+          hsCode: form.hsCode || form.filterValues?.hsCode || null,
           qualityGrade: form.qualityGrade,
           totalQuantity: Number(form.totalQuantity),
           price: form.price ? Number(form.price) : null,
@@ -118,6 +121,10 @@ export default function InventoryCreatePage() {
         }),
       });
       const lotData = await lotRes.json();
+      if (!lotRes.ok || !lotData?.success) {
+        alert(lotData?.message || t("page.alertSelectProduct"));
+        return;
+      }
       const lotId = lotData?.data?.id;
       if (lotId && attributeDefs.length > 0) {
         const entries = Object.entries(attributeValues).filter(([, v]) => v !== undefined && v != null && String(v).trim() !== "");

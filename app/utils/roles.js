@@ -1,21 +1,28 @@
-/** نقش‌های فعال: super_admin, admin, employee, supplier, customer */
+/** نقش‌ها: super_admin, admin, user, seller, service_provider */
 
 export const ROLE_SLUGS = {
   SUPER_ADMIN: "super_admin",
   ADMIN: "admin",
+  USER: "user",
+  SELLER: "seller",
+  SERVICE_PROVIDER: "service_provider",
+  /** @deprecated */
+  SUPPLIER: "seller",
+  /** @deprecated */
+  CUSTOMER: "user",
+  /** @deprecated */
   EMPLOYEE: "employee",
-  SUPPLIER: "supplier",
-  CUSTOMER: "customer",
 };
 
 const ADMIN_SLUGS = new Set(["super_admin", "admin", "administrator"]);
-const SUPPLIER_SLUGS = new Set(["supplier", "farmer", "loader"]);
+const SELLER_SLUGS = new Set(["seller", "supplier", "farmer", "loader"]);
 
 export function normalizeRoleSlug(role) {
   const raw = (role?.name || role?.nameEn || "").toLowerCase().trim().replace(/\s+/g, "_");
   if (raw === "administrator") return "admin";
   if (raw === "superadmin") return "super_admin";
-  if (raw === "farmer") return "supplier";
+  if (raw === "farmer" || raw === "loader" || raw === "supplier") return "seller";
+  if (raw === "customer" || raw === "regular_user") return "user";
   return raw;
 }
 
@@ -53,37 +60,57 @@ export function isAdmin(user) {
   return getRoleSlugs(user).some((r) => ADMIN_SLUGS.has(r));
 }
 
-export function isEmployee(user) {
-  return getRoleSlugs(user).includes(ROLE_SLUGS.EMPLOYEE);
+export function isSeller(user) {
+  return getRoleSlugs(user).some((r) => SELLER_SLUGS.has(r));
 }
 
+/** @deprecated use isSeller */
 export function isSupplier(user) {
-  return getRoleSlugs(user).some((r) => SUPPLIER_SLUGS.has(r));
+  return isSeller(user);
 }
 
+export function isServiceProvider(user) {
+  return getRoleSlugs(user).includes(ROLE_SLUGS.SERVICE_PROVIDER);
+}
+
+export function isUser(user) {
+  return getRoleSlugs(user).includes(ROLE_SLUGS.USER);
+}
+
+/** @deprecated use isUser */
 export function isCustomer(user) {
-  return getRoleSlugs(user).includes(ROLE_SLUGS.CUSTOMER);
+  return isUser(user);
+}
+
+/** @deprecated */
+export function isEmployee(user) {
+  return getRoleSlugs(user).includes("employee");
 }
 
 export function canAccessSupplierInventory(user) {
-  return isAdmin(user) || isSupplier(user);
+  return isAdmin(user) || isSeller(user);
 }
 
-/** پنل شخصی تأمین — برای تأمین‌کننده و مدیران */
+/** پنل فروشنده — فروشنده یا مدیر */
+export function shouldShowSellerPanel(user) {
+  return isSeller(user) || isAdmin(user);
+}
+
+/** @deprecated use shouldShowSellerPanel */
 export function shouldShowSupplierPanel(user) {
-  return isSupplier(user) || isAdmin(user);
+  return shouldShowSellerPanel(user);
 }
 
 export function resolveOwnScope(user, scopeParam) {
   if (scopeParam === "own") return true;
   if (scopeParam === "all") return false;
-  return isSupplier(user) && !isAdmin(user);
+  return isSeller(user) && !isAdmin(user);
 }
 
 export function canAccessSupplierOrders(user, scopeParam) {
   if (!user) return false;
-  if (isSupplier(user) && !isAdmin(user)) return true;
-  return scopeParam === "own" && shouldShowSupplierPanel(user);
+  if (isSeller(user) && !isAdmin(user)) return true;
+  return scopeParam === "own" && shouldShowSellerPanel(user);
 }
 
 export function canAccessAdminDashboard(user) {
