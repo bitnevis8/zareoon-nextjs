@@ -1,43 +1,95 @@
 {
-  "eyebrow": "Сеть услуг внешней торговли",
-  "title": "Услуги для бизнеса и международной торговли",
-  "subtitle": "Найдите компанию или специалиста по импорту, экспорту, перевозкам, таможне, инспекции и финансированию.",
-  "providerHint": "Каталог компаний и специалистов по каждому направлению, включая контактные данные, лицензии, опыт и оценки.",
-  "providerRegisterNote": "Представьте свои услуги, находите новых клиентов и развивайте присутствие в сети международной торговли с помощью отдельного профиля.",
+  "eyebrow": "Сеть поставщиков торговых услуг",
+  "title": "Торговые и международные услуги",
+  "subtitle": "Найдите компании и специалистов по инспекции, логистике, таможне, финансам и др. — или вступите сами.",
+  "providerHint": "Компании и специалисты по направлениям — контакты, лицензии, опыт и рейтинги.",
+  "providerRegisterNote": "Представьте услуги, найдите клиентов и будьте в сети международной торговли с отдельным профилем.",
   "categories": [
+    {
+      "id": "inspection-standards",
+      "icon": "inspection-standards",
+      "title": "Инспекция, испытания и сертификация",
+      "description": "Инспекция груза, контроль качества, лабораторные испытания, сертификаты, стандарты и PSI.",
+      "children": [
+        {
+          "id": "cargo-inspection",
+          "title": "بازرسی کالا"
+        },
+        {
+          "id": "quality-control",
+          "title": "کنترل کیفیت (QC)"
+        },
+        {
+          "id": "testing",
+          "title": "آزمون و آزمایش کالا"
+        },
+        {
+          "id": "inspection-certificate",
+          "title": "صدور گواهی بازرسی"
+        },
+        {
+          "id": "standards-certification",
+          "title": "استاندارد و گواهینامه‌ها"
+        },
+        {
+          "id": "pre-shipment-inspection",
+          "title": "بازرسی قبل از حمل (PSI)"
+        }
+      ]
+    },
+    {
+      "id": "packaging-prep",
+      "icon": "packaging-prep",
+      "title": "Упаковка и подготовка груза",
+      "description": "Экспортная упаковка, коммерческая маркировка, паллетирование и стандарты упаковки.",
+      "children": [
+        {
+          "id": "export-packaging",
+          "title": "بسته‌بندی صادراتی"
+        },
+        {
+          "id": "commercial-labeling",
+          "title": "لیبل و چاپ تجاری"
+        },
+        {
+          "id": "palletizing",
+          "title": "پالت‌بندی"
+        },
+        {
+          "id": "packaging-standards",
+          "title": "استانداردسازی بسته‌بندی"
+        }
+      ]
+    },
     {
       "id": "import-export",
       "icon": "import-export",
-      "title": "Импортно-экспортные услуги",
-      "description": "Управление импортом и экспортом, поиск товаров, международных покупателей и поставщиков, коммерческое представительство и управление документами.",
+      "title": "Услуги импорта и экспорта",
+      "description": "Управление импортом/экспортом, сорсинг, поиск зарубежных покупателей и поставщиков, агентство.",
       "children": [
         {
           "id": "import-mgmt",
-          "title": "Управление импортом товаров"
+          "title": "مدیریت واردات کالا"
         },
         {
           "id": "export-mgmt",
-          "title": "Управление экспортом товаров"
+          "title": "مدیریت صادرات کالا"
         },
         {
           "id": "sourcing",
-          "title": "Закупка и поиск товаров"
+          "title": "تأمین و سورسینگ کالا"
         },
         {
           "id": "find-buyer",
-          "title": "Поиск международных покупателей"
+          "title": "پیدا کردن خریدار خارجی"
         },
         {
           "id": "find-supplier",
-          "title": "Поиск международных поставщиков"
+          "title": "پیدا کردن تأمین‌کننده خارجی"
         },
         {
           "id": "commercial-agency",
-          "title": "Коммерческое и торговое представительство"
-        },
-        {
-          "id": "trade-documents",
-          "title": "Управление торговыми документами"
+          "title": "نمایندگی تجاری و فروش"
         }
       ]
     },
@@ -45,263 +97,443 @@
       "id": "intl-logistics",
       "icon": "intl-logistics",
       "title": "Международные перевозки и логистика",
-      "description": "Морские, воздушные, автомобильные, железнодорожные и мультимодальные перевозки; экспедирование, услуги перевозчиков, контейнерные и международные складские услуги.",
+      "description": "Морские, авиа, авто, ж/д и мультимодальные перевозки; экспедиторы, перевозчики, контейнеры и склады.",
       "children": [
         {
           "id": "sea-freight",
-          "title": "Морские перевозки"
+          "title": "حمل دریایی"
         },
         {
           "id": "air-freight",
-          "title": "Авиаперевозки"
+          "title": "حمل هوایی"
         },
         {
           "id": "road-freight",
-          "title": "Автомобильные перевозки"
+          "title": "حمل زمینی"
         },
         {
           "id": "rail-freight",
-          "title": "Железнодорожные перевозки"
+          "title": "حمل ریلی"
         },
         {
           "id": "multimodal",
-          "title": "Мультимодальные перевозки"
+          "title": "حمل ترکیبی"
         },
         {
           "id": "forwarder-carrier",
-          "title": "Экспедиторские услуги и услуги перевозчиков"
+          "title": "فورواردر و کریری"
         },
         {
           "id": "container-services",
-          "title": "Контейнерные услуги"
+          "title": "خدمات کانتینری"
         },
         {
           "id": "warehousing",
-          "title": "Складирование и хранение товаров"
+          "title": "انبارداری و نگهداری کالا"
         }
       ]
     },
     {
       "id": "customs-clearance",
       "icon": "customs-clearance",
-      "title": "Таможня и оформление товаров",
-      "description": "Таможенное оформление, услуги таможенного брокера, регистрация импортных заказов, получение разрешений на импорт и экспорт, оценка товаров и таможенное консультирование.",
+      "title": "Таможня и оформление",
+      "description": "Таможенное оформление, брокерские услуги, регистрация заказов, разрешения и консультации.",
       "children": [
         {
           "id": "customs-brokerage",
-          "title": "Таможенное оформление товаров"
+          "title": "ترخیص کالا"
         },
         {
           "id": "customs-agent",
-          "title": "Таможенный брокер"
+          "title": "کارگزار گمرکی"
         },
         {
           "id": "order-registration",
-          "title": "Регистрация импортного заказа"
+          "title": "ثبت سفارش"
         },
         {
           "id": "import-export-permits",
-          "title": "Получение разрешений на импорт и экспорт"
+          "title": "اخذ مجوزهای واردات و صادرات"
         },
         {
           "id": "customs-valuation",
-          "title": "Оценка товаров"
+          "title": "ارزش‌گذاری کالا"
         },
         {
           "id": "customs-consulting",
-          "title": "Таможенное консультирование"
+          "title": "مشاوره امور گمرکی"
         }
       ]
     },
     {
       "id": "intl-finance",
       "icon": "intl-finance",
-      "title": "Международные финансовые и платёжные услуги",
-      "description": "Аккредитивы, телеграфные переводы, международные платежи, торговое финансирование и валютные услуги.",
+      "title": "International trade finance",
+      "description": "Trade finance, LC, guarantees, FX, and payment solutions for cross-border deals.",
       "children": [
         {
           "id": "letter-of-credit",
-          "title": "Аккредитив (LC)"
+          "title": "اعتبار اسنادی (LC)"
         },
         {
           "id": "telegraphic-transfer",
-          "title": "Телеграфный перевод (TT)"
+          "title": "حواله ارزی (TT)"
         },
         {
           "id": "intl-payments",
-          "title": "Международные платежи"
+          "title": "پرداخت‌های بین‌المللی"
         },
         {
           "id": "trade-finance",
-          "title": "Торговое финансирование"
+          "title": "تأمین مالی تجارت"
         },
         {
           "id": "fx-trade-services",
-          "title": "Коммерческие валютные услуги"
-        }
-      ]
-    },
-    {
-      "id": "inspection-standards",
-      "icon": "inspection-standards",
-      "title": "Инспекция и стандарты",
-      "description": "Инспекция товаров, контроль качества, испытания, инспекционные сертификаты, стандарты и предотгрузочная инспекция (PSI).",
-      "children": [
-        {
-          "id": "cargo-inspection",
-          "title": "Инспекция товаров"
-        },
-        {
-          "id": "quality-control",
-          "title": "Контроль качества (QC)"
-        },
-        {
-          "id": "testing",
-          "title": "Испытания продукции и лабораторный анализ"
-        },
-        {
-          "id": "inspection-certificate",
-          "title": "Выдача инспекционных сертификатов"
-        },
-        {
-          "id": "standards-certification",
-          "title": "Стандарты и сертификация"
-        },
-        {
-          "id": "pre-shipment-inspection",
-          "title": "Предотгрузочная инспекция (PSI)"
+          "title": "خدمات ارزی تجاری"
         }
       ]
     },
     {
       "id": "insurance-risk",
       "icon": "insurance-risk",
-      "title": "Страхование и управление рисками",
-      "description": "Страхование грузов, международных перевозок и экспортных кредитов, а также управление торговыми рисками.",
+      "title": "Insurance & risk",
+      "description": "Cargo insurance, credit insurance, and risk management for trade.",
       "children": [
         {
           "id": "cargo-insurance",
-          "title": "Страхование грузов"
+          "title": "بیمه باربری"
         },
         {
           "id": "intl-transport-insurance",
-          "title": "Страхование международных перевозок"
+          "title": "بیمه حمل‌ونقل بین‌المللی"
         },
         {
           "id": "export-credit-insurance",
-          "title": "Страхование экспортных кредитов"
+          "title": "بیمه اعتبار صادراتی"
         },
         {
           "id": "trade-risk-mgmt",
-          "title": "Управление торговыми рисками"
+          "title": "مدیریت ریسک تجارت"
         }
       ]
     },
     {
       "id": "legal-trade",
       "icon": "legal-trade",
-      "title": "Юридические услуги и коммерческие договоры",
-      "description": "Международные договоры, составление договоров купли-продажи, консультации по торговому праву, разрешение споров и регистрация компаний.",
+      "title": "Legal & trade contracts",
+      "description": "Trade contracts, compliance, dispute support, and legal advisory for international business.",
       "children": [
         {
           "id": "intl-contracts",
-          "title": "Международные договоры"
+          "title": "قراردادهای بین‌المللی"
         },
         {
           "id": "sales-contracts",
-          "title": "Составление договора купли-продажи"
+          "title": "تنظیم قرارداد فروش"
         },
         {
           "id": "trade-law-advice",
-          "title": "Консультации по торговому праву"
+          "title": "مشاوره حقوق تجارت"
         },
         {
           "id": "dispute-resolution",
-          "title": "Разрешение коммерческих споров"
+          "title": "حل اختلافات تجاری"
         },
         {
           "id": "company-registration",
-          "title": "Регистрация компаний и представительств"
+          "title": "ثبت شرکت و نمایندگی"
         }
       ]
     },
     {
       "id": "market-development",
       "icon": "market-development",
-      "title": "Маркетинг и развитие рынка",
-      "description": "Исследование международных рынков, экспортный маркетинг, международная реклама, привлечение покупателей и участие в выставках.",
+      "title": "Market development",
+      "description": "Market research, entry strategy, partner finding, and export promotion.",
       "children": [
         {
           "id": "market-research",
-          "title": "Исследование международных рынков"
+          "title": "تحقیقات بازار خارجی"
         },
         {
           "id": "export-marketing",
-          "title": "Экспортный маркетинг"
+          "title": "بازاریابی صادراتی"
         },
         {
           "id": "intl-advertising",
-          "title": "Международная реклама"
+          "title": "تبلیغات بین‌المللی"
         },
         {
           "id": "buyer-acquisition",
-          "title": "Привлечение международных покупателей"
-        },
-        {
-          "id": "trade-fairs",
-          "title": "Участие в международных выставках"
-        }
-      ]
-    },
-    {
-      "id": "packaging-prep",
-      "icon": "packaging-prep",
-      "title": "Упаковка и подготовка товаров",
-      "description": "Экспортная упаковка, коммерческая маркировка и печать, паллетирование и стандартизация упаковки.",
-      "children": [
-        {
-          "id": "export-packaging",
-          "title": "Экспортная упаковка"
-        },
-        {
-          "id": "commercial-labeling",
-          "title": "Коммерческая маркировка и печать"
-        },
-        {
-          "id": "palletizing",
-          "title": "Паллетирование"
-        },
-        {
-          "id": "packaging-standards",
-          "title": "Стандартизация упаковки"
+          "title": "جذب خریدار خارجی"
         }
       ]
     },
     {
       "id": "specialized-trade",
       "icon": "specialized-trade",
-      "title": "Специализированные торговые услуги",
-      "description": "Специализированный письменный и устный перевод для торговли, обучение международной торговле, консультации по импорту и экспорту и местное представительство.",
+      "title": "Specialized trade",
+      "description": "Sector-specific trade services and specialized commercial consulting.",
       "children": [
         {
           "id": "trade-translation",
-          "title": "Специализированный торговый перевод"
+          "title": "ترجمه تخصصی تجاری"
         },
         {
           "id": "negotiation-interpreter",
-          "title": "Переводчик деловых переговоров"
+          "title": "مترجم مذاکرات تجاری"
         },
         {
           "id": "trade-training",
-          "title": "Обучение международной торговле"
+          "title": "آموزش تجارت بین‌الملل"
         },
         {
           "id": "trade-consulting",
-          "title": "Консультации по импорту и экспорту"
+          "title": "مشاوره صادرات و واردات"
         },
         {
           "id": "local-representative",
-          "title": "Услуги местного представителя по странам"
+          "title": "خدمات نماینده محلی در کشورها"
+        }
+      ]
+    },
+    {
+      "id": "intl-certificates",
+      "icon": "intl-certificates",
+      "title": "International certificates",
+      "description": "Certificates of origin, conformity, and other trade documents.",
+      "children": [
+        {
+          "id": "product-certificates",
+          "title": "گواهینامه‌های محصول"
+        },
+        {
+          "id": "export-licenses",
+          "title": "مجوزهای صادرات"
+        },
+        {
+          "id": "origin-certificates",
+          "title": "گواهی مبدأ"
+        },
+        {
+          "id": "halal-organic-certs",
+          "title": "گواهی حلال، ارگانیک و مشابه"
+        }
+      ]
+    },
+    {
+      "id": "export-compliance",
+      "icon": "export-compliance",
+      "title": "Export compliance",
+      "description": "Sanctions screening, export controls, and regulatory compliance.",
+      "children": [
+        {
+          "id": "export-regulations",
+          "title": "مقررات صادرات"
+        },
+        {
+          "id": "sanctions-screening",
+          "title": "بررسی تحریم و محدودیت‌ها"
+        },
+        {
+          "id": "destination-standards",
+          "title": "استانداردهای کشور مقصد"
+        },
+        {
+          "id": "compliance-audit",
+          "title": "ممیزی انطباق تجاری"
+        }
+      ]
+    },
+    {
+      "id": "trade-documents",
+      "icon": "trade-documents",
+      "title": "Trade documents",
+      "description": "Commercial invoices, packing lists, bills of lading, and document preparation.",
+      "children": [
+        {
+          "id": "shipping-docs",
+          "title": "اسناد حمل"
+        },
+        {
+          "id": "commercial-invoice",
+          "title": "فاکتور و پکینگ‌لیست"
+        },
+        {
+          "id": "incoterms-docs",
+          "title": "اسناد اینکوترمز"
+        },
+        {
+          "id": "bank-trade-docs",
+          "title": "اسناد بانکی و LC"
+        }
+      ]
+    },
+    {
+      "id": "supply-chain",
+      "icon": "supply-chain",
+      "title": "Supply chain",
+      "description": "End-to-end supply chain coordination and optimization for trade.",
+      "children": [
+        {
+          "id": "scm-design",
+          "title": "طراحی زنجیره تأمین"
+        },
+        {
+          "id": "supplier-management",
+          "title": "مدیریت تأمین‌کنندگان"
+        },
+        {
+          "id": "procurement",
+          "title": "تأمین و خرید کالا"
+        },
+        {
+          "id": "inventory-planning",
+          "title": "برنامه‌ریزی موجودی"
+        }
+      ]
+    },
+    {
+      "id": "ecommerce-marketplace",
+      "icon": "ecommerce-marketplace",
+      "title": "E-commerce & marketplaces",
+      "description": "Online channel setup, marketplace selling, and digital trade support.",
+      "children": [
+        {
+          "id": "marketplace-listing",
+          "title": "حضور در مارکت‌پلیس‌ها"
+        },
+        {
+          "id": "cross-border-ecommerce",
+          "title": "فروش فرامرزی آنلاین"
+        },
+        {
+          "id": "online-export-store",
+          "title": "فروشگاه صادراتی آنلاین"
+        },
+        {
+          "id": "digital-catalog",
+          "title": "کاتالوگ و ویترین دیجیتال"
+        }
+      ]
+    },
+    {
+      "id": "trade-digital",
+      "icon": "trade-digital",
+      "title": "Digital trade tools",
+      "description": "Digital platforms, automation, and tech tools for international trade.",
+      "children": [
+        {
+          "id": "trade-software",
+          "title": "نرم‌افزارهای تجارت"
+        },
+        {
+          "id": "process-automation",
+          "title": "اتوماسیون فرآیندها"
+        },
+        {
+          "id": "digital-transformation",
+          "title": "تحول دیجیتال"
+        },
+        {
+          "id": "trade-data-analytics",
+          "title": "تحلیل داده تجاری"
+        }
+      ]
+    },
+    {
+      "id": "investment-consulting",
+      "icon": "investment-consulting",
+      "title": "Investment consulting",
+      "description": "Investment advice, joint ventures, and cross-border investment support.",
+      "children": [
+        {
+          "id": "fdi-consulting",
+          "title": "مشاوره سرمایه‌گذاری خارجی"
+        },
+        {
+          "id": "business-growth",
+          "title": "توسعه کسب‌وکار"
+        },
+        {
+          "id": "feasibility-studies",
+          "title": "امکان‌سنجی پروژه‌ها"
+        },
+        {
+          "id": "export-strategy",
+          "title": "استراتژی صادرات"
+        }
+      ]
+    },
+    {
+      "id": "trade-events",
+      "icon": "trade-events",
+      "title": "Trade events & exhibitions",
+      "description": "Fairs, B2B meetings, and trade mission organization.",
+      "children": [
+        {
+          "id": "trade-fairs",
+          "title": "نمایشگاه‌های بین‌المللی"
+        },
+        {
+          "id": "b2b-matchmaking",
+          "title": "رویدادهای B2B و مچ‌میکینگ"
+        },
+        {
+          "id": "trade-missions",
+          "title": "هیئت‌های تجاری"
+        },
+        {
+          "id": "event-organization",
+          "title": "برگزاری رویداد تجاری"
+        }
+      ]
+    },
+    {
+      "id": "business-immigration",
+      "icon": "business-immigration",
+      "title": "Business immigration",
+      "description": "Visas, residency, and business immigration consulting for traders.",
+      "children": [
+        {
+          "id": "business-visa",
+          "title": "ویزای تجاری و کاری"
+        },
+        {
+          "id": "company-setup-abroad",
+          "title": "ثبت شرکت در خارج"
+        },
+        {
+          "id": "relocation-support",
+          "title": "استقرار و انتقال کسب‌وکار"
+        },
+        {
+          "id": "local-compliance-setup",
+          "title": "انطباق محلی و راه‌اندازی"
+        }
+      ]
+    },
+    {
+      "id": "esg-sustainability",
+      "icon": "esg-sustainability",
+      "title": "ESG & sustainability",
+      "description": "Sustainability reporting, green trade, and ESG compliance for business.",
+      "children": [
+        {
+          "id": "esg-advisory",
+          "title": "مشاوره ESG"
+        },
+        {
+          "id": "sustainability-reporting",
+          "title": "گزارش پایداری"
+        },
+        {
+          "id": "environmental-compliance",
+          "title": "الزامات زیست‌محیطی"
+        },
+        {
+          "id": "green-supply-chain",
+          "title": "زنجیره تأمین سبز"
         }
       ]
     }

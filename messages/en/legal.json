@@ -1,1 +1,640 @@
-{}
+{
+  "common": {
+    "lastUpdated": ""
+  },
+  "nav": {
+    "aria": "Legal documents and help",
+    "about": "About us",
+    "terms": "Terms & conditions",
+    "privacy": "Privacy",
+    "sellers": "Seller terms",
+    "buyers": "Buyer terms",
+    "refund": "Refunds",
+    "cancellation": "Cancellation",
+    "disputes": "Dispute resolution",
+    "help": "Help",
+    "pricing": "Subscriptions"
+  },
+  "terms": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "paragraphs": [
+        ""
+      ],
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "privacy": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "sellers": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "buyers": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "refund": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "cancellation": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "disputes": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "about": {
+    "title": "",
+    "subtitle": "",
+    "sections": [
+      {
+        "title": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "help": {
+    "title": "Complete Zareoon guide",
+    "subtitle": "How to use the site as a buyer, seller, or service provider — on mobile and desktop",
+    "tabsAria": "Guide sections",
+    "tabs": {
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "provider": "Service provider",
+      "account": "Profile & account",
+      "devices": "Mobile & desktop"
+    },
+    "buyer": {
+      "title": "Buyer guide",
+      "intro": "As a buyer you can search products and services, submit need requests, manage your cart, and track orders.",
+      "sections": {
+        "browse": {
+          "title": "Search and browse",
+          "body": "Use the home search box or map to find products or services. Open cards for details and contact info. Deals are direct between you and the other party."
+        },
+        "request": {
+          "title": "Submit a need request",
+          "body": "If you are not sure whom to buy from, use Submit request in the buyer dashboard. Track status under My requests."
+        },
+        "cart": {
+          "title": "Cart",
+          "body": "Collect selected products in the cart and finalize the order. Coordinate payment and delivery with the seller."
+        },
+        "orders": {
+          "title": "My orders",
+          "body": "Open My orders in the buyer dashboard to follow registered orders."
+        },
+        "messages": {
+          "title": "Messages and contact",
+          "body": "Contact the seller or provider from their public page. Final terms and risk stay with the parties."
+        },
+        "desktop": {
+          "title": "Buying on desktop",
+          "body": "Use the header search and categories. Open the user icon → My Zareoon and switch to the buyer role in the sidebar. Cart is in the header."
+        },
+        "mobile": {
+          "title": "Buying on mobile",
+          "body": "Use the bottom bar for home, search, and dashboard. In the mobile dashboard, pick the Buyer tab for requests, orders, and cart shortcuts."
+        }
+      }
+    },
+    "seller": {
+      "title": "Seller guide",
+      "intro": "Create a shop to get a dedicated page and product list. Manage customer orders and related need requests from the seller dashboard.",
+      "sections": {
+        "join": {
+          "title": "Create a shop",
+          "body": "From My dedicated page or the seller dashboard, open Create shop. Set your public page name, contact details, and optionally hours and location."
+        },
+        "products": {
+          "title": "Products and inventory",
+          "body": "Add items with price, images, and details from My products or New inventory. Accurate listings help buyers reach you."
+        },
+        "orders": {
+          "title": "Customer orders",
+          "body": "Review incoming orders in the seller area and coordinate delivery and payment directly."
+        },
+        "incoming": {
+          "title": "Related need requests",
+          "body": "See buyer requests related to your products and respond with offers."
+        },
+        "page": {
+          "title": "Your shop page",
+          "body": "Your public URL looks like zareoon.ir/your-page. My dedicated page in the header menu opens it. Edit shop settings from the seller dashboard."
+        },
+        "desktop": {
+          "title": "Selling on desktop",
+          "body": "User icon → My Zareoon, then switch the sidebar to Seller for products, inventory, orders, and shop page."
+        },
+        "mobile": {
+          "title": "Selling on mobile",
+          "body": "Open the Seller tab in the mobile dashboard. If you have no shop yet, use Create shop; afterwards product and order shortcuts appear."
+        }
+      }
+    },
+    "provider": {
+      "title": "Service provider guide",
+      "intro": "Offer trade services (customs, logistics, inspection, finance, and more) with a dedicated page and respond to related requests.",
+      "sections": {
+        "join": {
+          "title": "Join as a provider",
+          "body": "Start trade-services registration from My dedicated page or the services dashboard. Pick a category, fill company or professional info, and set your page address. After admin review, your page goes live."
+        },
+        "page": {
+          "title": "My services page",
+          "body": "Once approved, clients see your public page. Edit details from the services dashboard; changes may need another review."
+        },
+        "orders": {
+          "title": "Orders and coordination",
+          "body": "Track service-related orders or requests and coordinate directly with the client."
+        },
+        "incoming": {
+          "title": "Needs for my services",
+          "body": "View applicant requests in your field and reply or contact them."
+        },
+        "desktop": {
+          "title": "Services on desktop",
+          "body": "In the dashboard, choose the Service provider persona above the sidebar for your page, registration, and incoming needs."
+        },
+        "mobile": {
+          "title": "Services on mobile",
+          "body": "Open the Provider tab. If you are not a member yet, tap Create services; afterwards page and request shortcuts appear."
+        }
+      }
+    },
+    "account": {
+      "title": "Profile, security, and dedicated page",
+      "intro": "Your account underpins every role. Keep your profile accurate for easier contact and trust.",
+      "sections": {
+        "profile": {
+          "title": "Edit profile",
+          "body": "Use Edit profile from the user menu or Dashboard → Account to update name, contact, and address details."
+        },
+        "security": {
+          "title": "Sign-in and security",
+          "body": "Use a strong password and verify email when possible. Sign out on shared devices."
+        },
+        "roles": {
+          "title": "Multiple roles",
+          "body": "You can be buyer, seller, and provider at once. Switch roles in the dashboard; the sidebar follows the active role."
+        },
+        "dedicated": {
+          "title": "My dedicated page",
+          "body": "If you already have a shop or services page, this opens your public page. Otherwise you see an intro that explains how to create a shop or services page."
+        }
+      }
+    },
+    "devices": {
+      "title": "Mobile vs desktop",
+      "intro": "The same features exist on both; navigation differs slightly.",
+      "sections": {
+        "desktopNav": {
+          "title": "Desktop",
+          "body": "Full header with search, language, and user icon. User menu: My Zareoon, Edit profile, My dedicated page, Guide, Log out. Dashboard uses a sidebar and role switcher."
+        },
+        "mobileNav": {
+          "title": "Mobile",
+          "body": "Bottom bar for quick moves. Mobile dashboard uses Buyer / Seller / Provider tabs with shortcuts. Open the side menu from the menu icon."
+        },
+        "tips": {
+          "title": "Practical tips",
+          "body": "If an option is missing, switch role or create a shop/services page first. You can also open the in-dashboard guide for panel sections."
+        }
+      }
+    },
+    "contact": {
+      "title": "Technical support",
+      "phoneLabel": "Phone",
+      "phone": "09380910512",
+      "emailLabel": "Email",
+      "email": "zareoon.ir@gmail.com",
+      "hoursLabel": "Hours",
+      "hours": "Replies as capacity allows"
+    }
+  },
+  "homepageDisclaimer": {
+    "title": "Direct connection between sellers and buyers",
+    "body": "Zareoon is only a platform for direct contact among buyers, sellers, and service providers. Deal terms, quality, price, payment, and delivery are set by the parties; Zareoon bears no responsibility for transactions."
+  }
+}

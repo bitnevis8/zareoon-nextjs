@@ -601,11 +601,14 @@ export default function CategoryMegaMenu() {
           aria-expanded={open}
           aria-haspopup="dialog"
           className={[
-            "flex h-full min-h-10 shrink-0 items-center gap-1 border-l border-emerald-950/40 bg-emerald-950 px-2.5 text-[11px] font-bold text-white transition hover:bg-emerald-900 sm:px-3 sm:text-xs",
-            open ? "bg-emerald-900 ring-1 ring-inset ring-emerald-400/40" : "",
+            "flex h-full min-h-10 shrink-0 items-center gap-1.5 border-l border-emerald-200/90 bg-white px-2.5 text-[11px] font-semibold text-slate-800 transition sm:px-3 sm:text-xs",
+            "hover:bg-emerald-50 hover:text-emerald-900",
+            open
+              ? "bg-emerald-50 text-emerald-900 ring-1 ring-inset ring-emerald-200"
+              : "",
           ].join(" ")}
         >
-          <MenuIcon />
+          <MenuIcon className="h-3.5 w-3.5 text-emerald-700" />
           <span className="whitespace-nowrap">{t("categoriesShort")}</span>
           <ChevronDown open={open} />
         </button>

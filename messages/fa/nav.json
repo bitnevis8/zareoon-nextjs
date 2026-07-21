@@ -3,12 +3,12 @@
   "escrow": "تضمین معاملات و حساب امانی",
   "cart": "سبد خرید",
   "myOrders": "سفارشات من",
-  "startSelling": "عضویت در فروشندگان",
+  "startSelling": "راه‌اندازی فروشگاه",
   "submitRequest": "ثبت درخواست",
   "myRequests": "درخواست‌های من",
   "myProducts": "فهرست محصولات من",
   "newInventory": "ثبت موجودی جدید",
-  "shopSettings": "تنظیمات فروشگاه",
+  "shopSettings": "تنظیمات فروشگاه من",
   "customerOrders": "سفارشات مشتری",
   "incomingToMyProducts": "مشاهده نیازمندی‌ها به محصولات من",
   "admin": {
@@ -29,7 +29,12 @@
     "providerRequests": "درخواست‌های عضویت",
     "providersList": "فهرست ارائه‌دهندگان خدمات",
     "serviceCategories": "دسته‌بندی خدمات",
-    "settings": "تنظیمات"
+    "settings": "تنظیمات خدمات",
+    "siteSettings": "تنظیمات سایت",
+    "siteLanguages": "زبان‌ها",
+    "blockedPageNames": "اسامی غیرمجاز صفحه",
+    "slugAliases": "آدرس‌های رزرو",
+    "publicPages": "صفحات عمومی"
   },
   "sections": {
     "seller": "فروشنده",

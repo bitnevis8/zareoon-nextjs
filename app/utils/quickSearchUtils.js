@@ -81,7 +81,7 @@ export function searchServiceProviders(providers, query, language) {
     .slice(0, 8)
     .map((p) => ({
       key: `provider-${p.id}`,
-      href: `/trade-services/provider/${p.id}`,
+      href: p.profileSlug ? `/${p.profileSlug}` : "/trade-services",
       label: p.displayName,
       kind: "service_provider",
       categoryLabel: categoryTitleById.get(p.categoryId) || "",

@@ -423,7 +423,7 @@ export default function TradeServiceProvidersDashboardContent({
                 <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 text-sm">
                   <p className="text-xs font-semibold text-emerald-800">{t("tradeProviders.dedicatedPage")}</p>
                   <Link
-                    href={`/trade-services/provider/${selected.id}`}
+                    href={selected.profileSlug ? `/${selected.profileSlug}` : "#"}
                     className="mt-1 inline-block font-medium text-emerald-900 hover:underline"
                     target="_blank"
                   >

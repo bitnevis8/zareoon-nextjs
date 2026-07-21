@@ -47,7 +47,7 @@ export default function MobileMenu() {
             ) : (
               <Link
                 href="/auth/login"
-                className="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                className="block rounded-md bg-emerald-600 px-3 py-2 text-base font-medium text-white transition-colors duration-200 hover:bg-emerald-700"
                 onClick={() => setIsOpen(false)}
                 prefetch={true}
               >

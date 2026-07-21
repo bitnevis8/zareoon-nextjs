@@ -1,307 +1,539 @@
 {
-  "eyebrow": "",
-  "title": "",
-  "subtitle": "",
-  "providerHint": "",
-  "providerRegisterNote": "",
+  "eyebrow": "شبكة مقدّمي الخدمات التجارية",
+  "title": "الخدمات التجارية والتجارة الدولية",
+  "subtitle": "اعثر على شركات ومتخصصين في التفتيش والنقل والجمارك والتمويل وغيرها — أو انضم بنفسك.",
+  "providerHint": "شركات ومتخصصون في كل مجال — بيانات الاتصال والتراخيص والسجل والتقييمات.",
+  "providerRegisterNote": "قدّم خدماتك، واعثر على عملاء جدد، واحضر في شبكة التجارة الدولية بملف مخصص.",
   "categories": [
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "inspection-standards",
+      "icon": "inspection-standards",
+      "title": "التفتيش والاختبار وإصدار الشهادات",
+      "description": "تفتيش البضائع، مراقبة الجودة، الاختبارات المخبرية، شهادات التفتيش، المعايير وتفتيش ما قبل الشحن (PSI).",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "cargo-inspection",
+          "title": "بازرسی کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "quality-control",
+          "title": "کنترل کیفیت (QC)"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "testing",
+          "title": "آزمون و آزمایش کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "inspection-certificate",
+          "title": "صدور گواهی بازرسی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "standards-certification",
+          "title": "استاندارد و گواهینامه‌ها"
         },
         {
-          "id": "",
-          "title": ""
-        },
-        {
-          "id": "",
-          "title": ""
+          "id": "pre-shipment-inspection",
+          "title": "بازرسی قبل از حمل (PSI)"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "packaging-prep",
+      "icon": "packaging-prep",
+      "title": "التعبئة وتجهيز البضائع",
+      "description": "تعبئة التصدير، الملصقات والطباعة التجارية، التحزيم بالمصات ومعايير التعبئة للشحن الدولي.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "export-packaging",
+          "title": "بسته‌بندی صادراتی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "commercial-labeling",
+          "title": "لیبل و چاپ تجاری"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "palletizing",
+          "title": "پالت‌بندی"
         },
         {
-          "id": "",
-          "title": ""
-        },
-        {
-          "id": "",
-          "title": ""
-        },
-        {
-          "id": "",
-          "title": ""
-        },
-        {
-          "id": "",
-          "title": ""
-        },
-        {
-          "id": "",
-          "title": ""
+          "id": "packaging-standards",
+          "title": "استانداردسازی بسته‌بندی"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "import-export",
+      "icon": "import-export",
+      "title": "خدمات الاستيراد والتصدير",
+      "description": "إدارة الاستيراد والتصدير، التوريد، إيجاد مشترين ومورّدين أجانب والوكالة التجارية.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "import-mgmt",
+          "title": "مدیریت واردات کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "export-mgmt",
+          "title": "مدیریت صادرات کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "sourcing",
+          "title": "تأمین و سورسینگ کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "find-buyer",
+          "title": "پیدا کردن خریدار خارجی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "find-supplier",
+          "title": "پیدا کردن تأمین‌کننده خارجی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "commercial-agency",
+          "title": "نمایندگی تجاری و فروش"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "intl-logistics",
+      "icon": "intl-logistics",
+      "title": "النقل واللوجستيات الدولية",
+      "description": "نقل بحري وجوي وبري وسككي ومتعدد الوسائط؛ وسطاء شحن وناقلون وحاويات وتخزين.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "sea-freight",
+          "title": "حمل دریایی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "air-freight",
+          "title": "حمل هوایی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "road-freight",
+          "title": "حمل زمینی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "rail-freight",
+          "title": "حمل ریلی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "multimodal",
+          "title": "حمل ترکیبی"
+        },
+        {
+          "id": "forwarder-carrier",
+          "title": "فورواردر و کریری"
+        },
+        {
+          "id": "container-services",
+          "title": "خدمات کانتینری"
+        },
+        {
+          "id": "warehousing",
+          "title": "انبارداری و نگهداری کالا"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "customs-clearance",
+      "icon": "customs-clearance",
+      "title": "الجمارك والتخليص",
+      "description": "التخليص، الوساطة الجمركية، تسجيل الطلبات، تصاريح الاستيراد/التصدير والاستشارات الجمركية.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "customs-brokerage",
+          "title": "ترخیص کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "customs-agent",
+          "title": "کارگزار گمرکی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "order-registration",
+          "title": "ثبت سفارش"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "import-export-permits",
+          "title": "اخذ مجوزهای واردات و صادرات"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "customs-valuation",
+          "title": "ارزش‌گذاری کالا"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "customs-consulting",
+          "title": "مشاوره امور گمرکی"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "intl-finance",
+      "icon": "intl-finance",
+      "title": "تمويل التجارة الدولية",
+      "description": "تمويل التجارة والاعتماد المستندي والضمانات والصرف وحلول الدفع عبر الحدود.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "letter-of-credit",
+          "title": "اعتبار اسنادی (LC)"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "telegraphic-transfer",
+          "title": "حواله ارزی (TT)"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "intl-payments",
+          "title": "پرداخت‌های بین‌المللی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-finance",
+          "title": "تأمین مالی تجارت"
+        },
+        {
+          "id": "fx-trade-services",
+          "title": "خدمات ارزی تجاری"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "insurance-risk",
+      "icon": "insurance-risk",
+      "title": "التأمين والمخاطر",
+      "description": "تأمين البضائع والتأمين الائتماني وإدارة مخاطر التجارة.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "cargo-insurance",
+          "title": "بیمه باربری"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "intl-transport-insurance",
+          "title": "بیمه حمل‌ونقل بین‌المللی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "export-credit-insurance",
+          "title": "بیمه اعتبار صادراتی"
         },
         {
-          "id": "",
-          "title": ""
-        },
-        {
-          "id": "",
-          "title": ""
+          "id": "trade-risk-mgmt",
+          "title": "مدیریت ریسک تجارت"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "legal-trade",
+      "icon": "legal-trade",
+      "title": "القانون وعقود التجارة",
+      "description": "عقود التجارة والامتثال ودعم النزاعات والاستشارات القانونية للأعمال الدولية.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "intl-contracts",
+          "title": "قراردادهای بین‌المللی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "sales-contracts",
+          "title": "تنظیم قرارداد فروش"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-law-advice",
+          "title": "مشاوره حقوق تجارت"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "dispute-resolution",
+          "title": "حل اختلافات تجاری"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "company-registration",
+          "title": "ثبت شرکت و نمایندگی"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "market-development",
+      "icon": "market-development",
+      "title": "تطوير الأسواق",
+      "description": "بحوث السوق واستراتيجية الدخول وإيجاد الشركاء وترويج التصدير.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "market-research",
+          "title": "تحقیقات بازار خارجی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "export-marketing",
+          "title": "بازاریابی صادراتی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "intl-advertising",
+          "title": "تبلیغات بین‌المللی"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "buyer-acquisition",
+          "title": "جذب خریدار خارجی"
         }
       ]
     },
     {
-      "id": "",
-      "icon": "",
-      "title": "",
-      "description": "",
+      "id": "specialized-trade",
+      "icon": "specialized-trade",
+      "title": "تجارة متخصصة",
+      "description": "خدمات تجارية قطاعية واستشارات تجارية متخصصة.",
       "children": [
         {
-          "id": "",
-          "title": ""
+          "id": "trade-translation",
+          "title": "ترجمه تخصصی تجاری"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "negotiation-interpreter",
+          "title": "مترجم مذاکرات تجاری"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-training",
+          "title": "آموزش تجارت بین‌الملل"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "trade-consulting",
+          "title": "مشاوره صادرات و واردات"
         },
         {
-          "id": "",
-          "title": ""
+          "id": "local-representative",
+          "title": "خدمات نماینده محلی در کشورها"
+        }
+      ]
+    },
+    {
+      "id": "intl-certificates",
+      "icon": "intl-certificates",
+      "title": "الشهادات الدولية",
+      "description": "شهادات المنشأ والمطابقة ووثائق تجارية أخرى.",
+      "children": [
+        {
+          "id": "product-certificates",
+          "title": "گواهینامه‌های محصول"
+        },
+        {
+          "id": "export-licenses",
+          "title": "مجوزهای صادرات"
+        },
+        {
+          "id": "origin-certificates",
+          "title": "گواهی مبدأ"
+        },
+        {
+          "id": "halal-organic-certs",
+          "title": "گواهی حلال، ارگانیک و مشابه"
+        }
+      ]
+    },
+    {
+      "id": "export-compliance",
+      "icon": "export-compliance",
+      "title": "امتثال التصدير",
+      "description": "فحص العقوبات وضوابط التصدير والامتثال التنظيمي.",
+      "children": [
+        {
+          "id": "export-regulations",
+          "title": "مقررات صادرات"
+        },
+        {
+          "id": "sanctions-screening",
+          "title": "بررسی تحریم و محدودیت‌ها"
+        },
+        {
+          "id": "destination-standards",
+          "title": "استانداردهای کشور مقصد"
+        },
+        {
+          "id": "compliance-audit",
+          "title": "ممیزی انطباق تجاری"
+        }
+      ]
+    },
+    {
+      "id": "trade-documents",
+      "icon": "trade-documents",
+      "title": "وثائق التجارة",
+      "description": "الفواتير التجارية وقوائم التعبئة وبوالص الشحن وإعداد المستندات.",
+      "children": [
+        {
+          "id": "shipping-docs",
+          "title": "اسناد حمل"
+        },
+        {
+          "id": "commercial-invoice",
+          "title": "فاکتور و پکینگ‌لیست"
+        },
+        {
+          "id": "incoterms-docs",
+          "title": "اسناد اینکوترمز"
+        },
+        {
+          "id": "bank-trade-docs",
+          "title": "اسناد بانکی و LC"
+        }
+      ]
+    },
+    {
+      "id": "supply-chain",
+      "icon": "supply-chain",
+      "title": "سلسلة التوريد",
+      "description": "تنسيق وتحسين سلسلة التوريد للتجارة من طرف إلى طرف.",
+      "children": [
+        {
+          "id": "scm-design",
+          "title": "طراحی زنجیره تأمین"
+        },
+        {
+          "id": "supplier-management",
+          "title": "مدیریت تأمین‌کنندگان"
+        },
+        {
+          "id": "procurement",
+          "title": "تأمین و خرید کالا"
+        },
+        {
+          "id": "inventory-planning",
+          "title": "برنامه‌ریزی موجودی"
+        }
+      ]
+    },
+    {
+      "id": "ecommerce-marketplace",
+      "icon": "ecommerce-marketplace",
+      "title": "التجارة الإلكترونية والأسواق",
+      "description": "إعداد القنوات عبر الإنترنت والبيع في الأسواق ودعم التجارة الرقمية.",
+      "children": [
+        {
+          "id": "marketplace-listing",
+          "title": "حضور در مارکت‌پلیس‌ها"
+        },
+        {
+          "id": "cross-border-ecommerce",
+          "title": "فروش فرامرزی آنلاین"
+        },
+        {
+          "id": "online-export-store",
+          "title": "فروشگاه صادراتی آنلاین"
+        },
+        {
+          "id": "digital-catalog",
+          "title": "کاتالوگ و ویترین دیجیتال"
+        }
+      ]
+    },
+    {
+      "id": "trade-digital",
+      "icon": "trade-digital",
+      "title": "أدوات التجارة الرقمية",
+      "description": "منصات رقمية وأتمتة وأدوات تقنية للتجارة الدولية.",
+      "children": [
+        {
+          "id": "trade-software",
+          "title": "نرم‌افزارهای تجارت"
+        },
+        {
+          "id": "process-automation",
+          "title": "اتوماسیون فرآیندها"
+        },
+        {
+          "id": "digital-transformation",
+          "title": "تحول دیجیتال"
+        },
+        {
+          "id": "trade-data-analytics",
+          "title": "تحلیل داده تجاری"
+        }
+      ]
+    },
+    {
+      "id": "investment-consulting",
+      "icon": "investment-consulting",
+      "title": "استشارات الاستثمار",
+      "description": "نصح استثماري ومشاريع مشتركة ودعم الاستثمار عبر الحدود.",
+      "children": [
+        {
+          "id": "fdi-consulting",
+          "title": "مشاوره سرمایه‌گذاری خارجی"
+        },
+        {
+          "id": "business-growth",
+          "title": "توسعه کسب‌وکار"
+        },
+        {
+          "id": "feasibility-studies",
+          "title": "امکان‌سنجی پروژه‌ها"
+        },
+        {
+          "id": "export-strategy",
+          "title": "استراتژی صادرات"
+        }
+      ]
+    },
+    {
+      "id": "trade-events",
+      "icon": "trade-events",
+      "title": "فعاليات ومعارض تجارية",
+      "description": "معارض ولقاءات B2B وتنظيم بعثات تجارية.",
+      "children": [
+        {
+          "id": "trade-fairs",
+          "title": "نمایشگاه‌های بین‌المللی"
+        },
+        {
+          "id": "b2b-matchmaking",
+          "title": "رویدادهای B2B و مچ‌میکینگ"
+        },
+        {
+          "id": "trade-missions",
+          "title": "هیئت‌های تجاری"
+        },
+        {
+          "id": "event-organization",
+          "title": "برگزاری رویداد تجاری"
+        }
+      ]
+    },
+    {
+      "id": "business-immigration",
+      "icon": "business-immigration",
+      "title": "الهجرة للأعمال",
+      "description": "تأشيرات وإقامة واستشارات هجرة الأعمال للتجّار.",
+      "children": [
+        {
+          "id": "business-visa",
+          "title": "ویزای تجاری و کاری"
+        },
+        {
+          "id": "company-setup-abroad",
+          "title": "ثبت شرکت در خارج"
+        },
+        {
+          "id": "relocation-support",
+          "title": "استقرار و انتقال کسب‌وکار"
+        },
+        {
+          "id": "local-compliance-setup",
+          "title": "انطباق محلی و راه‌اندازی"
+        }
+      ]
+    },
+    {
+      "id": "esg-sustainability",
+      "icon": "esg-sustainability",
+      "title": "الاستدامة وESG",
+      "description": "تقارير الاستدامة والتجارة الخضراء وامتثال ESG للأعمال.",
+      "children": [
+        {
+          "id": "esg-advisory",
+          "title": "مشاوره ESG"
+        },
+        {
+          "id": "sustainability-reporting",
+          "title": "گزارش پایداری"
+        },
+        {
+          "id": "environmental-compliance",
+          "title": "الزامات زیست‌محیطی"
+        },
+        {
+          "id": "green-supply-chain",
+          "title": "زنجیره تأمین سبز"
         }
       ]
     }

@@ -1,38 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
+import AuthShell, {
+  AuthField,
+  AuthPrimaryButton,
+  authInputClass,
+  authGhostBtnClass,
+} from "../../../components/auth/AuthShell";
+import SmsCountdown from "../../../components/auth/SmsCountdown";
 
-export default function LoginPasswordPage() {
+const TEMP_PASSWORD_MS = 5 * 60 * 1000;
+
+function PasswordForm() {
   const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [forgotSent, setForgotSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [identifier, setIdentifier] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [smsLocked, setSmsLocked] = useState(false);
+  const [smsActive, setSmsActive] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const id = searchParams.get("identifier");
-    if (id) {
-      setIdentifier(id);
-    }
+    if (id) setIdentifier(id);
   }, [searchParams]);
 
-  // اگر کاربر قبلاً لاگین کرده، به داشبورد هدایت کن
   useEffect(() => {
     if (!authLoading && user) {
-      console.log("🔍 User already logged in, redirecting to dashboard");
-      router.push("/dashboard");
+      if (user.mustChangePassword) router.replace("/auth/set-password");
+      else router.replace("/dashboard");
     }
   }, [user, authLoading, router]);
 
@@ -40,194 +47,152 @@ export default function LoginPasswordPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       const response = await fetch(API_ENDPOINTS.auth.login, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // برای ذخیره کوکی‌ها
-        body: JSON.stringify({
-          identifier: identifier,
-          password: password,
-          rememberMe: rememberMe
-        }),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ identifier, password, rememberMe }),
       });
-
       const data = await response.json();
-
-      if (data.success) {
-        // ورود موفق - ذخیره اطلاعات کاربر در AuthContext و برو به داشبورد
-        console.log("🔍 Login successful, updating AuthContext");
-        await login(data.data?.user, data.data?.token);
-        console.log("🔍 AuthContext updated, redirecting to dashboard");
-        router.push("/dashboard");
-      } else {
+      if (!data.success) {
         setError(data.message || t("wrongPassword"));
+        return;
       }
-    } catch (err) {
-      console.error("Login error:", err);
+      await login(data.data?.user, data.data?.token);
+      if (data.data?.mustChangePassword || data.data?.user?.mustChangePassword) {
+        router.push("/auth/set-password");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch {
       setError(t("serverError"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleForgotPassword = () => {
-    // برو به صفحه تایید کد برای بازیابی رمز عبور
-    router.push(`/auth/verification/code?identifier=${encodeURIComponent(identifier)}&action=forgot`);
-  };
-
-  const handleSMSLogin = () => {
-    // برو به صفحه تایید کد برای ورود با SMS
-    router.push(`/auth/verification/code?identifier=${encodeURIComponent(identifier)}&action=login`);
-  };
-
-  const formatIdentifier = (id) => {
-    if (id.includes("@")) {
-      return id; // ایمیل
-    } else if (id.startsWith("09")) {
-      return `+98${id.slice(1)}`; // موبایل
+  const handleForgot = async () => {
+    setForgotLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(API_ENDPOINTS.auth.forgotPassword, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ mobile: identifier }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        setError(data.message || t("sendCodeError"));
+        return;
+      }
+      setForgotSent(true);
+      setPassword("");
+      setSmsLocked(true);
+      setSmsActive(false);
+      requestAnimationFrame(() => setSmsActive(true));
+    } catch {
+      setError(t("serverError"));
+    } finally {
+      setForgotLoading(false);
     }
-    return id;
   };
 
-  // اگر AuthContext در حال لود است، loading نشان بده
+  const onExpire = useCallback(() => {
+    setSmsLocked(false);
+  }, []);
+
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{tCommon("loading")}</p>
-        </div>
-      </div>
+      <AuthShell title={t("loginTitle")}>
+        <p className="text-center text-sm text-slate-500">{t("loading")}</p>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-        {/* هدر */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">{t("loginTitle")}</h1>
-            <p className="text-gray-600 text-sm mt-1">
-              {t("loginWith", { identifier: formatIdentifier(identifier) })}
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
-            <Image
-              src="/images/logo.png"
-              alt={t("logoAlt")}
-              width={48}
-              height={48}
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-        
-        <div className="p-8">
+    <AuthShell title={t("loginTitle")}>
+      <p className="mb-4 text-sm text-slate-600">
+        {t("loginWith", { identifier })}
+      </p>
+      <p className="mb-5 text-xs leading-5 text-slate-500">
+        {forgotSent ? t("forgotPasswordSent") : t("passwordHint")}
+      </p>
 
-        {/* فرم ورود */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <p className="text-sm text-gray-600 mb-4">
-              {t("passwordHint")}
-            </p>
-          </div>
-
-          {/* رمز عبور */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("passwordLabel")}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t("passwordPlaceholder")}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
-            </div>
-          </div>
-
-          {/* مرا به خاطر بسپار */}
-          <div className="flex items-center">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <AuthField
+          label={t("passwordLabel")}
+          error={error}
+          hint={forgotSent ? t("tempPasswordHint") : undefined}
+        >
+          <div className="relative">
             <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("passwordPlaceholder")}
+              className={`${authInputClass} pe-16`}
+              required
             />
-            <label htmlFor="rememberMe" className="mr-2 block text-sm text-gray-700">
-              {t("rememberMe")}
-            </label>
-          </div>
-
-          {/* نمایش خطا */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* دکمه ورود */}
-          <button
-            type="submit"
-            disabled={loading || !password.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
-          >
-            {loading ? t("loggingIn") : t("continue")}
-          </button>
-
-          {/* گزینه‌های اضافی */}
-          <div className="space-y-3">
             <button
               type="button"
-              onClick={handleForgotPassword}
-              className="w-full text-blue-600 hover:text-blue-800 text-sm font-medium"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute inset-y-0 left-2 my-auto h-9 rounded-lg px-2 text-xs font-semibold text-emerald-700"
             >
-              {t("forgotPassword")}
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">{t("or")}</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSMSLogin}
-              className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-200"
-            >
-              {t("smsLogin")}
+              {showPassword ? "مخفی" : "نمایش"}
             </button>
           </div>
-        </form>
+        </AuthField>
 
-        {/* لینک‌های اضافی */}
-        <div className="mt-6 text-center">
-          <Link href="/auth/login" className="text-sm text-gray-600 hover:text-gray-800">
-            {t("changeMobile")}
-          </Link>
-        </div>
-        </div>
-      </div>
-    </div>
+        <label className="flex items-center gap-2 text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+          />
+          {t("rememberMe")}
+        </label>
+
+        <AuthPrimaryButton loading={loading} loadingText={t("loggingIn")} showArrow={false}>
+          {t("loginTitle")}
+        </AuthPrimaryButton>
+      </form>
+
+      <button
+        type="button"
+        onClick={handleForgot}
+        disabled={forgotLoading || smsLocked}
+        className={`${authGhostBtnClass} mt-3`}
+      >
+        {forgotLoading ? t("forgotPasswordSending") : t("forgotPassword")}
+      </button>
+
+      <SmsCountdown
+        active={smsActive}
+        durationMs={TEMP_PASSWORD_MS}
+        onExpire={onExpire}
+        labelRemaining={(time) => t("timerTempRemaining", { time })}
+        labelExpired={t("timerTempExpired")}
+      />
+
+      <button
+        type="button"
+        onClick={() => router.push("/auth/login")}
+        className="mt-4 w-full text-center text-sm font-semibold text-slate-500 hover:text-emerald-700"
+      >
+        {t("changeMobile")}
+      </button>
+    </AuthShell>
+  );
+}
+
+export default function LoginPasswordPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-slate-500">...</div>}>
+      <PasswordForm />
+    </Suspense>
   );
 }

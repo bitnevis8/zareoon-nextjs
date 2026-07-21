@@ -2,12 +2,14 @@
   "roles": {
     "super_admin": "",
     "admin": "",
-    "employee": "",
+    "user": "",
+    "seller": "",
+    "service_provider": "",
+    "customer": "",
     "supplier": "",
     "farmer": "",
-    "customer": "",
     "loader": "",
-    "driver": "",
+    "employee": "",
     "administrator": ""
   },
   "accountNav": {

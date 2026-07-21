@@ -1,48 +1,102 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { DASHBOARD_PERSONAS } from "@/app/utils/dashboardPersona";
-import { shouldShowSellerPanel } from "@/app/utils/roles";
+import { isSeller } from "@/app/utils/roles";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
+import { showToast } from "@/app/utils/toast";
+import PublicPageSlugField from "@/app/components/ui/PublicPageSlugField";
+import ExistingPublicPageNotice from "@/app/components/ui/ExistingPublicPageNotice";
+import { useExistingPublicSlug } from "@/app/hooks/useExistingPublicSlug";
+import BusinessHoursEditor from "@/app/components/ui/BusinessHoursEditor";
+import LocationPickerMap from "@/app/components/ui/LocationPickerMap";
+import { DEFAULT_BUSINESS_HOURS } from "@/app/utils/businessHours";
+import { dash } from "@/app/components/dashboard/dashboardTheme";
+
+const STEPS = [
+  { id: 1, title: "آدرس" },
+  { id: 2, title: "تماس" },
+  { id: 3, title: "ساعات کاری" },
+  { id: 4, title: "موقعیت" },
+];
+
+const TOTAL_STEPS = 4;
 
 export default function SellerJoinPage() {
   const { t, isRTL } = useLanguage();
   const auth = useAuth();
-  const router = useRouter();
   const { setPersona } = useDashboardPersona();
+  const { slug: existingSlug, loading: slugLoading, hasSlug } = useExistingPublicSlug();
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [mobile, setMobile] = useState(auth?.user?.mobile || "");
+  const [landline, setLandline] = useState("");
+  const [email, setEmail] = useState(auth?.user?.email || "");
+  const [includeHours, setIncludeHours] = useState(false);
+  const [businessHours, setBusinessHours] = useState(DEFAULT_BUSINESS_HOURS);
+  const [location, setLocation] = useState({
+    latitude: null,
+    longitude: null,
+    addressLabel: "",
+  });
+  const [done, setDone] = useState(null);
 
-  const alreadySeller = shouldShowSellerPanel(auth?.user);
+  const alreadySeller = isSeller(auth?.user);
 
   const join = async () => {
     setError("");
+    if (!hasSlug && !shopName.trim()) {
+      setError("نام صفحه فروشگاه را وارد کنید");
+      setStep(1);
+      return;
+    }
     setLoading(true);
     try {
+      showToast.info("ایجاد فروشگاه به منزله پذیرش قوانین فروشندگان زارعون است.");
+
+      const body = {
+        publicPhone: mobile.trim() || undefined,
+        publicLandline: landline.trim() || undefined,
+        publicEmail: email.trim() || undefined,
+      };
+      if (includeHours) body.businessHours = businessHours;
+      if (location.latitude != null && location.longitude != null) {
+        body.latitude = location.latitude;
+        body.longitude = location.longitude;
+        body.addressLabel = location.addressLabel || undefined;
+      }
+      if (!hasSlug) body.profileSlug = shopName.trim();
+
       const res = await authFetch(API_ENDPOINTS.auth.becomeSeller, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!data.success) {
         setError(data.message || t("sellerJoinError"));
         return;
       }
-      if (data.data) {
-        auth.updateUser(data.data);
-      } else {
+      if (data.data) auth.updateUser(data.data);
+      else {
         const me = await authFetch(API_ENDPOINTS.auth.me, { credentials: "include" });
         const meData = await me.json();
         if (meData.success && meData.data) auth.updateUser(meData.data);
       }
       setPersona(DASHBOARD_PERSONAS.SELLER);
-      router.push("/dashboard/supplier-profile");
+      setDone({
+        message: data.message,
+        slug: data.data?.profileSlug,
+        awaitsApproval: !!data.data?.awaitsApproval,
+      });
     } catch (e) {
       console.error(e);
       setError(t("sellerJoinError"));
@@ -51,59 +105,250 @@ export default function SellerJoinPage() {
     }
   };
 
-  return (
-    <main className="mx-auto max-w-xl px-4 py-8 sm:px-6 sm:py-10" dir={isRTL ? "rtl" : "ltr"}>
-      <div className="overflow-hidden rounded-2xl border border-emerald-200/80 bg-white shadow-[0_16px_40px_-24px_rgba(6,78,59,0.35)]">
-        <div className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 px-5 py-6 text-white sm:px-7">
-          <p className="text-xs font-bold text-emerald-100/90">{t("sellerJoinBadge")}</p>
-          <h1 className="mt-2 text-xl font-black sm:text-2xl">{t("sellerJoinTitle")}</h1>
-          <p className="mt-2 text-sm leading-7 text-emerald-50/95">{t("sellerJoinDesc")}</p>
+  const goNext = () => {
+    if (step === 1 && !hasSlug && !shopName.trim()) {
+      setError("نام صفحه را وارد کنید");
+      return;
+    }
+    setError("");
+    setStep((s) => Math.min(TOTAL_STEPS, s + 1));
+  };
+
+  if (done) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-10 sm:max-w-xl sm:px-6 md:max-w-2xl md:py-14" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="overflow-hidden rounded-2xl border border-emerald-200/80 bg-white shadow-sm">
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 px-5 py-8 text-center text-white sm:px-8 sm:py-10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-2xl">
+              ✓
+            </div>
+            <h1 className="text-xl font-bold sm:text-2xl">
+              {done.awaitsApproval ? "درخواست ثبت شد" : "فروشگاه آماده است"}
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-emerald-50/95">{done.message}</p>
+          </div>
+          <div className="grid gap-2.5 p-4 sm:grid-cols-3 sm:gap-3 sm:p-6">
+            {!done.awaitsApproval ? (
+              <Link
+                href="/dashboard/supplier/inventory/create?scope=own"
+                className={`${dash.btnPrimary} min-h-11 w-full`}
+              >
+                افزودن محصول
+              </Link>
+            ) : null}
+            {done.slug ? (
+              <Link
+                href={`/${encodeURIComponent(done.slug)}`}
+                className={`${dash.btnSecondary} min-h-11 w-full`}
+              >
+                مشاهده صفحه
+              </Link>
+            ) : null}
+            <Link href="/dashboard/supplier-profile" className={`${dash.btnSecondary} min-h-11 w-full`}>
+              تنظیمات فروشگاه من
+            </Link>
+          </div>
         </div>
+      </main>
+    );
+  }
 
-        <div className="space-y-4 px-5 py-6 sm:px-7">
-          <ul className="space-y-2 text-sm leading-6 text-slate-700">
-            <li className="flex gap-2">
-              <span className="text-emerald-600">✓</span>
-              <span>{t("sellerJoinPoint1")}</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-emerald-600">✓</span>
-              <span>{t("sellerJoinPoint2")}</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-emerald-600">✓</span>
-              <span>{t("sellerJoinPoint3")}</span>
-            </li>
-          </ul>
-
-          {error ? (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-          ) : null}
-
-          {alreadySeller ? (
+  if (alreadySeller) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-10 sm:max-w-xl sm:px-6 md:max-w-2xl md:py-14" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="overflow-hidden rounded-2xl border border-emerald-200/80 bg-white shadow-sm">
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 px-5 py-8 text-center text-white sm:px-8 sm:py-10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-2xl">
+              ✓
+            </div>
+            <h1 className="text-xl font-bold sm:text-2xl">فروشگاه شما آماده است</h1>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-emerald-50/95">
+              می‌توانید محصولات را اضافه کنید یا تنظیمات را ویرایش کنید.
+            </p>
+          </div>
+          <div className="grid gap-2.5 p-4 sm:grid-cols-2 sm:gap-3 sm:p-6">
             <Link
-              href="/dashboard/supplier-profile"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800"
+              href="/dashboard/supplier/inventory/create?scope=own"
+              className={`${dash.btnPrimary} min-h-11 w-full`}
             >
-              {t("sellerJoinGoProfile")}
+              افزودن محصول
             </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={join}
-              disabled={loading || !auth?.user}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? t("sellerJoinSubmitting") : t("sellerJoinCta")}
-            </button>
-          )}
-
-          <p className="text-center text-xs text-slate-500">
-            <Link href="/dashboard" className="font-semibold text-emerald-800 hover:underline">
-              {t("sellerJoinBack")}
+            <Link href="/dashboard/supplier-profile" className={`${dash.btnSecondary} min-h-11 w-full`}>
+              تنظیمات فروشگاه من
             </Link>
-          </p>
+          </div>
         </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="mx-auto max-w-lg px-4 py-6 sm:max-w-xl sm:px-6 sm:py-8 md:max-w-2xl lg:max-w-3xl lg:py-10" dir={isRTL ? "rtl" : "ltr"}>
+      <header className="mb-5 sm:mb-6">
+        <p className="text-xs font-medium text-emerald-700">ایجاد فروشگاه</p>
+        <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">فروشگاه خود را بسازید</h1>
+        <p className="mt-1.5 text-sm leading-6 text-slate-500">
+          چهار مرحله — تماس، ساعات و نقشه اختیاری‌اند.
+        </p>
+      </header>
+
+      <div className="mb-5 grid grid-cols-4 gap-1.5 sm:gap-2">
+        {STEPS.map((s) => (
+          <div
+            key={s.id}
+            className={`rounded-lg border px-1 py-2.5 text-center text-[10px] font-semibold sm:py-3 sm:text-xs ${
+              step === s.id
+                ? "border-emerald-600 bg-emerald-50 text-emerald-800"
+                : step > s.id
+                  ? "border-emerald-200 bg-white text-emerald-700"
+                  : "border-slate-200 bg-white text-slate-500"
+            }`}
+          >
+            <span className="block sm:inline">{s.id}.</span> {s.title}
+          </div>
+        ))}
+      </div>
+
+      <div className={`${dash.card} space-y-5 p-4 sm:p-6 md:p-7`}>
+        {step === 1 ? (
+          slugLoading ? (
+            <div className="h-20 animate-pulse rounded-xl bg-slate-100" />
+          ) : hasSlug ? (
+            <ExistingPublicPageNotice slug={existingSlug} />
+          ) : (
+            <PublicPageSlugField
+              value={shopName}
+              onChange={setShopName}
+              checkUrl={API_ENDPOINTS.tamin.slugAvailable}
+              context="shop-create"
+              previewPrefix="zareoon.ir/"
+            />
+          )
+        ) : null}
+
+        {step === 2 ? (
+          <div className="space-y-4">
+            <p className="text-xs text-slate-500">همه فیلدهای این مرحله اختیاری‌اند.</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-1">
+                شماره موبایل
+                <input
+                  className={`${dash.input} mt-1.5`}
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  placeholder="09xxxxxxxxx"
+                  dir="ltr"
+                />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                شماره تلفن فروشگاه
+                <input
+                  className={`${dash.input} mt-1.5`}
+                  value={landline}
+                  onChange={(e) => setLandline(e.target.value)}
+                  placeholder="021xxxxxxx"
+                  dir="ltr"
+                />
+              </label>
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                ایمیل فروشگاه
+                <input
+                  type="email"
+                  className={`${dash.input} mt-1.5`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="shop@example.com"
+                  dir="ltr"
+                />
+              </label>
+            </div>
+          </div>
+        ) : null}
+
+        {step === 3 ? (
+          <div className="space-y-3">
+            <p className="text-xs text-slate-500">اختیاری — می‌توانید بعداً در تنظیمات تکمیل کنید.</p>
+            <BusinessHoursEditor
+              value={businessHours}
+              onChange={(h) => {
+                setIncludeHours(true);
+                setBusinessHours(h);
+              }}
+            />
+          </div>
+        ) : null}
+
+        {step === 4 ? (
+          <LocationPickerMap
+            latitude={location.latitude}
+            longitude={location.longitude}
+            addressLabel={location.addressLabel}
+            onChange={setLocation}
+            optional
+          />
+        ) : null}
+
+        {error ? (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        ) : null}
+
+        <div className="space-y-2">
+          <div className="flex items-stretch gap-2">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={() => setStep((s) => s - 1)}
+                className={`${dash.btnSecondary} h-11 min-h-11 shrink-0 px-5 sm:px-6`}
+              >
+                قبلی
+              </button>
+            ) : null}
+            {step < TOTAL_STEPS ? (
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={slugLoading}
+                className={`${dash.btnPrimary} h-11 min-h-11 flex-1`}
+              >
+                بعدی
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={join}
+                disabled={loading}
+                className={`${dash.btnPrimary} h-11 min-h-11 flex-1`}
+              >
+                {loading ? "در حال ایجاد…" : "ایجاد فروشگاه"}
+              </button>
+            )}
+          </div>
+          {step === TOTAL_STEPS ? (
+            <p className="text-center text-[11px] leading-5 text-slate-500">
+              با زدن «ایجاد فروشگاه»،{" "}
+              <Link href="/seller-terms" className="font-semibold text-emerald-700 hover:underline">
+                قوانین فروشندگان
+              </Link>{" "}
+              زارعون را می‌پذیرید.
+            </p>
+          ) : null}
+        </div>
+
+        {step === 2 || step === 3 || step === 4 ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (step === TOTAL_STEPS) join();
+              else {
+                setError("");
+                setStep((s) => s + 1);
+              }
+            }}
+            className="w-full text-center text-xs font-medium text-slate-500 hover:text-slate-700"
+          >
+            فعلاً رد شو
+          </button>
+        ) : null}
       </div>
     </main>
   );

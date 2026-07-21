@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { SITE_PHONE } from "@/app/config/siteContact";
+import { SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from "@/app/config/siteContact";
+import { toPersianDigits } from "@/app/utils/persianNumberUtils";
 
-const SUPPORT_PHONE = SITE_PHONE;
+const SUPPORT_PHONE = SITE_PHONE_DISPLAY;
+const SUPPORT_PHONE_TEL = SITE_PHONE_TEL;
 
 const GUIDE_STEP_KEYS = ["1", "2", "3"];
 
@@ -75,8 +77,8 @@ export function CartGuide() {
       </div>
       <p className="mt-3 text-xs text-slate-500">
         {t("support")}{" "}
-        <a href={`tel:${SUPPORT_PHONE}`} className="font-semibold text-emerald-700 hover:underline" dir="ltr">
-          {SUPPORT_PHONE}
+        <a href={SUPPORT_PHONE_TEL} className="font-semibold text-emerald-700 hover:underline" dir="ltr">
+          {toPersianDigits(SUPPORT_PHONE)}
         </a>
       </p>
     </aside>

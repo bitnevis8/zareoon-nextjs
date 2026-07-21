@@ -110,6 +110,10 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
       trail: [{ labelKey: "editProfile" }],
     },
     {
+      match: "/dashboard/dedicated-page",
+      trail: [{ labelKey: "dedicatedPage.title" }],
+    },
+    {
       match: "/dashboard/settings",
       trail: [{ labelKey: "tradeServices" }, { labelKey: "settings" }],
     },

@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "title": "",
+    "description": ""
+  },
+  "nav": {
+    "home": "",
+    "current": ""
+  },
+  "header": {
+    "title": "",
+    "subtitle": "",
+    "defaultSource": "",
+    "calendarHint": ""
+  },
+  "fetch": {
+    "label": "",
+    "refreshing": "",
+    "refresh": ""
+  },
+  "converter": {
+    "title": "",
+    "subtitle": "",
+    "amountLabel": "",
+    "resultLabel": "",
+    "swapAriaLabel": "",
+    "swapTitle": "",
+    "rateLine": ""
+  },
+  "errors": {
+    "fetchFailed": "",
+    "serverError": ""
+  },
+  "rates": {
+    "title": "",
+    "cryptoSuffix": "",
+    "currencyUnit": ""
+  },
+  "change": {
+    "percent": ""
+  },
+  "footer": "",
+  "currencies": {
+    "IRR": "Iraanse rial"
+  },
+  "apiKeys": [
+    {
+      "id": "price_dollar_rl",
+      "labelKey": "USD",
+      "code": "USD",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_eur",
+      "labelKey": "EUR",
+      "code": "EUR",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_aed",
+      "labelKey": "AED",
+      "code": "AED",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_rub",
+      "labelKey": "RUB",
+      "code": "RUB",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_gbp",
+      "labelKey": "GBP",
+      "code": "GBP",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_try",
+      "labelKey": "TRY",
+      "code": "TRY",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_cny",
+      "labelKey": "CNY",
+      "code": "CNY",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_sar",
+      "labelKey": "SAR",
+      "code": "SAR",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_cad",
+      "labelKey": "CAD",
+      "code": "CAD",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_chf",
+      "labelKey": "CHF",
+      "code": "CHF",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_jpy",
+      "labelKey": "JPY",
+      "code": "JPY",
+      "kind": "fiat"
+    },
+    {
+      "id": "price_aud",
+      "labelKey": "AUD",
+      "code": "AUD",
+      "kind": "fiat"
+    },
+    {
+      "id": "crypto-tether-irr",
+      "labelKey": "USDT",
+      "code": "USDT",
+      "kind": "crypto"
+    },
+    {
+      "id": "crypto-bitcoin-irr",
+      "labelKey": "BTC",
+      "code": "BTC",
+      "kind": "crypto"
+    },
+    {
+      "id": "crypto-ethereum-irr",
+      "labelKey": "ETH",
+      "code": "ETH",
+      "kind": "crypto"
+    }
+  ]
+}

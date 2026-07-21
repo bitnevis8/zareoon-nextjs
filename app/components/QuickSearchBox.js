@@ -7,8 +7,19 @@ import ExploreSearchModal from "@/app/components/ExploreSearchModal";
 
 const DESKTOP_MQ = "(min-width: 1024px)";
 
-const INPUT_CLASS =
-  "w-full min-h-11 rounded-full border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:px-5 sm:text-sm";
+function SearchIcon({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M16.2 16.2L20.5 20.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 /**
  * جستجوی سریع در صفحه اصلی:
@@ -29,10 +40,8 @@ export default function QuickSearchBox({
   const [modalOpen, setModalOpen] = useState(false);
 
   const isHomepage = variant === "homepage";
-  const textAlign = isRTL ? "text-right" : "text-left";
-  const inputClass = `${inputClassName || INPUT_CLASS} ${textAlign}`;
-  /** فارسی و انگلیسی: ذره‌بین چپ (آخر اینپوت) · سایر زبان‌ها: راست (اول اینپوت) */
-  const iconOnLeft = language === "fa" || language === "en";
+  /** فارسی، عربی، اردو: ذره‌بین داخل اینپوت سمت چپ (آخر متن RTL) */
+  const iconOnLeft = language === "fa" || language === "ar" || language === "ur";
 
   const exploreHref = (query = q) => {
     const trimmed = query.trim();
@@ -70,41 +79,70 @@ export default function QuickSearchBox({
     return () => window.removeEventListener("resize", onResize);
   }, [modalOpen]);
 
+  const shellClass = isHomepage
+    ? "mx-auto w-full max-w-xl px-1 sm:max-w-2xl sm:px-2 lg:max-w-3xl"
+    : "mx-auto w-full max-w-2xl";
+
+  const textAlignClass = isRTL
+    ? "text-right placeholder:text-right"
+    : "text-left placeholder:text-left";
+
+  const fieldClass = inputClassName
+    ? inputClassName
+    : [
+        "w-full cursor-pointer appearance-none rounded-2xl border border-slate-200/90 bg-white",
+        "text-slate-800 shadow-[0_4px_24px_rgba(15,23,42,0.06)]",
+        "placeholder:text-slate-400/90",
+        "transition-[border-color,box-shadow] duration-200",
+        "hover:border-emerald-200 hover:shadow-[0_8px_28px_rgba(6,95,70,0.08)]",
+        "focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15",
+        /* mobile — فونت کوچک‌تر */
+        "min-h-11 px-3.5 py-2.5 text-[13px] leading-snug",
+        /* tablet+ */
+        "sm:min-h-[3.25rem] sm:rounded-full sm:px-5 sm:text-[15px] sm:leading-normal",
+        /* desktop */
+        "lg:min-h-[3.75rem] lg:px-6 lg:text-base lg:tracking-tight",
+        textAlignClass,
+        iconOnLeft
+          ? "ps-10 pe-3.5 sm:ps-12 sm:pe-5 lg:ps-[3.25rem] lg:pe-6"
+          : "pe-10 ps-3.5 sm:pe-12 sm:ps-5 lg:pe-[3.25rem] lg:ps-6",
+      ].join(" ");
+
   return (
     <>
-      <div
-        className={`relative mx-auto w-full ${isHomepage ? "max-w-xl px-1 sm:px-2" : "max-w-2xl"} ${className}`}
-      >
-        <span
-          className={`pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-slate-400 ${
-            iconOnLeft ? "left-3.5 sm:left-4" : "right-3.5 sm:right-4"
-          }`}
-          aria-hidden
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </span>
-        <input
-          ref={inputRef}
-          type="search"
-          readOnly
-          autoFocus={autoFocus}
-          className={`${inputClass} cursor-pointer ${iconOnLeft ? "ps-11 pe-4" : "pe-11 ps-4"}`}
-          placeholder={t("searchPlaceholder")}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onFocus={(e) => {
-            e.target.blur();
-            openSearch();
-          }}
-          onClick={openSearch}
-          onKeyDown={onKeyDown}
-          enterKeyHint="search"
-          autoComplete="off"
-          aria-label={t("searchAdvanced")}
-          dir={isRTL ? "rtl" : "ltr"}
-        />
+      <div className={`relative ${shellClass} ${className}`}>
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="search"
+            readOnly
+            autoFocus={autoFocus}
+            className={fieldClass}
+            placeholder={t("searchPlaceholder")}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onFocus={(e) => {
+              e.target.blur();
+              openSearch();
+            }}
+            onClick={openSearch}
+            onKeyDown={onKeyDown}
+            enterKeyHint="search"
+            autoComplete="off"
+            aria-label={t("searchAdvanced")}
+            dir={isRTL ? "rtl" : "ltr"}
+          />
+          <span
+            className={`pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-emerald-700/80 ${
+              iconOnLeft
+                ? "left-3.5 sm:left-4 lg:left-5"
+                : "right-3.5 sm:right-4 lg:right-5"
+            }`}
+            aria-hidden
+          >
+            <SearchIcon className="h-4.5 w-4.5 sm:h-[1.35rem] sm:w-[1.35rem] lg:h-6 lg:w-6" />
+          </span>
+        </div>
       </div>
 
       <ExploreSearchModal

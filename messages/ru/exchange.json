@@ -1,45 +1,45 @@
 {
   "meta": {
-    "title": "Курсы валют",
-    "description": "Актуальные цены доллара США, евро, дирхама и других основных валют"
+    "title": "",
+    "description": ""
   },
   "nav": {
-    "home": "Главная",
-    "current": "Курсы валют"
+    "home": "",
+    "current": ""
   },
   "header": {
-    "title": "Курсы валют",
-    "subtitle": "Актуальные рыночные курсы основных валют — источник:",
-    "defaultSource": "TGJU",
-    "calendarHint": "Нажмите, чтобы сменить календарь"
+    "title": "",
+    "subtitle": "",
+    "defaultSource": "",
+    "calendarHint": ""
   },
   "fetch": {
-    "label": "Получено:",
-    "refreshing": "Обновление…",
-    "refresh": "Обновить"
+    "label": "",
+    "refreshing": "",
+    "refresh": ""
   },
   "converter": {
-    "title": "Конвертер валют",
-    "subtitle": "Конвертация между показанными валютами по последним рыночным курсам",
-    "amountLabel": "Исходная сумма",
-    "resultLabel": "Результат",
-    "swapAriaLabel": "Поменять исходную и целевую валюты местами",
-    "swapTitle": "Поменять",
-    "rateLine": "<one>1 {fromCode}</one><approx>≈</approx><highlight>{rateValue} {toCode}</highlight>"
+    "title": "",
+    "subtitle": "",
+    "amountLabel": "",
+    "resultLabel": "",
+    "swapAriaLabel": "",
+    "swapTitle": "",
+    "rateLine": ""
   },
   "errors": {
-    "fetchFailed": "Не удалось получить курсы валют",
-    "serverError": "Не удалось подключиться к серверу"
+    "fetchFailed": "",
+    "serverError": ""
   },
   "rates": {
-    "title": "Актуальные курсы валют",
-    "cryptoSuffix": " · Криптовалюта",
-    "currencyUnit": "риал"
+    "title": "",
+    "cryptoSuffix": "",
+    "currencyUnit": ""
   },
   "change": {
-    "percent": "{arrow} {value}%"
+    "percent": ""
   },
-  "footer": "Курсы обновляются каждые 5 минут из официального источника. Конвертер использует эти курсы.",
+  "footer": "",
   "currencies": {
     "IRR": "Иранский риал"
   },

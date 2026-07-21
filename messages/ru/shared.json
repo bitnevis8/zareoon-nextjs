@@ -1,29 +1,31 @@
 {
   "roles": {
-    "super_admin": "Суперадминистратор",
-    "admin": "Администратор",
-    "employee": "Сотрудник",
-    "supplier": "Поставщик",
-    "farmer": "Поставщик",
-    "customer": "Обычный пользователь",
-    "loader": "Поставщик",
-    "driver": "Сотрудник",
-    "administrator": "Администратор"
+    "super_admin": "",
+    "admin": "",
+    "user": "",
+    "seller": "",
+    "service_provider": "",
+    "customer": "",
+    "supplier": "",
+    "farmer": "",
+    "loader": "",
+    "employee": "",
+    "administrator": ""
   },
   "accountNav": {
-    "individual": "Пользователь",
-    "company": "Компания",
-    "trader": "Поставщик",
-    "manufacturer": "Поставщик",
-    "distributor": "Компания",
-    "admin": "Администратор",
-    "user": "Пользователь"
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": "",
+    "admin": "",
+    "user": ""
   },
   "currencies": {
     "TOMAN": {
-      "label": "туманов",
-      "shortLabel": "туманов",
-      "wordLabel": "туманов"
+      "label": "Иранский томан",
+      "shortLabel": "Томан",
+      "wordLabel": "Иранский томан"
     },
     "USD": {
       "label": "Доллар США",
@@ -41,9 +43,9 @@
       "wordLabel": "Евро"
     },
     "GBP": {
-      "label": "Британский фунт",
+      "label": "Фунт стерлингов",
       "shortLabel": "Фунт",
-      "wordLabel": "Британский фунт"
+      "wordLabel": "Фунт стерлингов"
     },
     "TRY": {
       "label": "Турецкая лира",
@@ -51,9 +53,9 @@
       "wordLabel": "Турецкая лира"
     },
     "SAR": {
-      "label": "Саудовский риял",
-      "shortLabel": "Саудовский риял",
-      "wordLabel": "Саудовский риял"
+      "label": "Саудовский риал",
+      "shortLabel": "Сауд. риал",
+      "wordLabel": "Саудовский риал"
     },
     "CNY": {
       "label": "Китайский юань",
@@ -91,178 +93,186 @@
       "wordLabel": "Tether"
     },
     "BTC": {
-      "label": "Bitcoin",
+      "label": "Биткоин",
       "shortLabel": "BTC",
-      "wordLabel": "Bitcoin"
+      "wordLabel": "Биткоин"
     },
     "ETH": {
-      "label": "Ethereum",
+      "label": "Эфириум",
       "shortLabel": "ETH",
-      "wordLabel": "Ethereum"
+      "wordLabel": "Эфириум"
     }
   },
   "priceCurrencySelect": {
     "ariaLabel": "Валюта"
   },
   "stock": {
-    "empty": "Нет в наличии",
-    "emptyRange": "0 килограммов",
-    "low": "Низкий запас",
-    "lowRange": "Менее 5 тонн",
-    "medium": "Средний запас",
-    "mediumRange": "От 5 до 20 тонн",
-    "high": "Высокий запас",
-    "highRange": "Более 20 тонн",
-    "legendTitle": "Цвета карточек зависят от количества запасов (в килограммах):",
-    "legendAriaLabel": "Легенда цветов запасов"
+    "empty": "",
+    "emptyRange": "",
+    "low": "",
+    "lowRange": "",
+    "medium": "",
+    "mediumRange": "",
+    "high": "",
+    "highRange": "",
+    "legendTitle": "",
+    "legendAriaLabel": ""
   },
   "supplyCountries": {
-    "IR": "Иран",
-    "AE": "Объединённые Арабские Эмираты",
-    "SA": "Саудовская Аравия",
-    "IQ": "Ирак",
-    "TR": "Турция",
-    "OM": "Оман",
-    "QA": "Диаметр",
-    "KW": "Кувейт",
-    "PK": "Пакистан",
-    "AF": "Афганистан",
-    "US": "Соединённые Штаты",
-    "RU": "Россия"
+    "IR": "",
+    "AE": "",
+    "SA": "",
+    "IQ": "",
+    "TR": "",
+    "OM": "",
+    "QA": "",
+    "KW": "",
+    "PK": "",
+    "AF": "",
+    "US": "",
+    "RU": ""
   },
   "supplySource": {
-    "withCity": "{country}, {city}"
+    "withCity": ""
   },
   "entityTypes": {
-    "individual": "Физическое лицо",
-    "company": "Компания (юридическое лицо)",
-    "trader": "Независимый трейдер",
-    "manufacturer": "Производитель / мастерская",
-    "distributor": "Дистрибьютор"
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Arya Foulad Gharn"
+    "inspectionStandardsCompany": "Инженерная инспекция Арья Фулад Гарн"
   },
   "attributeFields": {
-    "yes": "Да",
-    "no": "Нет"
+    "yes": "",
+    "no": ""
   },
   "documentUpload": {
-    "invalidFormat": "Формат файла {name} не разрешён",
-    "fileTooLarge": "Размер файла {name} не должен превышать 5 МБ",
-    "uploadSuccess": "Документ {name} успешно загружен",
-    "uploadError": "Ошибка загрузки документа",
-    "deleteSuccess": "Документ успешно удалён",
-    "deleteError": "Ошибка удаления документа",
-    "uploading": "Загрузка...",
-    "selectDocuments": "Выбрать документы",
-    "hint": "PDF, Word, изображения — максимум 5 МБ",
-    "uploadedTitle": "Загруженные документы:",
-    "view": "Просмотреть",
-    "delete": "Удалить"
+    "invalidFormat": "",
+    "fileTooLarge": "",
+    "uploadSuccess": "",
+    "uploadError": "",
+    "deleteSuccess": "",
+    "deleteError": "",
+    "uploading": "",
+    "selectDocuments": "",
+    "hint": "",
+    "uploadedTitle": "",
+    "view": "",
+    "delete": ""
   },
   "mediaUpload": {
-    "defaultButtonLabel": "Загрузить медиафайлы",
-    "loadError": "Ошибка загрузки файлов",
-    "uploadError": "Не удалось загрузить файл",
-    "deleteConfirm": "Удалить файл?",
-    "deleteError": "Ошибка удаления",
-    "deleteFileError": "Ошибка удаления файла",
-    "saveProductFirst": "Сначала сохраните товар, затем загрузите медиафайлы.",
-    "uploading": "Загрузка...",
-    "noFilesYet": "Файлы ещё не загружены",
-    "delete": "Удалить"
+    "defaultButtonLabel": "",
+    "loadError": "",
+    "uploadError": "",
+    "deleteConfirm": "",
+    "deleteError": "",
+    "deleteFileError": "",
+    "saveProductFirst": "",
+    "uploading": "",
+    "noFilesYet": "",
+    "delete": ""
   },
   "shareButton": {
-    "title": "Поделиться",
-    "telegram": "Telegram",
-    "whatsapp": "WhatsApp",
-    "eitaa": "Eitaa",
-    "rubika": "Rubika",
-    "twitter": "Twitter",
-    "copyLink": "Копировать ссылку",
-    "linkCopied": "Ссылка скопирована!"
+    "title": "",
+    "telegram": "",
+    "whatsapp": "",
+    "eitaa": "",
+    "rubika": "",
+    "twitter": "",
+    "copyLink": "",
+    "linkCopied": ""
   },
   "tieredPricing": {
-    "levelsCount": "Диапазонов: {count}",
-    "title": "Ступенчатые цены",
-    "level": "Диапазон {index}",
-    "from": "От:",
-    "to": "До:",
-    "unlimited": "Без ограничений",
-    "hint": "💡 Цена рассчитывается на основе количества заказа"
+    "levelsCount": "",
+    "title": "",
+    "level": "",
+    "from": "",
+    "to": "",
+    "unlimited": "",
+    "hint": ""
   },
   "inventoryPricing": {
-    "calcError": "Ошибка расчёта цены",
-    "serverError": "Не удалось подключиться к серверу",
-    "inventoryInfo": "Информация о запасах",
-    "grade": "Сорт: {grade}",
-    "totalStock": "Общий запас:",
-    "availableStock": "Доступно для продажи:",
-    "minOrder": "Минимальный заказ: {quantity} {unit}",
-    "orderQuantity": "Количество заказа ({unit})",
-    "quantityPlaceholder": "Введите желаемое количество",
-    "calculating": "Расчёт...",
-    "calculatePrice": "Рассчитать цену",
-    "quantityExceedsStock": "Запрошенное количество превышает доступный запас",
-    "calculatedPrice": "Рассчитанная цена:",
-    "pricePerUnit": "Цена за {unit}: {price} туманов",
-    "quantity": "Количество: {quantity} {unit}",
-    "priceTier": "Ценовой диапазон: {description}",
-    "pricingType": "Тип цены: {type}",
-    "pricingTypeTiered": "Ступенчатая",
-    "pricingTypeSimple": "Простая",
-    "tierTableTitle": "Таблица ступенчатых цен",
-    "quantityRange": "Диапазон количества",
-    "pricePerUnitHeader": "Цена за {unit}",
-    "description": "Описание"
+    "calcError": "",
+    "serverError": "",
+    "inventoryInfo": "",
+    "grade": "",
+    "totalStock": "",
+    "availableStock": "",
+    "minOrder": "",
+    "orderQuantity": "",
+    "quantityPlaceholder": "",
+    "calculating": "",
+    "calculatePrice": "",
+    "quantityExceedsStock": "",
+    "calculatedPrice": "",
+    "pricePerUnit": "",
+    "quantity": "",
+    "priceTier": "",
+    "pricingType": "",
+    "pricingTypeTiered": "",
+    "pricingTypeSimple": "",
+    "tierTableTitle": "",
+    "quantityRange": "",
+    "pricePerUnitHeader": "",
+    "description": ""
   },
   "hashtagInput": {
-    "defaultLabel": "Хэштеги",
-    "minLength": "Каждый хэштег должен содержать не менее 2 символов",
-    "maxCount": "Разрешено не более {max} хэштегов",
-    "removeAria": "Удалить {tag}",
-    "placeholder": "например, финики"
+    "defaultLabel": "",
+    "minLength": "",
+    "maxCount": "",
+    "removeAria": "",
+    "placeholder": ""
   },
   "lotLocationPicker": {
-    "fullscreenTitle": "Полноэкранный режим",
-    "fullscreenAria": "Полноэкранный режим",
-    "closeFullscreenAria": "Закрыть полноэкранную карту",
-    "close": "Закрыть",
-    "delete": "Удалить",
-    "hintCompact": "Используйте полноэкранную карту для более точного выбора",
-    "hintExpanded": "Нажмите на карту или выполните поиск",
-    "locationLabel": "Метка местоположения",
-    "locationPlaceholder": "например, склад, ферма, место погрузки",
-    "defaultMarkerName": "Местоположение",
-    "modalTitle": "Выберите местоположение на карте",
-    "modalHint": "Нажмите или выполните поиск — Esc для закрытия",
-    "confirmLocation": "Подтвердить местоположение"
+    "fullscreenTitle": "",
+    "fullscreenAria": "",
+    "closeFullscreenAria": "",
+    "close": "",
+    "delete": "",
+    "hintCompact": "",
+    "hintExpanded": "",
+    "locationLabel": "",
+    "locationPlaceholder": "",
+    "defaultMarkerName": "",
+    "modalTitle": "",
+    "modalHint": "",
+    "confirmLocation": ""
   },
   "map": {
-    "zoomIn": "Увеличить",
-    "zoomOut": "Уменьшить",
-    "positionDefault": "Местоположение {index}",
-    "selectedPosition": "Выбранное местоположение"
+    "zoomIn": "",
+    "zoomOut": "",
+    "positionDefault": "",
+    "selectedPosition": ""
   },
   "searchBox": {
-    "placeholderOverlay": "Поиск местоположений…",
-    "placeholderDefault": "Поиск местоположений..."
+    "placeholderOverlay": "",
+    "placeholderDefault": ""
   },
   "currencyTicker": {
     "zeroPercent": "0%",
-    "rial": "риал",
+    "rial": "IRR",
     "ratesAria": "Курсы валют и конвертер",
-    "ratesLabel": "Курсы валют",
+    "ratesLabel": "Курсы",
     "calendarGregorian": "Григорианский",
-    "calendarHijri": "Лунная хиджра",
+    "calendarHijri": "Хиджра",
     "calendarShamsi": "Солнечная хиджра",
     "calendarClickHint": "{full} — нажмите: {next}",
-    "calendarAria": "Календарь: {label}",
+    "calendarAria": "Календарь {label}",
     "regionAria": "Курсы валют на сегодня",
     "loadingRates": "Загрузка курсов…",
-    "ratesUnavailable": "Курсы валют недоступны",
-    "viewRates": "Посмотреть курсы валют",
-    "viewRatesDetails": "Подробнее о курсе валют"
+    "ratesUnavailable": "Курсы недоступны",
+    "viewRates": "Смотреть курсы",
+    "viewRatesDetails": "Подробности курсов валют",
+    "title": "Курсы валют",
+    "updatedAt": "Обновлено",
+    "buy": "Покупка",
+    "sell": "Продажа",
+    "mid": "Средний",
+    "loading": "Загрузка курсов…",
+    "error": "Не удалось загрузить курсы",
+    "retry": "Повторить"
   }
 }

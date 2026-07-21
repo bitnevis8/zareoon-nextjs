@@ -15,7 +15,7 @@ export default function MainCategoryGrid({
   className = "",
   id,
 }) {
-  const { language, t } = useLanguage();
+  const { language, t, isRTL } = useLanguage();
 
   const categories = useMemo(() => {
     const raw = categoriesProp?.length ? categoriesProp : STATIC_ROOT_CATEGORIES;
@@ -25,8 +25,8 @@ export default function MainCategoryGrid({
   if (!categories.length) return null;
 
   return (
-    <section id={id} className={className}>
-      <h2 className="mb-3 px-1 text-center text-base font-bold text-slate-800 sm:mb-4 sm:text-lg">
+    <section id={id} className={className} dir={isRTL ? "rtl" : "ltr"}>
+      <h2 className="mb-3 px-1 text-start text-base font-bold text-slate-800 sm:mb-4 sm:text-lg">
         {t("productCategories")}
       </h2>
       <div className="grid grid-cols-2 gap-2.5 min-[380px]:grid-cols-3 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6">

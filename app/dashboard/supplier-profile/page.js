@@ -5,174 +5,194 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import { authFetch } from "@/app/utils/authHeaders";
-import { shouldShowSellerPanel } from "@/app/utils/roles";
-import { getEntityTypeOptions } from "@/app/data/entityTypes";
+import { isSeller } from "@/app/utils/roles";
 import { useAuth } from "@/app/context/AuthContext";
 import { providerPublicPath } from "@/app/utils/providerPublicPath";
+import PublicPageSlugField from "@/app/components/ui/PublicPageSlugField";
+import BusinessHoursEditor from "@/app/components/ui/BusinessHoursEditor";
+import LocationPickerMap from "@/app/components/ui/LocationPickerMap";
+import ShopContactFields from "@/app/components/ui/ShopContactFields";
+import { DEFAULT_BUSINESS_HOURS, mergeBusinessHours } from "@/app/utils/businessHours";
+import { normalizeShopContacts, serializeShopContacts } from "@/app/utils/shopContacts";
+import { API_ENDPOINTS } from "@/app/config/api";
+import { dash } from "@/app/components/dashboard/dashboardTheme";
+import { showToast } from "@/app/utils/toast";
 
-const WEEK_DAY_KEYS = [
-  "saturday",
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-];
-
-const DEFAULT_HOURS = {
-  saturday: { closed: false, open: "08:00", close: "18:00" },
-  sunday: { closed: false, open: "08:00", close: "18:00" },
-  monday: { closed: false, open: "08:00", close: "18:00" },
-  tuesday: { closed: false, open: "08:00", close: "18:00" },
-  wednesday: { closed: false, open: "08:00", close: "18:00" },
-  thursday: { closed: false, open: "08:00", close: "18:00" },
-  friday: { closed: true, open: "", close: "" },
-};
-
-function DynamicFields({ schema, values, onChange, title }) {
-  if (!schema?.length) return null;
+function IconLink({ className = "h-5 w-5" }) {
   return (
-    <div className="space-y-3 rounded-xl border border-emerald-100 bg-emerald-50/40 p-4">
-      <h3 className="text-sm font-bold text-emerald-900">{title}</h3>
-      {schema.map((field) => (
-        <label key={field.key} className="block text-xs font-semibold text-slate-600">
-          {field.label}
-          {field.type === "textarea" ? (
-            <textarea
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              rows={3}
-              placeholder={field.placeholder}
-              value={values[field.key] || ""}
-              onChange={(e) => onChange(field.key, e.target.value)}
-            />
-          ) : (
-            <input
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              placeholder={field.placeholder}
-              value={values[field.key] || ""}
-              onChange={(e) => onChange(field.key, e.target.value)}
-            />
-          )}
-        </label>
-      ))}
-    </div>
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.122a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L4.5 8.25"
+      />
+    </svg>
+  );
+}
+
+function IconMap({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+      />
+    </svg>
+  );
+}
+
+function IconClock({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function IconContact({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+      />
+    </svg>
+  );
+}
+
+function SectionCard({ icon, title, subtitle, children, className = "" }) {
+  return (
+    <section className={`${dash.card} overflow-hidden ${className}`}>
+      <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-3.5 sm:px-5">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-slate-900 sm:text-base">{title}</h2>
+          {subtitle ? <p className="mt-0.5 text-xs leading-5 text-slate-500">{subtitle}</p> : null}
+        </div>
+      </div>
+      <div className="space-y-4 p-4 sm:p-5">{children}</div>
+    </section>
   );
 }
 
 function SupplierAccountEditor() {
   const t = useTranslations("product");
-  const tShared = useTranslations("shared");
-  const entityTypeOptions = getEntityTypeOptions(tShared);
   const auth = useAuth();
-  const [entityTypes, setEntityTypes] = useState([]);
-  const [fieldSchema, setFieldSchema] = useState([]);
+  const [canHidePublicPage, setCanHidePublicPage] = useState(false);
   const [form, setForm] = useState({
-    entityType: "individual",
     profileSlug: "",
     headline: "",
     bio: "",
-    country: "",
-    publicPhone: "",
+    shopContacts: normalizeShopContacts(null),
     isProfilePublic: true,
-    businessHours: DEFAULT_HOURS,
-    profileFields: {},
+    shopStatus: "ACTIVE",
+    businessHours: DEFAULT_BUSINESS_HOURS,
+    latitude: null,
+    longitude: null,
+    addressLabel: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    authFetch("/api/tamin/me")
+    authFetch(API_ENDPOINTS.tamin.me)
       .then((r) => r.json())
       .then((j) => {
         if (j.success && j.data) {
           const d = j.data;
-          setEntityTypes(d.entityTypes || []);
-          setFieldSchema(d.fieldSchema || []);
+          setCanHidePublicPage(!!d.canHidePublicPage);
           setForm({
-            entityType: d.entityType || "individual",
             profileSlug: d.profileSlug || "",
             headline: d.headline || "",
             bio: d.bio || "",
-            country: d.country || "",
-            publicPhone: d.publicPhone || "",
+            shopContacts: normalizeShopContacts(d.shopContacts, {
+              publicPhone: d.publicPhone,
+              publicLandline: d.publicLandline,
+              publicEmail: d.publicEmail,
+            }),
             isProfilePublic: d.isPublic !== false,
-            businessHours: { ...DEFAULT_HOURS, ...d.businessHours },
-            profileFields: d.profileFields || {},
+            shopStatus: d.shopStatus || "ACTIVE",
+            businessHours: mergeBusinessHours(d.businessHours),
+            latitude: d.latitude ?? null,
+            longitude: d.longitude ?? null,
+            addressLabel: d.addressLabel || "",
           });
         }
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const onEntityTypeChange = (entityType) => {
-    setForm((f) => ({ ...f, entityType, profileFields: {} }));
-    fetch(`/api/tamin/entity-schemas`)
-      .then((r) => r.json())
-      .then((j) => {
-        if (j.success) setFieldSchema(j.data.schemas[entityType] || []);
-      })
-      .catch(() => {});
-  };
-
-  const setProfileField = (key, value) => {
-    setForm((f) => ({
-      ...f,
-      profileFields: { ...f.profileFields, [key]: value },
-    }));
-  };
-
-  const setHour = (day, field, value) => {
-    setForm((f) => ({
-      ...f,
-      businessHours: {
-        ...f.businessHours,
-        [day]: { ...f.businessHours[day], [field]: value },
-      },
-    }));
-  };
-
   const save = async () => {
     setSaving(true);
     setMsg("");
-    const res = await authFetch("/api/tamin/me", {
+    const payload = {
+      profileSlug: form.profileSlug,
+      headline: form.headline,
+      bio: form.bio,
+      shopContacts: serializeShopContacts(form.shopContacts),
+      businessHours: form.businessHours,
+      latitude: form.latitude,
+      longitude: form.longitude,
+      addressLabel: form.addressLabel,
+    };
+    if (canHidePublicPage) payload.isProfilePublic = form.isProfilePublic;
+
+    const res = await authFetch(API_ENDPOINTS.tamin.me, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        entityType: form.entityType,
-        profileSlug: form.profileSlug,
-        headline: form.headline,
-        bio: form.bio,
-        country: form.country,
-        publicPhone: form.publicPhone,
-        businessHours: form.businessHours,
-        isProfilePublic: form.isProfilePublic,
-        profileFields: form.profileFields,
-      }),
+      body: JSON.stringify(payload),
     });
     const j = await res.json();
     if (j.success) {
-      setFieldSchema(j.data.fieldSchema || []);
       setForm((f) => ({
         ...f,
         profileSlug: j.data.profileSlug || f.profileSlug,
-        profileFields: j.data.profileFields || f.profileFields,
+        latitude: j.data.latitude ?? f.latitude,
+        longitude: j.data.longitude ?? f.longitude,
+        addressLabel: j.data.addressLabel || f.addressLabel,
+        shopContacts: normalizeShopContacts(j.data.shopContacts, {
+          publicPhone: j.data.publicPhone,
+          publicLandline: j.data.publicLandline,
+          publicEmail: j.data.publicEmail,
+        }),
       }));
+      if (auth?.updateUser && j.data?.profileSlug) {
+        auth.updateUser({
+          ...auth.user,
+          profileSlug: j.data.profileSlug,
+          accountNav: {
+            ...(auth.user?.accountNav || {}),
+            profileSlug: j.data.profileSlug,
+          },
+        });
+      }
+      showToast.success(j.message || t("supplierProfile.saveSuccess"));
+    } else {
+      showToast.error(j.message || "خطا در ذخیره");
     }
-    setMsg(j.success ? t("supplierProfile.saveSuccess") : j.message || "");
+    setMsg(j.success ? (j.message || t("supplierProfile.saveSuccess")) : j.message || "");
+    if (j.slugChange) {
+      setMsg(j.message || "درخواست تغییر آدرس ثبت شد");
+    }
     setSaving(false);
   };
 
-  if (!shouldShowSellerPanel(auth?.user)) {
+  if (!isSeller(auth?.user)) {
     return (
       <div className="mx-auto max-w-md px-4 py-12 text-center">
         <p className="text-slate-700">{t("supplierProfile.suppliersOnly")}</p>
-        <Link
-          href="/dashboard/seller/join"
-          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-800"
-        >
-          {t("supplierProfile.joinSellersCta")}
+        <Link href="/dashboard/seller/join" className={`${dash.btnPrimary} mt-4 min-h-11`}>
+          ایجاد فروشگاه
         </Link>
       </div>
     );
@@ -189,149 +209,194 @@ function SupplierAccountEditor() {
   const publicUrl = form.profileSlug ? providerPublicPath(form.profileSlug) : null;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-xl font-bold text-slate-900">{t("supplierProfile.title")}</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        {t("supplierProfile.subtitle")}
-      </p>
-      <p className="mt-1 text-xs text-slate-400">{t("supplierProfile.urlHint")}</p>
+    <div className="mx-auto max-w-5xl px-3 pb-28 pt-5 sm:px-5 sm:pt-8 lg:px-6">
+      {/* Sticky mobile save bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 backdrop-blur md:hidden">
+        <button type="button" onClick={save} disabled={saving} className={`${dash.btnPrimary} min-h-11 w-full`}>
+          {saving ? "در حال ذخیره…" : "ذخیره تنظیمات"}
+        </button>
+      </div>
 
-      {publicUrl ? (
-        <Link href={publicUrl} className="mt-3 inline-block text-sm font-semibold text-emerald-700 hover:underline">
-          {t("supplierProfile.viewPublicPage")}
-        </Link>
-      ) : null}
-
-      <div className="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <label className="block text-xs font-semibold text-slate-600">
-          {t("supplierProfile.entityTypeLabel")}
-          <select
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            value={form.entityType}
-            onChange={(e) => onEntityTypeChange(e.target.value)}
-          >
-            {(entityTypes.length ? entityTypes : entityTypeOptions).map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block text-xs font-semibold text-slate-600">
-          {t("supplierProfile.profileSlugLabel")}
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            value={form.profileSlug}
-            onChange={(e) => setForm({ ...form, profileSlug: e.target.value })}
-          />
-        </label>
-
-        <label className="block text-xs font-semibold text-slate-600">
-          {t("supplierProfile.countryLabel")}
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            value={form.country}
-            onChange={(e) => setForm({ ...form, country: e.target.value })}
-          />
-        </label>
-
-        <label className="block text-xs font-semibold text-slate-600">
-          {t("supplierProfile.headlineLabel")}
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            value={form.headline}
-            onChange={(e) => setForm({ ...form, headline: e.target.value })}
-          />
-        </label>
-
-        <label className="block text-xs font-semibold text-slate-600">
-          {t("supplierProfile.bioLabel")}
-          <textarea
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            rows={4}
-            value={form.bio}
-            onChange={(e) => setForm({ ...form, bio: e.target.value })}
-          />
-        </label>
-
-        <label className="block text-xs font-semibold text-slate-600">
-          {t("supplierProfile.publicPhoneLabel")}
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            dir="ltr"
-            value={form.publicPhone}
-            onChange={(e) => setForm({ ...form, publicPhone: e.target.value })}
-          />
-        </label>
-
-        <DynamicFields
-          schema={fieldSchema}
-          values={form.profileFields}
-          onChange={setProfileField}
-          title={t("supplierProfile.dynamicFieldsTitle")}
-        />
-
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.isProfilePublic}
-            onChange={(e) => setForm({ ...form, isProfilePublic: e.target.checked })}
-          />
-          {t("supplierProfile.publicPageEnabled")}
-        </label>
-
+      <header className="mb-5 flex flex-col gap-3 sm:mb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="mb-2 text-sm font-bold text-slate-800">{t("supplierProfile.businessHoursTitle")}</h2>
-          <div className="space-y-2">
-            {WEEK_DAY_KEYS.map((key) => (
-              <div key={key} className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 p-2 text-sm">
-                <span className="w-16 font-medium">{t(`supplierProfile.weekDays.${key}`)}</span>
-                <label className="flex items-center gap-1 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={!!form.businessHours[key]?.closed}
-                    onChange={(e) => setHour(key, "closed", e.target.checked)}
-                  />
-                  {t("supplierProfile.closed")}
-                </label>
-                {!form.businessHours[key]?.closed ? (
-                  <>
-                    <input
-                      type="time"
-                      className="rounded border px-1"
-                      value={form.businessHours[key]?.open || ""}
-                      onChange={(e) => setHour(key, "open", e.target.value)}
-                    />
-                    <span>{t("supplierProfile.until")}</span>
-                    <input
-                      type="time"
-                      className="rounded border px-1"
-                      value={form.businessHours[key]?.close || ""}
-                      onChange={(e) => setHour(key, "close", e.target.value)}
-                    />
-                  </>
-                ) : null}
-              </div>
-            ))}
-          </div>
+          <p className="text-xs font-medium text-emerald-700">فروشگاه من</p>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">تنظیمات فروشگاه من</h1>
+          <p className="mt-1 max-w-xl text-sm leading-6 text-slate-500">
+            آدرس صفحه، راه‌های ارتباطی، موقعیت و ساعات کاری را اینجا مدیریت کنید.
+          </p>
+          {publicUrl ? (
+            <Link
+              href={publicUrl}
+              className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline"
+              dir="ltr"
+            >
+              <IconLink className="h-4 w-4" />
+              zareoon.ir/{form.profileSlug}
+            </Link>
+          ) : null}
         </div>
-
         <button
           type="button"
           onClick={save}
           disabled={saving}
-          className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+          className={`${dash.btnPrimary} hidden min-h-11 min-w-[140px] md:inline-flex`}
         >
-          {saving ? t("supplierProfile.saving") : t("supplierProfile.saveProfile")}
+          {saving ? "در حال ذخیره…" : "ذخیره تنظیمات"}
         </button>
-        {msg ? <p className="text-center text-sm text-emerald-700">{msg}</p> : null}
+      </header>
+
+      <div className="grid gap-4 lg:grid-cols-12 lg:gap-5">
+        <div className="space-y-4 lg:col-span-7">
+          <SectionCard
+            icon={<IconLink />}
+            title="آدرس و معرفی"
+            subtitle="آدرس اختصاصی صفحه و متن معرفی فروشگاه"
+          >
+            <PublicPageSlugField
+              value={form.profileSlug}
+              onChange={(v) => setForm({ ...form, profileSlug: v })}
+              checkUrl={API_ENDPOINTS.tamin.slugAvailable}
+              context="shop-edit"
+              previewPrefix="zareoon.ir/"
+            />
+            <label className="block text-sm font-medium text-slate-700">
+              معرفی کوتاه
+              <input
+                className={`${dash.input} mt-1.5`}
+                value={form.headline}
+                onChange={(e) => setForm({ ...form, headline: e.target.value })}
+                maxLength={200}
+                placeholder="یک جمله درباره فروشگاه"
+              />
+            </label>
+            <label className="block text-sm font-medium text-slate-700">
+              درباره فروشگاه
+              <textarea
+                className={`${dash.input} mt-1.5`}
+                rows={4}
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                placeholder="توضیح کوتاه برای بازدیدکنندگان"
+              />
+            </label>
+            {canHidePublicPage ? (
+              <label className="flex items-start gap-2.5 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={form.isProfilePublic}
+                  onChange={(e) => setForm({ ...form, isProfilePublic: e.target.checked })}
+                />
+                <span className="font-semibold text-slate-800">صفحه عمومی فعال باشد</span>
+              </label>
+            ) : (
+              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">صفحه شما همیشه عمومی است.</p>
+            )}
+          </SectionCard>
+
+          <SectionCard
+            icon={<IconContact />}
+            title="راه‌های ارتباطی"
+            subtitle="تا ۳ شماره تلفن، چند ایمیل و پیام‌رسان‌های فعال"
+          >
+            <ShopContactFields
+              value={form.shopContacts}
+              onChange={(shopContacts) => setForm((f) => ({ ...f, shopContacts }))}
+              inputClassName={dash.input}
+            />
+          </SectionCard>
+        </div>
+
+        <div className="space-y-4 lg:col-span-5">
+          <SectionCard icon={<IconMap />} title="موقعیت روی نقشه" subtitle="جستجو یا کلیک روی نقشه">
+            <LocationPickerMap
+              latitude={form.latitude}
+              longitude={form.longitude}
+              addressLabel={form.addressLabel}
+              onChange={(loc) =>
+                setForm((f) => ({
+                  ...f,
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                  addressLabel: loc.addressLabel,
+                }))
+              }
+              optional
+            />
+          </SectionCard>
+
+          <SectionCard icon={<IconClock />} title="ساعات کاری" subtitle="اختیاری — برای نمایش در صفحه عمومی">
+            <BusinessHoursEditor
+              value={form.businessHours}
+              onChange={(businessHours) => setForm((f) => ({ ...f, businessHours }))}
+            />
+          </SectionCard>
+
+          <SectionCard
+            icon={
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                />
+              </svg>
+            }
+            title="بستن فروشگاه"
+            subtitle="صفحه بلافاصله حذف نمی‌شود"
+            className="border-rose-100"
+          >
+            <p className="text-xs leading-6 text-slate-500">
+              با درخواست بستن، فروشگاه مدتی با پیام مناسب نمایش داده می‌شود و سفارش جدید قبول نمی‌کند.
+            </p>
+            {form.shopStatus === "PENDING_DELETION" ? (
+              <button
+                type="button"
+                className={dash.btnPrimary}
+                onClick={async () => {
+                  const res = await authFetch(API_ENDPOINTS.tamin.cancelDeletion, { method: "POST" });
+                  const j = await res.json();
+                  setMsg(j.message || "");
+                  if (j.success) {
+                    setForm((f) => ({ ...f, shopStatus: "ACTIVE" }));
+                    showToast.success(j.message || "فروشگاه دوباره فعال شد");
+                  }
+                }}
+              >
+                لغو بستن و فعال‌سازی دوباره
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`${dash.btnSecondary} text-rose-700`}
+                onClick={async () => {
+                  if (!window.confirm("درخواست بستن فروشگاه ثبت شود؟")) return;
+                  const res = await authFetch(API_ENDPOINTS.tamin.requestDeletion, { method: "POST" });
+                  const j = await res.json();
+                  setMsg(j.message || "");
+                  if (j.success) {
+                    setForm((f) => ({ ...f, shopStatus: "PENDING_DELETION" }));
+                    showToast.warning(j.message || "درخواست بستن ثبت شد");
+                  }
+                }}
+              >
+                درخواست بستن فروشگاه
+              </button>
+            )}
+          </SectionCard>
+        </div>
       </div>
+
+      {msg ? (
+        <p className={`mt-4 text-sm font-medium ${msg.includes("خطا") ? "text-red-600" : "text-emerald-700"}`}>
+          {msg}
+        </p>
+      ) : null}
     </div>
   );
 }
 
-export default function SupplierProfileDashboardPage() {
+export default function SupplierProfilePage() {
   return (
     <ProtectedRoute>
       <SupplierAccountEditor />

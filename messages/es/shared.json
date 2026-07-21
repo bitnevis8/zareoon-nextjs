@@ -1,0 +1,278 @@
+{
+  "roles": {
+    "super_admin": "",
+    "admin": "",
+    "user": "",
+    "seller": "",
+    "service_provider": "",
+    "customer": "",
+    "supplier": "",
+    "farmer": "",
+    "loader": "",
+    "employee": "",
+    "administrator": ""
+  },
+  "accountNav": {
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": "",
+    "admin": "",
+    "user": ""
+  },
+  "currencies": {
+    "TOMAN": {
+      "label": "Tomán iraní",
+      "shortLabel": "Tomán",
+      "wordLabel": "Tomán iraní"
+    },
+    "USD": {
+      "label": "Dólar estadounidense",
+      "shortLabel": "Dólar",
+      "wordLabel": "Dólar estadounidense"
+    },
+    "AED": {
+      "label": "Dírham de EAU",
+      "shortLabel": "Dírham",
+      "wordLabel": "Dírham de EAU"
+    },
+    "EUR": {
+      "label": "Euro",
+      "shortLabel": "Euro",
+      "wordLabel": "Euro"
+    },
+    "GBP": {
+      "label": "Libra esterlina",
+      "shortLabel": "Libra",
+      "wordLabel": "Libra esterlina"
+    },
+    "TRY": {
+      "label": "Lira turca",
+      "shortLabel": "Lira",
+      "wordLabel": "Lira turca"
+    },
+    "SAR": {
+      "label": "Riyal saudí",
+      "shortLabel": "Riyal saudí",
+      "wordLabel": "Riyal saudí"
+    },
+    "CNY": {
+      "label": "Yuan chino",
+      "shortLabel": "Yuan",
+      "wordLabel": "Yuan chino"
+    },
+    "RUB": {
+      "label": "Rublo ruso",
+      "shortLabel": "Rublo",
+      "wordLabel": "Rublo ruso"
+    },
+    "CAD": {
+      "label": "Dólar canadiense",
+      "shortLabel": "Dólar canadiense",
+      "wordLabel": "Dólar canadiense"
+    },
+    "CHF": {
+      "label": "Franco suizo",
+      "shortLabel": "Franco",
+      "wordLabel": "Franco suizo"
+    },
+    "JPY": {
+      "label": "Yen japonés",
+      "shortLabel": "Yen",
+      "wordLabel": "Yen japonés"
+    },
+    "AUD": {
+      "label": "Dólar australiano",
+      "shortLabel": "Dólar australiano",
+      "wordLabel": "Dólar australiano"
+    },
+    "USDT": {
+      "label": "Tether (USDT)",
+      "shortLabel": "USDT",
+      "wordLabel": "Tether"
+    },
+    "BTC": {
+      "label": "Bitcoin",
+      "shortLabel": "BTC",
+      "wordLabel": "Bitcoin"
+    },
+    "ETH": {
+      "label": "Ethereum",
+      "shortLabel": "ETH",
+      "wordLabel": "Ethereum"
+    }
+  },
+  "priceCurrencySelect": {
+    "ariaLabel": "Moneda"
+  },
+  "stock": {
+    "empty": "",
+    "emptyRange": "",
+    "low": "",
+    "lowRange": "",
+    "medium": "",
+    "mediumRange": "",
+    "high": "",
+    "highRange": "",
+    "legendTitle": "",
+    "legendAriaLabel": ""
+  },
+  "supplyCountries": {
+    "IR": "",
+    "AE": "",
+    "SA": "",
+    "IQ": "",
+    "TR": "",
+    "OM": "",
+    "QA": "",
+    "KW": "",
+    "PK": "",
+    "AF": "",
+    "US": "",
+    "RU": ""
+  },
+  "supplySource": {
+    "withCity": ""
+  },
+  "entityTypes": {
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": ""
+  },
+  "vip": {
+    "inspectionStandardsCompany": "Inspección de ingeniería Arya Foulad Gharn"
+  },
+  "attributeFields": {
+    "yes": "",
+    "no": ""
+  },
+  "documentUpload": {
+    "invalidFormat": "",
+    "fileTooLarge": "",
+    "uploadSuccess": "",
+    "uploadError": "",
+    "deleteSuccess": "",
+    "deleteError": "",
+    "uploading": "",
+    "selectDocuments": "",
+    "hint": "",
+    "uploadedTitle": "",
+    "view": "",
+    "delete": ""
+  },
+  "mediaUpload": {
+    "defaultButtonLabel": "",
+    "loadError": "",
+    "uploadError": "",
+    "deleteConfirm": "",
+    "deleteError": "",
+    "deleteFileError": "",
+    "saveProductFirst": "",
+    "uploading": "",
+    "noFilesYet": "",
+    "delete": ""
+  },
+  "shareButton": {
+    "title": "",
+    "telegram": "",
+    "whatsapp": "",
+    "eitaa": "",
+    "rubika": "",
+    "twitter": "",
+    "copyLink": "",
+    "linkCopied": ""
+  },
+  "tieredPricing": {
+    "levelsCount": "",
+    "title": "",
+    "level": "",
+    "from": "",
+    "to": "",
+    "unlimited": "",
+    "hint": ""
+  },
+  "inventoryPricing": {
+    "calcError": "",
+    "serverError": "",
+    "inventoryInfo": "",
+    "grade": "",
+    "totalStock": "",
+    "availableStock": "",
+    "minOrder": "",
+    "orderQuantity": "",
+    "quantityPlaceholder": "",
+    "calculating": "",
+    "calculatePrice": "",
+    "quantityExceedsStock": "",
+    "calculatedPrice": "",
+    "pricePerUnit": "",
+    "quantity": "",
+    "priceTier": "",
+    "pricingType": "",
+    "pricingTypeTiered": "",
+    "pricingTypeSimple": "",
+    "tierTableTitle": "",
+    "quantityRange": "",
+    "pricePerUnitHeader": "",
+    "description": ""
+  },
+  "hashtagInput": {
+    "defaultLabel": "",
+    "minLength": "",
+    "maxCount": "",
+    "removeAria": "",
+    "placeholder": ""
+  },
+  "lotLocationPicker": {
+    "fullscreenTitle": "",
+    "fullscreenAria": "",
+    "closeFullscreenAria": "",
+    "close": "",
+    "delete": "",
+    "hintCompact": "",
+    "hintExpanded": "",
+    "locationLabel": "",
+    "locationPlaceholder": "",
+    "defaultMarkerName": "",
+    "modalTitle": "",
+    "modalHint": "",
+    "confirmLocation": ""
+  },
+  "map": {
+    "zoomIn": "",
+    "zoomOut": "",
+    "positionDefault": "",
+    "selectedPosition": ""
+  },
+  "searchBox": {
+    "placeholderOverlay": "",
+    "placeholderDefault": ""
+  },
+  "currencyTicker": {
+    "zeroPercent": "0%",
+    "rial": "IRR",
+    "ratesAria": "Tipos de cambio y conversor",
+    "ratesLabel": "Tipos",
+    "calendarGregorian": "Gregoriano",
+    "calendarHijri": "Hégira",
+    "calendarShamsi": "Solar",
+    "calendarClickHint": "{full} — clic: {next}",
+    "calendarAria": "Calendario {label}",
+    "regionAria": "Tipos de cambio del día",
+    "loadingRates": "Cargando tipos…",
+    "ratesUnavailable": "Tipos no disponibles",
+    "viewRates": "Ver tipos de cambio",
+    "viewRatesDetails": "Ver detalle de tipos de cambio",
+    "title": "Tipos de cambio",
+    "updatedAt": "Actualizado",
+    "buy": "Compra",
+    "sell": "Venta",
+    "mid": "Medio",
+    "loading": "Cargando tipos…",
+    "error": "No se pudieron cargar los tipos",
+    "retry": "Reintentar"
+  }
+}

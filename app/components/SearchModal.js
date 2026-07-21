@@ -17,7 +17,7 @@ export default function SearchModal({
   initialQuery = "",
   onExploreRequest,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const tSearch = useTranslations("search");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -142,21 +142,29 @@ export default function SearchModal({
             <input
               ref={inputRef}
               type="text"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm text-right search-modal"
+              className={`w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-[13px] shadow-sm transition-all duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm ${
+                isRTL
+                  ? "pe-4 ps-12 text-right placeholder:text-right"
+                  : "ps-4 pe-12 text-left placeholder:text-left"
+              }`}
               placeholder={tSearch("modalPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ direction: 'rtl' }}
+              dir={isRTL ? "rtl" : "ltr"}
             />
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? "left-4" : "right-4"}`}
+            >
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => setSearchQuery("")}
+                className={`absolute top-1/2 -translate-y-1/2 p-1 text-gray-400 transition-colors hover:text-gray-600 ${
+                  isRTL ? "right-4" : "left-4"
+                }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

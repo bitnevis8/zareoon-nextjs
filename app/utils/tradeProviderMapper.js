@@ -5,6 +5,7 @@ import {
   sampleTradeServiceProviders,
 } from "@/app/data/tradeServicesCatalog";
 import i18nData from "./i18nFaData";
+import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
 export function findSampleProviderById(providerId) {
   for (const [categoryId, list] of Object.entries(sampleTradeServiceProviders)) {
@@ -31,14 +32,16 @@ export function mapApiProviderRow(row, t, language) {
   return {
     id: String(row.id),
     apiId: row.id,
-    profilePath: `/trade-services/provider/${row.id}`,
+    profilePath: providerPublicPath(row.profileSlug),
     name: row.displayName,
     contactName: row.contactName,
     phone: row.phone,
     email: row.email || null,
     logoUrl: row.logoUrl || null,
     entityType:
-      row.entityType === "individual" ? t("entityIndividual") : t("entityCompany"),
+      row.entityType === "individual"
+        ? t("tradeProviderEntityIndividual")
+        : t("tradeProviderEntityCompany"),
     entityTypeKey: row.entityType === "individual" ? "individual" : "company",
     routes: row.countriesRoutes || null,
     services,
@@ -50,6 +53,10 @@ export function mapApiProviderRow(row, t, language) {
     notes: row.notes || null,
     isLive: true,
     primaryCategoryId: row.categoryId,
+    businessHours: row.businessHours || null,
+    latitude: row.latitude != null ? Number(row.latitude) : null,
+    longitude: row.longitude != null ? Number(row.longitude) : null,
+    addressLabel: row.addressLabel || null,
   };
 }
 
@@ -76,7 +83,7 @@ export function mapSampleProviderEntry(provider, categoryId, language, t) {
   return {
     id: provider.id,
     apiId: null,
-    profilePath: `/trade-services/provider/${provider.id}`,
+    profilePath: null,
     name: resolveLocalizedField(provider.name, language),
     contactName: resolveLocalizedField(provider.name, language),
     phone: null,

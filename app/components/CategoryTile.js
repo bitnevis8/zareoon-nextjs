@@ -41,10 +41,10 @@ export default function CategoryTile({
   return (
     <Link
       href={href || `/catalog/${item.id}`}
-      className={`group flex min-h-[7.5rem] flex-col items-center rounded-xl border bg-white p-2.5 shadow-sm transition-all active:scale-[0.98] sm:min-h-0 sm:rounded-2xl sm:p-3 md:p-4 hover:-translate-y-0.5 hover:border-green-300 hover:shadow-md ${stockClass}`}
+      className={`group flex min-h-[7.5rem] flex-col items-center rounded-xl border border-emerald-100/90 bg-white p-2.5 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.28)] transition-all active:scale-[0.98] sm:min-h-0 sm:rounded-2xl sm:p-3 md:p-4 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_10px_28px_-12px_rgba(16,185,129,0.35)] ${stockClass}`}
     >
       <div
-        className={`flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-50 to-slate-100 border border-slate-100 ${
+        className={`flex w-full items-center justify-center overflow-hidden rounded-xl border border-slate-100/80 bg-gradient-to-b from-emerald-50/40 to-slate-50 ${
           compact ? "aspect-square max-h-20" : "aspect-square"
         }`}
       >

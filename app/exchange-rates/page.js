@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { formatCalendar, formatFetchedAt, CALENDAR_MODES } from "@/app/utils/calendars";
+import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 function formatPrice(value, maximumFractionDigits = 0) {
   if (value == null || !Number.isFinite(value)) return "—";
@@ -38,17 +40,19 @@ function ChangeBadge({ direction, percent }) {
 
 function CurrencyConverter({ rates }) {
   const t = useTranslations("exchange");
+  const tShared = useTranslations("shared");
 
   const currencies = useMemo(() => {
     const list = [{ code: "IRR", label: t("currencies.IRR"), price: 1 }];
     for (const r of rates) {
       const price = Number(r.price);
       if (r?.code && Number.isFinite(price) && price > 0) {
-        list.push({ code: r.code, label: r.label || r.code, price });
+        const def = getCurrencyDefinition(r.labelKey || r.code, tShared);
+        list.push({ code: r.code, label: def.label || r.code, price });
       }
     }
     return list;
-  }, [rates, t]);
+  }, [rates, t, tShared]);
 
   const [fromCode, setFromCode] = useState("IRR");
   const [toCode, setToCode] = useState("USD");
@@ -175,6 +179,8 @@ function CurrencyConverter({ rates }) {
 
 export default function ExchangeRatesPage() {
   const t = useTranslations("exchange");
+  const tShared = useTranslations("shared");
+  const { language } = useLanguage();
   const [data, setData] = useState([]);
   const [fetchedAt, setFetchedAt] = useState(null);
   const [source, setSource] = useState("");
@@ -182,6 +188,15 @@ export default function ExchangeRatesPage() {
   const [error, setError] = useState("");
   const [calendarMode, setCalendarMode] = useState(0);
   const [now, setNow] = useState(() => new Date());
+
+  const localizedRates = useMemo(
+    () =>
+      data.map((rate) => {
+        const def = getCurrencyDefinition(rate.labelKey || rate.code, tShared);
+        return { ...rate, label: def.label || rate.code };
+      }),
+    [data, tShared]
+  );
 
   const load = async () => {
     setLoading(true);
@@ -209,7 +224,7 @@ export default function ExchangeRatesPage() {
     return () => clearInterval(tick);
   }, []);
 
-  const cal = formatCalendar(CALENDAR_MODES[calendarMode], now);
+  const cal = formatCalendar(CALENDAR_MODES[calendarMode], now, language);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -273,11 +288,11 @@ export default function ExchangeRatesPage() {
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-800">{error}</div>
         ) : (
           <>
-            <CurrencyConverter rates={data} />
+            <CurrencyConverter rates={localizedRates} />
 
             <h2 className="mb-4 text-lg font-bold text-slate-900">{t("rates.title")}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
-              {data.map((rate) => (
+              {localizedRates.map((rate) => (
                 <article
                   key={rate.code}
                   className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md"

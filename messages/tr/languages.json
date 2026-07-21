@@ -1,9 +1,12 @@
 {
-  "fa": "فارسی",
-  "en": "English",
-  "ar": "العربية",
-  "tr": "Türkçe",
-  "ru": "Русский",
-  "ur": "اردو",
-  "fi": "Suomi"
+    "fa":  "فارسی",
+    "tr":  "Türkçe",
+    "es":  "Español",
+    "ur":  "اردو",
+    "en":  "English",
+    "nl":  "Nederlands",
+    "ru":  "Русский",
+    "fi":  "Suomi",
+    "ar":  "العربية"
 }
+

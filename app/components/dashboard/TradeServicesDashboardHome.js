@@ -92,7 +92,11 @@ export default function TradeServicesDashboardHome({ user }) {
               label={t("kpi.public")}
               value={provider?.status === "approved" ? 1 : 0}
               hint={provider?.status === "approved" ? t("kpi.publicOn") : t("kpi.publicOff")}
-              href={provider?.status === "approved" ? `/trade-services/provider/${provider.id}` : "/dashboard/service-provider-profile"}
+              href={
+                provider?.status === "approved" && provider.profileSlug
+                  ? `/${provider.profileSlug}`
+                  : "/dashboard/service-provider-profile"
+              }
               tone="sky"
             />
           </DashKpiGrid>
@@ -113,7 +117,7 @@ export default function TradeServicesDashboardHome({ user }) {
 
           {provider.status === "approved" ? (
             <Link
-              href={`/trade-services/provider/${provider.id}`}
+              href={provider.profileSlug ? `/${provider.profileSlug}` : "/dashboard/service-provider-profile"}
               className="block rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm font-bold text-emerald-900 hover:bg-emerald-50"
             >
               {t("viewPublic")}

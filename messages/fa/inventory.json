@@ -200,6 +200,8 @@
     "descriptionPlaceholderFa": "توضیح کوتاه برای نمایش در صفحه این عرضه…",
     "titlePlaceholders": {
       "en": "e.g. Premium Mazafati dates — fresh harvest",
+      "es": "p. ej. Dátiles Mazafati premium — cosecha fresca",
+      "nl": "bijv. Premium Mazafati-dadels — verse oogst",
       "ar": "مثال: تمر مضافي درجة أولى",
       "ru": "например: финики Мазафати премиум",
       "tr": "ör. Premium Mazafati hurması — taze hasat",
@@ -207,6 +209,8 @@
     },
     "descriptionPlaceholders": {
       "en": "Short description for this listing…",
+      "es": "Descripción breve para este anuncio…",
+      "nl": "Korte beschrijving voor deze aanbieding…",
       "ar": "وصف قصير لهذا العرض…",
       "ru": "Краткое описание для этой позиции…",
       "tr": "Bu ilan için kısa açıklama…",

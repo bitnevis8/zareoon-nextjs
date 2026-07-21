@@ -1,4 +1,4 @@
-import { isAdmin, isSeller, shouldShowSellerPanel } from "./roles";
+import { isSeller } from "./roles";
 
 export const DASHBOARD_PERSONAS = {
   APPLICANT: "applicant",
@@ -21,12 +21,13 @@ export function normalizeDashboardPersona(value) {
   return value;
 }
 
+/** فقط کاربر با نقش فروشنده — نه ادمینِ بدون عضویت فروشگاه */
 export function canActAsSeller(user) {
-  return shouldShowSellerPanel(user);
+  return isSeller(user);
 }
 
 export function getDefaultDashboardPersona(user) {
+  // هر کاربر لاگین‌شده پیش‌فرض خریدار است؛ فروشنده/خدمات با انتخاب نقش در سایدبار
   if (!user) return DASHBOARD_PERSONAS.APPLICANT;
-  if (isSeller(user) && !isAdmin(user)) return DASHBOARD_PERSONAS.SELLER;
   return DASHBOARD_PERSONAS.APPLICANT;
 }

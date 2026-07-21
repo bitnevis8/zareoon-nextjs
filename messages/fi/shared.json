@@ -2,12 +2,14 @@
   "roles": {
     "super_admin": "",
     "admin": "",
-    "employee": "",
+    "user": "",
+    "seller": "",
+    "service_provider": "",
+    "customer": "",
     "supplier": "",
     "farmer": "",
-    "customer": "",
     "loader": "",
-    "driver": "",
+    "employee": "",
     "administrator": ""
   },
   "accountNav": {
@@ -21,88 +23,88 @@
   },
   "currencies": {
     "TOMAN": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Iranin toman",
+      "shortLabel": "Toman",
+      "wordLabel": "Iranin toman"
     },
     "USD": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Yhdysvaltain dollari",
+      "shortLabel": "Dollari",
+      "wordLabel": "Yhdysvaltain dollari"
     },
     "AED": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Arabiemiirikuntien dirhami",
+      "shortLabel": "Dirhami",
+      "wordLabel": "Arabiemiirikuntien dirhami"
     },
     "EUR": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Euro",
+      "shortLabel": "Euro",
+      "wordLabel": "Euro"
     },
     "GBP": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Englannin punta",
+      "shortLabel": "Punta",
+      "wordLabel": "Englannin punta"
     },
     "TRY": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Turkin liira",
+      "shortLabel": "Liira",
+      "wordLabel": "Turkin liira"
     },
     "SAR": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Saudi-Arabian rial",
+      "shortLabel": "Saudi-rial",
+      "wordLabel": "Saudi-Arabian rial"
     },
     "CNY": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Kiinan yuan",
+      "shortLabel": "Yuan",
+      "wordLabel": "Kiinan yuan"
     },
     "RUB": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Venäjän rupla",
+      "shortLabel": "Rupla",
+      "wordLabel": "Venäjän rupla"
     },
     "CAD": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Kanadan dollari",
+      "shortLabel": "Kanadan dollari",
+      "wordLabel": "Kanadan dollari"
     },
     "CHF": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Sveitsin frangi",
+      "shortLabel": "Frangi",
+      "wordLabel": "Sveitsin frangi"
     },
     "JPY": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Japanin jeni",
+      "shortLabel": "Jeni",
+      "wordLabel": "Japanin jeni"
     },
     "AUD": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Australian dollari",
+      "shortLabel": "Australian dollari",
+      "wordLabel": "Australian dollari"
     },
     "USDT": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Tether (USDT)",
+      "shortLabel": "USDT",
+      "wordLabel": "Tether"
     },
     "BTC": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Bitcoin",
+      "shortLabel": "BTC",
+      "wordLabel": "Bitcoin"
     },
     "ETH": {
-      "label": "",
-      "shortLabel": "",
-      "wordLabel": ""
+      "label": "Ethereum",
+      "shortLabel": "ETH",
+      "wordLabel": "Ethereum"
     }
   },
   "priceCurrencySelect": {
-    "ariaLabel": ""
+    "ariaLabel": "Valuutta"
   },
   "stock": {
     "empty": "",
@@ -141,7 +143,7 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": ""
+    "inspectionStandardsCompany": "Arya Foulad Gharn -tekninen tarkastus"
   },
   "attributeFields": {
     "yes": "",
@@ -250,19 +252,27 @@
     "placeholderDefault": ""
   },
   "currencyTicker": {
-    "zeroPercent": "",
-    "rial": "",
-    "ratesAria": "",
-    "ratesLabel": "",
-    "calendarGregorian": "",
-    "calendarHijri": "",
-    "calendarShamsi": "",
-    "calendarClickHint": "",
-    "calendarAria": "",
-    "regionAria": "",
-    "loadingRates": "",
-    "ratesUnavailable": "",
-    "viewRates": "",
-    "viewRatesDetails": ""
+    "zeroPercent": "0 %",
+    "rial": "IRR",
+    "ratesAria": "Valuuttakurssit ja muunnin",
+    "ratesLabel": "Kurssit",
+    "calendarGregorian": "Gregoriaaninen",
+    "calendarHijri": "Hijri",
+    "calendarShamsi": "Aurinko-hijri",
+    "calendarClickHint": "{full} — napsauta: {next}",
+    "calendarAria": "Kalenteri {label}",
+    "regionAria": "Päivän valuuttakurssit",
+    "loadingRates": "Ladataan kursseja…",
+    "ratesUnavailable": "Kurssit eivät ole saatavilla",
+    "viewRates": "Näytä valuuttakurssit",
+    "viewRatesDetails": "Näytä valuuttakurssien tiedot",
+    "title": "Valuuttakurssit",
+    "updatedAt": "Päivitetty",
+    "buy": "Osto",
+    "sell": "Myynti",
+    "mid": "Keski",
+    "loading": "Ladataan kursseja…",
+    "error": "Kursseja ei voitu ladata",
+    "retry": "Yritä uudelleen"
   }
 }

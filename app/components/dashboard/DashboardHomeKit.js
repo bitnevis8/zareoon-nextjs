@@ -4,36 +4,28 @@ import Link from "next/link";
 import { dash } from "./dashboardTheme";
 
 export function DashHero({ title, subtitle, badge, tone = "emerald" }) {
-  const tones = {
-    emerald: "from-emerald-800 via-emerald-700 to-teal-800",
-    amber: "from-amber-800 via-amber-700 to-orange-800",
-    sky: "from-sky-800 via-sky-700 to-cyan-800",
-    violet: "from-violet-800 via-violet-700 to-indigo-800",
+  const badgeTones = {
+    emerald: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    amber: "border-amber-200 bg-amber-50 text-amber-900",
+    sky: "border-sky-200 bg-sky-50 text-sky-900",
+    violet: "border-violet-200 bg-violet-50 text-violet-900",
   };
 
   return (
-    <header
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${tones[tone] || tones.emerald} px-4 py-5 text-white shadow-sm sm:px-5 sm:py-6`}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-20"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 20%, white 0, transparent 45%), radial-gradient(circle at 80% 0%, white 0, transparent 35%)",
-        }}
-        aria-hidden
-      />
-      <div className="relative">
-        {badge ? (
-          <span className="inline-flex rounded-full border border-white/25 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wide">
-            {badge}
-          </span>
-        ) : null}
-        <h1 className={`text-lg font-black leading-snug tracking-tight sm:text-xl ${badge ? "mt-2" : ""}`}>
-          {title}
-        </h1>
-        {subtitle ? <p className="mt-1.5 max-w-xl text-sm leading-6 text-white/85">{subtitle}</p> : null}
-      </div>
+    <header className="rounded-lg border border-slate-200/90 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
+      {badge ? (
+        <span
+          className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${
+            badgeTones[tone] || badgeTones.emerald
+          }`}
+        >
+          {badge}
+        </span>
+      ) : null}
+      <h1 className={`text-lg font-semibold leading-snug tracking-tight text-slate-900 sm:text-xl ${badge ? "mt-2" : ""}`}>
+        {title}
+      </h1>
+      {subtitle ? <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-500">{subtitle}</p> : null}
     </header>
   );
 }

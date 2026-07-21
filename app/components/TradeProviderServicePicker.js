@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { resolveVipCategoryMessage } from "@/app/utils/vipCategoryHelpers";
+import { isPlatformExclusiveCategory } from "@/app/utils/platformExclusiveCategories";
 
 function ChevronIcon({ open }) {
   return (
@@ -87,7 +88,7 @@ export default function TradeProviderServicePicker({
   const addService = (item) => {
     const key = getServiceKey(item);
     if (selectedKeys.has(key)) return;
-    if (vipCategories[item.categoryId]?.enabled) return;
+    if (vipCategories[item.categoryId]?.enabled || isPlatformExclusiveCategory(item.categoryId)) return;
     onChange([...selected, { ...item, key }]);
   };
 
@@ -152,14 +153,21 @@ export default function TradeProviderServicePicker({
           const isOpen = expanded.has(category.id) || query.trim().length > 0;
           const selectedInCategory = selected.filter((s) => s.categoryId === category.id).length;
           const vipEntry = vipCategories[category.id];
-          const isVip = !!vipEntry?.enabled;
-          const vipMessage = resolveVipCategoryMessage(vipCategories, category.id, language, t);
+          const platformExclusive = isPlatformExclusiveCategory(category.id);
+          const isVip = !!vipEntry?.enabled || platformExclusive;
+          const vipMessage = platformExclusive
+            ? null
+            : resolveVipCategoryMessage(vipCategories, category.id, language, t);
 
           return (
             <div
               key={category.id}
               className={`overflow-hidden rounded-xl border shadow-sm ${
-                isVip ? "border-amber-200 bg-amber-50/40" : "border-slate-200 bg-white"
+                isVip
+                  ? isPlatformExclusiveCategory(category.id)
+                    ? "border-emerald-200 bg-emerald-50/40"
+                    : "border-amber-200 bg-amber-50/40"
+                  : "border-slate-200 bg-white"
               }`}
             >
               <button
@@ -174,13 +182,21 @@ export default function TradeProviderServicePicker({
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-bold text-slate-900">{category.title}</p>
                     {isVip ? (
-                      <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-900">
-                        {t("tradeProviderVipBadge")}
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          isPlatformExclusiveCategory(category.id)
+                            ? "bg-emerald-200 text-emerald-900"
+                            : "bg-amber-200 text-amber-900"
+                        }`}
+                      >
+                        {isPlatformExclusiveCategory(category.id)
+                          ? t("packagingAdBadge")
+                          : t("tradeProviderVipBadge")}
                       </span>
                     ) : null}
                   </div>
                   <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">
-                    {isVip ? vipMessage : category.description}
+                    {isVip && vipMessage ? vipMessage : category.description}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -193,7 +209,7 @@ export default function TradeProviderServicePicker({
                 </div>
               </button>
 
-              {isVip ? (
+              {isVip && !platformExclusive ? (
                 <div className="border-t border-amber-100 px-4 py-3 text-xs leading-6 text-amber-900">
                   {t("tradeProviderVipCategoryLocked")}
                 </div>

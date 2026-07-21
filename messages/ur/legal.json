@@ -1,1 +1,528 @@
-{}
+{
+  "common": {
+    "lastUpdated": ""
+  },
+  "nav": {
+    "aria": "قانونی دستاویزات اور مدد",
+    "about": "ہمارے بارے میں",
+    "terms": "شرائط و ضوابط",
+    "privacy": "رازداری",
+    "sellers": "فروخت کنندگان کی شرائط",
+    "buyers": "خریداروں کی شرائط",
+    "refund": "رقم کی واپسی",
+    "cancellation": "منسوخی",
+    "disputes": "تنازعات کا حل",
+    "help": "مدد",
+    "pricing": "سبسکرپشنز"
+  },
+  "terms": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "paragraphs": [
+        ""
+      ],
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "privacy": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "sellers": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "buyers": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "refund": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "cancellation": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "disputes": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "about": {
+    "title": "",
+    "subtitle": "",
+    "sections": [
+      {
+        "title": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "help": {
+    "title": "",
+    "subtitle": "",
+    "customerGuide": {
+      "title": "",
+      "sections": {
+        "signup": {
+          "title": "",
+          "body": ""
+        },
+        "ordering": {
+          "title": "",
+          "body": ""
+        },
+        "tracking": {
+          "title": "",
+          "body": ""
+        }
+      }
+    },
+    "supplierGuide": {
+      "title": "",
+      "sections": {
+        "inventory": {
+          "title": "",
+          "body": ""
+        },
+        "orders": {
+          "title": "",
+          "body": ""
+        },
+        "products": {
+          "title": "",
+          "body": ""
+        }
+      }
+    },
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "hoursLabel": "",
+      "hours": ""
+    }
+  },
+  "homepageDisclaimer": {
+    "title": "فروخت کنندگان اور خریداروں کے درمیان براہِ راست رابطہ",
+    "body": "زارعون صرف خریداروں، فروخت کنندگان اور سروس فراہم کنندگان کے براہِ راست رابطے کا پلیٹ فارم ہے۔ سودے کی شرائط، معیار، قیمت، ادائیگی اور ترسیل فریقین طے کرتے ہیں؛ زارعون لین دین کا ذمہ دار نہیں۔"
+  }
+}

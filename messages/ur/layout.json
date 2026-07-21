@@ -24,7 +24,11 @@
   "sidebar": {
     "tradeServicesSection": "",
     "providerMembership": "",
+    "providerMembershipHint": "",
+    "sellerMembership": "",
+    "sellerMembershipHint": "",
     "myServicesPage": "",
+    "servicePageSettings": "",
     "customerOrders": "",
     "incomingServiceRequests": "",
     "myShopUrl": "",

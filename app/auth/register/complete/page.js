@@ -1,285 +1,193 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
+import AuthShell, { AuthField, AuthPrimaryButton, authInputClass } from "../../../components/auth/AuthShell";
 
-export default function CompleteRegistrationPage() {
+function CompleteForm() {
   const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
     mobile: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    acceptTerms: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    const identifier = searchParams.get("identifier");
-    if (identifier) {
-      if (identifier.includes("@")) {
-        setFormData(prev => ({ ...prev, email: identifier }));
-      } else if (identifier.startsWith("09")) {
-        setFormData(prev => ({ ...prev, mobile: identifier }));
-      }
+    const id = searchParams.get("identifier");
+    if (id && /^09\d{9}$/.test(id)) {
+      setForm((prev) => ({ ...prev, mobile: id }));
     }
   }, [searchParams]);
 
-  // اگر کاربر قبلاً لاگین کرده، به داشبورد هدایت کن
   useEffect(() => {
     if (!authLoading && user) {
-      console.log("🔍 User already logged in, redirecting to dashboard");
-      router.push("/dashboard");
+      router.replace(user.mustChangePassword ? "/auth/set-password" : "/dashboard");
     }
   }, [user, authLoading, router]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const setField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    if (!form.firstName.trim()) return setError(t("firstNameRequired"));
+    if (!form.lastName.trim()) return setError(t("lastNameRequired"));
+    if (form.password.length < 6) return setError(t("passwordMinLength"));
+    if (form.password !== form.confirmPassword) return setError(t("passwordMismatch"));
+    if (!form.acceptTerms) return setError(t("termsRequired"));
 
-    // اعتبارسنجی
-    if (!formData.fullName.trim()) {
-      setError(t("fullNameRequired"));
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError(t("passwordMinLength"));
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError(t("passwordMismatch"));
-      setLoading(false);
-      return;
-    }
-
+    setLoading(true);
     try {
       const response = await fetch(API_ENDPOINTS.auth.completeRegistration, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // برای ذخیره کوکی‌ها
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email || null,
-          mobile: formData.mobile || null,
-          password: formData.password
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          mobile: form.mobile,
+          password: form.password,
+          acceptTerms: true,
         }),
       });
-
       const data = await response.json();
-
-      if (data.success) {
-        // ثبت‌نام موفق - ذخیره اطلاعات در AuthContext و برو به داشبورد
-        console.log("🔍 Registration completed successfully, updating AuthContext");
-        await login(data.data?.user, data.data?.token);
-        console.log("🔍 AuthContext updated, redirecting to dashboard");
-        router.push("/dashboard");
-      } else {
+      if (!data.success) {
         setError(data.message || t("registrationError"));
+        return;
       }
-    } catch (err) {
-      console.error("Registration error:", err);
+      await login(data.data?.user, data.data?.token);
+      router.push("/dashboard");
+    } catch {
       setError(t("serverError"));
     } finally {
       setLoading(false);
     }
   };
 
-  const formatMobile = (mobile) => {
-    if (mobile.startsWith("09")) {
-      return `+98${mobile.slice(1)}`;
-    }
-    return mobile;
-  };
-
-  // اگر AuthContext در حال لود است، loading نشان بده
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{tCommon("loading")}</p>
-        </div>
-      </div>
+      <AuthShell title={t("completeRegistrationTitle")}>
+        <p className="text-center text-sm text-slate-500">{t("loading")}</p>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-4 md:items-center">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        {/* لوگو - فقط در دسکتاپ */}
-        <div className="text-center mb-8 hidden md:block">
-          <div className="w-20 h-20 bg-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl">✓</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">{t("completeRegistrationTitle")}</h1>
-          <p className="text-gray-600 text-sm mt-2">
-            {t("completeRegistrationSubtitle")}
-          </p>
-        </div>
-        
-        {/* عنوان موبایل */}
-        <div className="text-center mb-8 md:hidden">
-          <h1 className="text-2xl font-bold text-gray-800">{t("completeRegistrationTitle")}</h1>
-          <p className="text-gray-600 text-sm mt-2">
-            {t("completeRegistrationSubtitle")}
-          </p>
-        </div>
+    <AuthShell
+      title={t("completeRegistrationTitle")}
+      footer={
+        <p className="text-center text-[11px] leading-5 text-slate-500">
+          {t("termsPrefix")}{" "}
+          <Link href="/terms" className="font-semibold text-emerald-700 hover:underline">
+            {t("termsLink")}
+          </Link>{" "}
+          {t("termsSuffix")}
+        </p>
+      }
+    >
+      <p className="mb-5 text-sm leading-6 text-slate-600">{t("completeRegistrationSubtitle")}</p>
 
-        {/* فرم */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* نام کامل */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("fullNameLabel")}
-            </label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <AuthField label={t("firstNameLabel")}>
             <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder={t("fullNamePlaceholder")}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              name="firstName"
+              value={form.firstName}
+              onChange={(e) => setField("firstName", e.target.value)}
+              placeholder={t("firstNamePlaceholder")}
+              className={authInputClass}
               required
+              autoComplete="given-name"
             />
-          </div>
-
-          {/* ایمیل */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("emailOptionalLabel")}
-            </label>
+          </AuthField>
+          <AuthField label={t("lastNameLabel")}>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="example@gmail.com"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              name="lastName"
+              value={form.lastName}
+              onChange={(e) => setField("lastName", e.target.value)}
+              placeholder={t("lastNamePlaceholder")}
+              className={authInputClass}
+              required
+              autoComplete="family-name"
             />
-            <p className="text-xs text-gray-500 mt-1">{t("emailOptionalHint")}</p>
-          </div>
+          </AuthField>
+        </div>
 
-          {/* موبایل */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("mobileLabelLocked")}
-            </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                IR+98
-              </span>
-              <input
-                type="text"
-                value={formData.mobile ? formatMobile(formData.mobile) : ""}
-                disabled
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg bg-gray-50 text-gray-500"
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-1">{t("mobileLockedHint")}</p>
-          </div>
+        <AuthField label={t("mobileLabelLocked")} hint={t("mobileLockedHint")}>
+          <input
+            type="tel"
+            dir="ltr"
+            value={form.mobile}
+            readOnly
+            disabled
+            className={`${authInputClass} text-center tracking-wider`}
+          />
+        </AuthField>
 
-          {/* رمز عبور */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("passwordLabel")}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••••••••"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
-            </div>
-          </div>
+        <AuthField label={t("passwordLabel")}>
+          <input
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={(e) => setField("password", e.target.value)}
+            placeholder={t("passwordPlaceholder")}
+            className={authInputClass}
+            required
+            autoComplete="new-password"
+            minLength={6}
+          />
+        </AuthField>
 
-          {/* تکرار رمز عبور */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("confirmPasswordLabel")}
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder={t("confirmPasswordPlaceholder")}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
-            </div>
-          </div>
+        <AuthField label={t("confirmPasswordLabel")}>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={form.confirmPassword}
+            onChange={(e) => setField("confirmPassword", e.target.value)}
+            placeholder={t("confirmPasswordPlaceholder")}
+            className={authInputClass}
+            required
+            autoComplete="new-password"
+            minLength={6}
+          />
+        </AuthField>
 
-          {/* قوانین */}
-          <div className="text-center text-sm text-gray-600">
-            {t("termsPrefix")}{" "}
-            <Link href="/terms" className="text-blue-600 hover:text-blue-800">
-              {t("termsLink")}
-            </Link>{" "}
-            {t("termsSuffix")}
-          </div>
+        <label className="flex items-start gap-2.5 text-xs leading-5 text-slate-600">
+          <input
+            type="checkbox"
+            checked={form.acceptTerms}
+            onChange={(e) => setField("acceptTerms", e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600"
+          />
+          <span>{t("termsAcceptLabel")}</span>
+        </label>
 
-          {/* نمایش خطا */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+        {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
 
-          {/* دکمه تکمیل */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
-          >
-            {loading ? t("completing") : t("completeRegistrationBtn")}
-          </button>
-        </form>
-      </div>
-    </div>
+        <AuthPrimaryButton loading={loading} loadingText={t("completing")} showArrow={false}>
+          {t("completeRegistrationBtn")}
+        </AuthPrimaryButton>
+      </form>
+    </AuthShell>
+  );
+}
+
+export default function CompleteRegistrationPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-slate-500">...</div>}>
+      <CompleteForm />
+    </Suspense>
   );
 }

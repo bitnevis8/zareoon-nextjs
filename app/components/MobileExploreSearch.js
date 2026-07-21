@@ -395,7 +395,7 @@ export default function MobileExploreSearch({
               isRTL ? "right-3" : "left-3"
             }`}
           >
-            <SearchIcon className="h-4.5 w-4.5" />
+            <SearchIcon className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
           </span>
           <input
             ref={inputRef}
@@ -404,8 +404,10 @@ export default function MobileExploreSearch({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("mobileSearchPlaceholder")}
-            className={`w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 ${
-              isRTL ? "pe-9 ps-9 text-right" : "ps-9 pe-9 text-left"
+            className={`w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2 text-[13px] outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 sm:py-2.5 sm:text-sm ${
+              isRTL
+                ? "pe-9 ps-9 text-right placeholder:text-right"
+                : "ps-9 pe-9 text-left placeholder:text-left"
             }`}
             dir={isRTL ? "rtl" : "ltr"}
           />

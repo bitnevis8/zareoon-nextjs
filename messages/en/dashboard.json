@@ -49,8 +49,11 @@
   "incomingToMyProducts": "",
   "incomingToMyServices": "",
   "shell": {
-    "openMenu": "",
-    "site": "",
+    "openMenu": "Open menu",
+    "menuLabel": "Menu",
+    "site": "Site",
+    "editProfile": "Edit profile",
+    "userFallback": "User",
     "footer": "",
     "logoAlt": "",
     "personaTitle": {
@@ -59,6 +62,55 @@
       "seller": "",
       "default": ""
     }
+  },
+  "dedicatedPage": {
+    "title": "My dedicated page",
+    "subtitle": "You do not have a public page yet. Create a shop or a trade-services page — after that, this menu item opens your page directly.",
+    "loading": "Checking your dedicated page…",
+    "shopTitle": "Shop",
+    "shopBody": "If you sell products, create a shop so buyers can see your page and contact you directly.",
+    "shopCta": "Create shop",
+    "servicesTitle": "Trade services",
+    "servicesBody": "If you offer customs, logistics, inspection, finance, or similar services, create your services page so clients can find you.",
+    "servicesCta": "Create services page"
+  },
+  "mobileProfile": {
+    "userFallback": "User",
+    "editProfile": "Edit profile",
+    "stats": {
+      "products": "Products",
+      "followers": "Followers",
+      "following": "Following"
+    },
+    "bioMore": "more",
+    "bioLess": "less",
+    "bioEmpty": "Your phone and roles will appear here.",
+    "tabsAria": "Dashboard role",
+    "tabs": {
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "provider": "Services"
+    },
+    "actions": {
+      "submitRequest": "Submit request",
+      "myRequests": "My requests",
+      "myOrders": "My orders",
+      "cart": "Cart",
+      "escrow": "Escrow",
+      "myProducts": "My products",
+      "newInventory": "New stock",
+      "customerOrders": "Customer orders",
+      "shopSettings": "Shop settings",
+      "incoming": "Incoming needs",
+      "serviceSettings": "Service settings",
+      "incomingServices": "Requests"
+    },
+    "createShop": "Create shop",
+    "createShopHint": "Create your shop page to start selling products.",
+    "createServices": "Create services",
+    "createServicesHint": "Create your trade services page to get clients.",
+    "emptyProducts": "You have not listed any products for sale yet.",
+    "productFallback": "Product"
   },
   "guide": {
     "triggerLabel": "",
@@ -254,5 +306,138 @@
       "title": "",
       "desc": ""
     }
+  },
+  "homeBuyer": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "requests": "",
+      "open": "",
+      "openHint": "",
+      "cart": "",
+      "orders": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "submit": "",
+      "submitDesc": "",
+      "browse": "",
+      "browseDesc": "",
+      "cart": "",
+      "cartDesc": "",
+      "messages": "",
+      "messagesDesc": ""
+    },
+    "recentRequests": "",
+    "viewAll": "",
+    "emptyRequests": ""
+  },
+  "homeSeller": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "joinTitle": "",
+    "joinSubtitle": "",
+    "joinEmpty": "",
+    "joinCta": "",
+    "joinBody": "",
+    "joinFootnote": "",
+    "kpi": {
+      "products": "",
+      "orders": "",
+      "pending": "",
+      "incoming": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "addProduct": "",
+      "addProductDesc": "",
+      "myProducts": "",
+      "myProductsDesc": "",
+      "shop": "",
+      "shopDesc": "",
+      "incoming": "",
+      "incomingDesc": ""
+    },
+    "recentOrders": "",
+    "viewAll": "",
+    "emptyOrders": "",
+    "orderHash": ""
+  },
+  "homeProvider": {
+    "badge": "",
+    "title": "",
+    "subtitleGuest": "",
+    "subtitleMember": "",
+    "status": {
+      "pending": "",
+      "approved": "",
+      "rejected": "",
+      "none": ""
+    },
+    "statusLine": "",
+    "kpi": {
+      "incoming": "",
+      "orders": "",
+      "services": "",
+      "public": "",
+      "publicOn": "",
+      "publicOff": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "join": "",
+      "joinDesc": "",
+      "catalog": "",
+      "catalogDesc": "",
+      "profile": "",
+      "profileDesc": "",
+      "incoming": "",
+      "incomingDesc": "",
+      "orders": "",
+      "ordersDesc": "",
+      "messages": "",
+      "messagesDesc": ""
+    },
+    "viewPublic": "",
+    "pendingHint": ""
+  },
+  "homeAdmin": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "users": "",
+      "orders": "",
+      "pendingOrders": "",
+      "products": "",
+      "lotsTotal": "",
+      "providers": "",
+      "pendingProviders": ""
+    },
+    "alert": {
+      "pendingOrders": "",
+      "pendingProviders": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "users": "",
+      "usersDesc": "",
+      "orders": "",
+      "ordersDesc": "",
+      "inventory": "",
+      "inventoryDesc": "",
+      "providers": "",
+      "providersDesc": "",
+      "settings": "",
+      "settingsDesc": "",
+      "homepage": "",
+      "homepageDesc": ""
+    },
+    "recentOrders": "",
+    "viewAll": "",
+    "emptyOrders": "",
+    "orderHash": ""
   }
 }

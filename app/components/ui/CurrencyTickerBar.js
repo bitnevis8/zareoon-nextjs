@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { CALENDAR_MODES, formatCalendar } from "@/app/utils/calendars";
 import CategoryMegaMenu from "@/app/components/CategoryMegaMenu";
+import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 const EXCHANGE_HREF = "/exchange-rates#converter";
 const FETCH_TIMEOUT_MS = 10_000;
@@ -116,7 +118,7 @@ function ExchangeRatesButton({ ariaLabel, label }) {
   );
 }
 
-function CalendarBadge({ t }) {
+function CalendarBadge({ t, language }) {
   const [modeIndex, setModeIndex] = useState(0);
   const [now, setNow] = useState(null);
 
@@ -127,7 +129,7 @@ function CalendarBadge({ t }) {
   }, []);
 
   const mode = CALENDAR_MODES[modeIndex];
-  const cal = now ? formatCalendar(mode, now) : null;
+  const cal = now ? formatCalendar(mode, now, language) : null;
   const nextMode = CALENDAR_MODES[(modeIndex + 1) % CALENDAR_MODES.length];
   const nextLabel =
     nextMode === "gregorian"
@@ -156,12 +158,12 @@ function CalendarBadge({ t }) {
       <span className="hidden text-sm sm:inline sm:text-base" aria-hidden>
         📅
       </span>
-      <span className="hidden min-w-0 flex-col text-right leading-tight lg:flex" suppressHydrationWarning>
+      <span className="hidden min-w-0 flex-col text-start leading-tight lg:flex" suppressHydrationWarning>
         <span className="text-[9px] font-bold text-amber-700">{cal?.label || "\u00a0"}</span>
-        <span className="max-w-[7.5rem] truncate text-[11px] font-bold text-slate-800">{cal?.short || "…"}</span>
+        <span className="max-w-[7.5rem] truncate text-[11px] font-bold text-slate-800 tabular-nums">{cal?.short || "…"}</span>
       </span>
       <span
-        className="max-w-[4.75rem] truncate text-[10px] font-bold text-slate-800 lg:hidden sm:max-w-[5.5rem]"
+        className="max-w-[4.75rem] truncate text-[10px] font-bold tabular-nums text-slate-800 lg:hidden sm:max-w-[5.5rem]"
         suppressHydrationWarning
       >
         {cal?.short || "…"}
@@ -170,10 +172,10 @@ function CalendarBadge({ t }) {
   );
 }
 
-function TickerBarShell({ children, t }) {
+function TickerBarShell({ children, t, dir, language }) {
   return (
     <div
-      dir="rtl"
+      dir={dir}
       className="relative z-0 flex h-10 items-stretch overflow-hidden border-b border-emerald-200/70 bg-gradient-to-l from-emerald-50 via-white to-emerald-50/80"
       role="region"
       aria-label={t("currencyTicker.regionAria")}
@@ -185,13 +187,15 @@ function TickerBarShell({ children, t }) {
       <MobileRatesLead ariaLabel={t("currencyTicker.ratesAria")} label={t("currencyTicker.ratesLabel")} />
       {children}
       <ExchangeRatesButton ariaLabel={t("currencyTicker.ratesAria")} label={t("currencyTicker.ratesLabel")} />
-      <CalendarBadge t={t} />
+      <CalendarBadge t={t} language={language} />
     </div>
   );
 }
 
 export default function CurrencyTickerBar() {
   const t = useTranslations("shared");
+  const { isRTL, language } = useLanguage();
+  const dir = isRTL ? "rtl" : "ltr";
   const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchFailed, setFetchFailed] = useState(false);
@@ -241,7 +245,17 @@ export default function CurrencyTickerBar() {
     };
   }, [load]);
 
-  const centerLabel = rates.length
+  const localizedRates = useMemo(
+    () =>
+      rates.map((rate) => {
+        const key = rate.labelKey || rate.code;
+        const def = getCurrencyDefinition(key, t);
+        return { ...rate, label: def.label || rate.code };
+      }),
+    [rates, t]
+  );
+
+  const centerLabel = localizedRates.length
     ? null
     : loading
       ? t("currencyTicker.loadingRates")
@@ -250,8 +264,8 @@ export default function CurrencyTickerBar() {
         : t("currencyTicker.viewRates");
 
   return (
-    <TickerBarShell t={t}>
-      {rates.length > 0 ? (
+    <TickerBarShell t={t} dir={dir} language={language}>
+      {localizedRates.length > 0 ? (
         <Link
           href={EXCHANGE_HREF}
           dir="ltr"
@@ -260,7 +274,7 @@ export default function CurrencyTickerBar() {
         >
           <div className="zareoon-currency-ticker__inner">
             <TickerStrip
-              rates={rates}
+              rates={localizedRates}
               rialLabel={t("currencyTicker.rial")}
               zeroPercentLabel={t("currencyTicker.zeroPercent")}
             />

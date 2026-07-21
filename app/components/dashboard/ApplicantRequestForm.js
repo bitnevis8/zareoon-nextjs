@@ -39,7 +39,12 @@ function isCategoryNode(p) {
   return !p.isOrderable;
 }
 
-export default function ApplicantRequestForm({ onSubmitted, compact = false, initialRequestType = "" }) {
+export default function ApplicantRequestForm({
+  onSubmitted,
+  compact = false,
+  initialRequestType = "",
+  initialServiceCategoryId = "",
+}) {
   const t = useTranslations("applicant");
   const auth = useAuth();
   const router = useRouter();
@@ -114,6 +119,13 @@ export default function ApplicantRequestForm({ onSubmitted, compact = false, ini
     setRequestType(initialRequestType);
     setStep(2);
   }, [initialRequestType]);
+
+  useEffect(() => {
+    if (!initialServiceCategoryId || initialRequestType !== "service") return;
+    setServiceCategoryId(initialServiceCategoryId);
+    setServiceSubcategoryId("");
+    setStep(3);
+  }, [initialServiceCategoryId, initialRequestType]);
 
   const l1ProductCategories = useMemo(
     () => productCategories.filter((p) => isRootCategory(p) && isCategoryNode(p)),

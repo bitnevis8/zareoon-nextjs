@@ -81,27 +81,23 @@ export default function LatestAvailableProductsSection({
     : "";
 
   return (
-    <section className={`${sectionShellClass} ${className}`.trim()}>
+    <section className={`${sectionShellClass} ${className}`.trim()} dir={isRTL ? "rtl" : "ltr"}>
       {isGlassVariant ? (
         <div
-          className="pointer-events-none absolute -left-8 -top-10 h-28 w-28 rounded-full bg-emerald-300/20 blur-2xl"
+          className="pointer-events-none absolute -start-8 -top-10 h-28 w-28 rounded-full bg-emerald-300/20 blur-2xl"
           aria-hidden
         />
       ) : null}
       {isGlassVariant ? (
         <div
-          className="pointer-events-none absolute -bottom-10 -right-6 h-32 w-32 rounded-full bg-green-200/25 blur-2xl"
+          className="pointer-events-none absolute -bottom-10 -end-6 h-32 w-32 rounded-full bg-green-200/25 blur-2xl"
           aria-hidden
         />
       ) : null}
 
       <div className="relative">
       <div className="mb-3 flex flex-col gap-3 px-0.5 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <h2
-          className={`text-base font-extrabold leading-snug text-slate-900 sm:text-lg lg:text-xl ${
-            isRTL ? "text-right" : "text-left"
-          }`}
-        >
+        <h2 className="text-start text-base font-extrabold leading-snug text-slate-900 sm:text-lg lg:text-xl">
           {sectionTitle}
         </h2>
         {showGroupToggle ? (
@@ -130,7 +126,7 @@ export default function LatestAvailableProductsSection({
           <div className="space-y-4 lg:space-y-5">
             {availableProductsByCategory.map((group) => (
               <section key={group.id}>
-                <h3 className={`mb-2 px-1 text-base font-bold text-slate-800 ${isRTL ? "text-right" : "text-left"}`}>
+                <h3 className="mb-2 px-1 text-start text-base font-bold text-slate-800">
                   {group.category ? getLocalizedText(group.category, language) : t("productCategories")}
                 </h3>
                 <HorizontalScrollRow {...scrollRowProps}>

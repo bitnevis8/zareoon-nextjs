@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLanguage } from "../context/LanguageContext";
-import { shouldShowSupplierPanel } from "../utils/roles";
+import { useExistingPublicSlug } from "../hooks/useExistingPublicSlug";
 
 const linkClass =
   "block w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-right transition-colors";
@@ -10,10 +10,11 @@ const linkClass =
 const primaryLinkClass =
   "block w-full px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-50 text-right transition-colors";
 
-export default function UserProfileMenu({ user, onClose, onLogout }) {
+export default function UserProfileMenu({ onClose, onLogout }) {
   const { t, isRTL } = useLanguage();
-  const supplier = shouldShowSupplierPanel(user);
+  const { publicPath, hasSlug } = useExistingPublicSlug();
   const textAlign = isRTL ? "text-right" : "text-left";
+  const dedicatedHref = hasSlug && publicPath ? publicPath : "/dashboard/dedicated-page";
 
   return (
     <div className={`py-1 ${textAlign}`}>
@@ -21,25 +22,13 @@ export default function UserProfileMenu({ user, onClose, onLogout }) {
         {t("zareoonMe")}
       </Link>
 
-      {supplier ? (
-        <Link href="/dashboard/supplier-profile" onClick={onClose} className={linkClass}>
-          {t("myPublicPage")}
-        </Link>
-      ) : null}
-
       <Link href="/dashboard/account" onClick={onClose} className={linkClass}>
         {t("editProfile")}
       </Link>
 
-      {supplier ? (
-        <Link
-          href="/dashboard/supplier/inventory?scope=own"
-          onClick={onClose}
-          className={linkClass}
-        >
-          {t("myProducts")}
-        </Link>
-      ) : null}
+      <Link href={dedicatedHref} onClick={onClose} className={linkClass}>
+        {t("myDedicatedPage")}
+      </Link>
 
       <Link href="/help" onClick={onClose} className={linkClass}>
         {t("guide")}

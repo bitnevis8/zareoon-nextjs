@@ -1,39 +1,67 @@
 import jalaali from "jalaali-js";
 import i18nData from "./i18nFaData";
+import { toPersianDigits } from "./persianNumberUtils";
 
 const JALAALI_MONTHS = i18nData.calendars.months;
 const WEEKDAYS_FA = i18nData.calendars.weekdays;
 
-export function formatShamsiDate(date = new Date()) {
+/** fa / ar / ur → ارقام فارسی در نمایش تاریخ ناوبار */
+export function calendarUsesPersianDigits(language) {
+  return language === "fa" || language === "ar" || language === "ur";
+}
+
+function shapeCalendarDigits(text, language) {
+  if (!calendarUsesPersianDigits(language)) return String(text ?? "");
+  return toPersianDigits(text);
+}
+
+export function formatShamsiDate(date = new Date(), language = "fa") {
   const d = date instanceof Date ? date : new Date(date);
   const { jy, jm, jd } = jalaali.toJalaali(d);
   const weekday = WEEKDAYS_FA[d.getDay()];
+  const shortWestern = `${jd}/${jm}/${jy}`;
+  const fullWestern = `${weekday}${i18nData.calendars.dateComma} ${jd} ${JALAALI_MONTHS[jm - 1]} ${jy}`;
   return {
     label: i18nData.calendars.shamsi,
-    short: `${jd}/${jm}/${jy}`,
-    full: `${weekday}${i18nData.calendars.dateComma} ${jd.toLocaleString("fa-IR")} ${JALAALI_MONTHS[jm - 1]} ${jy.toLocaleString("fa-IR")}`,
+    short: shapeCalendarDigits(shortWestern, language),
+    full: shapeCalendarDigits(fullWestern, language),
   };
 }
 
-export function formatGregorianDate(date = new Date()) {
+export function formatGregorianDate(date = new Date(), language = "fa") {
   const d = date instanceof Date ? date : new Date(date);
-  const short = d.toLocaleDateString("fa-IR");
-  const full = d.toLocaleDateString("fa-IR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  return { label: i18nData.calendars.gregorian, short, full };
+  const locale = calendarUsesPersianDigits(language) ? "fa-IR" : "en-GB";
+  const short = d.toLocaleDateString(locale);
+  const full = d.toLocaleDateString(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  return {
+    label: i18nData.calendars.gregorian,
+    short: shapeCalendarDigits(short, language),
+    full: shapeCalendarDigits(full, language),
+  };
 }
 
-export function formatHijriDate(date = new Date()) {
+export function formatHijriDate(date = new Date(), language = "fa") {
   const d = date instanceof Date ? date : new Date(date);
+  const locale = calendarUsesPersianDigits(language) ? "fa-IR-u-ca-islamic" : "en-u-ca-islamic";
   let short = "";
   let full = "";
   try {
-    short = new Intl.DateTimeFormat("fa-IR-u-ca-islamic", { day: "numeric", month: "numeric", year: "numeric" }).format(d);
-    full = new Intl.DateTimeFormat("fa-IR-u-ca-islamic", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(d);
+    short = new Intl.DateTimeFormat(locale, { day: "numeric", month: "numeric", year: "numeric" }).format(d);
+    full = new Intl.DateTimeFormat(locale, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(d);
   } catch {
-    short = d.toLocaleDateString("fa-IR");
+    short = d.toLocaleDateString(calendarUsesPersianDigits(language) ? "fa-IR" : "en-GB");
     full = short;
   }
-  return { label: i18nData.calendars.hijri, short, full };
+  return {
+    label: i18nData.calendars.hijri,
+    short: shapeCalendarDigits(short, language),
+    full: shapeCalendarDigits(full, language),
+  };
 }
 
 export function cycleCalendar(current) {
@@ -42,16 +70,16 @@ export function cycleCalendar(current) {
   return "shamsi";
 }
 
-export function formatByCalendar(type, date = new Date()) {
-  if (type === "gregorian") return formatGregorianDate(date);
-  if (type === "hijri") return formatHijriDate(date);
-  return formatShamsiDate(date);
+export function formatByCalendar(type, date = new Date(), language = "fa") {
+  if (type === "gregorian") return formatGregorianDate(date, language);
+  if (type === "hijri") return formatHijriDate(date, language);
+  return formatShamsiDate(date, language);
 }
 
 export const CALENDAR_MODES = ["shamsi", "gregorian", "hijri"];
 
-export function formatCalendar(mode, date = new Date()) {
-  return formatByCalendar(mode, date);
+export function formatCalendar(mode, date = new Date(), language = "fa") {
+  return formatByCalendar(mode, date, language);
 }
 
 export function formatFetchedAt(iso) {

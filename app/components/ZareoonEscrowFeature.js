@@ -89,33 +89,35 @@ function ServicePanel({
 
   return (
     <article
-      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border ${panelBorder} ${panelBg} p-5 shadow-[0_8px_28px_-18px_rgba(6,78,59,0.28)] sm:p-6`}
+      className={`relative flex h-full flex-col overflow-hidden rounded-xl border ${panelBorder} ${panelBg} p-3.5 shadow-[0_8px_28px_-18px_rgba(6,78,59,0.28)] sm:rounded-2xl sm:p-6`}
     >
       <SoftFieldPattern patternId={patternId} className="opacity-80" />
-      <div className="relative flex items-start gap-3">
-        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm ${iconWrap}`}>
+      <div className="relative flex items-start gap-2.5 sm:gap-3">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm sm:h-11 sm:w-11 sm:rounded-xl ${iconWrap}`}>
           {icon}
         </span>
         <div className="min-w-0 pt-0.5">
-          <h4 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg">{title}</h4>
-          {hint ? <p className="mt-1 text-xs font-medium text-slate-500 sm:text-[13px]">{hint}</p> : null}
+          <h4 className="text-sm font-bold tracking-tight text-slate-900 sm:text-lg">{title}</h4>
+          {hint ? <p className="mt-0.5 text-[11px] font-medium text-slate-500 sm:mt-1 sm:text-[13px]">{hint}</p> : null}
         </div>
       </div>
 
-      {intro ? <p className="relative mt-3 text-sm leading-7 text-slate-600">{intro}</p> : null}
+      {intro ? <p className="relative mt-3 hidden text-sm leading-7 text-slate-600 sm:block">{intro}</p> : null}
 
-      <FeatureList items={items} tone={tone} />
+      <div className="hidden sm:block">
+        <FeatureList items={items} tone={tone} />
+      </div>
 
       {example ? (
-        <p className="relative mt-4 rounded-xl border border-slate-200/80 bg-white/80 px-3.5 py-3 text-xs leading-6 text-slate-600 sm:text-sm sm:leading-7">
+        <p className="relative mt-4 hidden rounded-xl border border-slate-200/80 bg-white/80 px-3.5 py-3 text-xs leading-6 text-slate-600 sm:block sm:text-sm sm:leading-7">
           {example}
         </p>
       ) : null}
 
-      <div className="relative mt-auto pt-5">
+      <div className="relative mt-3 pt-0 sm:mt-auto sm:pt-5">
         <Link
           href={ctaHref}
-          className={`inline-flex min-h-11 w-full items-center justify-center rounded-xl px-5 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto ${ctaClass}`}
+          className={`inline-flex min-h-9 w-full items-center justify-center rounded-lg px-4 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:min-h-11 sm:rounded-xl sm:px-5 sm:text-sm ${ctaClass}`}
         >
           {ctaLabel}
         </Link>

@@ -455,4 +455,44 @@ html, body {
   }
 }
 
+/* Homepage language semicircle — thin green glass + loading-style sweep */
+.home-lang-arc-glass {
+  stroke: rgb(236 253 245 / 0.45);
+}
+
+.home-lang-arc-base {
+  stroke: rgb(209 250 229 / 0.72);
+}
+
+.home-lang-arc-flow {
+  stroke: rgb(255 255 255 / 0.98);
+  stroke-dasharray: 48 266;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.85)) drop-shadow(0 0 6px rgb(209 250 229 / 0.65));
+  animation: home-lang-arc-flow 3.6s linear infinite;
+}
+
+.home-lang-arc-flash {
+  stroke: rgb(255 255 255 / 1);
+  stroke-dasharray: 12 302;
+  stroke-dashoffset: 18;
+  filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.9));
+  animation: home-lang-arc-flow 3.6s linear infinite;
+}
+
+@keyframes home-lang-arc-flow {
+  to {
+    stroke-dashoffset: -314;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-lang-arc-flow,
+  .home-lang-arc-flash {
+    animation: none;
+    stroke-dasharray: 70 244;
+    opacity: 0.55;
+  }
+}
+
 

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "../../../context/LanguageContext";
-import { SITE_LANGUAGES } from "../../../config/siteLanguages";
 
 function GlobeIcon() {
   return (
@@ -19,7 +18,7 @@ function GlobeIcon() {
 }
 
 export default function LanguageSwitcher({ buttonClass }) {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, t, availableLanguages } = useLanguage();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState(null);
   const ref = useRef(null);
@@ -93,7 +92,7 @@ export default function LanguageSwitcher({ buttonClass }) {
         style={menuStyle}
         className="fixed z-[10050] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
       >
-        {SITE_LANGUAGES.map((item) => {
+        {availableLanguages.map((item) => {
           const active = item.code === language;
           return (
             <li key={item.code} role="option" aria-selected={active}>

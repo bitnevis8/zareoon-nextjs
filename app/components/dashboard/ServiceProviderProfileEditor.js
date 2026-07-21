@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -12,9 +12,12 @@ import { findCatalogService, getL1Categories } from "@/app/data/tradeServicesCat
 import { showToast } from "@/app/utils/toast";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 import TradeProviderServicePicker from "@/app/components/TradeProviderServicePicker";
+import BusinessHoursEditor from "@/app/components/ui/BusinessHoursEditor";
+import LocationPickerMap from "@/app/components/ui/LocationPickerMap";
+import PublicHoursAndMap from "@/app/components/ui/PublicHoursAndMap";
+import { DEFAULT_BUSINESS_HOURS, mergeBusinessHours } from "@/app/utils/businessHours";
 
-const inputClass =
-  "mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm transition focus:border-sky-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20";
+const inputClass = dash.input + " mt-1.5";
 
 const STATUS_KEYS = {
   pending: { key: "pending", className: "bg-amber-100 text-amber-800 ring-amber-200/80" },
@@ -24,16 +27,16 @@ const STATUS_KEYS = {
 
 function providerToForm(provider, profileFullName) {
   return {
-    entityType: provider?.entityType === "individual" ? "individual" : "company",
-    displayName: provider?.displayName || "",
+    entityType: "individual",
+    displayName: provider?.displayName || profileFullName || "",
     contactName: provider?.contactName || profileFullName,
     phone: provider?.phone || "",
     email: provider?.email || "",
-    countriesRoutes: provider?.countriesRoutes || "",
-    licenses: provider?.licenses || "",
-    experienceYears: provider?.experienceYears != null ? String(provider.experienceYears) : "",
     notes: provider?.notes || "",
-    servicesOffered: provider?.servicesOffered || "",
+    businessHours: mergeBusinessHours(provider?.businessHours),
+    latitude: provider?.latitude ?? null,
+    longitude: provider?.longitude ?? null,
+    addressLabel: provider?.addressLabel || "",
   };
 }
 
@@ -107,7 +110,7 @@ function DocumentUploader({ documents, onChange }) {
 
   return (
     <div className="space-y-3">
-      <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-6 text-center transition hover:border-sky-200 hover:bg-sky-50/30">
+      <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-6 text-center transition hover:border-emerald-200 hover:bg-emerald-50/30">
         <input
           type="file"
           accept=".pdf,.jpg,.jpeg,.png,.webp"
@@ -137,7 +140,7 @@ function DocumentUploader({ documents, onChange }) {
                     href={doc.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] font-semibold text-sky-700 hover:underline"
+                    className="text-[11px] font-semibold text-emerald-700 hover:underline"
                   >
                     {td("view")}
                   </a>
@@ -188,6 +191,9 @@ function ProfileViewMode({
   hasPendingChanges,
   publicHref,
   onEdit,
+  onTogglePublic,
+  togglingPublic,
+  canHidePublicPage = false,
 }) {
   const te = useTranslations("supplier.tradeProvider.editor");
   const ts = useTranslations("supplier.tradeProvider");
@@ -198,6 +204,7 @@ function ProfileViewMode({
     provider.entityType === "individual" ? ts("entityIndividual") : ts("entityCompany");
   const displayName =
     provider.entityType === "individual" ? profileFullName || provider.displayName : provider.displayName;
+  const isPublic = provider.isPublic !== false;
 
   const groupedServices = useMemo(() => {
     const groups = {};
@@ -211,37 +218,29 @@ function ProfileViewMode({
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 pb-20 sm:pb-4">
-      {/* Hero */}
-      <section className="overflow-hidden rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-600 via-sky-700 to-slate-800 text-white shadow-md">
-        <div className="px-4 py-5 sm:px-6 sm:py-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset ${status.className}`}>
-                  {status.text}
-                </span>
-                <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium text-sky-50">
-                  {entityLabel}
-                </span>
-              </div>
-              <h2 className="text-xl font-black leading-snug sm:text-2xl">{displayName}</h2>
-              <p className="text-sm text-sky-100/90">{te("heroSubtitle")}</p>
+      <section className={`${dash.card} ${dash.cardBody}`}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset ${status.className}`}>
+                {status.text}
+              </span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
+                {entityLabel}
+              </span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href={publicHref}
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-white/95 px-4 text-sm font-bold text-sky-800 transition hover:bg-white"
-              >
+            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">{displayName}</h2>
+            <p className="text-sm text-slate-500">{te("heroSubtitle")}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {publicHref ? (
+              <Link href={publicHref} className={`${dash.btnSecondary} min-h-10`}>
                 {te("viewPublicPage")}
               </Link>
-              <button
-                type="button"
-                onClick={onEdit}
-                className="inline-flex h-10 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
-              >
-                {te("edit")}
-              </button>
-            </div>
+            ) : null}
+            <button type="button" onClick={onEdit} className={`${dash.btnPrimary} min-h-10`}>
+              {te("edit")}
+            </button>
           </div>
         </div>
       </section>
@@ -256,6 +255,46 @@ function ProfileViewMode({
         </div>
       ) : null}
 
+      <div className={`${dash.card} ${dash.cardBody}`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-bold text-slate-900">نمایش صفحه خدمات</p>
+            {canHidePublicPage ? (
+              <p className="mt-0.5 text-xs text-slate-500">
+                با غیرفعال کردن، صفحه از دسترس عموم خارج می‌شود؛ داده حذف نمی‌شود.
+              </p>
+            ) : (
+              <p className="mt-0.5 text-xs text-slate-500">
+                صفحه شما همیشه عمومی است. خصوصی‌سازی فقط با مجوز مدیریت ممکن است.
+              </p>
+            )}
+            {provider.profileSlug ? (
+              <p className="mt-1 text-[11px] text-slate-400" dir="ltr">
+                /{provider.profileSlug}
+              </p>
+            ) : null}
+          </div>
+          {canHidePublicPage ? (
+            <button
+              type="button"
+              disabled={togglingPublic}
+              onClick={() => onTogglePublic?.(!isPublic)}
+              className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-bold transition disabled:opacity-60 ${
+                isPublic
+                  ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+              }`}
+            >
+              {togglingPublic ? "…" : isPublic ? "غیرفعال‌سازی صفحه" : "فعال‌سازی صفحه"}
+            </button>
+          ) : (
+            <span className="inline-flex min-h-10 items-center rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-800">
+              عمومی
+            </span>
+          )}
+        </div>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
       <section className={`${dash.card} ${dash.cardBody}`}>
         <h3 className="mb-3 text-sm font-bold text-slate-900">{te("contactInfo")}</h3>
@@ -263,11 +302,13 @@ function ProfileViewMode({
           <InfoTile label={te("contactName")} value={provider.contactName || profileFullName} />
           <InfoTile label={te("phone")} value={provider.phone} dir="ltr" />
           <InfoTile label={te("email")} value={provider.email} dir="ltr" />
-          <InfoTile
-            label={te("experience")}
-            value={provider.experienceYears != null ? ts("experienceYears", { years: provider.experienceYears }) : null}
-          />
+          <InfoTile label="نام نمایشی" value={provider.displayName} />
         </div>
+        {provider.notes ? (
+          <div className="mt-3">
+            <TextBlock label="درباره خدمات" value={provider.notes} />
+          </div>
+        ) : null}
       </section>
 
       <section className={`${dash.card} ${dash.cardBody}`}>
@@ -276,12 +317,12 @@ function ProfileViewMode({
           <div className="space-y-4">
             {groupedServices.map(([category, subs]) => (
               <div key={category}>
-                <p className="mb-2 text-xs font-bold text-sky-800">{category}</p>
+                <p className="mb-2 text-xs font-bold text-emerald-800">{category}</p>
                 <div className="flex flex-wrap gap-2">
                   {subs.map((sub) => (
                     <span
                       key={`${category}-${sub}`}
-                      className="inline-flex rounded-lg border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900"
+                      className="inline-flex rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900"
                     >
                       {sub}
                     </span>
@@ -296,51 +337,44 @@ function ProfileViewMode({
       </section>
       </div>
 
-      {(provider.countriesRoutes ||
-        provider.licenses ||
-        provider.servicesOffered ||
-        provider.notes ||
-        documents.length > 0) && (
-        <section className={`${dash.card} ${dash.cardBody} space-y-3`}>
-          <h3 className="text-sm font-bold text-slate-900">{te("detailsAndDocs")}</h3>
-          <TextBlock label={te("routes")} value={provider.countriesRoutes} />
-          <TextBlock label={te("licenses")} value={provider.licenses} />
-          <TextBlock label={te("servicesOffered")} value={provider.servicesOffered} />
-          <TextBlock label={te("notes")} value={provider.notes} />
+      <PublicHoursAndMap
+        businessHours={provider.businessHours ? mergeBusinessHours(provider.businessHours) : null}
+        latitude={provider.latitude}
+        longitude={provider.longitude}
+        addressLabel={provider.addressLabel}
+      />
 
-          {documents.length > 0 ? (
-            <div>
-              <p className="mb-2 text-[11px] font-semibold text-slate-500">{ts("documents.title")}</p>
-              <ul className="space-y-2">
-                {documents.map((doc, i) => (
-                  <li
-                    key={`${doc.id || doc.url}-${i}`}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5"
+      {documents.length > 0 ? (
+        <section className={`${dash.card} ${dash.cardBody} space-y-3`}>
+          <h3 className="text-sm font-bold text-slate-900">{ts("documents.title")}</h3>
+          <ul className="space-y-2">
+            {documents.map((doc, i) => (
+              <li
+                key={`${doc.id || doc.url}-${i}`}
+                className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5"
+              >
+                <span className="truncate text-sm font-medium text-slate-800">{doc.name}</span>
+                {doc.url ? (
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 text-xs font-semibold text-emerald-700 hover:underline"
                   >
-                    <span className="truncate text-sm font-medium text-slate-800">{doc.name}</span>
-                    {doc.url ? (
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 text-xs font-semibold text-sky-700 hover:underline"
-                      >
-                        {ts("documents.view")}
-                      </a>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+                    {ts("documents.view")}
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </section>
-      )}
+      ) : null}
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur sm:hidden">
         <button
           type="button"
           onClick={onEdit}
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-sky-600 text-sm font-bold text-white"
+          className={`${dash.btnPrimary} h-11 w-full`}
         >
           {te("editMobileCta")}
         </button>
@@ -360,7 +394,6 @@ function ProfileEditMode({
   language,
   t,
   isRTL,
-  profileFullName,
   saving,
   onSubmit,
   onCancel,
@@ -375,7 +408,7 @@ function ProfileEditMode({
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-6xl space-y-4 pb-6">
-      <div className="rounded-xl border border-sky-100 bg-sky-50/60 px-4 py-3 text-sm leading-7 text-sky-900">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-700">
         {te("saveNotice")}
       </div>
 
@@ -385,31 +418,15 @@ function ProfileEditMode({
             <h2 className="mb-4 text-sm font-bold text-slate-900">{te("pageDetails")}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block sm:col-span-2">
-                <span className="text-sm font-medium text-slate-700">{te("type")}</span>
-                <select name="entityType" value={form.entityType} onChange={handleChange} className={inputClass}>
-                  <option value="company">{ts("entityCompany")}</option>
-                  <option value="individual">{ts("entityIndividual")}</option>
-                </select>
+                <span className="text-sm font-medium text-slate-700">نام نمایشی *</span>
+                <input
+                  name="displayName"
+                  value={form.displayName}
+                  onChange={handleChange}
+                  required
+                  className={inputClass}
+                />
               </label>
-
-              {form.entityType === "company" ? (
-                <label className="block sm:col-span-2">
-                  <span className="text-sm font-medium text-slate-700">{te("companyName")}</span>
-                  <input
-                    name="displayName"
-                    value={form.displayName}
-                    onChange={handleChange}
-                    required
-                    className={inputClass}
-                  />
-                </label>
-              ) : (
-                <div className="rounded-xl border border-slate-200 bg-slate-100/80 px-4 py-3 sm:col-span-2">
-                  <p className="text-xs font-semibold text-slate-500">{te("displayName")}</p>
-                  <p className="mt-1 text-sm font-medium text-slate-800">{profileFullName}</p>
-                </div>
-              )}
-
               <label className="block">
                 <span className="text-sm font-medium text-slate-700">{te("phone")} *</span>
                 <input
@@ -433,48 +450,47 @@ function ProfileEditMode({
                 />
               </label>
               <label className="block sm:col-span-2">
-                <span className="text-sm font-medium text-slate-700">{te("experienceYears")}</span>
-                <input
-                  name="experienceYears"
-                  type="number"
-                  min="0"
-                  max="80"
-                  value={form.experienceYears}
+                <span className="text-sm font-medium text-slate-700">درباره خدمات</span>
+                <textarea
+                  name="notes"
+                  value={form.notes}
                   onChange={handleChange}
+                  rows={3}
                   className={inputClass}
                 />
               </label>
             </div>
           </section>
 
+          <section className={`${dash.card} ${dash.cardBody} space-y-3`}>
+            <h2 className="text-sm font-bold text-slate-900">موقعیت روی نقشه</h2>
+            <LocationPickerMap
+              latitude={form.latitude}
+              longitude={form.longitude}
+              addressLabel={form.addressLabel}
+              onChange={(loc) =>
+                setForm((f) => ({
+                  ...f,
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                  addressLabel: loc.addressLabel,
+                }))
+              }
+            />
+          </section>
+
+          <section className={`${dash.card} ${dash.cardBody} space-y-3`}>
+            <h2 className="text-sm font-bold text-slate-900">ساعات کاری</h2>
+            <BusinessHoursEditor
+              value={form.businessHours || DEFAULT_BUSINESS_HOURS}
+              onChange={(businessHours) => setForm((f) => ({ ...f, businessHours }))}
+            />
+          </section>
+
           <section className={`${dash.card} ${dash.cardBody} space-y-4`}>
             <h2 className="text-sm font-bold text-slate-900">{te("detailsAndDocs")}</h2>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">{te("routes")}</span>
-              <input name="countriesRoutes" value={form.countriesRoutes} onChange={handleChange} className={inputClass} />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">{te("licenses")}</span>
-              <textarea name="licenses" value={form.licenses} onChange={handleChange} rows={2} className={inputClass} />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">{te("servicesOffered")}</span>
-              <textarea
-                name="servicesOffered"
-                value={form.servicesOffered}
-                onChange={handleChange}
-                rows={3}
-                className={inputClass}
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">{te("notes")}</span>
-              <textarea name="notes" value={form.notes} onChange={handleChange} rows={2} className={inputClass} />
-            </label>
-            <div>
-              <p className="mb-2 text-sm font-medium text-slate-700">{ts("documents.optional")}</p>
-              <DocumentUploader documents={documents} onChange={setDocuments} />
-            </div>
+            <p className="text-xs text-slate-500">{ts("documents.optional")}</p>
+            <DocumentUploader documents={documents} onChange={setDocuments} />
           </section>
         </div>
 
@@ -497,23 +513,25 @@ function ProfileEditMode({
         <button
           type="submit"
           disabled={saving}
-          className="h-11 flex-1 rounded-xl bg-sky-600 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60 sm:flex-none sm:px-6"
+          className={`${dash.btnPrimary} h-11 flex-1 sm:flex-none sm:px-6`}
         >
           {saving ? te("submitting") : te("submitForApproval")}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="h-11 flex-1 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:flex-none sm:px-6"
+          className={`${dash.btnSecondary} h-11 flex-1 sm:flex-none sm:px-6`}
         >
           {te("cancel")}
         </button>
-        <Link
-          href={publicHref}
-          className="hidden h-11 items-center justify-center rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-600 hover:bg-slate-50 sm:inline-flex"
-        >
-          {te("preview")}
-        </Link>
+        {publicHref ? (
+          <Link
+            href={publicHref}
+            className={`${dash.btnSecondary} hidden h-11 sm:inline-flex`}
+          >
+            {te("preview")}
+          </Link>
+        ) : null}
       </div>
     </form>
   );
@@ -529,6 +547,7 @@ export default function ServiceProviderProfileEditor() {
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [togglingPublic, setTogglingPublic] = useState(false);
   const [form, setForm] = useState(null);
   const [selectedServices, setSelectedServices] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -606,8 +625,8 @@ export default function ServiceProviderProfileEditor() {
     e.preventDefault();
     if (!form || !provider) return;
 
-    const displayName = form.entityType === "individual" ? profileFullName : form.displayName.trim();
-    if (!displayName || !form.phone.trim()) {
+    const displayName = String(form.displayName || "").trim() || profileFullName;
+    if (!displayName || !String(form.phone || "").trim()) {
       showToast.error(te("namePhoneRequired"));
       return;
     }
@@ -622,9 +641,16 @@ export default function ServiceProviderProfileEditor() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          entityType: "individual",
           displayName,
           contactName: profileFullName,
+          phone: form.phone,
+          email: form.email || "",
+          notes: form.notes || "",
+          businessHours: form.businessHours,
+          latitude: form.latitude,
+          longitude: form.longitude,
+          addressLabel: form.addressLabel || "",
           selectedServices: selectedServices.map(({ categoryId, subcategoryId }) => ({
             categoryId,
             subcategoryId,
@@ -653,7 +679,7 @@ export default function ServiceProviderProfileEditor() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
       </div>
     );
   }
@@ -666,10 +692,7 @@ export default function ServiceProviderProfileEditor() {
           <p className={dash.pageSubtitle}>{te("notMemberYet")}</p>
         </header>
         <div className={`${dash.card} ${dash.cardBody}`}>
-          <Link
-            href="/trade-services/register"
-            className="inline-flex rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700"
-          >
+          <Link href="/trade-services/register" className={`${dash.btnPrimary} min-h-11`}>
             {te("joinProviders")}
           </Link>
         </div>
@@ -678,7 +701,29 @@ export default function ServiceProviderProfileEditor() {
   }
 
   const hasPendingChanges = Boolean(provider.pendingChanges) && provider.status === "approved";
-  const publicHref = `/trade-services/provider/${provider.id}`;
+  const publicHref = provider.profileSlug ? `/${provider.profileSlug}` : null;
+
+  const onTogglePublic = async (nextPublic) => {
+    setTogglingPublic(true);
+    try {
+      const res = await authFetch(API_ENDPOINTS.tradeServiceProviders.updateVisibility, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublic: nextPublic }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        showToast.error(json.message || "خطا در تغییر وضعیت");
+        return;
+      }
+      showToast.success(json.message || "ذخیره شد");
+      await loadProvider();
+    } catch {
+      showToast.error("خطا در تغییر وضعیت");
+    } finally {
+      setTogglingPublic(false);
+    }
+  };
 
   return (
     <div className={dash.page} dir={isRTL ? "rtl" : "ltr"}>
@@ -698,6 +743,9 @@ export default function ServiceProviderProfileEditor() {
           hasPendingChanges={hasPendingChanges}
           publicHref={publicHref}
           onEdit={startEdit}
+          onTogglePublic={onTogglePublic}
+          togglingPublic={togglingPublic}
+          canHidePublicPage={!!provider.canHidePublicPage}
         />
       ) : (
         <ProfileEditMode
@@ -711,7 +759,6 @@ export default function ServiceProviderProfileEditor() {
           language={language}
           t={t}
           isRTL={isRTL}
-          profileFullName={profileFullName}
           saving={saving}
           onSubmit={handleSubmit}
           onCancel={cancelEdit}

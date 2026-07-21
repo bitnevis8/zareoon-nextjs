@@ -47,6 +47,8 @@ const localeDirs = fs
 const allLocales = new Set([
   ...localeDirs,
   "en",
+  "es",
+  "nl",
   "ar",
   "ru",
   "ur",

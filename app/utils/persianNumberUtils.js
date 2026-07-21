@@ -7,6 +7,28 @@ export function toPersianDigits(value) {
   return String(value ?? "").replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]);
 }
 
+export function toArabicIndicDigits(value) {
+  return String(value ?? "").replace(/\d/g, (d) => ARABIC_DIGITS[Number(d)]);
+}
+
+/** Western (0-9) digits — strips any Persian/Arabic-Indic numerals first. */
+export function toWesternDigits(value) {
+  return String(value ?? "")
+    .replace(/[۰-۹]/g, (ch) => String(PERSIAN_DIGITS.indexOf(ch)))
+    .replace(/[٠-٩]/g, (ch) => String(ARABIC_DIGITS.indexOf(ch)));
+}
+
+/**
+ * Locale-aware digit shaping for phones, years, etc.
+ * fa → Persian · ar → Arabic-Indic · others → Western
+ */
+export function formatLocalizedDigits(value, language = "fa") {
+  const western = toWesternDigits(value);
+  if (language === "fa") return toPersianDigits(western);
+  if (language === "ar") return toArabicIndicDigits(western);
+  return western;
+}
+
 export function parsePersianNumber(input) {
   if (input == null || input === "") return null;
   let s = String(input);

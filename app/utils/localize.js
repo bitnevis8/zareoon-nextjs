@@ -10,9 +10,16 @@ export function getLocalizedText(entity, language, fallbackKey = "name") {
   if (language === "ar" && entity.arabicName) return entity.arabicName;
   if (language === "tr" && entity.turkishName) return entity.turkishName;
   if (language === "fi" && entity.finnishName) return entity.finnishName;
+  if (language === "es" && entity.spanishName) return entity.spanishName;
+  if (language === "nl" && entity.dutchName) return entity.dutchName;
   if (language === "ur" && entity.urduName) return entity.urduName;
   if (entity.translations?.[language]?.name) return entity.translations[language].name;
-  if ((language === "tr" || language === "fi" || language === "ur") && entity.englishName) return entity.englishName;
+  if (
+    (language === "tr" || language === "fi" || language === "ur" || language === "es" || language === "nl") &&
+    entity.englishName
+  ) {
+    return entity.englishName;
+  }
   return entity[fallbackKey] || "";
 }
 
@@ -25,6 +32,8 @@ export function getLocalizedLotLabel(lot, language, t) {
 
 export function getNumberLocale(language) {
   if (language === "en") return "en-US";
+  if (language === "es") return "es-ES";
+  if (language === "nl") return "nl-NL";
   if (language === "ru") return "ru-RU";
   if (language === "ar") return "ar-EG";
   if (language === "tr") return "tr-TR";

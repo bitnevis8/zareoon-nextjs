@@ -10,15 +10,14 @@ import AdminDashboardHome from "../components/dashboard/AdminDashboardHome";
 import SupplierDashboardHome from "../components/dashboard/SupplierDashboardHome";
 import ApplicantDashboardHome from "../components/dashboard/ApplicantDashboardHome";
 import TradeServicesDashboardHome from "../components/dashboard/TradeServicesDashboardHome";
+import MobileDashboardHome from "../components/dashboard/MobileDashboardHome";
 import { dash } from "../components/dashboard/dashboardTheme";
 
-function DashboardContent() {
-  const { user } = useAuth();
+function DesktopDashboardBody({ user }) {
   const { isSellerView, isServicesView, isApplicantView } = useDashboardPersona();
   const admin = isAdmin(user);
   const t = useTranslations("dashboard");
 
-  // هر تب «در نقش» داشبورد خودش را دارد
   if (isServicesView) {
     return <TradeServicesDashboardHome user={user} />;
   }
@@ -31,7 +30,6 @@ function DashboardContent() {
     return <ApplicantDashboardHome user={user} />;
   }
 
-  // مدیر بدون persona فعال → نمای مدیریت
   if (admin) {
     return <AdminDashboardHome user={user} />;
   }
@@ -49,6 +47,19 @@ function DashboardContent() {
         </Link>
       </div>
     </div>
+  );
+}
+
+function DashboardContent() {
+  const { user } = useAuth();
+
+  return (
+    <>
+      <MobileDashboardHome />
+      <div className="hidden md:block">
+        <DesktopDashboardBody user={user} />
+      </div>
+    </>
   );
 }
 

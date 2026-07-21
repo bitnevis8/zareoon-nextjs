@@ -32,7 +32,7 @@ export default function LoginRequiredMessage({ children, className = "" }) {
           <div className="mt-2">
             <Link 
               href="/auth/login" 
-              className="text-blue-600 hover:text-blue-800 underline text-xs"
+              className="text-xs text-emerald-700 underline hover:text-emerald-900"
             >
               {t("loginRegister")}
             </Link>

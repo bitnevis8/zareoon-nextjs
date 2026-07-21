@@ -25,7 +25,7 @@
     "resultLabel": "",
     "swapAriaLabel": "",
     "swapTitle": "",
-    "rateLine": "<one>1 {fromCode}</one><approx>≈</approx><highlight>{rateValue} {toCode}</highlight>"
+    "rateLine": ""
   },
   "errors": {
     "fetchFailed": "",

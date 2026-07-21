@@ -3,17 +3,17 @@
     "lastUpdated": ""
   },
   "nav": {
-    "aria": "",
-    "about": "",
-    "terms": "",
-    "privacy": "",
-    "sellers": "",
-    "buyers": "",
-    "refund": "",
-    "cancellation": "",
-    "disputes": "",
-    "help": "",
-    "pricing": ""
+    "aria": "Yasal belgeler ve yardım",
+    "about": "Hakkımızda",
+    "terms": "Şartlar ve koşullar",
+    "privacy": "Gizlilik",
+    "sellers": "Satıcı şartları",
+    "buyers": "Alıcı şartları",
+    "refund": "İade",
+    "cancellation": "İptal",
+    "disputes": "Uyuşmazlık",
+    "help": "Yardım",
+    "pricing": "Abonelikler"
   },
   "terms": {
     "title": "",
@@ -522,7 +522,7 @@
     }
   },
   "homepageDisclaimer": {
-    "title": "",
-    "body": ""
+    "title": "Satıcılar ve alıcılar arasında doğrudan bağlantı",
+    "body": "Zareoon yalnızca alıcılar, satıcılar ve hizmet sağlayıcılar arasında doğrudan iletişim platformudur. Koşullar, kalite, fiyat, ödeme ve teslimat taraflarca belirlenir; Zareoon işlemlerden sorumlu değildir."
   }
 }

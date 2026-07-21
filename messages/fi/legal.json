@@ -1,1 +1,528 @@
-{}
+{
+  "common": {
+    "lastUpdated": ""
+  },
+  "nav": {
+    "aria": "Oikeudelliset asiakirjat ja ohjeet",
+    "about": "Tietoa meistä",
+    "terms": "Käyttöehdot",
+    "privacy": "Tietosuoja",
+    "sellers": "Myyjän ehdot",
+    "buyers": "Ostajan ehdot",
+    "refund": "Palautukset",
+    "cancellation": "Peruutus",
+    "disputes": "Riidanratkaisu",
+    "help": "Ohjeet",
+    "pricing": "Tilaukset"
+  },
+  "terms": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "subtitle": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "paragraphs": [
+        ""
+      ],
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "privacy": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "sellers": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "buyers": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "refund": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "cancellation": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "disputes": {
+    "title": "",
+    "subtitle": "",
+    "highlight": {
+      "title": "",
+      "paragraphs": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "sections": [
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "paragraphs": [
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": ""
+    }
+  },
+  "about": {
+    "title": "",
+    "subtitle": "",
+    "sections": [
+      {
+        "title": "",
+        "paragraphs": [
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "title": "",
+        "tone": "",
+        "items": [
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "addressLabel": "",
+      "address": ""
+    }
+  },
+  "help": {
+    "title": "",
+    "subtitle": "",
+    "customerGuide": {
+      "title": "",
+      "sections": {
+        "signup": {
+          "title": "",
+          "body": ""
+        },
+        "ordering": {
+          "title": "",
+          "body": ""
+        },
+        "tracking": {
+          "title": "",
+          "body": ""
+        }
+      }
+    },
+    "supplierGuide": {
+      "title": "",
+      "sections": {
+        "inventory": {
+          "title": "",
+          "body": ""
+        },
+        "orders": {
+          "title": "",
+          "body": ""
+        },
+        "products": {
+          "title": "",
+          "body": ""
+        }
+      }
+    },
+    "contact": {
+      "title": "",
+      "phoneLabel": "",
+      "phone": "",
+      "emailLabel": "",
+      "email": "",
+      "hoursLabel": "",
+      "hours": ""
+    }
+  },
+  "homepageDisclaimer": {
+    "title": "Suora yhteys myyjien ja ostajien välillä",
+    "body": "Zareoon on vain alusta ostajien, myyjien ja palveluntarjoajien suoraan yhteydenpitoon. Ehdot, laatu, hinta, maksu ja toimitus ovat osapuolten vastuulla; Zareoon ei vastaa kaupoista."
+  }
+}

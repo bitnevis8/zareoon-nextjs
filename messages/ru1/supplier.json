@@ -31,6 +31,7 @@
     "completedDeals": "",
     "contact": "",
     "activities": "",
+    "postsTabTitle": "",
     "noPosts": "",
     "reviewsTitle": "",
     "canReviewHint": "",
@@ -65,7 +66,11 @@
     "tieredPrice": "",
     "defaultProductName": "",
     "stock": "",
-    "currencyToman": ""
+    "currencyToman": "",
+    "addProduct": "",
+    "manage": "",
+    "emptyOwner": "",
+    "emptyPublic": ""
   },
   "tradeServices": {
     "exploreCta": "",
@@ -77,8 +82,13 @@
     "categoriesTitle": "",
     "categoriesDesc": "",
     "subcategoriesTitle": "",
+    "subcategoriesDesc": "",
+    "filterAll": "",
+    "clearFilter": "",
     "providersTitle": "",
     "providersDesc": "",
+    "providersFilteredDesc": "",
+    "noProvidersForFilter": "",
     "noProvidersYet": "",
     "forBuyers": "",
     "forProviders": ""
@@ -105,6 +115,11 @@
     "profileNameHint": "",
     "vipBadge": "",
     "vipMessage": "",
+    "defaultVipMessage": {
+      "fa": "",
+      "en": "",
+      "ru": ""
+    },
     "vipCategoryLocked": "",
     "viewProfile": "",
     "profileNotFound": "",

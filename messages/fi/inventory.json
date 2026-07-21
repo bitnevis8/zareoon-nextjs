@@ -65,7 +65,8 @@
     "successCreated": "",
     "successRedirecting": "",
     "alertSelectProduct": "",
-    "alertEnterQuantity": ""
+    "alertEnterQuantity": "",
+    "alertListingBlocked": ""
   },
   "create": {
     "title": "",
@@ -83,6 +84,12 @@
     "noOptions": "",
     "unit": "",
     "unitPlaceholder": "",
+    "packagingType": "",
+    "packagingPlaceholder": "",
+    "productFilters": "",
+    "hsCode": "",
+    "attributeSet": "",
+    "listingModeratedNote": "",
     "qualityGrade": "",
     "status": "",
     "totalQuantity": "",

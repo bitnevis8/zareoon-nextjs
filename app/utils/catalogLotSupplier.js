@@ -9,11 +9,8 @@ export function getLotSupplierProfileUrl(lot) {
   const supplier = getLotSupplier(lot);
   if (!supplier?.id) return null;
   const slug = supplier.account?.profileSlug || supplier.profileSlug;
-  if (slug) return providerPublicPath(slug);
-  if (supplier.username && !String(supplier.username).startsWith("temp")) {
-    return providerPublicPath(supplier.username);
-  }
-  return providerPublicPath(supplier.id);
+  if (!slug || /^\d+$/.test(String(slug))) return null;
+  return providerPublicPath(slug);
 }
 
 export function getLotSupplierDisplayName(lot) {

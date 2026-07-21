@@ -254,5 +254,138 @@
       "title": "",
       "desc": ""
     }
+  },
+  "homeBuyer": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "requests": "",
+      "open": "",
+      "openHint": "",
+      "cart": "",
+      "orders": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "submit": "",
+      "submitDesc": "",
+      "browse": "",
+      "browseDesc": "",
+      "cart": "",
+      "cartDesc": "",
+      "messages": "",
+      "messagesDesc": ""
+    },
+    "recentRequests": "",
+    "viewAll": "",
+    "emptyRequests": ""
+  },
+  "homeSeller": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "joinTitle": "",
+    "joinSubtitle": "",
+    "joinEmpty": "",
+    "joinCta": "",
+    "joinBody": "",
+    "joinFootnote": "",
+    "kpi": {
+      "products": "",
+      "orders": "",
+      "pending": "",
+      "incoming": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "addProduct": "",
+      "addProductDesc": "",
+      "myProducts": "",
+      "myProductsDesc": "",
+      "shop": "",
+      "shopDesc": "",
+      "incoming": "",
+      "incomingDesc": ""
+    },
+    "recentOrders": "",
+    "viewAll": "",
+    "emptyOrders": "",
+    "orderHash": ""
+  },
+  "homeProvider": {
+    "badge": "",
+    "title": "",
+    "subtitleGuest": "",
+    "subtitleMember": "",
+    "status": {
+      "pending": "",
+      "approved": "",
+      "rejected": "",
+      "none": ""
+    },
+    "statusLine": "",
+    "kpi": {
+      "incoming": "",
+      "orders": "",
+      "services": "",
+      "public": "",
+      "publicOn": "",
+      "publicOff": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "join": "",
+      "joinDesc": "",
+      "catalog": "",
+      "catalogDesc": "",
+      "profile": "",
+      "profileDesc": "",
+      "incoming": "",
+      "incomingDesc": "",
+      "orders": "",
+      "ordersDesc": "",
+      "messages": "",
+      "messagesDesc": ""
+    },
+    "viewPublic": "",
+    "pendingHint": ""
+  },
+  "homeAdmin": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "users": "",
+      "orders": "",
+      "pendingOrders": "",
+      "products": "",
+      "lotsTotal": "",
+      "providers": "",
+      "pendingProviders": ""
+    },
+    "alert": {
+      "pendingOrders": "",
+      "pendingProviders": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "users": "",
+      "usersDesc": "",
+      "orders": "",
+      "ordersDesc": "",
+      "inventory": "",
+      "inventoryDesc": "",
+      "providers": "",
+      "providersDesc": "",
+      "settings": "",
+      "settingsDesc": "",
+      "homepage": "",
+      "homepageDesc": ""
+    },
+    "recentOrders": "",
+    "viewAll": "",
+    "emptyOrders": "",
+    "orderHash": ""
   }
 }

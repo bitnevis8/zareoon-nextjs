@@ -28,11 +28,11 @@ export default function SiteChrome({ children }) {
             {children}
           </div>
         ) : (
-          <main className="flex flex-1 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom))] max-lg:pt-[var(--site-mobile-top-chrome)] lg:pb-0 lg:pt-0">
+          <main className="flex flex-1 flex-col max-lg:pt-[var(--site-mobile-top-chrome)] lg:pt-0">
             {children}
           </main>
         )}
-        {!isDashboard ? <Footer className="hidden lg:block" /> : null}
+        {!isDashboard ? <Footer /> : null}
         <ClientSideWrapper>
           <GlobalSidebar />
         </ClientSideWrapper>

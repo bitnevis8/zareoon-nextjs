@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import exchangeMeta from "../../../messages/fa/exchange.json";
-import shared from "../../../messages/fa/shared.json";
 import { apiError } from "@/app/utils/apiErrors";
 
 const TGJU_URLS = ["https://call2.tgju.org/ajax.json", "https://call5.tgju.org/ajax.json"];
 
+/** Labels are resolved client-side from shared.currencies per locale. */
 const CURRENCY_KEYS = (exchangeMeta.apiKeys || []).map((c) => ({
   id: c.id,
   code: c.code,
   kind: c.kind,
-  label: shared.currencies[c.labelKey]?.label || c.labelKey,
+  labelKey: c.labelKey || c.code,
 }));
 
 function parsePrice(raw) {

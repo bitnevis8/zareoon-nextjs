@@ -18,7 +18,9 @@ export default function DashboardSettingsPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [tradeProvidersAutoApprove, setTradeProvidersAutoApprove] = useState(false);
+  const [tradeProvidersAutoApprove, setTradeProvidersAutoApprove] = useState(true);
+  const [shopsAutoApprove, setShopsAutoApprove] = useState(true);
+  const [pageDeletionGraceDays, setPageDeletionGraceDays] = useState(30);
   const [vipTradeCategories, setVipTradeCategories] = useState({});
   const [providers, setProviders] = useState([]);
   const [bannerUploading, setBannerUploading] = useState(null);
@@ -38,7 +40,9 @@ export default function DashboardSettingsPage() {
           providersRes.json(),
         ]);
         if (!cancelled && settingsData.success) {
-          setTradeProvidersAutoApprove(!!settingsData.data?.tradeProvidersAutoApprove);
+          setTradeProvidersAutoApprove(settingsData.data?.tradeProvidersAutoApprove !== false);
+          setShopsAutoApprove(settingsData.data?.shopsAutoApprove !== false);
+          setPageDeletionGraceDays(Number(settingsData.data?.pageDeletionGraceDays) || 30);
           setVipTradeCategories(settingsData.data?.vipTradeCategories || {});
         }
         if (!cancelled && providersData.success) {
@@ -166,12 +170,20 @@ export default function DashboardSettingsPage() {
       const res = await authFetch(API_ENDPOINTS.siteSettings.updateTrade, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tradeProvidersAutoApprove, vipTradeCategories }),
+        body: JSON.stringify({
+          tradeProvidersAutoApprove,
+          shopsAutoApprove,
+          pageDeletionGraceDays: Number(pageDeletionGraceDays) || 30,
+          vipTradeCategories,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
         showToast.success(data.message || t("settings.saved"));
         if (data.data?.vipTradeCategories) setVipTradeCategories(data.data.vipTradeCategories);
+        if (data.data?.pageDeletionGraceDays != null) {
+          setPageDeletionGraceDays(Number(data.data.pageDeletionGraceDays) || 30);
+        }
       } else {
         showToast.error(data.message || t("settings.saveError"));
       }
@@ -203,7 +215,22 @@ export default function DashboardSettingsPage() {
           {t("settings.tradeSectionDesc")}
         </p>
 
-        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-emerald-200">
+        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-4 transition hover:border-emerald-200">
+          <input
+            type="checkbox"
+            checked={shopsAutoApprove}
+            onChange={(e) => setShopsAutoApprove(e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-slate-800">{t("settings.shopsAutoApproveLabel")}</span>
+            <span className="mt-1 block text-xs leading-6 text-slate-500">
+              {shopsAutoApprove ? t("settings.autoApproveOn") : t("settings.autoApproveOff")}
+            </span>
+          </span>
+        </label>
+
+        <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-4 transition hover:border-emerald-200">
           <input
             type="checkbox"
             checked={tradeProvidersAutoApprove}
@@ -218,6 +245,19 @@ export default function DashboardSettingsPage() {
                 : t("settings.autoApproveOff")}
             </span>
           </span>
+        </label>
+
+        <label className="mt-3 block rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+          <span className="block text-sm font-semibold text-slate-800">{t("settings.deletionGraceLabel")}</span>
+          <span className="mt-1 block text-xs leading-6 text-slate-500">{t("settings.deletionGraceHint")}</span>
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={pageDeletionGraceDays}
+            onChange={(e) => setPageDeletionGraceDays(e.target.value)}
+            className={`${dash.input} mt-3 max-w-[8rem]`}
+          />
         </label>
       </section>
 

@@ -5,13 +5,16 @@
 | کد | زبان |
 |----|------|
 | `fa` | فارسی (پیش‌فرض — منبع اصلی) |
+| `es` | Español |
+| `nl` | Nederlands |
 | `en` | English |
 | `ar` | العربية |
 | `ru` | Русский |
 | `ur` | اردو |
 | `fi` | Suomi |
+| `tr` | Türkçe |
 
-افزودن زبان جدید: کد را به `app/config/siteLanguages.js` اضافه کنید، سپس `npm run i18n:scaffold`.
+افزودن زبان جدید: کد را به `app/config/siteLanguages.js` اضافه کنید، سپس فقط پوشهٔ همان locale را scaffold کنید (از `i18n:scaffold` کامل پرهیز کنید چون localeهای پر را خالی می‌کند).
 
 ## ساختار پوشه
 
@@ -25,7 +28,7 @@ messages/
     dashboard.json       ← breadcrumb داشبورد
     escrow.json          ← t('escrow.pageTitle') — namespace escrow
     tradeServices.json   ← کatalog خدمات بازرگانی
-  en/ ar/ ru/ ur/ fi/    ← ترجمه — همان نام فایل‌ها
+  en/ es/ nl/ ar/ ru/ ur/ fi/ tr/  ← ترجمه — همان نام فایل‌ها
   loadMessages.js        ← merge: fa پایه + locale روی آن
 ```
 

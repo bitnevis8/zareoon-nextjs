@@ -4,6 +4,8 @@
  */
 import faTradeServices from "../../messages/fa/tradeServices.json";
 import enTradeServices from "../../messages/en/tradeServices.json";
+import esTradeServices from "../../messages/es/tradeServices.json";
+import nlTradeServices from "../../messages/nl/tradeServices.json";
 import ruTradeServices from "../../messages/ru/tradeServices.json";
 import arTradeServices from "../../messages/ar/tradeServices.json";
 import urTradeServices from "../../messages/ur/tradeServices.json";
@@ -29,6 +31,8 @@ export { SHARED_CATEGORY_IDS, LEGACY_SERVICE_TYPE_MAP, L1_CATEGORY_IDS, isValidL
 const TRADE_SERVICES_BY_LOCALE = {
   fa: faTradeServices,
   en: enTradeServices,
+  es: esTradeServices,
+  nl: nlTradeServices,
   ru: ruTradeServices,
   ar: arTradeServices,
   ur: urTradeServices,
@@ -60,6 +64,7 @@ export { sampleTradeServiceProviders };
 
 export function getSampleProviders(categoryId) {
   const normalized = LEGACY_SERVICE_TYPE_MAP[categoryId] || categoryId;
+  if (!sampleTradeServiceProviders || typeof sampleTradeServiceProviders !== "object") return [];
   return sampleTradeServiceProviders[normalized] || [];
 }
 

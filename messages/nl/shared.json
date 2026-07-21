@@ -1,0 +1,278 @@
+{
+  "roles": {
+    "super_admin": "",
+    "admin": "",
+    "user": "",
+    "seller": "",
+    "service_provider": "",
+    "customer": "",
+    "supplier": "",
+    "farmer": "",
+    "loader": "",
+    "employee": "",
+    "administrator": ""
+  },
+  "accountNav": {
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": "",
+    "admin": "",
+    "user": ""
+  },
+  "currencies": {
+    "TOMAN": {
+      "label": "Iraanse toman",
+      "shortLabel": "Toman",
+      "wordLabel": "Iraanse toman"
+    },
+    "USD": {
+      "label": "Amerikaanse dollar",
+      "shortLabel": "Dollar",
+      "wordLabel": "Amerikaanse dollar"
+    },
+    "AED": {
+      "label": "VAE-dirham",
+      "shortLabel": "Dirham",
+      "wordLabel": "VAE-dirham"
+    },
+    "EUR": {
+      "label": "Euro",
+      "shortLabel": "Euro",
+      "wordLabel": "Euro"
+    },
+    "GBP": {
+      "label": "Brits pond",
+      "shortLabel": "Pond",
+      "wordLabel": "Brits pond"
+    },
+    "TRY": {
+      "label": "Turkse lira",
+      "shortLabel": "Lira",
+      "wordLabel": "Turkse lira"
+    },
+    "SAR": {
+      "label": "Saoedi-riyal",
+      "shortLabel": "Saoedi-riyal",
+      "wordLabel": "Saoedi-riyal"
+    },
+    "CNY": {
+      "label": "Chinese yuan",
+      "shortLabel": "Yuan",
+      "wordLabel": "Chinese yuan"
+    },
+    "RUB": {
+      "label": "Russische roebel",
+      "shortLabel": "Roebel",
+      "wordLabel": "Russische roebel"
+    },
+    "CAD": {
+      "label": "Canadese dollar",
+      "shortLabel": "Canadese dollar",
+      "wordLabel": "Canadese dollar"
+    },
+    "CHF": {
+      "label": "Zwitserse frank",
+      "shortLabel": "Frank",
+      "wordLabel": "Zwitserse frank"
+    },
+    "JPY": {
+      "label": "Japanse yen",
+      "shortLabel": "Yen",
+      "wordLabel": "Japanse yen"
+    },
+    "AUD": {
+      "label": "Australische dollar",
+      "shortLabel": "Australische dollar",
+      "wordLabel": "Australische dollar"
+    },
+    "USDT": {
+      "label": "Tether (USDT)",
+      "shortLabel": "USDT",
+      "wordLabel": "Tether"
+    },
+    "BTC": {
+      "label": "Bitcoin",
+      "shortLabel": "BTC",
+      "wordLabel": "Bitcoin"
+    },
+    "ETH": {
+      "label": "Ethereum",
+      "shortLabel": "ETH",
+      "wordLabel": "Ethereum"
+    }
+  },
+  "priceCurrencySelect": {
+    "ariaLabel": "Valuta"
+  },
+  "stock": {
+    "empty": "",
+    "emptyRange": "",
+    "low": "",
+    "lowRange": "",
+    "medium": "",
+    "mediumRange": "",
+    "high": "",
+    "highRange": "",
+    "legendTitle": "",
+    "legendAriaLabel": ""
+  },
+  "supplyCountries": {
+    "IR": "",
+    "AE": "",
+    "SA": "",
+    "IQ": "",
+    "TR": "",
+    "OM": "",
+    "QA": "",
+    "KW": "",
+    "PK": "",
+    "AF": "",
+    "US": "",
+    "RU": ""
+  },
+  "supplySource": {
+    "withCity": ""
+  },
+  "entityTypes": {
+    "individual": "",
+    "company": "",
+    "trader": "",
+    "manufacturer": "",
+    "distributor": ""
+  },
+  "vip": {
+    "inspectionStandardsCompany": "Arya Foulad Gharn engineeringinspectie"
+  },
+  "attributeFields": {
+    "yes": "",
+    "no": ""
+  },
+  "documentUpload": {
+    "invalidFormat": "",
+    "fileTooLarge": "",
+    "uploadSuccess": "",
+    "uploadError": "",
+    "deleteSuccess": "",
+    "deleteError": "",
+    "uploading": "",
+    "selectDocuments": "",
+    "hint": "",
+    "uploadedTitle": "",
+    "view": "",
+    "delete": ""
+  },
+  "mediaUpload": {
+    "defaultButtonLabel": "",
+    "loadError": "",
+    "uploadError": "",
+    "deleteConfirm": "",
+    "deleteError": "",
+    "deleteFileError": "",
+    "saveProductFirst": "",
+    "uploading": "",
+    "noFilesYet": "",
+    "delete": ""
+  },
+  "shareButton": {
+    "title": "",
+    "telegram": "",
+    "whatsapp": "",
+    "eitaa": "",
+    "rubika": "",
+    "twitter": "",
+    "copyLink": "",
+    "linkCopied": ""
+  },
+  "tieredPricing": {
+    "levelsCount": "",
+    "title": "",
+    "level": "",
+    "from": "",
+    "to": "",
+    "unlimited": "",
+    "hint": ""
+  },
+  "inventoryPricing": {
+    "calcError": "",
+    "serverError": "",
+    "inventoryInfo": "",
+    "grade": "",
+    "totalStock": "",
+    "availableStock": "",
+    "minOrder": "",
+    "orderQuantity": "",
+    "quantityPlaceholder": "",
+    "calculating": "",
+    "calculatePrice": "",
+    "quantityExceedsStock": "",
+    "calculatedPrice": "",
+    "pricePerUnit": "",
+    "quantity": "",
+    "priceTier": "",
+    "pricingType": "",
+    "pricingTypeTiered": "",
+    "pricingTypeSimple": "",
+    "tierTableTitle": "",
+    "quantityRange": "",
+    "pricePerUnitHeader": "",
+    "description": ""
+  },
+  "hashtagInput": {
+    "defaultLabel": "",
+    "minLength": "",
+    "maxCount": "",
+    "removeAria": "",
+    "placeholder": ""
+  },
+  "lotLocationPicker": {
+    "fullscreenTitle": "",
+    "fullscreenAria": "",
+    "closeFullscreenAria": "",
+    "close": "",
+    "delete": "",
+    "hintCompact": "",
+    "hintExpanded": "",
+    "locationLabel": "",
+    "locationPlaceholder": "",
+    "defaultMarkerName": "",
+    "modalTitle": "",
+    "modalHint": "",
+    "confirmLocation": ""
+  },
+  "map": {
+    "zoomIn": "",
+    "zoomOut": "",
+    "positionDefault": "",
+    "selectedPosition": ""
+  },
+  "searchBox": {
+    "placeholderOverlay": "",
+    "placeholderDefault": ""
+  },
+  "currencyTicker": {
+    "zeroPercent": "0%",
+    "rial": "IRR",
+    "ratesAria": "Wisselkoersen en converter",
+    "ratesLabel": "Koersen",
+    "calendarGregorian": "Gregoriaans",
+    "calendarHijri": "Hijri",
+    "calendarShamsi": "Zonne-Hijri",
+    "calendarClickHint": "{full} — klik: {next}",
+    "calendarAria": "Kalender {label}",
+    "regionAria": "Dagelijkse wisselkoersen",
+    "loadingRates": "Koersen laden…",
+    "ratesUnavailable": "Koersen niet beschikbaar",
+    "viewRates": "Wisselkoersen bekijken",
+    "viewRatesDetails": "Details wisselkoersen bekijken",
+    "title": "Wisselkoersen",
+    "updatedAt": "Bijgewerkt",
+    "buy": "Koop",
+    "sell": "Verkoop",
+    "mid": "Midden",
+    "loading": "Koersen laden…",
+    "error": "Koersen laden mislukt",
+    "retry": "Opnieuw"
+  }
+}

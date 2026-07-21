@@ -25,7 +25,7 @@
     "resultLabel": "",
     "swapAriaLabel": "",
     "swapTitle": "",
-    "rateLine": "<one>1 {fromCode}</one><approx>≈</approx><highlight>{rateValue} {toCode}</highlight>"
+    "rateLine": ""
   },
   "errors": {
     "fetchFailed": "",
@@ -41,98 +41,98 @@
   },
   "footer": "",
   "currencies": {
-    "IRR": ""
+    "IRR": "Iranin rial"
   },
   "apiKeys": [
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_dollar_rl",
+      "labelKey": "USD",
+      "code": "USD",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_eur",
+      "labelKey": "EUR",
+      "code": "EUR",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_aed",
+      "labelKey": "AED",
+      "code": "AED",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_rub",
+      "labelKey": "RUB",
+      "code": "RUB",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_gbp",
+      "labelKey": "GBP",
+      "code": "GBP",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_try",
+      "labelKey": "TRY",
+      "code": "TRY",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_cny",
+      "labelKey": "CNY",
+      "code": "CNY",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_sar",
+      "labelKey": "SAR",
+      "code": "SAR",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_cad",
+      "labelKey": "CAD",
+      "code": "CAD",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_chf",
+      "labelKey": "CHF",
+      "code": "CHF",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_jpy",
+      "labelKey": "JPY",
+      "code": "JPY",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "price_aud",
+      "labelKey": "AUD",
+      "code": "AUD",
+      "kind": "fiat"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "crypto-tether-irr",
+      "labelKey": "USDT",
+      "code": "USDT",
+      "kind": "crypto"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "crypto-bitcoin-irr",
+      "labelKey": "BTC",
+      "code": "BTC",
+      "kind": "crypto"
     },
     {
-      "id": "",
-      "labelKey": "",
-      "code": "",
-      "kind": ""
+      "id": "crypto-ethereum-irr",
+      "labelKey": "ETH",
+      "code": "ETH",
+      "kind": "crypto"
     }
   ]
 }

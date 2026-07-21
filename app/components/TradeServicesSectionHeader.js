@@ -8,11 +8,15 @@ export default function TradeServicesSectionHeader({
   subtitle,
   titleAs = "h2",
   titleId,
+  dir,
 }) {
   const TitleTag = titleAs;
 
   return (
-    <header className="relative overflow-hidden border-b border-emerald-900/10 px-3.5 py-5 sm:px-7 sm:py-8 lg:px-9">
+    <header
+      className="relative overflow-hidden border-b border-emerald-900/10 px-3.5 py-5 text-start sm:px-7 sm:py-8 lg:px-9"
+      dir={dir}
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900" />
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.14]"

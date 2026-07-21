@@ -9,19 +9,35 @@ import { useLanguage } from "../context/LanguageContext";
 import { API_ENDPOINTS } from "../config/api";
 import {
   getCategoryById,
-  getSampleProviders,
   getTradeServicesContent,
 } from "../data/tradeServicesCatalog";
-import {
-  mapApiProviderRow,
-  mapSampleProviderEntry,
-} from "@/app/utils/tradeProviderMapper";
+import { mapApiProviderRow } from "@/app/utils/tradeProviderMapper";
 import {
   resolveVipBannerImage,
   resolveVipCategoryMessage,
   shouldUseFeaturedProviderCard,
 } from "@/app/utils/vipCategoryHelpers";
+import { isPlatformExclusiveCategory, isZareoonOperatedCategory } from "@/app/utils/platformExclusiveCategories";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
+import { getSubcategoryIconPath } from "@/app/utils/tradeServiceIcons";
+import ZareoonPackagingAd from "./ZareoonPackagingAd";
+
+function SubserviceIcon({ subcategoryId, className = "h-5 w-5" }) {
+  const d = getSubcategoryIconPath(subcategoryId);
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d={d} />
+    </svg>
+  );
+}
+
+function providerOffersSubservice(provider, subcategoryId, subcategoryTitle) {
+  if (!provider) return false;
+  const details = Array.isArray(provider.serviceDetails) ? provider.serviceDetails : [];
+  if (details.some((s) => s?.subcategoryId === subcategoryId)) return true;
+  const titles = Array.isArray(provider.services) ? provider.services : [];
+  return titles.some((title) => String(title).trim() === String(subcategoryTitle).trim());
+}
 
 function StarRating({ rating, size = "sm" }) {
   if (rating == null) return null;
@@ -200,11 +216,15 @@ export default function TradeServicesCategoryView({ categoryId }) {
   const { language, isRTL, t } = useLanguage();
   const section = getTradeServicesContent(language);
   const category = getCategoryById(language, categoryId);
-  const sampleProviders = getSampleProviders(categoryId);
   const [liveProviders, setLiveProviders] = useState([]);
   const [loadingProviders, setLoadingProviders] = useState(true);
   const [vipCategories, setVipCategories] = useState({});
+  const [selectedSubId, setSelectedSubId] = useState("all");
   const locale = language === "en" ? "en-US" : language === "ru" ? "ru-RU" : "fa-IR";
+
+  useEffect(() => {
+    setSelectedSubId("all");
+  }, [categoryId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -246,22 +266,59 @@ export default function TradeServicesCategoryView({ categoryId }) {
   }, [categoryId, t, language]);
 
   const isVipCategory = !!vipCategories[categoryId]?.enabled;
+  const isPlatformExclusive = isPlatformExclusiveCategory(categoryId);
+  const isPackagingExclusive = isZareoonOperatedCategory(categoryId);
+  const membershipClosed = isVipCategory || isPlatformExclusive;
   const vipMessage = resolveVipCategoryMessage(vipCategories, categoryId, language, t);
+  // بازرسی و بسته‌بندی: بدون پیام «عضویت فعال نیست» — تبلیغ/برند کافی است
+  const exclusiveMessage = isPlatformExclusive ? null : vipMessage;
   const vipBannerImage = resolveVipBannerImage(vipCategories, categoryId);
 
   const providers = useMemo(() => {
     if (liveProviders.length) return liveProviders;
-    if (isVipCategory) return [];
-    return sampleProviders.map((p) => mapSampleProviderEntry(p, categoryId, language, t));
-  }, [liveProviders, sampleProviders, categoryId, language, t, isVipCategory]);
+    return [];
+  }, [liveProviders]);
+
+  const selectedChild =
+    selectedSubId === "all"
+      ? null
+      : (category?.children || []).find((c) => c.id === selectedSubId) || null;
+
+  const filteredProviders = useMemo(() => {
+    if (!selectedChild) return providers;
+    return providers.filter((p) =>
+      providerOffersSubservice(p, selectedChild.id, selectedChild.title)
+    );
+  }, [providers, selectedChild]);
 
   if (!category) return null;
+
+  const children = category.children || [];
 
   return (
     <div className={`min-h-screen bg-slate-50 ${isRTL ? "text-right" : "text-left"}`} dir={isRTL ? "rtl" : "ltr"}>
       {/* Hero */}
-      <div className="border-b border-emerald-900/10 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="relative overflow-hidden border-b border-emerald-900/10 text-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.14]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -left-16 -top-20 h-52 w-52 rounded-full bg-emerald-400/25 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 -right-10 h-56 w-56 rounded-full bg-teal-300/20 blur-3xl"
+          aria-hidden
+        />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
           <nav className="mb-4 text-xs text-emerald-100/90 sm:text-sm">
             <Link href="/" className="hover:text-white">
               {t("mainPage")}
@@ -280,9 +337,15 @@ export default function TradeServicesCategoryView({ categoryId }) {
                 <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
                   {t("tradeServicesSectionLabel")}
                 </span>
-                {isVipCategory ? (
-                  <span className="rounded-full bg-amber-300 px-2.5 py-0.5 text-[10px] font-bold text-amber-950">
-                    {t("tradeProviderVipBadge")}
+                {membershipClosed ? (
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                      isPackagingExclusive
+                        ? "bg-emerald-300 text-emerald-950"
+                        : "bg-amber-300 text-amber-950"
+                    }`}
+                  >
+                    {isPackagingExclusive ? t("packagingAdBadge") : t("tradeProviderVipBadge")}
                   </span>
                 ) : null}
               </div>
@@ -294,7 +357,7 @@ export default function TradeServicesCategoryView({ categoryId }) {
                 <VipHeroBanner src={vipBannerImage} alt={category.title} />
               ) : null}
               <div className="flex flex-wrap gap-2 sm:justify-end">
-              {!isVipCategory ? (
+              {!membershipClosed ? (
                 <AuthRequiredButton
                   href={`/trade-services/register?category=${category.id}`}
                   className="inline-flex min-h-[44px] items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50"
@@ -306,42 +369,133 @@ export default function TradeServicesCategoryView({ categoryId }) {
             </div>
           </div>
 
-          {isVipCategory && vipMessage ? (
-            <p className="mt-4 max-w-3xl rounded-xl border border-amber-300/40 bg-amber-400/15 px-4 py-3 text-sm leading-7 text-amber-50">
-              {vipMessage}
+          {membershipClosed && exclusiveMessage ? (
+            <p
+              className={`mt-4 max-w-3xl rounded-xl border px-4 py-3 text-sm leading-7 ${
+                isPackagingExclusive
+                  ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-50"
+                  : "border-amber-300/40 bg-amber-400/15 text-amber-50"
+              }`}
+            >
+              {exclusiveMessage}
             </p>
           ) : null}
 
           <div className="mt-6 flex flex-wrap gap-3">
             <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 backdrop-blur-sm">
               <p className="text-[10px] text-emerald-100">{t("tradeServicesProvidersTitle")}</p>
-              <p className="text-lg font-bold tabular-nums">{providers.length.toLocaleString(locale)}</p>
+              <p className="text-lg font-bold tabular-nums">{filteredProviders.length.toLocaleString(locale)}</p>
             </div>
             <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 backdrop-blur-sm">
               <p className="text-[10px] text-emerald-100">{t("tradeServicesSubcategoriesTitle")}</p>
-              <p className="text-lg font-bold tabular-nums">{category.children.length.toLocaleString(locale)}</p>
+              <p className="text-lg font-bold tabular-nums">{children.length.toLocaleString(locale)}</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
-        {/* Subcategories */}
-        <section aria-labelledby="subcategories-heading">
-          <h2 id="subcategories-heading" className="mb-4 text-lg font-bold text-slate-900 sm:text-xl">
-            {t("tradeServicesSubcategoriesTitle")}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {category.children.map((child) => (
-              <span
-                key={child.id}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
+        {isPackagingExclusive ? <ZareoonPackagingAd /> : null}
+
+        {/* Subcategory filters */}
+        {children.length > 0 ? (
+          <section
+            aria-labelledby="subcategories-heading"
+            className="rounded-3xl border border-emerald-100/90 bg-white p-4 shadow-[0_4px_24px_rgba(15,23,42,0.04)] sm:p-6"
+          >
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 id="subcategories-heading" className="text-lg font-bold text-slate-900 sm:text-xl">
+                  {t("tradeServicesSubcategoriesTitle")}
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+                  {t("tradeServicesSubcategoriesDesc")}
+                </p>
+              </div>
+              {selectedChild ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubId("all")}
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+                >
+                  {t("tradeServicesClearFilter")}
+                </button>
+              ) : null}
+            </div>
+
+            <div
+              className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4"
+              role="listbox"
+              aria-label={t("tradeServicesSubcategoriesTitle")}
+            >
+              <button
+                type="button"
+                role="option"
+                aria-selected={selectedSubId === "all"}
+                onClick={() => setSelectedSubId("all")}
+                className={`group flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-center transition ${
+                  selectedSubId === "all"
+                    ? "border-emerald-500 bg-emerald-50 shadow-sm ring-1 ring-emerald-500/30"
+                    : "border-slate-200/90 bg-slate-50/80 hover:border-emerald-200 hover:bg-white"
+                }`}
               >
-                {child.title}
-              </span>
-            ))}
-          </div>
-        </section>
+                <span
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                    selectedSubId === "all"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-white text-emerald-700 shadow-sm ring-1 ring-slate-200/80"
+                  }`}
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h10" />
+                  </svg>
+                </span>
+                <span
+                  className={`text-xs font-bold leading-5 sm:text-sm ${
+                    selectedSubId === "all" ? "text-emerald-900" : "text-slate-800"
+                  }`}
+                >
+                  {t("tradeServicesFilterAll")}
+                </span>
+              </button>
+
+              {children.map((child) => {
+                const active = selectedSubId === child.id;
+                return (
+                  <button
+                    key={child.id}
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    onClick={() => setSelectedSubId(child.id)}
+                    className={`group flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-center transition ${
+                      active
+                        ? "border-emerald-500 bg-emerald-50 shadow-sm ring-1 ring-emerald-500/30"
+                        : "border-slate-200/90 bg-white hover:border-emerald-200 hover:bg-emerald-50/40"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${
+                        active
+                          ? "bg-emerald-600 text-white"
+                          : "bg-gradient-to-br from-emerald-50 to-white text-emerald-700 shadow-sm ring-1 ring-emerald-100"
+                      }`}
+                    >
+                      <SubserviceIcon subcategoryId={child.id} className="h-5 w-5" />
+                    </span>
+                    <span
+                      className={`line-clamp-2 text-xs font-semibold leading-5 sm:text-sm ${
+                        active ? "text-emerald-900" : "text-slate-800"
+                      }`}
+                    >
+                      {child.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         {/* Providers */}
         <section aria-labelledby="providers-heading">
@@ -350,24 +504,48 @@ export default function TradeServicesCategoryView({ categoryId }) {
               <h2 id="providers-heading" className="text-lg font-bold text-slate-900 sm:text-xl">
                 {t("tradeServicesProvidersTitle")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">{t("tradeServicesProvidersDesc")}</p>
+              <p className="mt-1 text-sm text-slate-600">
+                {selectedChild
+                  ? t("tradeServicesProvidersFilteredDesc", {
+                      service: selectedChild.title,
+                      count: filteredProviders.length,
+                    })
+                  : t("tradeServicesProvidersDesc")}
+              </p>
             </div>
+            <p className="text-sm font-semibold tabular-nums text-slate-500">
+              {filteredProviders.length.toLocaleString(locale)}
+            </p>
           </div>
 
           {loadingProviders ? (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              <SkeletonCard featured={isVipCategory} />
-              {!isVipCategory ? (
+              <SkeletonCard featured={membershipClosed} />
+              {!membershipClosed ? (
                 <>
                   <SkeletonCard />
                   <SkeletonCard />
                 </>
               ) : null}
             </div>
-          ) : providers.length === 0 ? (
+          ) : filteredProviders.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-              <p className="text-sm text-slate-600">{isVipCategory ? vipMessage : t("tradeServicesNoProvidersYet")}</p>
-              {!isVipCategory ? (
+              <p className="text-sm text-slate-600">
+                {selectedChild
+                  ? t("tradeServicesNoProvidersForFilter")
+                  : membershipClosed
+                    ? exclusiveMessage
+                    : t("tradeServicesNoProvidersYet")}
+              </p>
+              {selectedChild ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubId("all")}
+                  className="mt-4 inline-flex rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+                >
+                  {t("tradeServicesFilterAll")}
+                </button>
+              ) : !membershipClosed ? (
                 <AuthRequiredButton
                   href={`/trade-services/register?category=${category.id}`}
                   className="mt-4 inline-flex rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
@@ -378,18 +556,18 @@ export default function TradeServicesCategoryView({ categoryId }) {
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {providers.map((provider) =>
+              {filteredProviders.map((provider) =>
                 shouldUseFeaturedProviderCard({
-                  isVipCategory,
+                  isVipCategory: membershipClosed,
                   provider,
-                  providerCount: providers.length,
+                  providerCount: filteredProviders.length,
                 }) ? (
                   <VipFeaturedProviderCard
                     key={provider.id}
                     provider={provider}
                     t={t}
                     locale={locale}
-                    vipMessage={vipMessage}
+                    vipMessage={exclusiveMessage}
                   />
                 ) : (
                   <ProviderCard key={provider.id} provider={provider} t={t} locale={locale} />

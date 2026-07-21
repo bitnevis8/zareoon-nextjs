@@ -2,15 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useSidebar } from "../context/SidebarContext";
-import { useDashboardPersona } from "../context/DashboardPersonaContext";
-import { DASHBOARD_PERSONAS } from "../utils/dashboardPersona";
 import CategoryDrillDownMenu from "./CategoryDrillDownMenu";
+import MobileRequestSheet from "./MobileRequestSheet";
 import { useTranslations } from "next-intl";
 import { useNavigationLoading } from "../context/NavigationLoadingContext";
 
@@ -37,85 +35,17 @@ function UserAvatar({ user, t, avatarFallbackInitial }) {
   );
 }
 
-function RequestPicker({ open, onClose, onSelect, t }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
-
-  if (!open || !mounted) return null;
-
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] lg:hidden">
-      <button
-        type="button"
-        className="absolute inset-0 bg-slate-900/25"
-        aria-label={t("close")}
-        onClick={onClose}
-      />
-      <div className="absolute inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] px-3">
-        <div className="mx-auto max-w-md overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-xl">
-          <div className="border-b border-slate-100 px-4 py-2.5">
-            <p className="text-center text-xs font-bold text-slate-600">{t("mobileSubmitRequestTab")}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2 p-3">
-            <button
-              type="button"
-              onClick={() => onSelect("product")}
-              className="min-h-11 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-900 transition hover:bg-emerald-100"
-            >
-              {t("mobileRequestForProduct")}
-            </button>
-            <button
-              type="button"
-              onClick={() => onSelect("service")}
-              className="min-h-11 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5 text-sm font-bold text-sky-900 transition hover:bg-sky-100"
-            >
-              {t("mobileRequestForService")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
 export default function MobileBottomBar() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
   const { t, isRTL } = useLanguage();
   const tLayout = useTranslations("layout");
-  const { isSidebarOpen, openSidebar } = useSidebar();
-  const { setPersona } = useDashboardPersona();
+  const { isSidebarOpen } = useSidebar();
   const { start: startNavLoading } = useNavigationLoading();
   const user = auth?.user;
   const [requestPickerOpen, setRequestPickerOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
-
-  const goSubmitRequest = (type) => {
-    setRequestPickerOpen(false);
-    const target = `/dashboard/submit-request?type=${type}`;
-    startNavLoading();
-    if (!user) {
-      router.push(`/auth/login?returnUrl=${encodeURIComponent(target)}`);
-      return;
-    }
-    setPersona(DASHBOARD_PERSONAS.APPLICANT);
-    router.push(target);
-  };
 
   const handleRequestClick = () => {
     setCategoryMenuOpen(false);
@@ -134,11 +64,9 @@ export default function MobileBottomBar() {
 
   const handleAccountClick = () => {
     closeOverlays();
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("openMobileSidebar", "1");
-    }
-    if (pathname === "/dashboard") {
-      openSidebar();
+    // اینستاگرام‌مانند: رفتن به پروفایل داشبورد، بدون باز کردن پیش‌فرض سایدبار
+    if (pathname === "/dashboard" || pathname === "/dashboard/") {
+      window.scrollTo?.({ top: 0, behavior: "smooth" });
       return;
     }
     startNavLoading();
@@ -340,12 +268,7 @@ export default function MobileBottomBar() {
         onClose={() => setCategoryMenuOpen(false)}
         rootTitle={t("mobileProductsTab")}
       />
-      <RequestPicker
-        open={requestPickerOpen}
-        onClose={() => setRequestPickerOpen(false)}
-        onSelect={goSubmitRequest}
-        t={t}
-      />
+      <MobileRequestSheet open={requestPickerOpen} onClose={() => setRequestPickerOpen(false)} />
 
       <div className="fixed bottom-0 left-0 right-0 z-[9998] border-t border-gray-200 bg-white shadow-lg pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className={`flex min-h-[3.75rem] items-stretch justify-between px-0.5 py-0.5 ${isRTL ? "" : "flex-row-reverse"}`}>

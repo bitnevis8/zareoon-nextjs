@@ -1,258 +1,391 @@
 {
-  "ariaLabel": "Навигационная цепочка",
-  "home": "Панель управления",
-  "fallbackPage": "Страница",
-  "welcomeFallback": "Добро пожаловать. Используйте боковое меню для перехода к нужным разделам.",
-  "browseProducts": "Просмотр товаров",
-  "userManagement": "Управление пользователями",
-  "addUser": "Добавить пользователя",
-  "usersList": "Список пользователей",
-  "edit": "Редактировать",
-  "view": "Просмотреть",
-  "details": "Подробности",
-  "rolesList": "Список ролей",
-  "addRole": "Добавить роль",
-  "supplyManagement": "Управление поставками",
-  "supplierPanel": "Панель поставщика",
-  "createInventory": "Добавить запас",
-  "createInventoryNew": "Добавить новый запас",
-  "inventoryList": "Список товаров",
-  "myProducts": "Мои товарные предложения",
-  "orders": "Заказы",
-  "customerOrders": "Заказы клиентов",
-  "productCategories": "Категории товаров",
-  "editProduct": "Редактировать товар",
-  "productAttributes": "Характеристики товаров",
-  "orderManagement": "Управление заказами",
-  "homepageOrder": "Отображение заказа",
-  "providerRequests": "Заявки на вступление",
-  "providersList": "Список поставщиков услуг",
-  "tradeServices": "Торговые услуги",
-  "servicesManagement": "Управление услугами",
-  "serviceCategories": "Категории услуг",
-  "messages": "Сообщения",
-  "supplierProfile": "Публичная страница поставщика",
-  "editProfile": "Редактировать профиль",
-  "settings": "Настройки",
-  "applicant": "Заявитель",
-  "submitRequest": "Подать заявку",
-  "myOrders": "Мои заказы",
-  "myRequests": "Мои заявки",
-  "escrow": "Гарантии сделок",
-  "escrowContracts": "Договоры",
-  "escrowSettings": "Настройки гарантии сделки",
-  "contractDetails": "Сведения о договоре",
-  "requestDetails": "Сведения о заявке",
-  "servicesProvider": "Поставщик услуг",
-  "myServicesPage": "Моя страница услуг",
-  "seller": "Продавец",
-  "incomingToMyProducts": "Посмотреть заявки на мои товары",
-  "incomingToMyServices": "Посмотреть заявки на мои услуги",
+  "ariaLabel": "",
+  "home": "",
+  "fallbackPage": "",
+  "welcomeFallback": "",
+  "browseProducts": "",
+  "userManagement": "",
+  "addUser": "",
+  "usersList": "",
+  "edit": "",
+  "view": "",
+  "details": "",
+  "rolesList": "",
+  "addRole": "",
+  "supplyManagement": "",
+  "supplierPanel": "",
+  "createInventory": "",
+  "createInventoryNew": "",
+  "inventoryList": "",
+  "myProducts": "",
+  "orders": "",
+  "customerOrders": "",
+  "productCategories": "",
+  "editProduct": "",
+  "productAttributes": "",
+  "orderManagement": "",
+  "homepageOrder": "",
+  "providerRequests": "",
+  "providersList": "",
+  "tradeServices": "",
+  "servicesManagement": "",
+  "serviceCategories": "",
+  "messages": "",
+  "supplierProfile": "",
+  "editProfile": "",
+  "settings": "",
+  "applicant": "",
+  "submitRequest": "",
+  "myOrders": "",
+  "myRequests": "",
+  "escrow": "",
+  "escrowContracts": "",
+  "escrowSettings": "",
+  "contractDetails": "",
+  "requestDetails": "",
+  "servicesProvider": "",
+  "myServicesPage": "",
+  "seller": "",
+  "incomingToMyProducts": "",
+  "incomingToMyServices": "",
   "shell": {
-    "openMenu": "Открыть меню",
-    "site": "Сайт",
-    "footer": "© {year} Zareoon — панель администрирования",
-    "logoAlt": "Zareoon",
+    "openMenu": "",
+    "site": "",
+    "footer": "",
+    "logoAlt": "",
     "personaTitle": {
-      "services": "Торговые услуги",
-      "applicant": "Заявитель",
-      "seller": "Продавец",
-      "default": "Панель управления"
+      "services": "",
+      "applicant": "",
+      "seller": "",
+      "default": ""
     }
   },
   "guide": {
-    "triggerLabel": "Руководство по панели управления",
-    "triggerShort": "Руководство",
-    "brand": "Zareoon",
-    "title": "Руководство по панели управления",
-    "subtitle": "Для кого предназначен каждый раздел и что в нём можно делать",
-    "tipPrefix": "Совет:",
-    "tipText": "Используйте кнопки «Заявитель», «Продавец» и «Услуги» в верхней части бокового меню для переключения между разделами.",
-    "dismiss": "Понятно",
+    "triggerLabel": "",
+    "triggerShort": "",
+    "brand": "",
+    "title": "",
+    "subtitle": "",
+    "tipPrefix": "",
+    "tipText": "",
+    "dismiss": "",
     "sections": {
       "intro": {
-        "title": "Что такое панель управления Zareoon?",
-        "summary": "Здесь можно управлять тремя основными ролями. Используйте кнопки в верхней части меню для переключения между ролями заявителя, продавца и поставщика услуг — все три роли могут быть у вас одновременно."
+        "title": "",
+        "summary": ""
       },
       "applicant": {
-        "title": "Раздел заявителя",
-        "summary": "Используйте этот раздел, когда вам нужен товар или услуга и вы хотите опубликовать свою потребность, чтобы соответствующие продавцы и поставщики получили уведомление.",
+        "title": "",
+        "summary": "",
         "items": {
           "submitRequest": {
-            "label": "Подать заявку",
-            "desc": "Подайте подробную заявку на товар или услугу, чтобы она была отправлена подходящим исполнителям."
+            "label": "",
+            "desc": ""
           },
           "myRequests": {
-            "label": "Мои заявки",
-            "desc": "Просматривайте предыдущие заявки и отслеживайте их статус."
+            "label": "",
+            "desc": ""
           },
           "cart": {
-            "label": "Корзина",
-            "desc": "Просматривайте выбранные товары и оформляйте заказы."
+            "label": "",
+            "desc": ""
           },
           "myOrders": {
-            "label": "Мои заказы",
-            "desc": "Просматривайте отправленные заказы и отслеживайте их статус."
+            "label": "",
+            "desc": ""
           }
         }
       },
       "seller": {
-        "title": "Раздел продавца",
-        "summary": "Если у вас есть товары для покупателей, зарегистрируйтесь как продавец. После настройки у вас появится отдельная страница магазина.",
+        "title": "",
+        "summary": "",
         "items": {
           "storeUrl": {
-            "label": "URL моего магазина",
-            "desc": "Публичная ссылка вашего магазина — нажмите, чтобы открыть страницу магазина или настроить URL."
+            "label": "",
+            "desc": ""
           },
           "myProducts": {
-            "label": "Мои товарные предложения",
-            "desc": "Управляйте всеми зарегистрированными товарами и запасами."
+            "label": "",
+            "desc": ""
           },
           "createInventory": {
-            "label": "Добавить новый запас",
-            "desc": "Добавьте новый товар, указав цену, изображения, местоположение и подробные сведения."
+            "label": "",
+            "desc": ""
           },
           "customerOrders": {
-            "label": "Заказы клиентов",
-            "desc": "Просматривайте и отслеживайте заказы, полученные от покупателей."
+            "label": "",
+            "desc": ""
           },
           "incomingProducts": {
-            "label": "Посмотреть заявки на мои товары",
-            "desc": "Просматривайте заявки покупателей, связанные с вашими товарами."
+            "label": "",
+            "desc": ""
           }
         }
       },
       "services": {
-        "title": "Раздел торговых услуг",
-        "summary": "Если вы оказываете услуги в сфере международной торговли — например, таможенные, транспортные, инспекционные или финансовые — присоединитесь к этому разделу и создайте отдельную страницу услуг.",
+        "title": "",
+        "summary": "",
         "items": {
           "publicPage": {
-            "label": "Моя страница услуг",
-            "desc": "Публичная ссылка вашей страницы — после регистрации и одобрения администратором клиенты смогут просматривать ваши услуги."
+            "label": "",
+            "desc": ""
           },
           "register": {
-            "label": "Стать поставщиком услуг",
-            "desc": "Выберите услуги, укажите сведения о компании или специалисте и отправьте запрос на публикацию."
+            "label": "",
+            "desc": ""
           },
           "myPage": {
-            "label": "Моя страница услуг",
-            "desc": "При необходимости просматривайте и редактируйте данные страницы. Изменения вступают в силу после одобрения администратором."
+            "label": "",
+            "desc": ""
           },
           "customerOrders": {
-            "label": "Заказы клиентов",
-            "desc": "Отслеживайте заказы, связанные с вашими услугами."
+            "label": "",
+            "desc": ""
           },
           "incomingServices": {
-            "label": "Посмотреть заявки на мои услуги",
-            "desc": "Просматривайте заявки, связанные с вашими услугами, и отвечайте на них."
+            "label": "",
+            "desc": ""
           }
         }
       }
     }
   },
   "adminHome": {
-    "title": "Панель администратора",
-    "subtitle": "Здравствуйте, {name}. Здесь представлена сводная информация о состоянии системы.",
+    "title": "",
+    "subtitle": "",
     "kpi": {
-      "users": "Пользователи",
-      "orders": "Заказы",
-      "pendingOrders": "В ожидании: {count}",
-      "activeProducts": "Активные товары",
-      "lotsHint": "из {count} партий",
-      "providers": "Поставщики",
-      "pendingProviders": "Ожидают одобрения: {count}"
+      "users": "",
+      "orders": "",
+      "pendingOrders": "",
+      "activeProducts": "",
+      "lotsHint": "",
+      "providers": "",
+      "pendingProviders": ""
     },
     "charts": {
-      "orderStatus": "Статус заказа",
-      "usersByRole": "Пользователи по ролям",
-      "providerStatus": "Статус поставщиков услуг"
+      "orderStatus": "",
+      "usersByRole": "",
+      "providerStatus": ""
     },
     "orderStatus": {
-      "pending": "В ожидании",
-      "reserved": "Зарезервирован",
-      "completed": "Завершён",
-      "cancelled": "Отменена",
-      "approved": "Одобрен"
+      "pending": "",
+      "reserved": "",
+      "completed": "",
+      "cancelled": "",
+      "approved": ""
     },
     "providerStatus": {
-      "pending": "В ожидании",
-      "approved": "Одобрен",
-      "rejected": "Отклонён"
+      "pending": "",
+      "approved": "",
+      "rejected": ""
     },
-    "noRole": "Без роли",
+    "noRole": "",
     "recentOrders": {
-      "title": "Последние заказы",
-      "viewAll": "Показать всё",
-      "status": "Статус",
-      "date": "Дата",
-      "empty": "Заказов пока нет"
+      "title": "",
+      "viewAll": "",
+      "status": "",
+      "date": "",
+      "empty": ""
     },
     "quickLinks": {
-      "providers": "Поставщики"
+      "providers": ""
     }
   },
   "buyerHome": {
-    "title": "Панель покупателя",
-    "subtitle": "Уважаемый(-ая) {name}, найдите нужный товар и отправьте запрос на покупку.",
+    "title": "",
+    "subtitle": "",
     "browseProducts": {
-      "title": "Просмотр товаров",
-      "desc": "Поиск товарных предложений и категорий"
+      "title": "",
+      "desc": ""
     },
     "cart": {
-      "title": "Корзина",
-      "desc": "Просмотр и завершение текущих заказов"
+      "title": "",
+      "desc": ""
     },
     "messages": {
-      "title": "Сообщения",
-      "desc": "Чат с продавцами и отслеживание заявок"
+      "title": "",
+      "desc": ""
     },
     "tradeServices": {
-      "title": "Торговые услуги",
-      "desc": "Просмотр поставщиков услуг международной торговли"
+      "title": "",
+      "desc": ""
     }
   },
   "supplierHome": {
-    "title": "Панель продавца",
-    "subtitle": "Уважаемый(-ая) {name}, размещайте товары и отслеживайте заказы клиентов.",
+    "title": "",
+    "subtitle": "",
     "stats": {
-      "myProducts": "Мои товарные предложения",
-      "customerOrders": "Заказы клиентов",
-      "pending": "В ожидании"
+      "myProducts": "",
+      "customerOrders": "",
+      "pending": ""
     },
-    "productStatusChart": "Статус товара",
+    "productStatusChart": "",
     "lotStatus": {
-      "harvested": "Доступен для продажи",
-      "onField": "На месте производства",
-      "reserved": "Зарезервирован",
-      "sold": "Продан"
+      "harvested": "",
+      "onField": "",
+      "reserved": "",
+      "sold": ""
     }
   },
   "tradeServicesHome": {
-    "title": "Торговые услуги",
-    "subtitle": "Уважаемый(-ая) {name}, предлагайте услуги международной торговли или просматривайте каталог услуг.",
+    "title": "",
+    "subtitle": "",
     "myServicesPage": {
-      "title": "Моя страница услуг",
-      "desc": "{name} — просмотр и редактирование вашей отдельной страницы услуг"
+      "title": "",
+      "desc": ""
     },
     "publicProfile": {
-      "title": "Моя отдельная страница",
-      "desc": "Публичный профиль, отображаемый в каталоге услуг"
+      "title": "",
+      "desc": ""
     },
     "customerOrders": {
-      "title": "Заказы клиентов",
-      "desc": "Отслеживание заказов, поданных клиентами"
+      "title": "",
+      "desc": ""
     },
     "incomingRequests": {
-      "title": "Посмотреть заявки на мои услуги",
-      "desc": "Заявки, связанные с вашими услугами"
+      "title": "",
+      "desc": ""
     },
     "catalog": {
-      "title": "Каталог услуг",
-      "desc": "Просмотр компаний и специалистов, оказывающих торговые услуги"
+      "title": "",
+      "desc": ""
     },
     "messages": {
-      "title": "Сообщения",
-      "desc": "Отслеживание переписки с поставщиками и заявителями"
+      "title": "",
+      "desc": ""
     }
+  },
+  "homeBuyer": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "requests": "",
+      "open": "",
+      "openHint": "",
+      "cart": "",
+      "orders": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "submit": "",
+      "submitDesc": "",
+      "browse": "",
+      "browseDesc": "",
+      "cart": "",
+      "cartDesc": "",
+      "messages": "",
+      "messagesDesc": ""
+    },
+    "recentRequests": "",
+    "viewAll": "",
+    "emptyRequests": ""
+  },
+  "homeSeller": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "joinTitle": "",
+    "joinSubtitle": "",
+    "joinEmpty": "",
+    "joinCta": "",
+    "joinBody": "",
+    "joinFootnote": "",
+    "kpi": {
+      "products": "",
+      "orders": "",
+      "pending": "",
+      "incoming": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "addProduct": "",
+      "addProductDesc": "",
+      "myProducts": "",
+      "myProductsDesc": "",
+      "shop": "",
+      "shopDesc": "",
+      "incoming": "",
+      "incomingDesc": ""
+    },
+    "recentOrders": "",
+    "viewAll": "",
+    "emptyOrders": "",
+    "orderHash": ""
+  },
+  "homeProvider": {
+    "badge": "",
+    "title": "",
+    "subtitleGuest": "",
+    "subtitleMember": "",
+    "status": {
+      "pending": "",
+      "approved": "",
+      "rejected": "",
+      "none": ""
+    },
+    "statusLine": "",
+    "kpi": {
+      "incoming": "",
+      "orders": "",
+      "services": "",
+      "public": "",
+      "publicOn": "",
+      "publicOff": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "join": "",
+      "joinDesc": "",
+      "catalog": "",
+      "catalogDesc": "",
+      "profile": "",
+      "profileDesc": "",
+      "incoming": "",
+      "incomingDesc": "",
+      "orders": "",
+      "ordersDesc": "",
+      "messages": "",
+      "messagesDesc": ""
+    },
+    "viewPublic": "",
+    "pendingHint": ""
+  },
+  "homeAdmin": {
+    "badge": "",
+    "title": "",
+    "subtitle": "",
+    "kpi": {
+      "users": "",
+      "orders": "",
+      "pendingOrders": "",
+      "products": "",
+      "lotsTotal": "",
+      "providers": "",
+      "pendingProviders": ""
+    },
+    "alert": {
+      "pendingOrders": "",
+      "pendingProviders": ""
+    },
+    "actionsTitle": "",
+    "actions": {
+      "users": "",
+      "usersDesc": "",
+      "orders": "",
+      "ordersDesc": "",
+      "inventory": "",
+      "inventoryDesc": "",
+      "providers": "",
+      "providersDesc": "",
+      "settings": "",
+      "settingsDesc": "",
+      "homepage": "",
+      "homepageDesc": ""
+    },
+    "recentOrders": "",
+    "viewAll": "",
+    "emptyOrders": "",
+    "orderHash": ""
   }
 }
