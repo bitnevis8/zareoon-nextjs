@@ -288,6 +288,8 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
               }}
               chatUserId={profile.id}
               showInternalChat={!isOwner}
+              profileSlug={profile.profileSlug}
+              displayName={profile.displayName}
             />
             {panelOnly && String(profile.bio || "").trim() ? (
               <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

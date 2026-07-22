@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "../../../context/LanguageContext";
-import EnamadFooterBadge from "../../legal/EnamadFooterBadge";
 import EnamadSeal from "../../legal/EnamadSeal";
 import {
   SITE_EMAIL,
@@ -91,13 +90,10 @@ export default function Footer({ className = "" }) {
         </nav>
 
         <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
-          <div className="flex items-center gap-2">
-            <EnamadFooterBadge size="sm" />
-            <EnamadSeal className="[&_img]:h-9 [&_img]:w-auto" />
-          </div>
-          <p className="max-w-[9.5rem] text-end text-[9px] leading-4 text-slate-400">
+          <p className="min-w-0 text-[9px] leading-4 text-slate-400">
             © {displayYear} {t("siteName")}
           </p>
+          <EnamadSeal className="shrink-0 [&_img]:h-9 [&_img]:w-auto" />
         </div>
 
         <button
@@ -183,22 +179,22 @@ export default function Footer({ className = "" }) {
             </div>
 
             <nav className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
-              <Link href="/" className="text-slate-500 transition hover:text-emerald-700">
-                {t("home")}
-              </Link>
+          <Link href="/" className="text-slate-500 transition hover:text-emerald-700">
+            {t("home")}
+          </Link>
               <span className="text-slate-200" aria-hidden>
                 |
               </span>
-              <Link href="/trade-services" className="text-slate-500 transition hover:text-emerald-700">
-                {t("tradeServicesSectionLabel")}
-              </Link>
+          <Link href="/trade-services" className="text-slate-500 transition hover:text-emerald-700">
+            {t("tradeServicesSectionLabel")}
+          </Link>
               <span className="text-slate-200" aria-hidden>
                 |
               </span>
-              <Link href="/auth/login" className="text-slate-500 transition hover:text-emerald-700">
-                {t("login")}
-              </Link>
-            </nav>
+          <Link href="/auth/login" className="text-slate-500 transition hover:text-emerald-700">
+            {t("login")}
+          </Link>
+        </nav>
           </div>
 
           <div className="flex flex-col gap-3 text-start">
@@ -214,17 +210,14 @@ export default function Footer({ className = "" }) {
                 </Link>
               ))}
             </nav>
-            <div className="mt-1 flex flex-wrap items-end gap-3">
-              <EnamadFooterBadge />
-              <EnamadSeal />
-            </div>
           </div>
         </div>
 
-        <div className="mt-5 border-t border-slate-100 pt-4 sm:mt-6">
-          <p className="text-center text-[11px] leading-relaxed text-slate-500 sm:text-xs">
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 sm:mt-6">
+          <p className="min-w-0 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
             © {displayYear} {t("siteName")}. {t("allRightsReserved")}
           </p>
+          <EnamadSeal className="shrink-0" />
         </div>
       </div>
     </footer>

@@ -97,7 +97,7 @@ export default function LatestAvailableProductsSection({
 
       <div className="relative">
       <div className="mb-3 flex flex-col gap-3 px-0.5 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <h2 className="text-start text-base font-extrabold leading-snug text-slate-900 sm:text-lg lg:text-xl">
+        <h2 className="text-start text-base font-bold leading-snug text-slate-900 sm:text-lg">
           {sectionTitle}
         </h2>
         {showGroupToggle ? (
@@ -126,7 +126,7 @@ export default function LatestAvailableProductsSection({
           <div className="space-y-4 lg:space-y-5">
             {availableProductsByCategory.map((group) => (
               <section key={group.id}>
-                <h3 className="mb-2 px-1 text-start text-base font-bold text-slate-800">
+                <h3 className="mb-2 px-1 text-start text-sm font-bold text-slate-800 sm:text-base">
                   {group.category ? getLocalizedText(group.category, language) : t("productCategories")}
                 </h3>
                 <HorizontalScrollRow {...scrollRowProps}>
@@ -162,7 +162,7 @@ export default function LatestAvailableProductsSection({
         )
       ) : (
         <div className="py-8 text-center text-slate-500">
-          <p className="text-base">{t("noProductsWithStock")}</p>
+          <p className="text-sm text-slate-600 sm:text-base">{t("noProductsWithStock")}</p>
         </div>
       )}
       </div>

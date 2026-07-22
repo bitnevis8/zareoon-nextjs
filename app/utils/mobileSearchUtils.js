@@ -2,7 +2,14 @@ import { getLocalizedText, getLocalizedLotLabel } from "./localize";
 import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
 import { buildAvailableProducts, buildProductByIdMap } from "./availableProducts";
 
-export const SEARCH_FILTERS = ["all", "types", "listings", "hashtag"];
+export const SEARCH_FILTERS = ["all", "products", "services", "posts", "hashtag"];
+
+/** سازگاری با فیلترهای قدیمی URL */
+export function normalizeSearchFilter(raw) {
+  if (raw === "types" || raw === "listings") return "products";
+  if (SEARCH_FILTERS.includes(raw)) return raw;
+  return "all";
+}
 
 export function parseSearchQuery(raw) {
   const trimmed = raw.trim();
@@ -20,9 +27,39 @@ export function normalizeSearchTerm(term) {
     .replace(/^#+/, "");
 }
 
+/** لینک صفحه جستجو برای یک هشتگ */
+export function buildHashtagSearchHref(tag) {
+  const clean = String(tag || "")
+    .trim()
+    .replace(/^#+/, "");
+  if (!clean) return "/search?mode=explore&filter=hashtag";
+  const params = new URLSearchParams();
+  params.set("mode", "explore");
+  params.set("q", `#${clean}`);
+  params.set("filter", "hashtag");
+  return `/search?${params.toString()}`;
+}
+
+function isWordChar(c) {
+  return Boolean(c) && /[\p{L}\p{N}]/u.test(c);
+}
+
+/** Match at word start (prefix/whole word) — avoids «اوره» matching inside «مشاوره». */
 function matchesText(haystack, needle) {
   if (!needle) return true;
-  return String(haystack || "").toLowerCase().includes(needle);
+  const h = String(haystack || "").toLowerCase();
+  const n = String(needle || "").toLowerCase();
+  if (!n || !h) return false;
+
+  let from = 0;
+  while (from <= h.length) {
+    const idx = h.indexOf(n, from);
+    if (idx === -1) return false;
+    const before = idx > 0 ? h[idx - 1] : "";
+    if (!isWordChar(before)) return true;
+    from = idx + 1;
+  }
+  return false;
 }
 
 export function matchesLocalizedCatalogItem(item, term, language) {
@@ -174,6 +211,50 @@ export function buildListingCountMap(flatLots) {
   return map;
 }
 
+export function searchServiceProviders(providers, term) {
+  const q = normalizeSearchTerm(term);
+  const list = Array.isArray(providers) ? providers : [];
+  if (!q) return list.slice(0, 40);
+
+  return list
+    .filter((p) => {
+      const fields = [
+        p.displayName,
+        p.companyName,
+        p.contactName,
+        p.profileSlug,
+        p.notes,
+        ...(Array.isArray(p.selectedServices) ? p.selectedServices.map((s) => s.title).filter(Boolean) : []),
+      ];
+      return fields.some((field) => matchesText(field, q));
+    })
+    .slice(0, 40);
+}
+
+export function searchServiceCategories(categories, term) {
+  const q = normalizeSearchTerm(term);
+  const list = Array.isArray(categories) ? categories : [];
+  if (!q) return list;
+
+  return list.filter((c) => {
+    const titles = [c.title, ...(c.children || []).map((ch) => ch.title)];
+    return titles.some((x) => matchesText(x, q));
+  });
+}
+
+export function searchPublicPosts(posts, term) {
+  const q = normalizeSearchTerm(term);
+  const list = Array.isArray(posts) ? posts : [];
+  if (!q) return list.slice(0, 40);
+
+  return list
+    .filter((p) => {
+      const tags = Array.isArray(p.hashtags) ? p.hashtags.join(" ") : "";
+      return matchesText(p.body, q) || matchesText(tags, q) || matchesText(p.authorName, q);
+    })
+    .slice(0, 40);
+}
+
 export function runMobileSearch({
   allProducts,
   inventoryLots,
@@ -181,12 +262,22 @@ export function runMobileSearch({
   language,
   t,
   filter = "all",
+  serviceProviders = [],
+  serviceCategories = [],
+  publicPosts = [],
 }) {
   const parsed = parseSearchQuery(term);
   const productById = buildProductByIdMap(allProducts);
   const flatLots = flattenAvailableLots(inventoryLots, productById);
   const listingCountByProductId = buildListingCountMap(flatLots);
   const q = parsed.term;
+  const normalizedFilter = normalizeSearchFilter(filter);
+
+  const emptyExtra = {
+    services: [],
+    serviceCategories: [],
+    posts: [],
+  };
 
   if (!q) {
     return {
@@ -195,22 +286,59 @@ export function runMobileSearch({
       types: [],
       listings: flatLots,
       hashtagTags: [],
+      services: searchServiceProviders(serviceProviders, ""),
+      serviceCategories: serviceCategories.slice(0, 24),
+      posts: searchPublicPosts(publicPosts, ""),
     };
   }
 
-  const hashtagOnly = filter === "hashtag";
+  const hashtagOnly = normalizedFilter === "hashtag";
   const types = searchCatalogTypes(allProducts, q, language, listingCountByProductId);
   const listings = searchAvailableListings(flatLots, q, language, t, { hashtagOnly });
   const hashtag = searchHashtagMatches({ allProducts, flatLots, term: q, language, t });
+  const services = searchServiceProviders(serviceProviders, q);
+  const matchedServiceCategories = searchServiceCategories(serviceCategories, q);
+  const posts = searchPublicPosts(publicPosts, q);
 
-  if (filter === "hashtag") {
-    return { parsed, flatLots, types: hashtag.types, listings: hashtag.listings, hashtagTags: hashtag.tags };
+  if (normalizedFilter === "hashtag") {
+    return {
+      parsed,
+      flatLots,
+      types: hashtag.types,
+      listings: hashtag.listings,
+      hashtagTags: hashtag.tags,
+      ...emptyExtra,
+      posts: posts.filter((p) =>
+        (p.hashtags || []).some((tag) => normalizeSearchTerm(tag).includes(normalizeSearchTerm(q)))
+      ),
+    };
   }
-  if (filter === "types") {
-    return { parsed, flatLots, types, listings: [], hashtagTags: [] };
+  if (normalizedFilter === "products") {
+    return { parsed, flatLots, types, listings, hashtagTags: [], ...emptyExtra };
   }
-  if (filter === "listings") {
-    return { parsed, flatLots, types: [], listings, hashtagTags: [] };
+  if (normalizedFilter === "services") {
+    return {
+      parsed,
+      flatLots,
+      types: [],
+      listings: [],
+      hashtagTags: [],
+      services,
+      serviceCategories: matchedServiceCategories,
+      posts: [],
+    };
+  }
+  if (normalizedFilter === "posts") {
+    return {
+      parsed,
+      flatLots,
+      types: [],
+      listings: [],
+      hashtagTags: [],
+      services: [],
+      serviceCategories: [],
+      posts,
+    };
   }
 
   return {
@@ -219,5 +347,8 @@ export function runMobileSearch({
     types,
     listings,
     hashtagTags: hashtag.tags,
+    services,
+    serviceCategories: matchedServiceCategories,
+    posts,
   };
 }

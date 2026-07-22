@@ -2,8 +2,9 @@
 
 import { useTranslations } from "next-intl";
 
-export default function AttributeFields({ defs = [], values = {}, onChange, className = "", compact = false }) {
+export default function AttributeFields({ defs = [], values = {}, onChange, className = "", compact = false, optional = false }) {
   const t = useTranslations("shared");
+  const tInv = useTranslations("inventory");
 
   if (!defs.length) return null;
 
@@ -16,7 +17,12 @@ export default function AttributeFields({ defs = [], values = {}, onChange, clas
     <div className={`grid grid-cols-1 gap-2 sm:grid-cols-2 ${className}`}>
       {defs.map((def) => (
         <div key={def.id} className="flex flex-col">
-          <label className={labelClass}>{def.name}</label>
+          <label className={labelClass}>
+            {def.name}
+            {optional ? (
+              <span className="ms-1 font-normal text-slate-400">({tInv("create.optional")})</span>
+            ) : null}
+          </label>
           {def.type === "number" ? (
             <input
               type="number"

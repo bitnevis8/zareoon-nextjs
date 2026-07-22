@@ -20,6 +20,7 @@ import { lotMatchesFilterValues } from "@/app/utils/productCatalogSchema";
 import { buildLotGalleryItems } from "@/app/utils/catalogGradeMedia";
 import CatalogMediaLightbox, { sortMediaItems, buildProductGalleryItems } from "@/app/components/catalog/CatalogMediaLightbox";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
+import ShareButton from "@/app/components/ui/ShareButton";
 import CatalogPageSkeleton from "@/app/components/CatalogPageSkeleton";
 import { sortCatalogItems } from "@/app/utils/productSort";
 import { authFetch } from "@/app/utils/authHeaders";
@@ -335,16 +336,24 @@ export default function CatalogItemPage({ params }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
         {item ? (
-          <CatalogPdfDownload
-            scope={item.isOrderable ? "product" : "category"}
-            productId={item.isOrderable ? productIdNum : undefined}
-            categoryId={!item.isOrderable ? productIdNum : undefined}
-            productIsOrderable={item.isOrderable}
-            user={user}
-            label={t("downloadCatalogPdf")}
-            compact
-            className="shrink-0 self-start sm:self-center"
-          />
+          <div className="flex shrink-0 flex-wrap items-center gap-2 self-start sm:self-center">
+            <ShareButton
+              variant="button"
+              url={`/catalog/${productIdNum || id}`}
+              title={getLocalizedText(item, language) || t("product")}
+            />
+            <CatalogPdfDownload
+              scope={item.isOrderable ? "product" : "category"}
+              productId={item.isOrderable ? productIdNum : undefined}
+              categoryId={!item.isOrderable ? productIdNum : undefined}
+              productIsOrderable={item.isOrderable}
+              user={user}
+              product={item}
+              lots={productLots}
+              label={t("downloadCatalogPdf")}
+              compact
+            />
+          </div>
         ) : null}
       </div>
 
@@ -392,7 +401,7 @@ export default function CatalogItemPage({ params }) {
           setLotQtyById={setLotQtyById}
           placingLotId={placingLotId}
           onAddToCart={handleAddToLotCart}
-          productUnit={item?.unit}
+          productUnit={item?.defaultMeasurementUnit || item?.unit}
           cartTotalQty={cartTotalQty}
           cartUnit={cartUnit}
           inventorySummary={summary}

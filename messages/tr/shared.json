@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Arya Foulad Gharn mühendislik muayenesi"
+    "inspectionStandardsCompany": "Arya Foulad Gharn mühendislik muayenesi",
+    "verifiedBadge": "Onaylı",
+    "verifiedBadgeTitle": "Zareoon onaylı sağlayıcı"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "Miladi",
     "calendarHijri": "Hicri",
     "calendarShamsi": "Şemsi",
-    "calendarClickHint": "{full} — tıkla: {next}",
+    "calendarClickHint": "{full} — eşdeğerleri görmek için tıklayın",
     "calendarAria": "Takvim {label}",
+    "calendarEquivalentsTitle": "Eşdeğer tarihler",
     "regionAria": "Günün döviz kurları",
     "loadingRates": "Kurlar yükleniyor…",
     "ratesUnavailable": "Kurlar kullanılamıyor",

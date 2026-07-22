@@ -53,9 +53,13 @@ function ProductCard({ item }) {
           {item.name || t("defaultProductName")}
         </h3>
         {priceLabel ? <p className="text-xs font-semibold text-emerald-700">{priceLabel}</p> : null}
-        <p className="text-[11px] text-slate-500">
-          {t("stock", { qty: qty.toLocaleString("fa-IR"), unit: item.unit || "" })}
-        </p>
+        {qty > 0 ? (
+          <p className="text-[11px] text-slate-500">
+            {t("stock", { qty: qty.toLocaleString("fa-IR"), unit: item.unit || "" })}
+          </p>
+        ) : (
+          <p className="text-[11px] text-slate-500">{t("inquiryOnly")}</p>
+        )}
       </div>
     </Link>
   );

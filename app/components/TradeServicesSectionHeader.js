@@ -43,24 +43,12 @@ export default function TradeServicesSectionHeader({
 
         <TitleTag
           id={titleId}
-          className="mt-2.5 text-balance text-[1.125rem] font-black leading-snug tracking-tight text-white sm:mt-3 sm:text-xl lg:text-[1.85rem] lg:leading-tight"
+          className="mt-2.5 text-balance text-base font-bold leading-snug tracking-tight text-white sm:mt-3 sm:text-lg"
         >
           {title}
         </TitleTag>
 
-        <p
-          className={[
-            "mt-2 w-full min-w-0 text-emerald-50/95",
-            /* mobile: wrap with readable measure */
-            "text-[12.5px] leading-[1.75] text-pretty",
-            "sm:text-sm sm:leading-7",
-            "md:text-[15px] md:leading-7",
-            /* desktop: single line across full hub width */
-            "lg:mt-2.5 lg:whitespace-nowrap lg:text-[13px] lg:leading-normal lg:tracking-tight",
-            "xl:text-sm",
-            "2xl:text-[15px]",
-          ].join(" ")}
-        >
+        <p className="mt-2 w-full min-w-0 text-pretty text-xs leading-6 text-emerald-50/95 sm:text-sm sm:leading-7 lg:mt-2.5 lg:whitespace-nowrap lg:leading-normal">
           {subtitle}
         </p>
       </div>

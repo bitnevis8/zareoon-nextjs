@@ -17,7 +17,7 @@ function ModalFallback() {
  * Desktop/tablet advanced search dialog.
  * Full-viewport sheet on smaller widths; centered modal on large screens.
  */
-export default function ExploreSearchModal({ isOpen, onClose, initialQuery = "" }) {
+export default function ExploreSearchModal({ isOpen, onClose, initialQuery = "", initialFilter = "all" }) {
   const { t, isRTL } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -56,7 +56,7 @@ export default function ExploreSearchModal({ isOpen, onClose, initialQuery = "" 
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[9998] flex items-stretch justify-center p-0 sm:items-center sm:p-4 md:p-6 lg:p-8 ${
+      className={`fixed inset-0 z-[10060] flex items-stretch justify-center p-0 sm:items-center sm:p-4 md:p-6 lg:p-8 ${
         closing ? "pointer-events-none" : ""
       }`}
       role="dialog"
@@ -100,6 +100,7 @@ export default function ExploreSearchModal({ isOpen, onClose, initialQuery = "" 
             <MobileExploreSearch
               variant="modal"
               initialQuery={initialQuery}
+              initialFilter={initialFilter}
               onRequestClose={handleClose}
             />
           </Suspense>

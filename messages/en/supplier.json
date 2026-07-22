@@ -66,6 +66,7 @@
     "tieredPrice": "",
     "defaultProductName": "",
     "stock": "",
+    "inquiryOnly": "Price & stock on inquiry",
     "currencyToman": "",
     "addProduct": "",
     "manage": "",

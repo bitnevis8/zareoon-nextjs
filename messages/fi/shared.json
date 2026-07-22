@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Arya Foulad Gharn -tekninen tarkastus"
+    "inspectionStandardsCompany": "Arya Foulad Gharn -tekninen tarkastus",
+    "verifiedBadge": "Vahvistettu",
+    "verifiedBadgeTitle": "Vahvistettu palveluntarjoaja Zareoonissa"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "Gregoriaaninen",
     "calendarHijri": "Hijri",
     "calendarShamsi": "Aurinko-hijri",
-    "calendarClickHint": "{full} — napsauta: {next}",
+    "calendarClickHint": "{full} — napsauta nähdäksesi vastaavat",
     "calendarAria": "Kalenteri {label}",
+    "calendarEquivalentsTitle": "Vastaavat päivämäärät",
     "regionAria": "Päivän valuuttakurssit",
     "loadingRates": "Ladataan kursseja…",
     "ratesUnavailable": "Kurssit eivät ole saatavilla",

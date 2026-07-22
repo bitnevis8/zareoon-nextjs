@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
+import { buildHashtagSearchHref } from "@/app/utils/mobileSearchUtils";
 
 function postImages(post) {
   if (Array.isArray(post.imageUrls) && post.imageUrls.length) return post.imageUrls;
@@ -20,12 +22,13 @@ export default function SupplierPostItem({ post }) {
       {hashtags.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {hashtags.map((tag) => (
-            <span
+            <Link
               key={tag}
-              className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
+              href={buildHashtagSearchHref(tag)}
+              className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 hover:text-emerald-950"
             >
               #{tag}
-            </span>
+            </Link>
           ))}
         </div>
       ) : null}

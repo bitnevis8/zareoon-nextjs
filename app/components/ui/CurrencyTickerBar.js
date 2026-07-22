@@ -1,9 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { CALENDAR_MODES, formatCalendar } from "@/app/utils/calendars";
+import {
+  formatAllCalendars,
+  formatCalendar,
+  getDefaultCalendarMode,
+} from "@/app/utils/calendars";
 import CategoryMegaMenu from "@/app/components/CategoryMegaMenu";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -118,9 +123,13 @@ function ExchangeRatesButton({ ariaLabel, label }) {
   );
 }
 
-function CalendarBadge({ t, language }) {
-  const [modeIndex, setModeIndex] = useState(0);
+function CalendarBadge({ t, language, isRTL }) {
+  const [open, setOpen] = useState(false);
   const [now, setNow] = useState(null);
+  const [menuStyle, setMenuStyle] = useState(null);
+  const rootRef = useRef(null);
+  const buttonRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     setNow(new Date());
@@ -128,51 +137,139 @@ function CalendarBadge({ t, language }) {
     return () => clearInterval(id);
   }, []);
 
-  const mode = CALENDAR_MODES[modeIndex];
-  const cal = now ? formatCalendar(mode, now, language) : null;
-  const nextMode = CALENDAR_MODES[(modeIndex + 1) % CALENDAR_MODES.length];
-  const nextLabel =
-    nextMode === "gregorian"
+  useEffect(() => {
+    const onDoc = (e) => {
+      const target = e.target;
+      if (rootRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const updatePosition = () => {
+      const button = buttonRef.current;
+      if (!button) return;
+      const rect = button.getBoundingClientRect();
+      const menuWidth = Math.min(280, window.innerWidth - 16);
+      const gap = 6;
+      const pad = 8;
+      let left = isRTL ? rect.right - menuWidth : rect.left;
+      if (left + menuWidth > window.innerWidth - pad) left = window.innerWidth - menuWidth - pad;
+      if (left < pad) left = pad;
+      const top = Math.min(rect.bottom + gap, window.innerHeight - 8);
+      setMenuStyle({ top, left, width: menuWidth });
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open, isRTL]);
+
+  const primaryMode = getDefaultCalendarMode(language);
+  const primary = now ? formatCalendar(primaryMode, now, language) : null;
+  const primaryLabel =
+    primaryMode === "gregorian"
       ? t("currencyTicker.calendarGregorian")
-      : nextMode === "hijri"
+      : primaryMode === "hijri"
         ? t("currencyTicker.calendarHijri")
         : t("currencyTicker.calendarShamsi");
 
+  const equivalents = now
+    ? formatAllCalendars(now, language, {
+        gregorian: t("currencyTicker.calendarGregorian"),
+        hijri: t("currencyTicker.calendarHijri"),
+        shamsi: t("currencyTicker.calendarShamsi"),
+      })
+    : [];
+
+  const menu =
+    open && menuStyle ? (
+      <div
+        ref={menuRef}
+        role="dialog"
+        aria-label={t("currencyTicker.calendarEquivalentsTitle")}
+        style={menuStyle}
+        className="fixed z-[10050] overflow-hidden rounded-xl border border-emerald-200/80 bg-white shadow-xl"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div className="border-b border-slate-100 bg-emerald-50/80 px-3.5 py-2.5">
+          <p className="text-xs font-bold text-emerald-900">{t("currencyTicker.calendarEquivalentsTitle")}</p>
+        </div>
+        <ul className="divide-y divide-slate-100 py-1">
+          {equivalents.map((item) => (
+            <li key={item.mode} className="px-3.5 py-2.5">
+              <p className="text-[10px] font-bold tracking-wide text-amber-700">{item.label}</p>
+              <p className="mt-0.5 text-sm font-bold tabular-nums text-slate-900">{item.short}</p>
+              <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{item.full}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null;
+
   return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setModeIndex((i) => (i + 1) % CALENDAR_MODES.length);
-      }}
-      className={`${edgePanelClass} gap-1 border-l border-emerald-200/80 lg:border-r lg:border-l-0 sm:gap-1.5`}
-      title={
-        cal
-          ? t("currencyTicker.calendarClickHint", { full: cal.full, next: nextLabel })
-          : t("currencyTicker.calendarAria", { label: "" })
-      }
-      aria-label={cal ? t("currencyTicker.calendarAria", { label: cal.label }) : t("currencyTicker.calendarAria", { label: "" })}
-      suppressHydrationWarning
-    >
-      <span className="hidden text-sm sm:inline sm:text-base" aria-hidden>
-        📅
-      </span>
-      <span className="hidden min-w-0 flex-col text-start leading-tight lg:flex" suppressHydrationWarning>
-        <span className="text-[9px] font-bold text-amber-700">{cal?.label || "\u00a0"}</span>
-        <span className="max-w-[7.5rem] truncate text-[11px] font-bold text-slate-800 tabular-nums">{cal?.short || "…"}</span>
-      </span>
-      <span
-        className="max-w-[4.75rem] truncate text-[10px] font-bold tabular-nums text-slate-800 lg:hidden sm:max-w-[5.5rem]"
+    <div ref={rootRef} className="relative shrink-0 self-stretch">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className={`${edgePanelClass} gap-1 border-l border-emerald-200/80 lg:border-r lg:border-l-0 sm:gap-1.5`}
+        title={
+          primary
+            ? t("currencyTicker.calendarClickHint", { full: primary.full })
+            : t("currencyTicker.calendarAria", { label: "" })
+        }
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-label={
+          primary
+            ? t("currencyTicker.calendarAria", { label: primaryLabel })
+            : t("currencyTicker.calendarAria", { label: "" })
+        }
         suppressHydrationWarning
       >
-        {cal?.short || "…"}
-      </span>
-    </button>
+        <span className="hidden text-sm sm:inline sm:text-base" aria-hidden>
+          📅
+        </span>
+        <span className="hidden min-w-0 flex-col text-start leading-tight lg:flex" suppressHydrationWarning>
+          <span className="text-[9px] font-bold text-amber-700">{primaryLabel || "\u00a0"}</span>
+          <span className="max-w-[8.5rem] truncate text-[11px] font-bold tabular-nums text-slate-800">
+            {primary?.short || "…"}
+          </span>
+        </span>
+        <span
+          className="max-w-[5.25rem] truncate text-[10px] font-bold tabular-nums text-slate-800 lg:hidden sm:max-w-[6rem]"
+          suppressHydrationWarning
+        >
+          {primary?.short || "…"}
+        </span>
+      </button>
+      {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
+    </div>
   );
 }
 
-function TickerBarShell({ children, t, dir, language }) {
+function TickerBarShell({ children, t, dir, language, isRTL }) {
   return (
     <div
       dir={dir}
@@ -187,7 +284,7 @@ function TickerBarShell({ children, t, dir, language }) {
       <MobileRatesLead ariaLabel={t("currencyTicker.ratesAria")} label={t("currencyTicker.ratesLabel")} />
       {children}
       <ExchangeRatesButton ariaLabel={t("currencyTicker.ratesAria")} label={t("currencyTicker.ratesLabel")} />
-      <CalendarBadge t={t} language={language} />
+      <CalendarBadge t={t} language={language} isRTL={isRTL} />
     </div>
   );
 }
@@ -264,7 +361,7 @@ export default function CurrencyTickerBar() {
         : t("currencyTicker.viewRates");
 
   return (
-    <TickerBarShell t={t} dir={dir} language={language}>
+    <TickerBarShell t={t} dir={dir} language={language} isRTL={isRTL}>
       {localizedRates.length > 0 ? (
         <Link
           href={EXCHANGE_HREF}

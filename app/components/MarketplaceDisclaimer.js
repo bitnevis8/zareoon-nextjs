@@ -93,28 +93,31 @@ export default function MarketplaceDisclaimer({ className = "" }) {
 
   return (
     <aside
-      className={`w-full rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2.5 shadow-sm sm:rounded-2xl sm:px-4 sm:py-3 ${className}`}
+      className={`group/disclaimer w-full rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2.5 shadow-sm sm:rounded-2xl sm:px-4 sm:py-3 ${className}`}
       dir={isRTL ? "rtl" : "ltr"}
       role="note"
     >
-      <div className="flex items-start gap-2.5 sm:gap-3.5">
+      <div className="flex items-stretch gap-2.5 sm:gap-3.5">
         <div
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-200/80 bg-white px-1.5 py-1.5 text-amber-800 shadow-sm sm:gap-2 sm:rounded-xl sm:px-2 sm:py-2"
+          className="relative flex w-14 min-h-[4.5rem] shrink-0 items-center justify-center self-stretch overflow-hidden rounded-xl border border-amber-200/80 bg-white text-amber-800 shadow-sm sm:w-16 sm:min-h-[5.25rem] sm:rounded-2xl"
           aria-hidden
         >
-          <LawIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className="h-3.5 w-px bg-amber-200 sm:h-4" />
-          <RankIcon className="h-4 w-4 text-emerald-700 sm:h-5 sm:w-5" />
+          <span className="absolute inset-0 flex items-center justify-center transition duration-500 ease-out group-hover/disclaimer:scale-90 group-hover/disclaimer:opacity-0 group-hover/disclaimer:-rotate-12 group-focus-within/disclaimer:scale-90 group-focus-within/disclaimer:opacity-0 group-focus-within/disclaimer:-rotate-12">
+            <LawIcon className="h-8 w-8 sm:h-9 sm:w-9" />
+          </span>
+          <span className="absolute inset-0 flex items-center justify-center scale-90 rotate-12 text-emerald-700 opacity-0 transition duration-500 ease-out group-hover/disclaimer:scale-100 group-hover/disclaimer:rotate-0 group-hover/disclaimer:opacity-100 group-focus-within/disclaimer:scale-100 group-focus-within/disclaimer:rotate-0 group-focus-within/disclaimer:opacity-100">
+            <RankIcon className="h-8 w-8 sm:h-9 sm:w-9" />
+          </span>
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-bold leading-snug text-slate-900 sm:text-sm">
+          <p className="text-sm font-bold leading-snug text-slate-900">
             {t("homepageDisclaimer.title")}
           </p>
-          <p className="mt-1 text-[11px] leading-5 text-slate-600 sm:mt-1.5 sm:text-xs sm:leading-6">
+          <p className="mt-1 text-xs leading-6 text-slate-600 sm:mt-1.5">
             {t("homepageDisclaimer.body")}
           </p>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 sm:mt-2 sm:text-[11px]">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 sm:mt-2 sm:text-xs">
             <Link href="/terms" className="font-medium text-emerald-700 hover:underline">
               {t("nav.terms")}
             </Link>

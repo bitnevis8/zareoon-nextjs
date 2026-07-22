@@ -90,6 +90,7 @@ function SupplierAccountEditor() {
   const [canHidePublicPage, setCanHidePublicPage] = useState(false);
   const [form, setForm] = useState({
     profileSlug: "",
+    displayName: "",
     headline: "",
     bio: "",
     shopContacts: normalizeShopContacts(null),
@@ -113,6 +114,7 @@ function SupplierAccountEditor() {
           setCanHidePublicPage(!!d.canHidePublicPage);
           setForm({
             profileSlug: d.profileSlug || "",
+            displayName: d.displayName || "",
             headline: d.headline || "",
             bio: d.bio || "",
             shopContacts: normalizeShopContacts(d.shopContacts, {
@@ -137,6 +139,7 @@ function SupplierAccountEditor() {
     setMsg("");
     const payload = {
       profileSlug: form.profileSlug,
+      displayName: form.displayName,
       headline: form.headline,
       bio: form.bio,
       shopContacts: serializeShopContacts(form.shopContacts),
@@ -157,6 +160,8 @@ function SupplierAccountEditor() {
       setForm((f) => ({
         ...f,
         profileSlug: j.data.profileSlug || f.profileSlug,
+        displayName: j.data.displayName || f.displayName,
+        headline: j.data.headline ?? f.headline,
         latitude: j.data.latitude ?? f.latitude,
         longitude: j.data.longitude ?? f.longitude,
         addressLabel: j.data.addressLabel || f.addressLabel,
@@ -259,6 +264,19 @@ function SupplierAccountEditor() {
               context="shop-edit"
               previewPrefix="zareoon.ir/"
             />
+            <label className="block text-sm font-medium text-slate-700">
+              نام نمایشی فروشگاه
+              <input
+                className={`${dash.input} mt-1.5`}
+                value={form.displayName}
+                onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+                maxLength={120}
+                placeholder="نام فروشگاه برای نمایش در سایت"
+              />
+              <span className="mt-1 block text-[11px] leading-5 text-slate-500">
+                در کارت‌های خرید/فروشگاه‌ها به‌جای اسم شخصی شما نشان داده می‌شود.
+              </span>
+            </label>
             <label className="block text-sm font-medium text-slate-700">
               معرفی کوتاه
               <input

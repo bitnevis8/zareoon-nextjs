@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "آریا فولاد قرن انجینئرنگ معائنہ"
+    "inspectionStandardsCompany": "آریا فولاد قرن انجینئرنگ معائنہ",
+    "verifiedBadge": "تصدیق شدہ",
+    "verifiedBadgeTitle": "زارعون پر تصدیق شدہ فراہم کنندہ"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "عیسوی",
     "calendarHijri": "ہجری",
     "calendarShamsi": "شمسی",
-    "calendarClickHint": "{full} — کلک: {next}",
+    "calendarClickHint": "{full} — مساوی تاریخیں دیکھنے کے لیے کلک کریں",
     "calendarAria": "کیلنڈر {label}",
+    "calendarEquivalentsTitle": "مساوی تاریخیں",
     "regionAria": "آج کی زر مبادلہ شرحیں",
     "loadingRates": "شرحیں لوڈ ہو رہی ہیں…",
     "ratesUnavailable": "شرحیں دستیاب نہیں",

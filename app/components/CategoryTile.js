@@ -71,7 +71,7 @@ export default function CategoryTile({
       <div className="mt-2 w-full text-center">
         <div
           className={`line-clamp-2 font-semibold leading-snug text-slate-800 ${
-            compact ? "text-[11px]" : "text-[11px] sm:text-xs md:text-sm"
+            compact ? "text-xs" : "text-xs sm:text-sm"
           }`}
         >
           {label}

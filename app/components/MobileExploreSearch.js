@@ -11,12 +11,14 @@ import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { sortCatalogItems } from "@/app/utils/productSort";
 import { getLotSupplierDisplayName } from "@/app/utils/catalogLotSupplier";
 import {
-  SEARCH_FILTERS,
+  normalizeSearchFilter,
   parseSearchQuery,
   runMobileSearch,
   buildListingCountMap,
   getListingDisplayTitle,
 } from "@/app/utils/mobileSearchUtils";
+import { useTradeServicesContent } from "@/app/hooks/useTradeServicesContent";
+import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
 const RECENT_KEY = "recentSearches";
 const EXPLORE_LIMIT = 48;
@@ -130,9 +132,82 @@ function ListingResultCard({ row, language, t, onNavigate }) {
   );
 }
 
+function ServiceCategoryCard({ category, t, onNavigate }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(`/trade-services/${category.id}`, category.title)}
+      className="flex w-full items-center gap-3 rounded-xl border border-violet-100 bg-white px-3 py-2.5 text-start shadow-sm transition hover:border-violet-200 hover:bg-violet-50/40"
+    >
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-8 8h10a2 2 0 002-2V8l-4-4H8L4 8v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-slate-900">{category.title}</p>
+        <p className="text-[11px] text-slate-500">{t("mobileSearchServicesSection")}</p>
+      </div>
+      <span className="shrink-0 text-slate-300">‹</span>
+    </button>
+  );
+}
+
+function ServiceProviderCard({ provider, onNavigate }) {
+  const name = provider.displayName || provider.companyName || provider.profileSlug || "";
+  const href =
+    providerPublicPath(provider.profileSlug) ||
+    (provider.id ? `/trade-services/provider/${provider.id}` : "/trade-services");
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(href, name)}
+      className="flex w-full items-center gap-3 rounded-xl border border-emerald-100 bg-white px-3 py-2.5 text-start shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50/40"
+    >
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-sm font-bold text-emerald-800">
+        {(name[0] || "س").toUpperCase()}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
+        {provider.profileSlug ? (
+          <p className="truncate text-[11px] text-slate-500" dir="ltr">
+            /{provider.profileSlug}
+          </p>
+        ) : null}
+      </div>
+      <span className="shrink-0 text-slate-300">‹</span>
+    </button>
+  );
+}
+
+function PostResultCard({ post, onNavigate }) {
+  const href = post.href || (post.profileSlug ? `/${post.profileSlug}?tab=posts` : "/search");
+  const image = resolveMediaUrl(post.imageUrl) || resolveMediaUrl(post.authorAvatar);
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(href, post.authorName || post.body?.slice(0, 40))}
+      className="flex w-full gap-3 rounded-xl border border-slate-100 bg-white p-2.5 text-start shadow-sm transition hover:border-emerald-200"
+    >
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+        {image ? (
+          <Image src={image} alt="" fill sizes="64px" className="object-cover" unoptimized />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center text-lg text-slate-400">✎</span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-bold text-slate-800">{post.authorName || post.profileSlug}</p>
+        <p className="mt-0.5 line-clamp-2 text-[12px] leading-5 text-slate-600">{post.body}</p>
+      </div>
+    </button>
+  );
+}
+
 export default function MobileExploreSearch({
   variant = "page",
   initialQuery = "",
+  initialFilter = "",
   onRequestClose,
 }) {
   const { t, language, isRTL } = useLanguage();
@@ -140,15 +215,17 @@ export default function MobileExploreSearch({
   const searchParams = useSearchParams();
   const inputRef = useRef(null);
   const isModal = variant === "modal";
+  const tradeServices = useTradeServicesContent();
 
   const [query, setQuery] = useState(() => initialQuery || searchParams.get("q") || "");
-  const [filter, setFilter] = useState(() => {
-    const f = searchParams.get("filter");
-    return SEARCH_FILTERS.includes(f) ? f : "all";
-  });
+  const [filter, setFilter] = useState(() =>
+    normalizeSearchFilter(initialFilter || searchParams.get("filter"))
+  );
   const [allProducts, setAllProducts] = useState([]);
   const [inventoryLots, setInventoryLots] = useState([]);
   const [rootCategories, setRootCategories] = useState([]);
+  const [serviceProviders, setServiceProviders] = useState([]);
+  const [publicPosts, setPublicPosts] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [recentSearches, setRecentSearches] = useState([]);
 
@@ -167,20 +244,26 @@ export default function MobileExploreSearch({
     let cancelled = false;
     (async () => {
       try {
-        const [productsRes, inventoryRes, catsRes] = await Promise.all([
+        const [productsRes, inventoryRes, catsRes, providersRes, postsRes] = await Promise.all([
           fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" }),
           fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
           fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=`, { cache: "no-store" }),
+          fetch(`${API_ENDPOINTS.tradeServiceProviders.getPublic}?limit=200`, { cache: "no-store" }).catch(() => null),
+          fetch(`${API_ENDPOINTS.tamin.publicPosts}?limit=40`, { cache: "no-store" }).catch(() => null),
         ]);
-        const [productsJson, inventoryJson, catsJson] = await Promise.all([
+        const [productsJson, inventoryJson, catsJson, providersJson, postsJson] = await Promise.all([
           productsRes.json(),
           inventoryRes.json(),
           catsRes.json(),
+          providersRes?.ok ? providersRes.json() : Promise.resolve(null),
+          postsRes?.ok ? postsRes.json() : Promise.resolve(null),
         ]);
         if (!cancelled) {
           setAllProducts(productsJson?.data || []);
           setInventoryLots(inventoryJson?.data || []);
           setRootCategories(sortCatalogItems(catsJson?.data || [], language));
+          setServiceProviders(Array.isArray(providersJson?.data) ? providersJson.data : []);
+          setPublicPosts(Array.isArray(postsJson?.data) ? postsJson.data : []);
         }
       } finally {
         if (!cancelled) setLoadingData(false);
@@ -194,8 +277,7 @@ export default function MobileExploreSearch({
   useEffect(() => {
     if (isModal) return;
     const q = searchParams.get("q") || "";
-    const f = searchParams.get("filter");
-    const urlFilter = f && SEARCH_FILTERS.includes(f) ? f : "all";
+    const urlFilter = normalizeSearchFilter(searchParams.get("filter"));
     setQuery((prev) => (prev !== q ? q : prev));
     setFilter((prev) => (prev !== urlFilter ? urlFilter : prev));
   }, [searchParams, isModal]);
@@ -205,6 +287,31 @@ export default function MobileExploreSearch({
       setQuery(initialQuery);
     }
   }, [isModal, initialQuery]);
+
+  useEffect(() => {
+    if (isModal && initialFilter) {
+      setFilter(normalizeSearchFilter(initialFilter));
+    }
+  }, [isModal, initialFilter]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const q = query.trim();
+    if (!q && filter !== "posts" && filter !== "all" && filter !== "hashtag") return undefined;
+    (async () => {
+      try {
+        const url = `${API_ENDPOINTS.tamin.publicPosts}?limit=40${q ? `&q=${encodeURIComponent(q)}` : ""}`;
+        const res = await fetch(url, { cache: "no-store" });
+        const json = await res.json();
+        if (!cancelled && json?.success) setPublicPosts(Array.isArray(json.data) ? json.data : []);
+      } catch {
+        /* keep previous */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [query, filter]);
 
   useEffect(() => {
     if (parsed.term) return;
@@ -221,8 +328,11 @@ export default function MobileExploreSearch({
         language,
         t,
         filter,
+        serviceProviders,
+        serviceCategories: tradeServices.categories || [],
+        publicPosts,
       }),
-    [allProducts, inventoryLots, query, language, t, filter]
+    [allProducts, inventoryLots, query, language, t, filter, serviceProviders, tradeServices.categories, publicPosts]
   );
 
   const listingCountByProductId = useMemo(
@@ -290,8 +400,9 @@ export default function MobileExploreSearch({
 
   const filterChips = [
     { id: "all", label: t("mobileSearchFilterAll"), descKey: "mobileSearchFilterAllDesc" },
-    { id: "types", label: t("mobileSearchFilterTypes"), descKey: "mobileSearchFilterTypesDesc" },
-    { id: "listings", label: t("mobileSearchFilterListings"), descKey: "mobileSearchFilterListingsDesc" },
+    { id: "products", label: t("mobileSearchFilterProducts"), descKey: "mobileSearchFilterProductsDesc" },
+    { id: "services", label: t("mobileSearchFilterServices"), descKey: "mobileSearchFilterServicesDesc" },
+    { id: "posts", label: t("mobileSearchFilterPosts"), descKey: "mobileSearchFilterPostsDesc" },
     { id: "hashtag", label: t("mobileSearchFilterHashtag"), descKey: "mobileSearchFilterHashtagDesc" },
   ];
 
@@ -302,10 +413,11 @@ export default function MobileExploreSearch({
     [rootCategories, language]
   );
 
-  const showTypes = filter === "all" || filter === "types" || filter === "hashtag";
-  const showListings = filter === "all" || filter === "listings" || filter === "hashtag";
+  const showProducts = filter === "all" || filter === "products" || filter === "hashtag";
+  const showServices = filter === "all" || filter === "services";
+  const showPosts = filter === "all" || filter === "posts" || filter === "hashtag";
   const hasSearch = Boolean(parsed.term);
-  const { types, listings, hashtagTags } = searchResult;
+  const { types, listings, hashtagTags, services, serviceCategories, posts } = searchResult;
 
   const renderExplore = () => {
     if (loadingData) {
@@ -323,7 +435,7 @@ export default function MobileExploreSearch({
       );
     }
 
-    if (filter === "types") {
+    if (filter === "products") {
       if (!exploreTypes.length) {
         return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
       }
@@ -337,6 +449,53 @@ export default function MobileExploreSearch({
               t={t}
               onNavigate={handleResultNavigate}
             />
+          ))}
+        </div>
+      );
+    }
+
+    if (filter === "services") {
+      const cats = tradeServices.categories || [];
+      if (!cats.length && !serviceProviders.length) {
+        return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
+      }
+      return (
+        <div className="space-y-4">
+          {cats.length ? (
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {cats.slice(0, 12).map((category) => (
+                <ServiceCategoryCard
+                  key={category.id}
+                  category={category}
+                  t={t}
+                  onNavigate={handleResultNavigate}
+                />
+              ))}
+            </div>
+          ) : null}
+          {serviceProviders.length ? (
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {serviceProviders.slice(0, 12).map((provider) => (
+                <ServiceProviderCard
+                  key={provider.id || provider.profileSlug}
+                  provider={provider}
+                  onNavigate={handleResultNavigate}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    if (filter === "posts") {
+      if (!publicPosts.length) {
+        return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
+      }
+      return (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {publicPosts.slice(0, EXPLORE_LIMIT).map((post) => (
+            <PostResultCard key={post.id} post={post} onNavigate={handleResultNavigate} />
           ))}
         </div>
       );
@@ -515,7 +674,13 @@ export default function MobileExploreSearch({
 
             <section>
               <h2 className="mb-2 text-xs font-bold text-slate-700">
-                {filter === "types" ? t("mobileSearchTypesSection") : t("mobileSearchExploreTitle")}
+                {filter === "products"
+                  ? t("mobileSearchTypesSection")
+                  : filter === "services"
+                    ? t("mobileSearchServicesSection")
+                    : filter === "posts"
+                      ? t("mobileSearchPostsSection")
+                      : t("mobileSearchExploreTitle")}
               </h2>
               {renderExplore()}
             </section>
@@ -561,7 +726,7 @@ export default function MobileExploreSearch({
               </section>
             ) : null}
 
-            {showTypes && types.length > 0 ? (
+            {showProducts && types.length > 0 ? (
               <section className={splitResultsOnDesktop ? "xl:col-span-4" : ""}>
                 <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchTypesSection")}</h2>
                 <div className="grid grid-cols-1 gap-1.5 lg:gap-2">
@@ -578,7 +743,7 @@ export default function MobileExploreSearch({
               </section>
             ) : null}
 
-            {showListings && listings.length > 0 ? (
+            {showProducts && listings.length > 0 ? (
               <section className={splitResultsOnDesktop ? "xl:col-span-8" : ""}>
                 <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchListingsSection")}</h2>
                 <div
@@ -599,7 +764,54 @@ export default function MobileExploreSearch({
               </section>
             ) : null}
 
-            {!types.length && !listings.length && !hashtagTags.length ? (
+            {showServices && serviceCategories?.length > 0 ? (
+              <section>
+                <h2 className="mb-2 text-xs font-bold text-slate-700">{t("mobileSearchServicesSection")}</h2>
+                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                  {serviceCategories.map((category) => (
+                    <ServiceCategoryCard
+                      key={category.id}
+                      category={category}
+                      t={t}
+                      onNavigate={handleResultNavigate}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {showServices && services?.length > 0 ? (
+              <section>
+                <h2 className="mb-2 text-xs font-bold text-slate-700">{t("mobileSearchServiceProvidersSection")}</h2>
+                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                  {services.map((provider) => (
+                    <ServiceProviderCard
+                      key={provider.id || provider.profileSlug}
+                      provider={provider}
+                      onNavigate={handleResultNavigate}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {showPosts && posts?.length > 0 ? (
+              <section>
+                <h2 className="mb-2 text-xs font-bold text-slate-700">{t("mobileSearchPostsSection")}</h2>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {posts.map((post) => (
+                    <PostResultCard key={post.id} post={post} onNavigate={handleResultNavigate} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {!types.length &&
+            !listings.length &&
+            !hashtagTags.length &&
+            !(services || []).length &&
+            !(serviceCategories || []).length &&
+            !(posts || []).length ? (
               <div className="py-12 text-center">
                 <SearchIcon className="mx-auto h-10 w-10 text-slate-300" />
                 <p className="mt-3 text-sm font-semibold text-slate-700">{t("mobileSearchNoResults")}</p>

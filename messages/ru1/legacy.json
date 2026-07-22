@@ -1,6 +1,8 @@
 {
   "siteName": "",
   "siteTagline": "",
+  "headerAyahRef": "",
+  "headerAyahText": "",
   "siteIntro": "",
   "cart": "",
   "language": "",
@@ -117,6 +119,9 @@
   "escrowExampleTitle": "",
   "escrowExampleText": "",
   "escrowFooter": "",
+  "escrowGuideLink": "",
+  "escrowGuideModalTitle": "",
+  "escrowGuideBody": "",
   "escrowCta": "",
   "escrowLcCta": "",
   "lcBlockHint": "",

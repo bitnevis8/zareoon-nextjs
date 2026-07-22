@@ -11,7 +11,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
-const SAMPLE_SLUG = "your-shop";
+const SAMPLE_SLUG = "your-page";
 
 function SoftMeshPattern({ patternId }) {
   return (
@@ -27,53 +27,110 @@ function SoftMeshPattern({ patternId }) {
   );
 }
 
-function PageCard({ href, name, subtitle, avatar, badge, accent }) {
+function PageCard({ href, name, subtitle, avatar, badges = [], accent }) {
   const initial = (name?.[0] || "?").toUpperCase();
   const img = resolveMediaUrl(avatar);
   const isService = accent === "teal";
+  const slug = href.replace(/^\//, "");
+  const isLogoAvatar = typeof avatar === "string" && avatar.includes("logo.png");
 
   return (
     <Link
       href={href}
-      className={`group flex w-[8.5rem] shrink-0 flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:w-[10.5rem] sm:rounded-2xl ${
+      className={`group relative flex w-[9.75rem] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border bg-white shadow-[0_10px_28px_-16px_rgba(15,23,42,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_-16px_rgba(15,23,42,0.5)] sm:w-[12.5rem] ${
         isService
-          ? "border-teal-100 hover:border-teal-300"
-          : "border-emerald-100 hover:border-emerald-300"
+          ? "border-teal-100/90 hover:border-teal-300"
+          : "border-emerald-100/90 hover:border-emerald-300"
       }`}
     >
       <div
-        className={`relative flex h-16 items-end justify-center pb-0 sm:h-24 ${
+        className={`relative h-[4.25rem] overflow-hidden sm:h-[5.25rem] ${
           isService
-            ? "bg-gradient-to-br from-teal-700 to-cyan-800"
-            : "bg-gradient-to-br from-emerald-700 to-teal-800"
+            ? "bg-gradient-to-br from-teal-600 via-teal-700 to-cyan-800"
+            : "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800"
         }`}
       >
-        <span className="absolute start-1.5 top-1.5 rounded-md bg-black/20 px-1.5 py-0.5 text-[8px] font-bold text-white/95 sm:start-2 sm:top-2 sm:text-[9px]">
-          {badge}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.35), transparent 45%), radial-gradient(circle at 80% 0%, rgba(255,255,255,0.18), transparent 40%)",
+          }}
+          aria-hidden
+        />
+        <div className="absolute start-2 top-2 flex max-w-[calc(100%-2.75rem)] flex-wrap gap-1">
+          {badges.map((label) => (
+            <span
+              key={label}
+              className={`rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide text-white shadow-sm backdrop-blur-sm sm:text-[10px] ${
+                isService ? "bg-teal-950/40 ring-1 ring-white/25" : "bg-emerald-950/40 ring-1 ring-white/25"
+              }`}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+        <span className="absolute end-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-white opacity-0 ring-1 ring-white/20 transition group-hover:opacity-100">
+          <svg className="h-3.5 w-3.5 rtl:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+            <path
+              fillRule="evenodd"
+              d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+              clipRule="evenodd"
+            />
+          </svg>
         </span>
-        <div className="relative z-[1] mb-[-0.95rem] h-11 w-11 overflow-hidden rounded-lg border-2 border-white bg-white shadow-md sm:mb-[-1.15rem] sm:h-16 sm:w-16 sm:rounded-xl">
+      </div>
+
+      <div className="relative -mt-7 flex flex-col items-center px-3 pb-3 pt-0 text-center sm:-mt-8 sm:px-3.5 sm:pb-3.5">
+        <div
+          className={`relative h-[3.25rem] w-[3.25rem] overflow-hidden rounded-2xl border-[3px] border-white bg-white shadow-md sm:h-16 sm:w-16 ${
+            isService ? "ring-2 ring-teal-100" : "ring-2 ring-emerald-100"
+          }`}
+        >
           {img ? (
-            <Image src={img} alt="" fill unoptimized className="object-cover" />
+            <Image
+              src={img}
+              alt=""
+              fill
+              unoptimized
+              className={isLogoAvatar ? "object-contain p-1.5" : "object-cover"}
+              sizes="64px"
+            />
           ) : (
             <span
-              className={`flex h-full w-full items-center justify-center text-base font-black text-white sm:text-xl ${
-                isService ? "bg-teal-600" : "bg-emerald-600"
+              className={`flex h-full w-full items-center justify-center text-base font-bold text-white sm:text-lg ${
+                isService
+                  ? "bg-gradient-to-br from-teal-500 to-teal-700"
+                  : "bg-gradient-to-br from-emerald-500 to-emerald-700"
               }`}
             >
               {initial}
             </span>
           )}
         </div>
-      </div>
-      <div className="flex flex-1 flex-col px-2 pb-2.5 pt-4 text-start sm:px-3 sm:pb-3.5 sm:pt-6">
-        <p className="line-clamp-2 text-[11px] font-bold leading-snug text-slate-900 sm:text-sm">{name}</p>
+
+        <p className="mt-2.5 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-snug tracking-tight text-slate-900 sm:mt-3 sm:min-h-[2.5rem] sm:text-sm">
+          {name}
+        </p>
+
         {subtitle ? (
-          <p className="mt-0.5 line-clamp-2 text-[9px] leading-4 text-slate-500 sm:mt-1 sm:text-[11px]">
+          <p className="mt-1 line-clamp-2 min-h-[2rem] text-[10px] leading-4 text-slate-500 sm:text-xs sm:leading-5">
             {subtitle}
           </p>
-        ) : null}
-        <p className="mt-1.5 truncate font-mono text-[8px] text-slate-400 sm:mt-2 sm:text-[10px]" dir="ltr">
-          zareoon.ir/{href.replace(/^\//, "")}
+        ) : (
+          <p className="mt-1 min-h-[2rem]" aria-hidden />
+        )}
+
+        <p
+          className={`mt-2 inline-flex max-w-full items-center gap-0.5 truncate rounded-full px-2 py-1 font-mono text-[9px] font-semibold sm:text-[10px] ${
+            isService
+              ? "bg-teal-50 text-teal-800 ring-1 ring-teal-100"
+              : "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100"
+          }`}
+          dir="ltr"
+        >
+          <span className="opacity-60">zareoon.ir/</span>
+          <span className="truncate">{slug}</span>
         </p>
       </div>
     </Link>
@@ -89,19 +146,28 @@ function CardsRail({ items, emptyLabel, type, t }) {
     );
   }
 
+  const shopLabel = t("buyerSellerPortalShopBadge");
+  const serviceLabel = t("buyerSellerPortalServiceBadge");
+
   return (
-    <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-1 pt-0.5 [scrollbar-width:thin] sm:gap-3 sm:pb-1.5">
-      {items.map((item) => (
-        <PageCard
-          key={`${type}-${item.id || item.profileSlug}`}
-          href={item.href}
-          name={item.name}
-          subtitle={item.subtitle}
-          avatar={item.avatar}
-          badge={type === "shop" ? t("buyerSellerPortalShopBadge") : t("buyerSellerPortalServiceBadge")}
-          accent={type === "shop" ? "emerald" : "teal"}
-        />
-      ))}
+    <div className="-mx-0.5 flex gap-2.5 overflow-x-auto px-0.5 pb-1.5 pt-1 [scrollbar-width:thin] snap-x snap-mandatory sm:gap-3.5 sm:pb-2">
+      {items.map((item) => {
+        const badges = [];
+        if (type === "shop" || item.hasShop) badges.push(shopLabel);
+        if (type === "service" || item.hasServices) badges.push(serviceLabel);
+
+        return (
+          <PageCard
+            key={`${type}-${item.id || item.profileSlug}`}
+            href={item.href}
+            name={item.name}
+            subtitle={item.subtitle}
+            avatar={item.avatar}
+            badges={[...new Set(badges)]}
+            accent={type === "shop" ? "emerald" : "teal"}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -130,20 +196,28 @@ export default function BuyerSellerPortal({ className = "" }) {
         const [shopsJson, svcJson] = await Promise.all([shopsRes.json(), svcRes.json()]);
         if (cancelled) return;
 
+        const shopRows = Array.isArray(shopsJson?.data) ? shopsJson.data : [];
+        const svcRows = Array.isArray(svcJson?.data) ? svcJson.data.slice(0, 10) : [];
+
+        const resolveAvatar = (avatar, slug) => {
+          if (avatar) return avatar;
+          if (String(slug || "").toLowerCase() === "zareoon") return "/images/logo.png";
+          return null;
+        };
+
         setShops(
-          Array.isArray(shopsJson?.data)
-            ? shopsJson.data.map((s) => ({
-                id: s.id,
-                profileSlug: s.profileSlug,
-                href: s.profileUrl || `/${s.profileSlug}`,
-                name: s.displayName || s.profileSlug,
-                subtitle: s.headline || "",
-                avatar: s.avatar,
-              }))
-            : []
+          shopRows.map((s) => ({
+            id: s.id,
+            profileSlug: s.profileSlug,
+            href: s.profileUrl || `/${s.profileSlug}`,
+            name: s.displayName || s.profileSlug,
+            subtitle: s.headline || "",
+            avatar: resolveAvatar(s.avatar, s.profileSlug),
+            hasShop: true,
+            hasServices: !!s.hasServices,
+          }))
         );
 
-        const svcRows = Array.isArray(svcJson?.data) ? svcJson.data.slice(0, 10) : [];
         setServices(
           svcRows
             .filter((p) => p.profileSlug)
@@ -153,7 +227,9 @@ export default function BuyerSellerPortal({ className = "" }) {
               href: providerPublicPath(p.profileSlug) || `/${p.profileSlug}`,
               name: p.displayName || p.companyName || p.profileSlug,
               subtitle: p.routes || p.selectedServices?.[0] || "",
-              avatar: p.logoUrl || null,
+              avatar: resolveAvatar(p.logoUrl || null, p.profileSlug),
+              hasShop: !!p.hasShop,
+              hasServices: true,
             }))
         );
       } catch {
@@ -175,7 +251,7 @@ export default function BuyerSellerPortal({ className = "" }) {
     : "/dashboard/seller/join";
 
   const sellerCtaClass =
-    "inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-white px-4 py-2.5 text-center text-[13px] font-bold leading-snug text-emerald-900 shadow-sm transition hover:bg-emerald-50 sm:min-h-11 sm:w-auto sm:min-w-[14rem] sm:rounded-lg sm:text-sm sm:px-5";
+    "inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-white px-4 py-2.5 text-center text-sm font-bold leading-snug text-emerald-900 shadow-sm transition hover:bg-emerald-50 sm:min-h-11 sm:w-auto sm:min-w-[14rem] sm:rounded-lg sm:px-5";
 
   const listTitle = useMemo(
     () => (tab === "shops" ? t("buyerSellerPortalRecentShops") : t("buyerSellerPortalRecentServices")),
@@ -205,16 +281,16 @@ export default function BuyerSellerPortal({ className = "" }) {
           <div className="relative mx-auto w-full max-w-[90rem] px-3.5 py-4 sm:px-6 sm:py-7 lg:px-10 lg:py-8">
             <div className="flex flex-col gap-3.5 sm:gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
               <div className="min-w-0 max-w-2xl">
-                <p className="inline-flex rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[9px] font-bold text-emerald-50 sm:px-2.5 sm:text-[11px]">
+                <p className="inline-flex rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold text-emerald-50 sm:px-2.5 sm:text-xs">
                   {t("buyerSellerPortalBadge")}
                 </p>
                 <h2
                   id="buyer-seller-portal-title"
-                  className="mt-1.5 text-balance text-lg font-black tracking-tight text-white sm:mt-2 sm:text-2xl"
+                  className="mt-1.5 text-balance text-base font-bold tracking-tight text-white sm:mt-2 sm:text-lg"
                 >
                   {t("buyerSellerPortalSectionTitle")}
                 </h2>
-                <p className="mt-1 line-clamp-3 text-[12.5px] leading-6 text-emerald-50/90 sm:mt-1.5 sm:line-clamp-none sm:text-[15px] sm:leading-7">
+                <p className="mt-1 line-clamp-3 text-xs leading-6 text-emerald-50/90 sm:mt-1.5 sm:line-clamp-none sm:text-sm sm:leading-7">
                   {t("buyerSellerPortalSectionDesc")}
                 </p>
                 <p
@@ -243,7 +319,7 @@ export default function BuyerSellerPortal({ className = "" }) {
             <div className="mt-4 rounded-xl border border-white/15 bg-black/20 p-2.5 backdrop-blur-sm sm:mt-6 sm:rounded-2xl sm:p-4">
               <div className="mb-2.5 flex flex-col gap-2 sm:mb-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
-                  <p className="text-[13px] font-bold text-white sm:text-sm">{listTitle}</p>
+                  <p className="text-sm font-bold text-white">{listTitle}</p>
                   {!loadingList ? (
                     <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-100">
                       {(tab === "shops" ? shops.length : services.length).toLocaleString("fa-IR")}
@@ -277,9 +353,12 @@ export default function BuyerSellerPortal({ className = "" }) {
               </div>
 
               {loadingList ? (
-                <div className="flex gap-2 overflow-hidden sm:gap-3">
+                <div className="flex gap-2.5 overflow-hidden sm:gap-3.5">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-28 w-[8.5rem] shrink-0 animate-pulse rounded-xl bg-white/10 sm:h-36 sm:w-36 sm:rounded-2xl" />
+                    <div
+                      key={i}
+                      className="h-[11.5rem] w-[9.75rem] shrink-0 animate-pulse rounded-2xl bg-white/10 sm:h-[13.5rem] sm:w-[12.5rem]"
+                    />
                   ))}
                 </div>
               ) : tab === "shops" ? (

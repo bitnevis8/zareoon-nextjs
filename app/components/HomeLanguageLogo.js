@@ -133,7 +133,7 @@ export default function HomeLanguageLogo() {
           {arcItems.map((option, index) => {
             const isActive = language === option.code;
             const deg = -90 + (index / Math.max(count - 1, 1)) * 180;
-            const isIran = option.code === "fa";
+            const flagOnly = Boolean(option.flagOnly);
 
             return (
               <button
@@ -141,8 +141,8 @@ export default function HomeLanguageLogo() {
                 type="button"
                 onClick={() => setLanguage(option.code)}
                 className={`pointer-events-auto absolute left-0 top-0 flex items-center justify-center border text-[9px] font-semibold leading-none shadow-sm transition ${
-                  isIran
-                    ? "min-h-0 min-w-[2.75rem] flex-col gap-0 overflow-hidden rounded-xl p-0 sm:min-w-[2.75rem] sm:text-xs"
+                  flagOnly
+                    ? "min-h-0 min-w-[2.75rem] overflow-hidden rounded-xl p-0 sm:min-w-[2.75rem]"
                     : "min-h-[2.75rem] min-w-[2.75rem] flex-col gap-0.5 rounded-xl px-1.5 py-1 sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1 sm:rounded-full sm:px-2 sm:py-1.5 sm:text-xs"
                 } ${
                   isActive
@@ -158,13 +158,14 @@ export default function HomeLanguageLogo() {
               >
                 <LanguageFlag
                   countryCode={option.countryCode}
+                  flagGlyph={option.flagGlyph}
                   className={
-                    isIran
-                      ? "!h-5 !w-full !rounded-none !border-0 sm:!h-6"
+                    flagOnly
+                      ? "!h-7 !w-full !rounded-none !border-0 sm:!h-8"
                       : "h-[1.1rem] w-[1.55rem] sm:h-3.5 sm:w-5"
                   }
                 />
-                <span className={`tracking-wide ${isIran ? "px-1.5 py-1" : ""}`}>{option.shortLabel}</span>
+                {!flagOnly ? <span className="tracking-wide">{option.shortLabel}</span> : null}
               </button>
             );
           })}

@@ -1,7 +1,9 @@
 export const translations = {
   fa: {
     siteName: "زارعون",
-    siteTagline: "زارعون بستری امن میان تولید و مصرف",
+    siteTagline: "ارتباط بی‌واسطه فروشندگان و خریداران",
+    headerAyahRef: "(قرآن کریم، واقعه ۶۴)",
+    headerAyahText: "آیا شما آن را می‌رویید یا ما رویاننده‌ایم؟",
     siteIntro: "زارعون، بازار آنلاین خرید و فروش انواع محصولات؛ ارتباط مستقیم میان تولیدکننده، تامین‌کننده و خریدار.",
     cart: "سبد خرید",
     language: "زبان",
@@ -105,7 +107,7 @@ export const translations = {
     lcItem1: "افتتاح اعتبار اسنادی (LC)",
     lcItem2: "پیگیری مراحل اجرایی",
     lcItem3: "هماهنگی بانک و طرفین معامله",
-    lcItem4: "مشاوره واردات و صادرات",
+    lcItem4: "بررسی و تطبیق اسناد اعتبار اسنادی",
     lcFooter: "مسئولیت نهایی توافق و اجرا همیشه با طرفین معامله است.",
     lcRequestCta: "درخواست LC",
     escrowTagline:
@@ -115,10 +117,10 @@ export const translations = {
     escrowDescription:
       "ابزارهای اختیاری برای تسهیل هماهنگی میان کاربران در دسترس است؛ استفاده از آن‌ها به‌معنای قبول مسئولیت معامله توسط زارعون نیست.",
     escrowBlockTitle: "تضمین معاملات و حساب امانی",
-    escrowBlockHint: "ابزار اختیاری — مسئولیت نهایی با طرفین",
-    escrowItem1: "محاسبه خودکار وجه تضمین بر اساس قوانین معامله (مثلاً ۳۰٪ مبلغ کل)",
+    escrowBlockHint: "خدمات ویژه زارعون",
+    escrowItem1: "محاسبه و مدیریت وجه تضمین بر اساس شرایط معامله",
     escrowItem2: "قفل وجه تا زمان تأیید خریدار و فروشنده",
-    escrowItem3: "آزادسازی مرحله‌ای پس از تحویل کالا یا انجام خدمات",
+    escrowItem3: "آزادسازی یکجا یا مرحله‌ای پس از تحویل کالا یا انجام خدمات",
     escrowItem4: "امکان ثبت اختلاف میان طرفین؛ حل نهایی اختلاف بر عهده خود کاربران است",
     escrowExampleTitle: "مثال عملی",
     escrowExampleText:
@@ -126,7 +128,7 @@ export const translations = {
     escrowFooter:
       "حتی با استفاده از ابزارهای اختیاری، زارعون طرف معامله نیست و مسئولیتی در قبال توافق یا اختلاف کاربران ندارد.",
     escrowCta: "شروع تضمین معاملات",
-    lcBlockHint: "امکان اختیاری برای تسهیل فرآیند — مسئولیت با طرفین",
+    lcBlockHint: "خدمات ویژه زارعون",
     lcSectionIntro:
       "برای معاملات بین‌المللی، امکانات مرتبط با اعتبار اسنادی (LC) صرفاً برای تسهیل ارتباط و فرآیند میان کاربران ارائه می‌شود و مسئولیت نهایی با طرفین است، شامل:",
     zareoonServicesLiabilityNote:
@@ -196,7 +198,7 @@ export const translations = {
     buyerSellerPortalSectionDesc:
       "فروشنده یا خدمات‌دهنده باشید؛ یک صفحه عمومی با آدرس اختصاصی بسازید تا مشتریانتان محصولات یا خدمات شما را ببینند، تماس بگیرند و دنبال کنند.",
     buyerSellerPortalFriendlyNote:
-      "آدرس نمونه: zareoon.ir/your-shop — نام انگلیسی فروشگاه را به‌جای your-shop بگذارید.",
+      "آدرس نمونه: zareoon.ir/your-page — نام انگلیسی صفحه را به‌جای your-page بگذارید.",
     buyerSellerPortalUrlLabel: "نمونه آدرس اختصاصی",
     buyerSellerPortalShopTitle: "فروشگاه و عرضه محصول",
     buyerSellerPortalShopPoint1: "ویترین محصولات و موجودی روی یک لینک قابل اشتراک",
@@ -558,6 +560,8 @@ export const translations = {
   en: {
     siteName: "Zareoon",
     siteTagline: "A trusted bridge between production and consumption",
+    headerAyahRef: "(Holy Quran, Al-Waqi'ah 64)",
+    headerAyahText: "Is it you who make it grow, or are We the grower?",
     siteIntro: "Zareoon is an online marketplace for various products, connecting producers, suppliers, and buyers directly.",
     cart: "Cart",
     language: "Language",
@@ -661,7 +665,7 @@ export const translations = {
     lcItem1: "LC opening",
     lcItem2: "Process tracking",
     lcItem3: "Bank and counterparty coordination",
-    lcItem4: "Import and export advisory",
+    lcItem4: "LC document review and compliance",
     lcFooter: "Your trusted partner in international trade.",
     lcRequestCta: "Request LC",
     escrowTagline:
@@ -671,10 +675,10 @@ export const translations = {
     escrowDescription:
       "Optional tools help parties coordinate; using them does not mean Zareoon assumes liability for the deal.",
     escrowBlockTitle: "Trade guarantee & escrow",
-    escrowBlockHint: "Optional tool — final responsibility stays with the parties",
+    escrowBlockHint: "Zareoon special services",
     escrowItem1: "Deposit calculation and management per deal terms",
     escrowItem2: "Secure holding of funds until agreed milestones are confirmed",
-    escrowItem3: "Milestone release after obligations are completed",
+    escrowItem3: "One-time or staged release after goods delivery or service completion",
     escrowItem4: "Parties can record a dispute; final resolution remains with the users",
     escrowExampleTitle: "Practical example",
     escrowExampleText:
@@ -682,7 +686,7 @@ export const translations = {
     escrowFooter:
       "Even when optional tools are used, Zareoon is not a party to the deal and has no liability for agreements, payments, quality, or disputes between users.",
     escrowCta: "Start trade guarantee",
-    lcBlockHint: "Optional facilitation — responsibility stays with the parties",
+    lcBlockHint: "Zareoon special services",
     lcSectionIntro:
       "For international deals, LC-related features only help parties coordinate; final responsibility remains with them, including:",
     zareoonServicesLiabilityNote:
@@ -737,7 +741,7 @@ export const translations = {
     buyerSellerPortalSectionDesc:
       "Sell products or offer trade services with a public page and a dedicated link — so customers can browse, contact you, and follow your activity.",
     buyerSellerPortalFriendlyNote:
-      "Example URL: zareoon.ir/your-shop — replace your-shop with your English shop name.",
+      "Example URL: zareoon.ir/your-page — replace your-page with your English page name.",
     buyerSellerPortalUrlLabel: "Sample dedicated URL",
     buyerSellerPortalShopTitle: "Shop & product listings",
     buyerSellerPortalShopPoint1: "Showcase products and stock on one shareable link",
@@ -1115,6 +1119,8 @@ export const translations = {
   ru: {
     siteName: "Zareoon",
     siteTagline: "Надежная платформа между производством и потреблением",
+    headerAyahRef: "(Коран, сура Аль-Вакиа 64)",
+    headerAyahText: "Вы ли выращиваете его, или Мы — выращивающие?",
     siteIntro: "Zareoon - онлайн-площадка для торговли различными товарами, связывающая производителей, поставщиков и покупателей.",
     cart: "Корзина",
     language: "Язык",
@@ -1217,7 +1223,7 @@ export const translations = {
     lcItem1: "Открытие аккредитива (LC)",
     lcItem2: "Сопровождение процесса",
     lcItem3: "Координация с банком и контрагентами",
-    lcItem4: "Консультации по импорту и экспорту",
+    lcItem4: "Проверка и соответствие документов LC",
     lcFooter: "Ваш надежный партнер в международной торговле.",
     lcRequestCta: "Запрос LC",
     escrowBadge: "Эксклюзив Zareoon",
@@ -1226,9 +1232,9 @@ export const translations = {
     escrowTitle: "Гарантия сделки и эскроу-счёт",
     escrowDescription:
       "B2B-сделки с большей уверенностью: депозит блокируется на эскроу Zareoon и поэтапно освобождается после поставки или выполнения обязательств — независимо от платёжного шлюза, с прозрачным реестром и разрешением споров.",
-    escrowItem1: "Автоматический расчёт депозита (например, 30% от суммы сделки)",
+    escrowItem1: "Расчёт и управление депозитом по условиям сделки",
     escrowItem2: "Блокировка средств до подтверждения покупателем и продавцом",
-    escrowItem3: "Поэтапное освобождение после доставки товара или оказания услуги",
+    escrowItem3: "Единовременное или поэтапное освобождение после поставки товара или оказания услуги",
     escrowItem4: "Споры, возвраты и посредничество команды Zareoon",
     escrowExampleTitle: "Практический пример",
     escrowExampleText:

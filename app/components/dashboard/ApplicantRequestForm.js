@@ -44,6 +44,8 @@ export default function ApplicantRequestForm({
   compact = false,
   initialRequestType = "",
   initialServiceCategoryId = "",
+  initialDescription = "",
+  initialNotes = "",
 }) {
   const t = useTranslations("applicant");
   const auth = useAuth();
@@ -84,12 +86,12 @@ export default function ApplicantRequestForm({
   const [serviceCategoryId, setServiceCategoryId] = useState("");
   const [serviceSubcategoryId, setServiceSubcategoryId] = useState("");
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(() => String(initialDescription || "").trim());
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(() => String(initialNotes || "").trim());
   const [allowPhoneContact, setAllowPhoneContact] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

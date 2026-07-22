@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Инженерная инспекция Арья Фулад Гарн"
+    "inspectionStandardsCompany": "Инженерная инспекция Арья Фулад Гарн",
+    "verifiedBadge": "Проверен",
+    "verifiedBadgeTitle": "Проверенный поставщик на Zareoon"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "Григорианский",
     "calendarHijri": "Хиджра",
     "calendarShamsi": "Солнечная хиджра",
-    "calendarClickHint": "{full} — нажмите: {next}",
+    "calendarClickHint": "{full} — нажмите, чтобы увидеть эквиваленты",
     "calendarAria": "Календарь {label}",
+    "calendarEquivalentsTitle": "Эквивалентные даты",
     "regionAria": "Курсы валют на сегодня",
     "loadingRates": "Загрузка курсов…",
     "ratesUnavailable": "Курсы недоступны",

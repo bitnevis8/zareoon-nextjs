@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import AuthRequiredButton from "./ui/AuthRequiredButton";
 import { ZAREOON_LOGO } from "../data/tradeProviderBranding";
 
-const PACKAGING_CTA_HREF = "/dashboard/submit-request?type=service&category=packaging-prep";
+const PACKAGING_CTA_HREF = "/zareoon?tab=services";
 
 function PackageIcon({ className = "h-4 w-4" }) {
   return (
@@ -53,10 +53,15 @@ function AdMainContent({ t }) {
     <>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-4xl space-y-2">
-          <h2 className="text-lg font-extrabold leading-8 text-slate-900 sm:text-xl sm:leading-10 lg:text-2xl">
-            {t("packagingAdTitle")}
-          </h2>
-          <p className="text-sm leading-7 text-slate-700 sm:text-base">{t("packagingAdDescription")}</p>
+          <div>
+            <h2 className="text-base font-bold leading-7 text-slate-900 sm:text-lg sm:leading-8">
+              {t("packagingAdTitle")}
+            </h2>
+            <p className="mt-0.5 text-[10px] font-medium text-slate-500 sm:mt-1 sm:text-xs">
+              {t("packagingAdBadge")}
+            </p>
+          </div>
+          <p className="text-xs leading-6 text-slate-700 sm:text-sm sm:leading-7">{t("packagingAdDescription")}</p>
         </div>
         <div className="flex h-16 w-16 shrink-0 items-center justify-center self-start overflow-hidden rounded-2xl border border-emerald-200/80 bg-white p-1.5 shadow-md sm:h-20 sm:w-20">
           <Image
@@ -73,7 +78,7 @@ function AdMainContent({ t }) {
         {[1, 2, 3, 4].map((n) => (
           <div
             key={n}
-            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-white/95 px-2.5 py-1.5 text-[10px] font-medium text-slate-800 shadow-sm sm:text-[11px]"
+            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-white/95 px-2.5 py-1.5 text-[10px] font-medium text-slate-800 shadow-sm sm:text-xs"
           >
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
             <span>{t(`packagingAdItem${n}`)}</span>
@@ -116,10 +121,7 @@ export default function ZareoonPackagingAd({ className = "" }) {
   return (
     <div className={`w-full ${className}`}>
       {/* دسکتاپ: کارت کامل */}
-      <div className="mx-auto hidden w-full max-w-5xl space-y-2 lg:block">
-        <div className={`flex items-center gap-2 px-1 ${isRTL ? "justify-end" : "justify-start"}`}>
-          <span className="text-[11px] text-slate-400 sm:text-xs">{t("packagingAdBadge")}</span>
-        </div>
+      <div className="mx-auto hidden w-full max-w-5xl lg:block">
         <div
           className={`relative block w-full overflow-hidden rounded-[2rem] border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-teal-50 shadow-[0_18px_50px_-18px_rgba(16,185,129,0.35)] transition-shadow hover:shadow-[0_22px_55px_-20px_rgba(16,185,129,0.42)] ${
             isRTL ? "text-right" : "text-left"

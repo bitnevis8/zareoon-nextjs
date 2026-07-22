@@ -7,14 +7,14 @@ const ENGLISH_ONLY = /[^a-zA-Z0-9\s-]/g;
 
 const CONTEXT_COPY = {
   "shop-create": {
-    label: "آدرس صفحه اختصاصی *",
+    label: "آدرس صفحه (لینک) *",
     hint:
-      "یک نام اختصاصی برای آدرس صفحه خود انتخاب کنید. این آدرس، صفحه اختصاصی کسب‌وکار شما در زارعون خواهد بود؛ مانند یک سایت اختصاصی که برای معرفی فروشگاه، محصولات و خدمات شما استفاده می‌شود.\n\nمثال: اگر نام greenfarm را انتخاب کنید، آدرس صفحه شما به شکل زیر خواهد بود:\nzareoon.ir/greenfarm",
+      "این فقط آدرس لینک صفحه است و با نام نمایشی فرق دارد.\nمثال: اگر greenfarm را انتخاب کنید → zareoon.ir/greenfarm",
   },
   "services-create": {
-    label: "آدرس صفحه اختصاصی *",
+    label: "آدرس صفحه (لینک) *",
     hint:
-      "این آدرس صفحه اختصاصی شماست. اگر فروشگاه هم بسازید، همین آدرس برای فروشگاه به‌کار می‌رود. نام نمایشی خدمات جدا از این آدرس است.",
+      "این فقط آدرس لینک صفحه است و با نام نمایشی فرق دارد. اگر از قبل فروشگاه ساخته باشید، همان آدرس اینجا استفاده می‌شود.\nمثال: اگر cargoplus را انتخاب کنید → zareoon.ir/cargoplus",
   },
   "shop-edit": {
     label: "آدرس صفحه (اسلاگ)",
@@ -137,7 +137,7 @@ export default function PublicPageSlugField({
         onChange={handleChange}
         maxLength={Math.max(Number(slugRules.maxLength) || 30, 80)}
         className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-        placeholder="e.g. my-shop"
+        placeholder="e.g. example"
         dir="ltr"
         autoComplete="off"
         spellCheck={false}

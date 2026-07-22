@@ -13,9 +13,12 @@ export function getLotSupplierProfileUrl(lot) {
   return providerPublicPath(slug);
 }
 
+/** نام فروشگاه / صفحه عمومی — نه نام شخصی */
 export function getLotSupplierDisplayName(lot) {
   const supplier = getLotSupplier(lot);
   if (!supplier) return "";
+  const shopName = String(supplier.account?.displayName || supplier.displayName || "").trim();
+  if (shopName) return shopName;
   return (
     [supplier.firstName, supplier.lastName].filter(Boolean).join(" ").trim() ||
     supplier.username ||
@@ -28,17 +31,22 @@ export function getLotSupplierPhone(lot) {
   return supplier?.mobile || supplier?.phone || "";
 }
 
-/** برچسب نمایشی تأمین‌کننده برای تب‌ها و کارت‌ها */
+export function lotSupplierHasPhone(lot) {
+  const supplier = getLotSupplier(lot);
+  if (!supplier) return false;
+  if (supplier.hasPhone === true) return true;
+  return Boolean(getLotSupplierPhone(lot));
+}
+
+/** برچسب نمایشی تأمین‌کننده برای تب‌ها و کارت‌ها (بدون شماره) */
 export function getLotSupplierDisplay(lot, t) {
   const supplier = getLotSupplier(lot);
   const name = getLotSupplierDisplayName(lot);
   const mobile = getLotSupplierPhone(lot);
   const label =
-    (name && mobile ? `${name} · ${mobile}` : "") ||
     name ||
-    mobile ||
     supplier?.username ||
     (t ? t("lotNumber", { id: lot?.id }) : null) ||
     (t ? t("notSet") : "—");
-  return { label, name, mobile };
+  return { label, name, mobile, hasPhone: lotSupplierHasPhone(lot) };
 }

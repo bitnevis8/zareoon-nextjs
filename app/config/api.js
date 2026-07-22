@@ -237,6 +237,12 @@ export const API_ENDPOINTS = {
     delete: (id) => `${API_BASE_URL}/location/delete/${id}`,
     deleteBySlug: (slug) => `${API_BASE_URL}/location/deleteBySlug/${encodeURIComponent(slug)}`,
   },
+  hsCodes: {
+    base: `${API_BASE_URL}/hs-code`,
+    search: `${API_BASE_URL}/hs-code/search`,
+    getAll: `${API_BASE_URL}/hs-code/getAll`,
+    getByCode: (code) => `${API_BASE_URL}/hs-code/getByCode/${encodeURIComponent(code)}`,
+  },
   // کلاس تگ‌ها - حذف شده
   classTags: {
     base: `${API_BASE_URL}/__removed_articles__/class-tags`,
@@ -269,6 +275,7 @@ export const API_ENDPOINTS = {
       base: `${API_BASE_URL}/supplier/inventory-lot`,
       getAll: `${API_BASE_URL}/supplier/inventory-lot`,
       getById: (id) => `${API_BASE_URL}/supplier/inventory-lot/${id}`,
+      supplierContact: (id) => `${API_BASE_URL}/supplier/inventory-lot/${id}/supplier-contact`,
       create: `${API_BASE_URL}/supplier/inventory-lot`,
       update: (id) => `${API_BASE_URL}/supplier/inventory-lot/${id}`,
       delete: (id) => `${API_BASE_URL}/supplier/inventory-lot/${id}`,
@@ -431,6 +438,7 @@ export const API_ENDPOINTS = {
     cancelDeletion: `${API_BASE_URL}/tamin/me/cancel-deletion`,
     slugAvailable: `${API_BASE_URL}/tamin/slug-available`,
     recentShops: `${API_BASE_URL}/tamin/recent-shops`,
+    publicPosts: `${API_BASE_URL}/tamin/posts/public`,
     adminShops: `${API_BASE_URL}/tamin/admin/shops`,
     adminShop: (id) => `${API_BASE_URL}/tamin/admin/shops/${id}`,
     createPost: `${API_BASE_URL}/tamin/posts`,

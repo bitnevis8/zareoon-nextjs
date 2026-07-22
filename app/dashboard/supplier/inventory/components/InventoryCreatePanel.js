@@ -223,16 +223,15 @@ export default function InventoryCreatePanel({
               {t("create.listingModeratedNote")}
             </p>
           ) : null}
-          {selectedProduct?.attributeSetId ? (
-            <p className="mt-1.5 text-[11px] text-slate-500">
-              {t("create.attributeSet")}: <span className="font-medium text-slate-700">{selectedProduct.attributeSetId}</span>
-            </p>
-          ) : null}          {!supplier ? (
+          {!supplier ? (
             <div className="mt-3">
               <Field label={t("create.supplier")} compact>
                 <AsyncSelect
                   cacheOptions
                   styles={selectStyles}
+                  menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+                  menuPosition="fixed"
+                  menuShouldScrollIntoView={false}
                   defaultOptions
                   loadOptions={loadFarmerOptions}
                   placeholder={t("create.selectSupplier")}
@@ -348,7 +347,10 @@ export default function InventoryCreatePanel({
 
           {filterKeys.length > 0 ? (
             <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/50 p-2.5 sm:p-3">
-              <p className="mb-2 text-xs font-semibold text-slate-700">{t("create.productFilters")}</p>
+              <p className="mb-2 text-xs font-semibold text-slate-700">
+                {t("create.productFilters")}
+                <span className="ms-1.5 font-normal text-slate-400">({t("create.optional")})</span>
+              </p>
               <ProductFilterFields
                 keys={filterKeys}
                 values={form.filterValues || {}}
@@ -456,7 +458,9 @@ export default function InventoryCreatePanel({
             />
             {attributeDefs.length > 0 ? (
               <div className="rounded-lg border border-slate-200 p-2.5 sm:p-3">
-                <p className="mb-2 text-xs font-semibold text-slate-700">{t("create.technicalSpecs")}</p>
+                <p className="mb-2 text-xs font-semibold text-slate-700">
+                  {t("create.technicalSpecs")}
+                </p>
                 <AttributeFields
                   defs={attributeDefs}
                   values={attributeValues}
@@ -468,7 +472,7 @@ export default function InventoryCreatePanel({
           </div>
         </StepBlock>
 
-        <div className="sticky bottom-0 -mx-3 border-t border-slate-100 bg-white/95 px-3 py-2.5 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-1">
+        <div className="sticky bottom-0 z-10 -mx-3 border-t border-slate-100 bg-white/95 px-3 py-2.5 backdrop-blur sm:static sm:z-auto sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-1">
           <button
             type="submit"
             disabled={saving}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { formatCalendar, formatFetchedAt, CALENDAR_MODES } from "@/app/utils/calendars";
+import { formatCalendar, formatFetchedAt, CALENDAR_MODES, getDefaultCalendarMode } from "@/app/utils/calendars";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -189,6 +189,12 @@ export default function ExchangeRatesPage() {
   const [calendarMode, setCalendarMode] = useState(0);
   const [now, setNow] = useState(() => new Date());
 
+  useEffect(() => {
+    const mode = getDefaultCalendarMode(language);
+    const idx = CALENDAR_MODES.indexOf(mode);
+    setCalendarMode(idx >= 0 ? idx : 0);
+  }, [language]);
+
   const localizedRates = useMemo(
     () =>
       data.map((rate) => {
@@ -224,7 +230,14 @@ export default function ExchangeRatesPage() {
     return () => clearInterval(tick);
   }, []);
 
-  const cal = formatCalendar(CALENDAR_MODES[calendarMode], now, language);
+  const mode = CALENDAR_MODES[calendarMode];
+  const cal = formatCalendar(mode, now, language);
+  const calLabel =
+    mode === "gregorian"
+      ? tShared("currencyTicker.calendarGregorian")
+      : mode === "hijri"
+        ? tShared("currencyTicker.calendarHijri")
+        : tShared("currencyTicker.calendarShamsi");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -255,7 +268,7 @@ export default function ExchangeRatesPage() {
                 📅
               </span>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wide text-amber-700">{cal.label}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-amber-700">{calLabel}</div>
                 <div className="text-sm font-semibold text-amber-950">{cal.full}</div>
                 <div className="mt-0.5 text-[10px] text-amber-700/80">{t("header.calendarHint")}</div>
               </div>
@@ -266,7 +279,7 @@ export default function ExchangeRatesPage() {
             <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm">
               <span className="font-medium text-slate-700">{t("fetch.label")}</span>
               <time dateTime={fetchedAt} className="font-semibold tabular-nums text-emerald-800">
-                {formatFetchedAt(fetchedAt)}
+                {formatFetchedAt(fetchedAt, language)}
               </time>
               <button
                 type="button"

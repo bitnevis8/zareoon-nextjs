@@ -57,8 +57,8 @@ export default function HomeIntroLines({ introOrder, language, siteIntroByLang }
             title={isActive ? undefined : text}
             className={`relative mx-auto block w-full max-w-full rounded-md px-2 text-center leading-snug outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400/60 ${
               isActive
-                ? "cursor-default whitespace-normal text-pretty text-[13px] font-semibold text-slate-800 sm:text-sm"
-                : "cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-[10px] font-normal text-slate-400 sm:text-[11px]"
+                ? "cursor-default whitespace-normal text-pretty text-xs font-semibold text-slate-800 sm:text-sm"
+                : "cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-[10px] font-normal text-slate-400 sm:text-xs"
             }`}
             style={{ textAlign: "center" }}
             suppressHydrationWarning

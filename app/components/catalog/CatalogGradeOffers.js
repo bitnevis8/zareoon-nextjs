@@ -225,6 +225,7 @@ export default function CatalogGradeOffers({
     placingLotId,
     onAddToCart,
     productUnit,
+    product: item,
     productId: item?.id,
   };
 

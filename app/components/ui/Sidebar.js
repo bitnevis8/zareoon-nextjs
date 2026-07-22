@@ -27,13 +27,6 @@ function useSidebarMenus() {
     () => ({
       adminMenuSections: [
         {
-          id: 'overview',
-          title: t('admin.overview'),
-          submenu: [
-            { title: t('admin.managementHome'), path: '/dashboard/management', icon: 'home' },
-          ],
-        },
-        {
           id: 'users',
           title: t('admin.userManagement'),
           submenu: [
@@ -75,6 +68,11 @@ function useSidebarMenus() {
           ],
         },
       ],
+      adminDashboardLink: {
+        title: t('admin.managementDashboard'),
+        path: '/dashboard/management',
+        icon: 'home',
+      },
       sellerMenuLinksPrimary: [
         { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own', icon: 'products' },
         { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own', icon: 'plus' },
@@ -207,6 +205,7 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
   const menus = useSidebarMenus();
   const {
     adminMenuSections,
+    adminDashboardLink,
     sellerMenuLinksPrimary,
     sellerMenuLinksSecondary,
     applicantMenuLinksBeforeEscrow,
@@ -358,6 +357,17 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
         {showAdmin ? (
           <>
             <SectionLabel>{sectionAdmin}</SectionLabel>
+            {adminDashboardLink ? (
+              <div className="px-2">
+                <NavItem
+                  href={adminDashboardLink.path}
+                  label={adminDashboardLink.title}
+                  active={isActive(adminDashboardLink.path)}
+                  onClick={onLinkClick}
+                  icon={adminDashboardLink.icon}
+                />
+              </div>
+            ) : null}
             {adminMenuSections.map((section) => (
               <SubmenuBlock
                 key={section.id}

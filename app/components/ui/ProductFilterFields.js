@@ -13,9 +13,11 @@ export default function ProductFilterFields({
   onChange,
   optionsByKey = {},
   compact = false,
+  optional = false,
   className = "",
 }) {
   const t = useTranslations("catalog");
+  const tInv = useTranslations("inventory");
 
   if (!keys.length) return null;
 
@@ -42,7 +44,12 @@ export default function ProductFilterFields({
         const opts = optionsByKey[key];
         return (
           <div key={key} className="flex flex-col">
-            <label className={labelClass}>{labelFor(key)}</label>
+            <label className={labelClass}>
+              {labelFor(key)}
+              {optional ? (
+                <span className="ms-1 font-normal text-slate-400">({tInv("create.optional")})</span>
+              ) : null}
+            </label>
             {Array.isArray(opts) && opts.length > 0 ? (
               <select
                 className={inputClass}

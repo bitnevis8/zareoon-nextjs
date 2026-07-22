@@ -12,6 +12,7 @@ import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
 import PublicPageSlugField from "@/app/components/ui/PublicPageSlugField";
 import ExistingPublicPageNotice from "@/app/components/ui/ExistingPublicPageNotice";
+import DedicatedPageTip from "@/app/components/ui/DedicatedPageTip";
 import { useExistingPublicSlug } from "@/app/hooks/useExistingPublicSlug";
 import BusinessHoursEditor from "@/app/components/ui/BusinessHoursEditor";
 import LocationPickerMap from "@/app/components/ui/LocationPickerMap";
@@ -36,6 +37,8 @@ export default function SellerJoinPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [shopName, setShopName] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [headline, setHeadline] = useState("");
   const [mobile, setMobile] = useState(auth?.user?.mobile || "");
   const [landline, setLandline] = useState("");
   const [email, setEmail] = useState(auth?.user?.email || "");
@@ -53,7 +56,12 @@ export default function SellerJoinPage() {
   const join = async () => {
     setError("");
     if (!hasSlug && !shopName.trim()) {
-      setError("نام صفحه فروشگاه را وارد کنید");
+      setError("آدرس صفحه را وارد کنید");
+      setStep(1);
+      return;
+    }
+    if (!displayName.trim()) {
+      setError("نام نمایشی فروشگاه را وارد کنید");
       setStep(1);
       return;
     }
@@ -62,6 +70,8 @@ export default function SellerJoinPage() {
       showToast.info("ایجاد فروشگاه به منزله پذیرش قوانین فروشندگان زارعون است.");
 
       const body = {
+        displayName: displayName.trim(),
+        headline: headline.trim() || undefined,
         publicPhone: mobile.trim() || undefined,
         publicLandline: landline.trim() || undefined,
         publicEmail: email.trim() || undefined,
@@ -106,9 +116,15 @@ export default function SellerJoinPage() {
   };
 
   const goNext = () => {
-    if (step === 1 && !hasSlug && !shopName.trim()) {
-      setError("نام صفحه را وارد کنید");
-      return;
+    if (step === 1) {
+      if (!hasSlug && !shopName.trim()) {
+        setError("آدرس صفحه را وارد کنید");
+        return;
+      }
+      if (!displayName.trim()) {
+        setError("نام نمایشی فروشگاه را وارد کنید");
+        return;
+      }
     }
     setError("");
     setStep((s) => Math.min(TOTAL_STEPS, s + 1));
@@ -147,7 +163,16 @@ export default function SellerJoinPage() {
             <Link href="/dashboard/supplier-profile" className={`${dash.btnSecondary} min-h-11 w-full`}>
               تنظیمات فروشگاه من
             </Link>
+            <Link
+              href="/trade-services/register?start=1"
+              className={`${dash.btnSecondary} min-h-11 w-full sm:col-span-3`}
+            >
+              افزودن خدمات (اختیاری)
+            </Link>
           </div>
+          <p className="border-t border-slate-100 px-4 py-3 text-center text-[11px] leading-5 text-slate-500 sm:px-6">
+            همین صفحه ویترین شماست؛ بعداً می‌توانید از همان آدرس، خدمات بازرگانی هم اضافه کنید.
+          </p>
         </div>
       </main>
     );
@@ -163,7 +188,7 @@ export default function SellerJoinPage() {
             </div>
             <h1 className="text-xl font-bold sm:text-2xl">فروشگاه شما آماده است</h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-emerald-50/95">
-              می‌توانید محصولات را اضافه کنید یا تنظیمات را ویرایش کنید.
+              می‌توانید محصول اضافه کنید، خدمات هم عرضه کنید یا تنظیمات را ویرایش کنید.
             </p>
           </div>
           <div className="grid gap-2.5 p-4 sm:grid-cols-2 sm:gap-3 sm:p-6">
@@ -186,11 +211,15 @@ export default function SellerJoinPage() {
     <main className="mx-auto max-w-lg px-4 py-6 sm:max-w-xl sm:px-6 sm:py-8 md:max-w-2xl lg:max-w-3xl lg:py-10" dir={isRTL ? "rtl" : "ltr"}>
       <header className="mb-5 sm:mb-6">
         <p className="text-xs font-medium text-emerald-700">ایجاد فروشگاه</p>
-        <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">فروشگاه خود را بسازید</h1>
+        <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          صفحه اختصاصی فروشگاه خود را بسازید
+        </h1>
         <p className="mt-1.5 text-sm leading-6 text-slate-500">
-          چهار مرحله — تماس، ساعات و نقشه اختیاری‌اند.
+          چهار مرحله ساده؛ تماس، ساعات کاری و موقعیت اختیاری‌اند و بعداً هم قابل تکمیل هستند.
         </p>
       </header>
+
+      <DedicatedPageTip context="shop-create" className="mb-5" />
 
       <div className="mb-5 grid grid-cols-4 gap-1.5 sm:gap-2">
         {STEPS.map((s) => (
@@ -211,19 +240,47 @@ export default function SellerJoinPage() {
 
       <div className={`${dash.card} space-y-5 p-4 sm:p-6 md:p-7`}>
         {step === 1 ? (
-          slugLoading ? (
-            <div className="h-20 animate-pulse rounded-xl bg-slate-100" />
-          ) : hasSlug ? (
-            <ExistingPublicPageNotice slug={existingSlug} />
-          ) : (
-            <PublicPageSlugField
-              value={shopName}
-              onChange={setShopName}
-              checkUrl={API_ENDPOINTS.tamin.slugAvailable}
-              context="shop-create"
-              previewPrefix="zareoon.ir/"
-            />
-          )
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-slate-700">
+              نام نمایشی فروشگاه *
+              <input
+                className={`${dash.input} mt-1.5`}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                maxLength={120}
+                placeholder="مثلاً باغ سبز جنوب"
+              />
+              <span className="mt-1.5 block text-[11px] leading-5 text-slate-500">
+                این نام روی کارت‌های فروشگاه‌ها و صفحه عمومی شما نشان داده می‌شود — نه اسم و فامیل شخصی شما.
+              </span>
+            </label>
+            <label className="block text-sm font-medium text-slate-700">
+              توضیح کوتاه (اختیاری)
+              <input
+                className={`${dash.input} mt-1.5`}
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                maxLength={200}
+                placeholder="مثلاً تأمین عمده خرما و خشکبار صادراتی"
+              />
+              <span className="mt-1.5 block text-[11px] leading-5 text-slate-500">
+                یک جمله کوتاه زیر نام فروشگاه در فهرست‌ها و کارت‌ها نمایش داده می‌شود.
+              </span>
+            </label>
+            {slugLoading ? (
+              <div className="h-20 animate-pulse rounded-xl bg-slate-100" />
+            ) : hasSlug ? (
+              <ExistingPublicPageNotice slug={existingSlug} />
+            ) : (
+              <PublicPageSlugField
+                value={shopName}
+                onChange={setShopName}
+                checkUrl={API_ENDPOINTS.tamin.slugAvailable}
+                context="shop-create"
+                previewPrefix="zareoon.ir/"
+              />
+            )}
+          </div>
         ) : null}
 
         {step === 2 ? (

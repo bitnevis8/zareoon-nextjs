@@ -2,7 +2,7 @@
 import languageLabels from "../../messages/fa/languages.json";
 
 export const SITE_LANGUAGES = [
-  { code: "fa", label: languageLabels.fa, shortLabel: "Fa", countryCode: "IR" },
+  { code: "fa", label: languageLabels.fa, shortLabel: "Fa", countryCode: "IR", flagOnly: true },
   { code: "es", label: languageLabels.es, shortLabel: "Es", countryCode: "ES" },
   { code: "ar", label: languageLabels.ar, shortLabel: "Ar", countryCode: "IQ" },
   { code: "en", label: languageLabels.en, shortLabel: "En", countryCode: "GB" },

@@ -143,7 +143,7 @@ export default function ProductCatalogPicker({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="relative z-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="border-b border-slate-100 px-2.5 py-2 sm:px-3">
         <div className="flex gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
           <ModeTab active={mode === "category"} onClick={() => setMode("category")}>
@@ -183,6 +183,9 @@ export default function ProductCatalogPicker({
             <AsyncSelect
               cacheOptions
               styles={selectStyles}
+              menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+              menuPosition="fixed"
+              menuShouldScrollIntoView={false}
               defaultOptions={fallbackProducts.map((p) => ({ value: p.id, label: p.name }))}
               loadOptions={loadProductOptions}
               placeholder={t("catalog.searchProductPlaceholder")}

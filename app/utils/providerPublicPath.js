@@ -18,7 +18,24 @@ export function providerPublicPath(slugOrId) {
  * Display host + path for marketing (no protocol).
  * @param {string} [slugExample]
  */
-export function providerPublicDisplayUrl(slugExample = "your-shop") {
+export function providerPublicDisplayUrl(slugExample = "example") {
   const host = (process.env.NEXT_PUBLIC_SITE_HOST || "zareoon.ir").replace(/^https?:\/\//, "").replace(/\/$/, "");
   return `${host}/${slugExample}`;
+}
+
+/**
+ * Absolute public storefront URL for QR / share links.
+ * Prefers NEXT_PUBLIC_SITE_URL, then browser origin, then https://zareoon.ir
+ * @param {string | number | null | undefined} slugOrId
+ * @returns {string | null}
+ */
+export function providerPublicAbsoluteUrl(slugOrId) {
+  const path = providerPublicPath(slugOrId);
+  if (!path) return null;
+  const fromEnv = (process.env.NEXT_PUBLIC_SITE_URL || "").trim().replace(/\/$/, "");
+  if (fromEnv) return `${fromEnv}${path}`;
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return `${window.location.origin}${path}`;
+  }
+  return `https://zareoon.ir${path}`;
 }

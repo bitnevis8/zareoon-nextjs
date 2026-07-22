@@ -66,6 +66,7 @@
     "tieredPrice": "قیمت پلکانی",
     "defaultProductName": "محصول",
     "stock": "موجودی: {qty} {unit}",
+    "inquiryOnly": "قیمت و موجودی با استعلام",
     "currencyToman": "تومان",
     "addProduct": "افزودن محصول",
     "manage": "مدیریت موجودی",

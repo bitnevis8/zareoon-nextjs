@@ -112,7 +112,37 @@ function CategoryBrandMark({ item, size = "md", alt = "", tone = "amber" }) {
   );
 }
 
-function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel, className = "" }) {
+function VerifiedCornerBadge({ label, title }) {
+  return (
+    <span
+      className="absolute top-1.5 end-1.5 z-[1] inline-flex max-w-[calc(100%-0.5rem)] items-center gap-0.5 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold leading-none text-white shadow-sm shadow-emerald-900/20 sm:top-2.5 sm:end-2.5 sm:gap-1 sm:rounded-lg sm:px-2 sm:py-1 sm:text-[10px]"
+      title={title}
+      aria-label={title}
+    >
+      <svg className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clipRule="evenodd"
+        />
+      </svg>
+      <span className="truncate">{label}</span>
+    </span>
+  );
+}
+
+function CategoryCard({
+  item,
+  count,
+  isVip,
+  companyName,
+  t,
+  locale,
+  memberLabel,
+  verifiedLabel,
+  verifiedTitle,
+  className = "",
+}) {
   const exclusive = isPlatformExclusiveCategory(item.id) || isVip;
   const isInspection = item.id === "inspection-standards";
   const isPackaging = isZareoonOperatedCategory(item.id);
@@ -120,9 +150,9 @@ function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel,
   const joinHref = `/trade-services/register?category=${encodeURIComponent(item.id)}`;
 
   const providersBtn =
-    "inline-flex min-h-8 w-full items-center justify-center rounded-lg border border-emerald-200 bg-white px-1.5 py-1.5 text-[10px] font-bold leading-tight text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-50 sm:min-h-10 sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm";
+    "inline-flex min-h-8 w-full items-center justify-center rounded-lg border border-emerald-200 bg-white px-1.5 py-1.5 text-[10px] font-bold leading-tight text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-50 sm:min-h-10 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs";
   const joinBtn =
-    "inline-flex min-h-8 w-full items-center justify-center rounded-lg bg-emerald-600 px-1.5 py-1.5 text-[10px] font-bold leading-tight text-white shadow-sm transition hover:bg-emerald-700 sm:min-h-10 sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm";
+    "inline-flex min-h-8 w-full items-center justify-center rounded-lg bg-emerald-600 px-1.5 py-1.5 text-[10px] font-bold leading-tight text-white shadow-sm transition hover:bg-emerald-700 sm:min-h-10 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs";
 
   return (
     <article
@@ -134,6 +164,7 @@ function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel,
           : "border-emerald-100/90 md:hover:border-emerald-300"
       } ${className}`}
     >
+      {isInspection ? <VerifiedCornerBadge label={verifiedLabel} title={verifiedTitle} /> : null}
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 h-0.5 opacity-70 ${
           exclusive
@@ -163,17 +194,17 @@ function CategoryCard({ item, count, isVip, companyName, t, locale, memberLabel,
       </div>
       {brandedExclusive && companyName ? (
         <p
-          className={`mb-0.5 line-clamp-2 text-start text-[11px] font-bold tracking-wide sm:mb-1 sm:text-xs ${
+          className={`mb-0.5 line-clamp-2 text-start text-[10px] font-semibold tracking-wide sm:mb-1 sm:text-xs ${
             isPackaging ? "text-emerald-800" : "text-amber-800"
           }`}
         >
           {companyName}
         </p>
       ) : null}
-      <h3 className="mb-1.5 line-clamp-2 min-h-[2.5rem] text-start text-[11px] font-bold leading-snug text-slate-900 sm:mb-1.5 sm:min-h-0 sm:text-[15px] sm:leading-6">
+      <h3 className="mb-1.5 line-clamp-2 min-h-[2.5rem] text-start text-xs font-semibold leading-snug text-slate-900 sm:mb-1.5 sm:min-h-0 sm:text-sm sm:leading-6">
         {item.title}
       </h3>
-      <p className="mb-4 hidden flex-1 text-start text-xs leading-6 text-slate-600 sm:line-clamp-3 sm:block sm:text-[13px]">
+      <p className="mb-4 hidden flex-1 text-start text-xs leading-6 text-slate-600 sm:line-clamp-3 sm:block">
         {item.description}
       </p>
       <div className="mt-auto flex flex-col gap-1.5 sm:gap-2">
@@ -276,6 +307,8 @@ export default function ZareoonExclusiveServices({ className = "" }) {
                   t={t}
                   locale={numberLocale}
                   memberLabel={memberLabel}
+                  verifiedLabel={tShared("vip.verifiedBadge")}
+                  verifiedTitle={tShared("vip.verifiedBadgeTitle")}
                 />
               );
             }}

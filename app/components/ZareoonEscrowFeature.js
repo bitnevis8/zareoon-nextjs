@@ -1,6 +1,7 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -22,7 +23,6 @@ function DocIcon({ className = "h-6 w-6" }) {
   );
 }
 
-/** Soft grid + dots — matches Zareoon marketplace chrome (no busy leaf clutter). */
 function SoftFieldPattern({ patternId, className = "" }) {
   return (
     <svg className={`pointer-events-none absolute inset-0 h-full w-full ${className}`} aria-hidden>
@@ -45,7 +45,7 @@ function FeatureList({ items, tone = "emerald" }) {
   return (
     <ul className="mt-4 space-y-2.5">
       {items.map((text) => (
-        <li key={text} className="flex gap-2.5 text-sm leading-6 text-slate-700">
+        <li key={text} className="flex gap-2.5 text-xs leading-6 text-slate-700 sm:text-sm">
           <span
             className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-1 ${bullet}`}
             aria-hidden
@@ -65,27 +65,137 @@ function FeatureList({ items, tone = "emerald" }) {
   );
 }
 
+function ArrowIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={`${className} rtl:rotate-180`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function GuideIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01M12 21a9 9 0 100-18 9 9 0 000 18z" />
+    </svg>
+  );
+}
+
+function EscrowGuideModal({ open, onClose, t, isRTL }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  if (!mounted || !open) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[99999] flex items-end justify-center p-0 sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="escrow-guide-modal-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+        onClick={onClose}
+        aria-label={t("closeGuide")}
+      />
+      <div
+        dir={isRTL ? "rtl" : "ltr"}
+        className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-2xl border border-emerald-100 bg-white shadow-xl sm:max-w-lg sm:rounded-2xl"
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-emerald-100/80 bg-white/95 px-4 py-3 backdrop-blur sm:px-5">
+          <h2 id="escrow-guide-modal-title" className="min-w-0 text-sm font-extrabold text-slate-900 sm:text-base">
+            {t("escrowGuideModalTitle")}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+            aria-label={t("closeGuide")}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
+          <p className="text-xs leading-7 text-slate-600 sm:text-sm sm:leading-7">{t("escrowGuideBody")}</p>
+
+          <ul className="space-y-2.5 rounded-xl border border-emerald-100 bg-emerald-50/50 p-3.5 sm:p-4">
+            {[1, 2, 3, 4].map((n) => (
+              <li key={n} className="flex gap-2.5 text-xs leading-6 text-slate-700 sm:text-sm">
+                <span
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-[10px] font-bold text-white"
+                  aria-hidden
+                >
+                  {n}
+                </span>
+                <span>{t(`escrowItem${n}`)}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-3 sm:px-4 sm:py-3.5">
+            <p className="text-xs font-bold text-slate-900 sm:text-sm">{t("escrowExampleTitle")}</p>
+            <p className="mt-1.5 text-xs leading-7 text-slate-600 sm:text-sm sm:leading-7">{t("escrowExampleText")}</p>
+          </div>
+
+          <p className="text-[11px] leading-6 text-slate-500 sm:text-xs sm:leading-6">{t("escrowFooter")}</p>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function ServicePanel({
   tone,
   icon,
+  ctaIcon,
   title,
   hint,
   intro,
   items,
-  example,
+  guideLabel,
+  onOpenGuide,
   ctaHref,
   ctaLabel,
-  ctaVariant = "solid",
   patternId,
 }) {
   const isTeal = tone === "teal";
   const iconWrap = isTeal ? "bg-teal-700 text-white" : "bg-emerald-800 text-white";
   const panelBorder = isTeal ? "border-teal-200/80" : "border-emerald-200/80";
   const panelBg = isTeal ? "bg-gradient-to-b from-white to-teal-50/40" : "bg-gradient-to-b from-white to-emerald-50/50";
-  const ctaClass =
-    ctaVariant === "outline"
-      ? "border border-teal-300/80 bg-white text-teal-900 hover:bg-teal-50 focus-visible:outline-teal-600"
-      : "border border-emerald-900/10 bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:outline-emerald-700";
+  const ctaClass = isTeal
+    ? "border border-teal-300 bg-white text-teal-900 shadow-sm ring-1 ring-teal-100/80 hover:border-teal-400 hover:bg-teal-50 hover:shadow-md focus-visible:outline-teal-600"
+    : "border border-emerald-300 bg-white text-emerald-900 shadow-sm ring-1 ring-emerald-100/80 hover:border-emerald-400 hover:bg-emerald-50 hover:shadow-md focus-visible:outline-emerald-600";
+  const ctaIconClass = isTeal ? "text-teal-700" : "text-emerald-700";
+  const guideClass = isTeal
+    ? "text-teal-800 hover:bg-teal-50 hover:text-teal-950"
+    : "text-emerald-800 hover:bg-emerald-50 hover:text-emerald-950";
 
   return (
     <article
@@ -96,30 +206,38 @@ function ServicePanel({
         <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm sm:h-11 sm:w-11 sm:rounded-xl ${iconWrap}`}>
           {icon}
         </span>
-        <div className="min-w-0 pt-0.5">
-          <h4 className="text-sm font-bold tracking-tight text-slate-900 sm:text-lg">{title}</h4>
-          {hint ? <p className="mt-0.5 text-[11px] font-medium text-slate-500 sm:mt-1 sm:text-[13px]">{hint}</p> : null}
+        <div className="min-w-0 flex-1 pt-0.5">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h4 className="text-sm font-bold tracking-tight text-slate-900 sm:text-base">{title}</h4>
+            {onOpenGuide && guideLabel ? (
+              <button
+                type="button"
+                onClick={onOpenGuide}
+                className={`inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold transition sm:text-xs ${guideClass}`}
+              >
+                <GuideIcon className="h-3.5 w-3.5" />
+                {guideLabel}
+              </button>
+            ) : null}
+          </div>
+          {hint ? <p className="mt-0.5 text-[10px] font-medium text-slate-500 sm:mt-1 sm:text-xs">{hint}</p> : null}
         </div>
       </div>
 
-      {intro ? <p className="relative mt-3 hidden text-sm leading-7 text-slate-600 sm:block">{intro}</p> : null}
+      {intro ? <p className="relative mt-3 hidden text-xs leading-6 text-slate-600 sm:block sm:text-sm sm:leading-7">{intro}</p> : null}
 
       <div className="hidden sm:block">
         <FeatureList items={items} tone={tone} />
       </div>
 
-      {example ? (
-        <p className="relative mt-4 hidden rounded-xl border border-slate-200/80 bg-white/80 px-3.5 py-3 text-xs leading-6 text-slate-600 sm:block sm:text-sm sm:leading-7">
-          {example}
-        </p>
-      ) : null}
-
       <div className="relative mt-3 pt-0 sm:mt-auto sm:pt-5">
         <Link
           href={ctaHref}
-          className={`inline-flex min-h-9 w-full items-center justify-center rounded-lg px-4 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:min-h-11 sm:rounded-xl sm:px-5 sm:text-sm ${ctaClass}`}
+          className={`inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:min-h-11 sm:text-sm ${ctaClass}`}
         >
-          {ctaLabel}
+          <span className={`shrink-0 ${ctaIconClass}`}>{ctaIcon}</span>
+          <span className="min-w-0 text-center">{ctaLabel}</span>
+          <ArrowIcon className={`h-4 w-4 shrink-0 opacity-70 ${ctaIconClass}`} />
         </Link>
       </div>
     </article>
@@ -130,6 +248,7 @@ function ServicePanel({
 export default function ZareoonEscrowFeature({ className = "" }) {
   const { t, isRTL } = useLanguage();
   const rawId = useId().replace(/:/g, "");
+  const [guideOpen, setGuideOpen] = useState(false);
   const escrowItems = [1, 2, 3, 4].map((n) => t(`escrowItem${n}`));
   const lcItems = [1, 2, 3, 4].map((n) => t(`lcItem${n}`));
 
@@ -141,27 +260,30 @@ export default function ZareoonEscrowFeature({ className = "" }) {
       <ServicePanel
         tone="emerald"
         icon={<ShieldIcon className="h-5 w-5" />}
+        ctaIcon={<ShieldIcon className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" />}
         title={t("escrowBlockTitle")}
         hint={t("escrowBlockHint")}
         items={escrowItems}
-        example={t("escrowExampleText")}
+        guideLabel={t("escrowGuideLink")}
+        onOpenGuide={() => setGuideOpen(true)}
         ctaHref="/dashboard/escrow"
         ctaLabel={t("escrowCta")}
-        ctaVariant="solid"
         patternId={`${rawId}-escrow`}
       />
       <ServicePanel
         tone="teal"
         icon={<DocIcon className="h-5 w-5" />}
+        ctaIcon={<DocIcon className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" />}
         title={t("lcTitle")}
         hint={t("lcBlockHint")}
         intro={t("lcSectionIntro")}
         items={lcItems}
         ctaHref="/lc-request"
         ctaLabel={t("lcRequestCta")}
-        ctaVariant="outline"
         patternId={`${rawId}-lc`}
       />
+
+      <EscrowGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} t={t} isRTL={isRTL} />
     </div>
   );
 }

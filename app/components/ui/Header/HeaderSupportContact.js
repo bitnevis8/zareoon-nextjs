@@ -40,7 +40,7 @@ function WhatsAppIcon({ className = "h-4 w-4" }) {
 }
 
 /**
- * شماره پشتیبانی هدر — بدون پس‌زمینه؛ کلیک → منوی تلگرام / واتساپ / تماس
+ * آیکن پشتیبانی — هاور/کلیک → منو: شماره موبایل، تلگرام، واتساپ
  */
 export default function HeaderSupportContact() {
   const { t, isRTL, language } = useLanguage();
@@ -49,7 +49,27 @@ export default function HeaderSupportContact() {
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
+  const closeTimerRef = useRef(null);
   const displayPhone = formatLocalizedDigits(SITE_PHONE_DISPLAY, language);
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const openMenu = () => {
+    clearCloseTimer();
+    setOpen(true);
+  };
+
+  const scheduleClose = () => {
+    clearCloseTimer();
+    closeTimerRef.current = setTimeout(() => setOpen(false), 140);
+  };
+
+  useEffect(() => () => clearCloseTimer(), []);
 
   useEffect(() => {
     const onDoc = (e) => {
@@ -96,69 +116,75 @@ export default function HeaderSupportContact() {
     };
   }, [open, isRTL]);
 
-  const items = [
+  const channelItems = [
     {
       href: SITE_PHONE_TELEGRAM,
       label: t("supportTelegram"),
       icon: <TelegramIcon className="h-4 w-4 text-sky-600" />,
-      external: true,
     },
     {
       href: SITE_PHONE_WHATSAPP,
       label: t("supportWhatsapp"),
       icon: <WhatsAppIcon className="h-4 w-4 text-emerald-600" />,
-      external: true,
-    },
-    {
-      href: SITE_PHONE_TEL,
-      label: t("supportCall"),
-      icon: <PhoneIcon className="h-4 w-4 text-slate-600" />,
-      external: false,
     },
   ];
 
   const menu =
     open && menuStyle ? (
-      <ul
+      <div
         ref={menuRef}
         role="menu"
         aria-label={t("supportContact")}
         style={menuStyle}
+        onMouseEnter={openMenu}
+        onMouseLeave={scheduleClose}
         className="fixed z-[10050] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl"
       >
-        {items.map((item) => (
-          <li key={item.href} role="none">
-            <a
-              role="menuitem"
-              href={item.href}
-              {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              onClick={() => setOpen(false)}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
-            >
-              {item.icon}
-              <span className="font-medium">{item.label}</span>
-            </a>
-          </li>
+        <a
+          role="menuitem"
+          href={SITE_PHONE_TEL}
+          onClick={() => setOpen(false)}
+          className="flex w-full items-center gap-2.5 border-b border-slate-100 px-3.5 py-2.5 text-sm text-slate-800 transition hover:bg-slate-50"
+          dir="ltr"
+        >
+          <PhoneIcon className="h-4 w-4 shrink-0 text-emerald-700" />
+          <span className="font-semibold tabular-nums tracking-wide">{displayPhone}</span>
+        </a>
+        {channelItems.map((item) => (
+          <a
+            key={item.href}
+            role="menuitem"
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
+          >
+            {item.icon}
+            <span className="font-medium">{item.label}</span>
+          </a>
         ))}
-      </ul>
+      </div>
     ) : null;
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div
+      ref={rootRef}
+      className="relative shrink-0"
+      onMouseEnter={openMenu}
+      onMouseLeave={scheduleClose}
+    >
       <button
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label={`${t("supportContact")}: ${displayPhone}`}
+        aria-label={t("supportContact")}
         title={t("supportContact")}
-        className="inline-flex items-center gap-1.5 px-1 py-1 text-xs text-slate-700 transition hover:text-emerald-800 sm:gap-2 sm:text-[13px]"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-emerald-700 transition-colors hover:bg-gray-50 hover:text-emerald-800"
       >
-        <span className="hidden font-semibold tabular-nums tracking-wide sm:inline" dir="ltr">
-          {displayPhone}
-        </span>
-        <PhoneIcon className="h-4 w-4 shrink-0 text-emerald-700" />
+        <PhoneIcon className="h-5 w-5" />
       </button>
 
       {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}

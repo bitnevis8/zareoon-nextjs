@@ -143,7 +143,9 @@
     "distributor": "پخش‌کننده"
   },
   "vip": {
-    "inspectionStandardsCompany": "بازرسی مهندسی آریا فولاد قرن"
+    "inspectionStandardsCompany": "بازرسی مهندسی آریا فولاد قرن",
+    "verifiedBadge": "تأییدشده",
+    "verifiedBadgeTitle": "ارائه‌دهنده تأییدشده در زارعون"
   },
   "attributeFields": {
     "yes": "بلی",
@@ -177,13 +179,17 @@
   },
   "shareButton": {
     "title": "اشتراک‌گذاری",
+    "hint": "لینک این صفحه را در پیام‌رسان موردنظر بفرستید.",
     "telegram": "تلگرام",
     "whatsapp": "واتساپ",
     "eitaa": "ایتا",
+    "bale": "بله",
     "rubika": "روبیکا",
+    "instagram": "اینستاگرام",
     "twitter": "توییتر",
     "copyLink": "کپی لینک",
-    "linkCopied": "لینک کپی شد!"
+    "linkCopied": "لینک کپی شد",
+    "close": "بستن"
   },
   "tieredPricing": {
     "levelsCount": "{count} سطح",
@@ -259,8 +265,9 @@
     "calendarGregorian": "میلادی",
     "calendarHijri": "قمری",
     "calendarShamsi": "شمسی",
-    "calendarClickHint": "{full} — کلیک: {next}",
+    "calendarClickHint": "{full} — برای دیدن معادل‌ها کلیک کنید",
     "calendarAria": "تقویم {label}",
+    "calendarEquivalentsTitle": "معادل تاریخ در گاه‌شماری‌ها",
     "regionAria": "نرخ ارز روز",
     "loadingRates": "در حال دریافت نرخ…",
     "ratesUnavailable": "نرخ ارز در دسترس نیست",

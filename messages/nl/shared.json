@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Arya Foulad Gharn engineeringinspectie"
+    "inspectionStandardsCompany": "Arya Foulad Gharn engineeringinspectie",
+    "verifiedBadge": "Geverifieerd",
+    "verifiedBadgeTitle": "Geverifieerde aanbieder op Zareoon"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "Gregoriaans",
     "calendarHijri": "Hijri",
     "calendarShamsi": "Zonne-Hijri",
-    "calendarClickHint": "{full} — klik: {next}",
+    "calendarClickHint": "{full} — klik voor equivalenten",
     "calendarAria": "Kalender {label}",
+    "calendarEquivalentsTitle": "Equivalente datums",
     "regionAria": "Dagelijkse wisselkoersen",
     "loadingRates": "Koersen laden…",
     "ratesUnavailable": "Koersen niet beschikbaar",

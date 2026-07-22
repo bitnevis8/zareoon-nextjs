@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Arya Foulad Gharn Engineering Inspection"
+    "inspectionStandardsCompany": "Arya Foulad Gharn Engineering Inspection",
+    "verifiedBadge": "Verified",
+    "verifiedBadgeTitle": "Verified provider on Zareoon"
   },
   "attributeFields": {
     "yes": "",
@@ -176,14 +178,18 @@
     "delete": ""
   },
   "shareButton": {
-    "title": "",
-    "telegram": "",
-    "whatsapp": "",
-    "eitaa": "",
-    "rubika": "",
-    "twitter": "",
-    "copyLink": "",
-    "linkCopied": ""
+    "title": "Share",
+    "hint": "Send this page link via your preferred messenger.",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "eitaa": "Eitaa",
+    "bale": "Bale",
+    "rubika": "Rubika",
+    "instagram": "Instagram",
+    "twitter": "Twitter",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "close": "Close"
   },
   "tieredPricing": {
     "levelsCount": "",
@@ -259,8 +265,9 @@
     "calendarGregorian": "Gregorian",
     "calendarHijri": "Hijri",
     "calendarShamsi": "Solar Hijri",
-    "calendarClickHint": "{full} — click: {next}",
+    "calendarClickHint": "{full} — click to see equivalents",
     "calendarAria": "Calendar {label}",
+    "calendarEquivalentsTitle": "Equivalent dates",
     "regionAria": "Daily exchange rates",
     "loadingRates": "Loading rates…",
     "ratesUnavailable": "Rates unavailable",

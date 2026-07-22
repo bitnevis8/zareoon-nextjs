@@ -171,22 +171,22 @@ export default function HorizontalScrollRow({
   const backPos =
     arrowPlacement === "bottom"
       ? isRTL
-        ? "right-1.5"
-        : "left-1.5"
+        ? "-right-1 sm:-right-2"
+        : "-left-1 sm:-left-2"
       : isRTL
-        ? "right-1"
-        : "left-1";
+        ? "-right-1.5 sm:-right-3"
+        : "-left-1.5 sm:-left-3";
   const forwardPos =
     arrowPlacement === "bottom"
       ? isRTL
-        ? "left-1.5"
-        : "right-1.5"
+        ? "-left-1 sm:-left-2"
+        : "-right-1 sm:-right-2"
       : isRTL
-        ? "left-1"
-        : "right-1";
+        ? "-left-1.5 sm:-left-3"
+        : "-right-1.5 sm:-right-3";
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative overflow-visible ${className}`}>
       {showArrows && scrollable ? (
         <>
           <button

@@ -93,7 +93,6 @@ export default function CatalogGradeMediaPanel({
           aspectClass={aspectClass}
           onSlideTap={openAt}
           expandAriaLabel={t("viewGallery")}
-          expandAtBottom
           cornerTopBar={topOverlay}
           cornerBottomEnd={bottomOverlay}
         />

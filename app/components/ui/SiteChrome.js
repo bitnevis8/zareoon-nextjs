@@ -24,11 +24,11 @@ export default function SiteChrome({ children }) {
         <CatalogWarmupBoot />
         <Header />
         {isDashboard ? (
-          <div className="flex min-h-0 flex-1 flex-col max-lg:pt-[var(--site-mobile-top-chrome)] max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
+          <div className="flex min-h-0 flex-1 flex-col max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
             {children}
           </div>
         ) : (
-          <main className="flex flex-1 flex-col max-lg:pt-[var(--site-mobile-top-chrome)] lg:pt-0">
+          <main className="flex flex-1 flex-col">
             {children}
           </main>
         )}

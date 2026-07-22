@@ -44,10 +44,10 @@ export default function AvailableProductCompactCard({
         ) : null}
       </figure>
       <div className="flex flex-1 flex-col gap-1 p-2">
-        <h3 className="line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight text-slate-800">
+        <h3 className="line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight text-slate-800 sm:text-sm">
           {title}
         </h3>
-        <p className="text-[10px] font-medium text-green-700">{qtyLabel}</p>
+        <p className="text-[10px] font-medium text-green-700 sm:text-xs">{qtyLabel}</p>
       </div>
     </Link>
   );

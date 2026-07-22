@@ -27,6 +27,10 @@ const BuyerSellerPortal = dynamic(() => import('./components/BuyerSellerPortal')
 const ZareoonExclusiveServices = dynamic(() => import('./components/ZareoonExclusiveServices'), {
   loading: () => <SectionSkeleton minHeight="20rem" className="mt-2" variant="services" />,
 });
+const TradeToolsPanel = dynamic(() => import('./components/TradeToolsPanel'), {
+  loading: () => <SectionSkeleton minHeight="16rem" variant="portal" />,
+});
+const HomeSectionNav = dynamic(() => import('./components/HomeSectionNav'), { ssr: false });
 
 export default function Home() {
   return (
@@ -63,6 +67,7 @@ function HomeContent() {
 
   return (
     <main className="pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4" dir={isRTL ? "rtl" : "ltr"}>
+      <HomeSectionNav />
       <section className="page-shell section-stack space-y-4 text-start sm:space-y-6 lg:space-y-8">
         <div className="mt-3 space-y-1.5 text-center sm:mt-4 sm:space-y-2 lg:mt-5">
           <HomeLanguageLogo />
@@ -74,7 +79,7 @@ function HomeContent() {
           />
         </div>
 
-        <MainCategoryGrid className="w-full" id="product-categories" />
+        <MainCategoryGrid className="w-full scroll-mt-20" id="product-categories" />
 
         <MarketplaceDisclaimer className="mt-2" />
 
@@ -90,15 +95,16 @@ function HomeContent() {
         <LazyWhenVisible
           id="buyer-request"
           className="w-full scroll-mt-20"
-          minHeight="7rem"
-          fallback={<SectionSkeleton minHeight="7rem" variant="portal" />}
+          minHeight="16rem"
+          fallback={<SectionSkeleton minHeight="16rem" variant="portal" />}
         >
           <BuyerRequestPortal />
         </LazyWhenVisible>
       </section>
 
       <LazyWhenVisible
-        className="mt-5 w-full sm:mt-6 lg:mt-8"
+        id="buyer-seller"
+        className="mt-5 w-full scroll-mt-20 sm:mt-6 lg:mt-8"
         minHeight="16rem"
         fallback={<SectionSkeleton minHeight="16rem" className="page-shell mt-2" variant="portal" />}
       >
@@ -107,10 +113,21 @@ function HomeContent() {
 
       <section className="page-shell section-stack mt-5 text-start sm:mt-6 lg:mt-8">
         <LazyWhenVisible
+          id="trade-services"
+          className="w-full scroll-mt-20"
           minHeight="20rem"
           fallback={<SectionSkeleton minHeight="20rem" className="mt-2" variant="services" />}
         >
           <ZareoonExclusiveServices className="w-full" />
+        </LazyWhenVisible>
+
+        <LazyWhenVisible
+          id="trade-tools"
+          className="mt-5 w-full scroll-mt-20 sm:mt-6 lg:mt-8"
+          minHeight="8rem"
+          fallback={<SectionSkeleton minHeight="8rem" variant="portal" />}
+        >
+          <TradeToolsPanel />
         </LazyWhenVisible>
       </section>
     </main>

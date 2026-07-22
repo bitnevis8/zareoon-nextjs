@@ -106,7 +106,7 @@ export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
   return (
     <Link
       href="/auth/login"
-      className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-emerald-700"
+      className="hidden rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-emerald-700 lg:inline-flex"
     >
       {t("loginRegister")}
     </Link>

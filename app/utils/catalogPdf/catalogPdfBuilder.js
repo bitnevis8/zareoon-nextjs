@@ -1,8 +1,11 @@
-﻿import { API_ENDPOINTS } from "@/app/config/api";
+import { API_ENDPOINTS } from "@/app/config/api";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { buildMapNavigationLinks } from "@/app/utils/mapNavigationLinks";
 import { sortMediaItems } from "@/app/components/catalog/CatalogMediaLightbox";
 import { getLotSupplier, getLotSupplierDisplay, getLotSupplierDisplayName, getLotSupplierPhone } from "@/app/utils/catalogLotSupplier";
+import { getLocalizedText, getNumberLocale, localizeUnit } from "@/app/utils/localize";
+import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
+import { isRtlLanguage } from "@/app/config/siteLanguages";
 
 function absOrigin() {
   if (typeof window !== "undefined" && window.location?.origin) return window.location.origin;
@@ -186,10 +189,32 @@ function collectDescendantIds(products, rootId) {
   return ids;
 }
 
-export function formatNum(n) {
+export function formatNum(n, language = "fa") {
   const v = parseFloat(n);
   if (!Number.isFinite(v)) return "—";
-  return v.toLocaleString("fa-IR");
+  return v.toLocaleString(getNumberLocale(language));
+}
+
+function productDisplayName(product, language = "fa") {
+  return getLocalizedText(product, language) || product?.name || "";
+}
+
+function productDisplayDescription(product, language = "fa") {
+  if (!product) return "";
+  if (language === "fa") return product.description || "";
+  const fromTr = product.translations?.[language]?.description;
+  if (fromTr) return fromTr;
+  return product.description || "";
+}
+
+function lotUnitLabel(lot, product, language, t) {
+  const code = lot?.unit || product?.unit || "";
+  if (!code) return "";
+  try {
+    return localizeUnit(code, language) || code;
+  } catch {
+    return code;
+  }
 }
 
 export const PAGE_SPEC = { widthPx: 794, heightPx: 1123 };
@@ -260,21 +285,21 @@ function lotsWithCoords(lots) {
   });
 }
 
-function lotPriceText(lot, t) {
+function lotPriceText(lot, t, language = "fa") {
   if (lot.tieredPricing?.length) {
     return lot.tieredPricing
       .map((tier) => {
-        const max = tier.maxQuantity ? formatNum(tier.maxQuantity) : "∞";
+        const max = tier.maxQuantity ? formatNum(tier.maxQuantity, language) : "∞";
         return t("pdf.tierPriceRow", {
-          min: formatNum(tier.minQuantity),
+          min: formatNum(tier.minQuantity, language),
           max,
-          unit: lot.unit,
-          price: formatNum(tier.pricePerUnit),
+          unit: lotUnitLabel(lot, null, language, t) || lot.unit,
+          price: formatNum(tier.pricePerUnit, language),
         });
       })
       .join(" / ");
   }
-  if (lot.price) return `${formatNum(lot.price)} ${t("currencyToman")}`;
+  if (lot.price) return `${formatNum(lot.price, language)} ${t("currencyToman")}`;
   return t("pdf.contactForPrice");
 }
 
@@ -287,9 +312,12 @@ function infoTableRow(label, value, { highlight = false, alt = false } = {}) {
   </tr>`;
 }
 
-function singleLotInfoPageHtml(product, lot, t) {
+function singleLotInfoPageHtml(product, lot, t, language = "fa") {
   const supplier = lotSupplierLabel(lot, t);
   const available = lotAvailable(lot);
+  const display = getLotDisplayForLanguage(lot, language);
+  const productName = productDisplayName(product, language);
+  const unitLbl = lotUnitLabel(lot, product, language, t);
 
   let rowIndex = 0;
   const addRow = (label, value, opts = {}) => {
@@ -299,15 +327,18 @@ function singleLotInfoPageHtml(product, lot, t) {
   };
 
   const rows = [
-    addRow(t("pdf.productName"), esc(product.name), { highlight: true }),
+    addRow(t("pdf.productName"), esc(productName), { highlight: true }),
+    display.title ? addRow(t("pdf.offerTitle"), esc(display.title), { highlight: true }) : "",
     addRow(t("pdf.qualityGrade"), esc(lot.qualityGrade || t("notSet")), { highlight: true }),
     addRow(t("supplier"), esc(supplier)),
-    addRow(t("pdf.availableStock"), `${formatNum(available)} <span style="font-weight:600;color:#64748b">${esc(lot.unit || product.unit || "")}</span>`, {
-      highlight: true,
-    }),
-    addRow(t("pdf.price"), `<span style="color:#047857">${lotPriceText(lot, t)}</span>`, { highlight: true }),
+    addRow(
+      t("pdf.availableStock"),
+      `${formatNum(available, language)} <span style="font-weight:600;color:#64748b">${esc(unitLbl)}</span>`,
+      { highlight: true }
+    ),
+    addRow(t("pdf.price"), `<span style="color:#047857">${lotPriceText(lot, t, language)}</span>`, { highlight: true }),
     lot.minimumOrderQuantity
-      ? addRow(t("pdf.minimumOrder"), `${formatNum(lot.minimumOrderQuantity)} ${esc(lot.unit || product.unit || "")}`)
+      ? addRow(t("pdf.minimumOrder"), `${formatNum(lot.minimumOrderQuantity, language)} ${esc(unitLbl)}`)
       : "",
     lot.locationLabel ? addRow(t("pdf.loadingLocation"), esc(lot.locationLabel)) : "",
     addRow(t("pdf.lotId"), `<span dir="ltr">#${lot.id}</span>`),
@@ -317,17 +348,18 @@ function singleLotInfoPageHtml(product, lot, t) {
     rows.push(addRow(esc(attr.definition?.name || t("pdf.attributeFallback")), esc(attr.value ?? t("notSet"))));
   }
 
-  const lotDescriptionBlock = lot.description
+  const lotDescriptionBlock = display.description
     ? `<div style="margin-top:16px;border:1px solid #e2e8f0;border-radius:14px;background:#fafafa;padding:14px 16px">
         <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#0f172a">${esc(t("pdf.lotDescriptionTitle"))}</p>
-        <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(lot.description)}</p>
+        <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(display.description)}</p>
       </div>`
     : "";
 
-  const productDescriptionBlock = product.description
+  const productDesc = productDisplayDescription(product, language);
+  const productDescriptionBlock = productDesc
     ? `<div style="margin-top:16px;border:1px solid #d1fae5;border-radius:14px;background:linear-gradient(180deg,#f0fdf4 0%,#fff 100%);padding:14px 16px">
         <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#047857">${esc(t("pdf.aboutProduct"))}</p>
-        <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(product.description)}</p>
+        <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(productDesc)}</p>
       </div>`
     : "";
 
@@ -338,10 +370,10 @@ function singleLotInfoPageHtml(product, lot, t) {
       <div style="margin-bottom:14px;text-align:center">
         <span data-pdf-link="${pdfProductUrl(product.id)}" style="display:inline-block;font-size:13px;font-weight:700;color:#059669;text-decoration:underline;padding:4px 6px">${esc(t("pdf.viewProductAndOrder"))}</span>
       </div>
-      <table dir="rtl" style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
+      <table dir="${isRtlLanguage(language) ? "rtl" : "ltr"}" style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
         <thead>
           <tr>
-            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:right">${esc(t("pdf.lotInfoTableHeader"))}</th>
+            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:${isRtlLanguage(language) ? "right" : "left"}">${esc(t("pdf.lotInfoTableHeader"))}</th>
           </tr>
         </thead>
         <tbody>${rows.join("") || `<tr><td colspan="2" style="padding:16px;text-align:center;color:#94a3b8;font-size:12px">${esc(t("pdf.noInfoRegistered"))}</td></tr>`}</tbody>
@@ -450,12 +482,16 @@ function mapSectionHtml(lots, mapImageDataUrl, logo, t, { showHeader = true } = 
   `;
 }
 
-function productInfoPageHtml(product, lots, t) {
-  if (lots.length === 1) return singleLotInfoPageHtml(product, lots[0], t);
+function productInfoPageHtml(product, lots, t, language = "fa") {
+  if (lots.length === 1) return singleLotInfoPageHtml(product, lots[0], t, language);
   const totalAvailable = lots.reduce((sum, lot) => sum + lotAvailable(lot), 0);
   const grades = [...new Set(lots.map((l) => l.qualityGrade).filter(Boolean))];
   const country = countryLabel(product.supplyCountry, t);
   const origin = [country, product.supplyCity].filter(Boolean).join(" — ");
+  const productName = productDisplayName(product, language);
+  const unitLbl = lotUnitLabel({ unit: product.unit }, product, language, t);
+  const align = isRtlLanguage(language) ? "right" : "left";
+  const dir = isRtlLanguage(language) ? "rtl" : "ltr";
 
   let rowIndex = 0;
   const addRow = (label, value, opts = {}) => {
@@ -465,20 +501,23 @@ function productInfoPageHtml(product, lots, t) {
   };
 
   const rows = [
-    addRow(t("pdf.productName"), esc(product.name), { highlight: true }),
-    addRow(t("pdf.unitOfMeasure"), esc(product.unit || t("notSet"))),
+    addRow(t("pdf.productName"), esc(productName), { highlight: true }),
+    addRow(t("pdf.unitOfMeasure"), esc(unitLbl || t("notSet"))),
     addRow(t("pdf.supplyOrigin"), esc(origin)),
-    addRow(t("pdf.activeLotsCount"), formatNum(lots.length)),
-    addRow(t("pdf.availableStock"), `${formatNum(totalAvailable)} <span style="font-weight:600;color:#64748b">${esc(product.unit || "")}</span>`, {
-      highlight: true,
-    }),
-    grades.length ? addRow(t("pdf.availableGrades"), esc(grades.join("، "))) : "",
+    addRow(t("pdf.activeLotsCount"), formatNum(lots.length, language)),
+    addRow(
+      t("pdf.availableStock"),
+      `${formatNum(totalAvailable, language)} <span style="font-weight:600;color:#64748b">${esc(unitLbl)}</span>`,
+      { highlight: true }
+    ),
+    grades.length ? addRow(t("pdf.availableGrades"), esc(grades.join(language === "fa" ? "، " : ", "))) : "",
   ].filter(Boolean);
 
-  const descriptionBlock = product.description
+  const productDesc = productDisplayDescription(product, language);
+  const descriptionBlock = productDesc
     ? `<div style="margin-top:18px;border:1px solid #d1fae5;border-radius:14px;background:linear-gradient(180deg,#f0fdf4 0%,#fff 100%);padding:14px 16px">
         <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#047857">${esc(t("pdf.aboutProduct"))}</p>
-        <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(product.description)}</p>
+        <p style="margin:0;font-size:12px;line-height:1.9;color:#334155;text-align:justify">${esc(productDesc)}</p>
       </div>`
     : "";
 
@@ -488,10 +527,10 @@ function productInfoPageHtml(product, lots, t) {
       <div style="margin-bottom:14px;text-align:center">
         <span data-pdf-link="${pdfProductUrl(product.id)}" style="display:inline-block;font-size:13px;font-weight:700;color:#059669;text-decoration:underline;padding:4px 6px">${esc(t("pdf.viewProductAndOrder"))}</span>
       </div>
-      <table dir="rtl" style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
+      <table dir="${dir}" style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
         <thead>
           <tr>
-            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:right">${esc(t("pdf.productInfoTableHeader"))}</th>
+            <th colspan="2" style="background:linear-gradient(90deg,#059669,#047857);color:#fff;font-size:14px;font-weight:800;padding:12px 16px;text-align:${align}">${esc(t("pdf.productInfoTableHeader"))}</th>
           </tr>
         </thead>
         <tbody>${rows.join("")}</tbody>
@@ -502,12 +541,13 @@ function productInfoPageHtml(product, lots, t) {
   `;
 }
 
-function productCoverHtml(product, logo) {
+function productCoverHtml(product, logo, language = "fa") {
+  const productName = productDisplayName(product, language);
   return `
     <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 20px;box-sizing:border-box">
       <img src="${logo}" style="max-height:216px;width:auto;max-width:85%;object-fit:contain;margin-bottom:24px" alt="" />
       <span data-pdf-link="${PDF_SITE_URL}" style="display:inline-block;margin-bottom:28px;font-size:18px;font-weight:700;color:#047857;text-decoration:underline;letter-spacing:0.03em">zareoon.ir</span>
-      <h1 style="margin:0;font-size:38px;font-weight:900;color:#047857;line-height:1.35;max-width:92%">${esc(product.name)}</h1>
+      <h1 style="margin:0;font-size:38px;font-weight:900;color:#047857;line-height:1.35;max-width:92%">${esc(productName)}</h1>
     </div>
   `;
 }
@@ -534,7 +574,15 @@ function supplierImagePageHtml(src, imageMap, logo, lot, t) {
   `;
 }
 
-export async function fetchCatalogPdfData({ scope = "full", productId, categoryId, lotId, supplierUserId, t }) {
+export async function fetchCatalogPdfData({
+  scope = "full",
+  productId,
+  categoryId,
+  lotId,
+  supplierUserId,
+  language = "fa",
+  t,
+}) {
   const [allProducts, allLots] = await Promise.all([
     fetchJson(API_ENDPOINTS.supplier.products.getAll),
     fetchJson(API_ENDPOINTS.supplier.inventoryLots.getAll),
@@ -559,9 +607,10 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
     }
 
     const lotEntry = sections[0]?.lots?.[0];
+    const productForTitle = sections[0]?.product;
     const title = lotEntry
-      ? `${product.name} — ${lotSupplierName(lotEntry, t)}`
-      : productMap.get(Number(productId))?.name || t("pdf.titleSupplier");
+      ? `${productDisplayName(productForTitle, language)} — ${lotSupplierName(lotEntry, t)}`
+      : productDisplayName(productMap.get(Number(productId)), language) || t("pdf.titleSupplier");
 
     const imageMap = await preloadImages(allImageUrls);
     return {
@@ -613,9 +662,11 @@ export async function fetchCatalogPdfData({ scope = "full", productId, categoryI
   }
 
   let title = t("pdf.titleFull");
-  if (scope === "product" && productId) title = productMap.get(Number(productId))?.name || title;
-  else if (scope === "category" && categoryId) title = productMap.get(Number(categoryId))?.name || title;
-  else if (scope === "supplier-own") title = t("pdf.titleMyProducts");
+  if (scope === "product" && productId) {
+    title = productDisplayName(productMap.get(Number(productId)), language) || title;
+  } else if (scope === "category" && categoryId) {
+    title = productDisplayName(productMap.get(Number(categoryId)), language) || title;
+  } else if (scope === "supplier-own") title = t("pdf.titleMyProducts");
 
   const imageMap = await preloadImages(allImageUrls);
 
@@ -639,14 +690,18 @@ function sortLotsForPdf(lots) {
   });
 }
 
-export function buildPdfPages(data, t) {
+export function buildPdfPages(data, t, language = "fa") {
   const spec = PAGE_SPEC;
   const { imageMap } = data;
   const origin = absOrigin();
   const logo = imageMap[`${origin}/images/logo.png`] || `${origin}/images/logo.png`;
+  const dir = isRtlLanguage(language) ? "rtl" : "ltr";
+  const fontStack = isRtlLanguage(language)
+    ? "'Vazirmatn','IRANSans',Tahoma,sans-serif"
+    : "Tahoma,Arial,Helvetica,sans-serif";
 
   const pageShell = (inner) => `
-    <div class="pdf-page" dir="rtl" style="position:relative;width:${spec.widthPx}px;height:${spec.heightPx}px;box-sizing:border-box;overflow:hidden;font-family:'Vazirmatn','IRANSans',Tahoma,sans-serif;background:#fff;color:#0f172a;padding:32px 28px 40px;">
+    <div class="pdf-page" dir="${dir}" style="position:relative;width:${spec.widthPx}px;height:${spec.heightPx}px;box-sizing:border-box;overflow:hidden;font-family:${fontStack};background:#fff;color:#0f172a;padding:32px 28px 40px;">
       ${inner}
       <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center">
         <span data-pdf-link="${PDF_SITE_URL}" style="font-size:9px;color:#059669;text-decoration:underline">zareoon.ir</span>
@@ -654,7 +709,7 @@ export function buildPdfPages(data, t) {
     </div>`;
 
   const imagePageShell = (inner) => `
-    <div class="pdf-page" dir="rtl" style="position:relative;width:${spec.widthPx}px;height:${spec.heightPx}px;box-sizing:border-box;overflow:hidden;font-family:'Vazirmatn','IRANSans',Tahoma,sans-serif;background:#fff;color:#0f172a;padding:0;">
+    <div class="pdf-page" dir="${dir}" style="position:relative;width:${spec.widthPx}px;height:${spec.heightPx}px;box-sizing:border-box;overflow:hidden;font-family:${fontStack};background:#fff;color:#0f172a;padding:0;">
       ${inner}
       <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center">
         <span data-pdf-link="${PDF_SITE_URL}" style="font-size:8px;color:#94a3b8;text-decoration:underline">zareoon.ir</span>
@@ -664,18 +719,22 @@ export function buildPdfPages(data, t) {
   const pages = [];
 
   for (const section of data.sections) {
-    pages.push(pageShell(productCoverHtml(section.product, logo)));
+    pages.push(pageShell(productCoverHtml(section.product, logo, language)));
 
     const orderedLots = sortLotsForPdf(section.lots);
 
     if (!orderedLots.length) {
-      pages.push(pageShell(`<div style="height:100%;overflow:hidden">${productInfoPageHtml(section.product, [], t)}</div>`));
+      pages.push(
+        pageShell(`<div style="height:100%;overflow:hidden">${productInfoPageHtml(section.product, [], t, language)}</div>`)
+      );
       continue;
     }
 
     for (const lot of orderedLots) {
       pages.push(
-        pageShell(`<div style="height:100%;overflow:auto">${singleLotInfoPageHtml(section.product, lot, t)}</div>`)
+        pageShell(
+          `<div style="height:100%;overflow:auto">${singleLotInfoPageHtml(section.product, lot, t, language)}</div>`
+        )
       );
 
       if (lotsWithCoords([lot]).length) {

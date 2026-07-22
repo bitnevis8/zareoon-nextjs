@@ -111,7 +111,11 @@ export default function SiteLanguagesSettingsPage() {
                   disabled={locked || saving}
                   onChange={() => toggle(item.code)}
                 />
-                <LanguageFlag countryCode={item.countryCode} className="h-4 w-6" />
+                <LanguageFlag
+                  countryCode={item.countryCode}
+                  flagGlyph={item.flagGlyph}
+                  className="h-4 w-6"
+                />
                 <span className="flex-1 text-sm font-medium text-slate-800">
                   {item.label}
                   <span className="ms-2 text-xs font-normal text-slate-500">({item.code})</span>

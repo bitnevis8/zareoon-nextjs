@@ -106,9 +106,9 @@
       "incomingServices": "Requests"
     },
     "createShop": "Create shop",
-    "createShopHint": "Create your shop page to start selling products.",
+    "createShopHint": "Create your dedicated page — sell products and optionally offer services too.",
     "createServices": "Create services",
-    "createServicesHint": "Create your trade services page to get clients.",
+    "createServicesHint": "Create your dedicated page — offer services and optionally sell products too.",
     "emptyProducts": "You have not listed any products for sale yet.",
     "productFallback": "Product"
   },
@@ -404,40 +404,40 @@
     "pendingHint": ""
   },
   "homeAdmin": {
-    "badge": "",
-    "title": "",
-    "subtitle": "",
+    "badge": "Super admin",
+    "title": "Admin dashboard",
+    "subtitle": "Platform overview for the super admin: users, all orders placed by users, inventory, and service providers — separate from your own personal buyer/seller activity.",
     "kpi": {
-      "users": "",
-      "orders": "",
-      "pendingOrders": "",
-      "products": "",
-      "lotsTotal": "",
-      "providers": "",
-      "pendingProviders": ""
+      "users": "Platform users",
+      "orders": "Users' orders",
+      "pendingOrders": "{count} pending review",
+      "products": "Active platform inventory",
+      "lotsTotal": "of {count} total on platform",
+      "providers": "Platform service providers",
+      "pendingProviders": "{count} pending approval"
     },
     "alert": {
-      "pendingOrders": "",
-      "pendingProviders": ""
+      "pendingOrders": "{count} user orders pending review",
+      "pendingProviders": "{count} service-provider join requests"
     },
-    "actionsTitle": "",
+    "actionsTitle": "Super-admin quick links",
     "actions": {
-      "users": "",
-      "usersDesc": "",
-      "orders": "",
-      "ordersDesc": "",
-      "inventory": "",
-      "inventoryDesc": "",
-      "providers": "",
-      "providersDesc": "",
-      "settings": "",
-      "settingsDesc": "",
-      "homepage": "",
-      "homepageDesc": ""
+      "users": "Platform users",
+      "usersDesc": "Manage all accounts and roles",
+      "orders": "Users' orders",
+      "ordersDesc": "All orders placed on the platform",
+      "inventory": "Platform inventory",
+      "inventoryDesc": "All listings across the platform",
+      "providers": "Provider join requests",
+      "providersDesc": "Review service-provider memberships",
+      "settings": "Platform settings",
+      "settingsDesc": "Configure services and site",
+      "homepage": "Homepage order",
+      "homepageDesc": "Arrange homepage display"
     },
-    "recentOrders": "",
-    "viewAll": "",
-    "emptyOrders": "",
-    "orderHash": ""
+    "recentOrders": "Latest users' orders",
+    "viewAll": "View all",
+    "emptyOrders": "No user orders have been placed on the platform yet.",
+    "orderHash": "#"
   }
 }

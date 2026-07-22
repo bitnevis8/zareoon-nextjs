@@ -219,7 +219,7 @@ export default function BlockedPageNamesSettingsPage() {
             <div>
               <h2 className={dash.cardTitle}>محدودیت طول نام صفحه اختصاصی</h2>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                حداقل و حداکثر تعداد حروف انگلیسی برای آدرس صفحه (مثل <span dir="ltr">greenfarm</span>). روی
+                حداقل و حداکثر تعداد حروف انگلیسی برای آدرس صفحه (مثل <span dir="ltr">example</span>). روی
                 ایجاد فروشگاه، خدمات و تغییر آدرس اعمال می‌شود.
               </p>
             </div>

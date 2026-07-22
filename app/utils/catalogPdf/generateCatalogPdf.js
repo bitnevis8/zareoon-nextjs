@@ -83,16 +83,27 @@ export async function generateCatalogPdf({
   supplierUserId,
   productIsOrderable = true,
   user,
-  t,
+  language = "fa",
   onProgress,
 }) {
   assertCatalogPdfAccess({ user, scope, productIsOrderable, supplierUserId });
 
+  const { createCatalogPdfTranslator } = await import("./catalogPdfI18n");
+  const t = createCatalogPdfTranslator(language);
+
   onProgress?.("loading");
-  const data = await fetchCatalogPdfData({ scope, productId, categoryId, lotId, supplierUserId, t });
+  const data = await fetchCatalogPdfData({
+    scope,
+    productId,
+    categoryId,
+    lotId,
+    supplierUserId,
+    language,
+    t,
+  });
 
   onProgress?.("rendering");
-  const { pages, spec } = buildPdfPages(data, t);
+  const { pages, spec } = buildPdfPages(data, t, language);
 
   onProgress?.("generating");
   const { jsPDF } = await import("jspdf");

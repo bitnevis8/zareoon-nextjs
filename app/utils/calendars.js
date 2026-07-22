@@ -1,11 +1,30 @@
-import jalaali from "jalaali-js";
-import i18nData from "./i18nFaData";
 import { toPersianDigits } from "./persianNumberUtils";
 
-const JALAALI_MONTHS = i18nData.calendars.months;
-const WEEKDAYS_FA = i18nData.calendars.weekdays;
+export const CALENDAR_MODES = ["shamsi", "gregorian", "hijri"];
 
-/** fa / ar / ur → ارقام فارسی در نمایش تاریخ ناوبار */
+const LOCALE_BY_LANG = {
+  fa: "fa-IR",
+  ar: "ar",
+  ur: "ur-PK",
+  en: "en-GB",
+  es: "es",
+  nl: "nl",
+  tr: "tr",
+  ru: "ru",
+  fi: "fi",
+};
+
+/** تقویم پیش‌فرض بر اساس زبان رابط */
+export function getDefaultCalendarMode(language) {
+  if (language === "fa") return "shamsi";
+  if (language === "ar" || language === "ur") return "hijri";
+  return "gregorian";
+}
+
+export function getBcp47Locale(language) {
+  return LOCALE_BY_LANG[language] || "en-GB";
+}
+
 export function calendarUsesPersianDigits(language) {
   return language === "fa" || language === "ar" || language === "ur";
 }
@@ -15,53 +34,53 @@ function shapeCalendarDigits(text, language) {
   return toPersianDigits(text);
 }
 
-export function formatShamsiDate(date = new Date(), language = "fa") {
+function calendarIdForMode(mode) {
+  if (mode === "shamsi") return "persian";
+  if (mode === "hijri") return "islamic-umalqura";
+  return "gregory";
+}
+
+function buildLocaleWithCalendar(language, mode) {
+  const base = getBcp47Locale(language);
+  const cal = calendarIdForMode(mode);
+  if (cal === "gregory") return base;
+  return `${base}-u-ca-${cal}`;
+}
+
+function formatWithIntl(date, language, mode) {
   const d = date instanceof Date ? date : new Date(date);
-  const { jy, jm, jd } = jalaali.toJalaali(d);
-  const weekday = WEEKDAYS_FA[d.getDay()];
-  const shortWestern = `${jd}/${jm}/${jy}`;
-  const fullWestern = `${weekday}${i18nData.calendars.dateComma} ${jd} ${JALAALI_MONTHS[jm - 1]} ${jy}`;
-  return {
-    label: i18nData.calendars.shamsi,
-    short: shapeCalendarDigits(shortWestern, language),
-    full: shapeCalendarDigits(fullWestern, language),
-  };
+  const locale = buildLocaleWithCalendar(language, mode);
+  const shortOpts = { day: "numeric", month: "numeric", year: "numeric" };
+  const fullOpts = { weekday: "long", day: "numeric", month: "long", year: "numeric" };
+
+  try {
+    const short = new Intl.DateTimeFormat(locale, shortOpts).format(d);
+    const full = new Intl.DateTimeFormat(locale, fullOpts).format(d);
+    return {
+      short: shapeCalendarDigits(short, language),
+      full: shapeCalendarDigits(full, language),
+    };
+  } catch {
+    const fallback = getBcp47Locale(language);
+    const short = d.toLocaleDateString(fallback, shortOpts);
+    const full = d.toLocaleDateString(fallback, fullOpts);
+    return {
+      short: shapeCalendarDigits(short, language),
+      full: shapeCalendarDigits(full, language),
+    };
+  }
+}
+
+export function formatShamsiDate(date = new Date(), language = "fa") {
+  return { mode: "shamsi", ...formatWithIntl(date, language, "shamsi") };
 }
 
 export function formatGregorianDate(date = new Date(), language = "fa") {
-  const d = date instanceof Date ? date : new Date(date);
-  const locale = calendarUsesPersianDigits(language) ? "fa-IR" : "en-GB";
-  const short = d.toLocaleDateString(locale);
-  const full = d.toLocaleDateString(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  return {
-    label: i18nData.calendars.gregorian,
-    short: shapeCalendarDigits(short, language),
-    full: shapeCalendarDigits(full, language),
-  };
+  return { mode: "gregorian", ...formatWithIntl(date, language, "gregorian") };
 }
 
 export function formatHijriDate(date = new Date(), language = "fa") {
-  const d = date instanceof Date ? date : new Date(date);
-  const locale = calendarUsesPersianDigits(language) ? "fa-IR-u-ca-islamic" : "en-u-ca-islamic";
-  let short = "";
-  let full = "";
-  try {
-    short = new Intl.DateTimeFormat(locale, { day: "numeric", month: "numeric", year: "numeric" }).format(d);
-    full = new Intl.DateTimeFormat(locale, {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(d);
-  } catch {
-    short = d.toLocaleDateString(calendarUsesPersianDigits(language) ? "fa-IR" : "en-GB");
-    full = short;
-  }
-  return {
-    label: i18nData.calendars.hijri,
-    short: shapeCalendarDigits(short, language),
-    full: shapeCalendarDigits(full, language),
-  };
+  return { mode: "hijri", ...formatWithIntl(date, language, "hijri") };
 }
 
 export function cycleCalendar(current) {
@@ -76,20 +95,34 @@ export function formatByCalendar(type, date = new Date(), language = "fa") {
   return formatShamsiDate(date, language);
 }
 
-export const CALENDAR_MODES = ["shamsi", "gregorian", "hijri"];
-
 export function formatCalendar(mode, date = new Date(), language = "fa") {
   return formatByCalendar(mode, date, language);
 }
 
-export function formatFetchedAt(iso) {
+/** هر سه گاه‌شماری با برچسب ترجمه‌شده */
+export function formatAllCalendars(date = new Date(), language = "fa", labels = {}) {
+  return CALENDAR_MODES.map((mode) => {
+    const formatted = formatByCalendar(mode, date, language);
+    const label =
+      mode === "gregorian"
+        ? labels.gregorian || "Gregorian"
+        : mode === "hijri"
+          ? labels.hijri || "Hijri"
+          : labels.shamsi || "Solar Hijri";
+    return { ...formatted, mode, label };
+  });
+}
+
+export function formatFetchedAt(iso, language = "fa") {
   if (!iso) return "—";
   const d = new Date(iso);
-  return d.toLocaleString("fa-IR", {
+  const locale = getBcp47Locale(language);
+  const text = d.toLocaleString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
+  return shapeCalendarDigits(text, language);
 }

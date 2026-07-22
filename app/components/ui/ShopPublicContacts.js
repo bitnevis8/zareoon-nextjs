@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MESSENGER_META, messengerHref } from "@/app/utils/shopContacts";
 import { MessengerGlyph, MESSENGER_COLORS } from "@/app/components/ui/ShopContactFields";
+import ShopPageQrCode from "@/app/components/ui/ShopPageQrCode";
 
 function ChatIcon({ className = "h-4 w-4" }) {
   return (
@@ -27,13 +28,15 @@ function ChatIcon({ className = "h-4 w-4" }) {
 }
 
 /**
- * نمایش عمومی تماس فروشگاه + چت داخلی زارعون
+ * نمایش عمومی تماس فروشگاه + چت داخلی زارعون + QR صفحه
  */
 export default function ShopPublicContacts({
   shopContacts,
   legacy = {},
   chatUserId = null,
   showInternalChat = true,
+  profileSlug = null,
+  displayName = "",
 }) {
   const phones = Array.isArray(shopContacts?.phones)
     ? shopContacts.phones.filter(Boolean)
@@ -53,8 +56,9 @@ export default function ShopPublicContacts({
 
   const canShowChat = showInternalChat && chatUserId;
   const chatHref = `/dashboard/messages?u=${chatUserId}`;
+  const canShowQr = Boolean(profileSlug);
 
-  if (!phones.length && !emails.length && !messengerEntries.length && !canShowChat) return null;
+  if (!phones.length && !emails.length && !messengerEntries.length && !canShowChat && !canShowQr) return null;
 
   return (
     <div className="space-y-3 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm sm:p-4">
@@ -142,6 +146,8 @@ export default function ShopPublicContacts({
           })}
         </div>
       ) : null}
+
+      {canShowQr ? <ShopPageQrCode profileSlug={profileSlug} displayName={displayName} /> : null}
     </div>
   );
 }

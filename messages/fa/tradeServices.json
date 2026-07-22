@@ -23,9 +23,9 @@
       "id": "packaging-prep",
       "icon": "packaging-prep",
       "title": "بسته‌بندی و آماده‌سازی کالا",
-      "description": "بسته‌بندی صادراتی، لیبل و چاپ تجاری، پالت‌بندی و استانداردسازی بسته‌بندی برای حمل بین‌المللی.",
+      "description": "بسته‌بندی برای حمل داخلی و بین‌المللی، لیبل و چاپ تجاری، پالت‌بندی و استانداردسازی بسته‌بندی.",
       "children": [
-        { "id": "export-packaging", "title": "بسته‌بندی صادراتی" },
+        { "id": "export-packaging", "title": "بسته‌بندی داخلی و صادراتی" },
         { "id": "commercial-labeling", "title": "لیبل و چاپ تجاری" },
         { "id": "palletizing", "title": "پالت‌بندی" },
         { "id": "packaging-standards", "title": "استانداردسازی بسته‌بندی" }

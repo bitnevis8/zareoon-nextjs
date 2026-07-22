@@ -18,7 +18,7 @@ import {
   DashSection,
 } from "./DashboardHomeKit";
 
-export default function AdminDashboardHome({ user }) {
+export default function AdminDashboardHome({ user: _user }) {
   const t = useTranslations("dashboard.homeAdmin");
   const tDash = useTranslations("dashboard");
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ export default function AdminDashboardHome({ user }) {
       <DashHero
         tone="emerald"
         badge={t("badge")}
-        title={t("title", { name: user?.firstName || "" })}
+        title={t("title")}
         subtitle={t("subtitle")}
       />
 
@@ -116,11 +116,11 @@ export default function AdminDashboardHome({ user }) {
       </DashKpiGrid>
 
       {(pendingOrders > 0 || pendingProviders > 0) && (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {pendingOrders > 0 ? (
             <Link
               href="/dashboard/order-management"
-              className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-950"
+              className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[13px] font-bold text-amber-950 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
             >
               {t("alert.pendingOrders", { count: pendingOrders })}
             </Link>
@@ -128,7 +128,7 @@ export default function AdminDashboardHome({ user }) {
           {pendingProviders > 0 ? (
             <Link
               href="/dashboard/trade-service-provider-requests"
-              className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-bold text-sky-950"
+              className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-[13px] font-bold text-sky-950 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
             >
               {t("alert.pendingProviders", { count: pendingProviders })}
             </Link>

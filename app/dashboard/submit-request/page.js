@@ -17,8 +17,11 @@ function SubmitRequestInner() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type");
   const categoryParam = searchParams.get("category") || "";
+  const noteParam = searchParams.get("note") || "";
   const initialRequestType = typeParam === "service" || typeParam === "product" ? typeParam : "";
   const isPackagingRequest = categoryParam === "packaging-prep";
+  const serviceCategoryId =
+    categoryParam === "packaging-prep" || categoryParam === "intl-logistics" ? categoryParam : "";
 
   useEffect(() => {
     setPersona(DASHBOARD_PERSONAS.APPLICANT);
@@ -37,7 +40,8 @@ function SubmitRequestInner() {
       <ApplicantRequestForm
         compact
         initialRequestType={initialRequestType}
-        initialServiceCategoryId={isPackagingRequest ? "packaging-prep" : ""}
+        initialServiceCategoryId={serviceCategoryId}
+        initialDescription={noteParam}
       />
     </div>
   );

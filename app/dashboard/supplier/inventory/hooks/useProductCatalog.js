@@ -15,7 +15,7 @@ export function useProductCatalog() {
     setCatalogLoading(true);
     setCatalogError("");
     try {
-      const res = await fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" });
+      const res = await fetch(`${API_ENDPOINTS.supplier.products.getAll}?lite=1`, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setCatalogItems((json?.data || []).map(normalizeCatalogProduct));

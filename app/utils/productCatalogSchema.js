@@ -57,17 +57,18 @@ export function getListingPolicy(product) {
 
 export function canSellerListProduct(product, { isAdmin = false } = {}) {
   if (!product) return { ok: false, reason: "missing" };
-  if (!product.isOrderable && !product.isLeaf) {
-    return { ok: false, reason: "category-navigation-only" };
-  }
   const policy = getListingPolicy(product);
   if (BLOCKED_LISTING_POLICIES.has(policy)) {
     return { ok: false, reason: policy };
   }
-  if (RESTRICTED_LISTING_POLICIES.has(policy) && !isAdmin) {
-    return { ok: false, reason: policy };
+  if (!product.isOrderable && !product.isLeaf) {
+    return { ok: false, reason: "category-navigation-only" };
   }
-  return { ok: true, reason: policy, warning: policy === "moderated" };
+  // pre-approval / manual-review: قابل ثبت است؛ ممکن است بررسی شود
+  const warning =
+    policy === "moderated" ||
+    (RESTRICTED_LISTING_POLICIES.has(policy) && !isAdmin);
+  return { ok: true, reason: policy, warning };
 }
 
 export function humanizeFilterKey(key) {

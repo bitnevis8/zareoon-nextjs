@@ -169,7 +169,10 @@ export default function InventoryEditModal({
 
             {filterKeys.length > 0 ? (
               <div>
-                <h3 className="mb-3 text-sm font-bold text-slate-800">{t("create.productFilters")}</h3>
+                <h3 className="mb-3 text-sm font-bold text-slate-800">
+                  {t("create.productFilters")}
+                  <span className="ms-1.5 font-normal text-slate-400">({t("create.optional")})</span>
+                </h3>
                 <ProductFilterFields
                   keys={filterKeys}
                   values={form.filterValues || {}}
@@ -210,7 +213,9 @@ export default function InventoryEditModal({
 
             {attributeDefs.length > 0 ? (
               <div>
-                <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.technicalPackaging")}</h3>
+                <h3 className="mb-3 text-sm font-bold text-slate-800">
+                  {t("create.technicalSpecs")}
+                </h3>
                 <AttributeFields
                   defs={attributeDefs}
                   values={attributeValues}

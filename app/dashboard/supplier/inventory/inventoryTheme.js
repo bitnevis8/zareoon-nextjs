@@ -69,7 +69,13 @@ export const selectStyles = {
     minHeight: "42px",
     fontSize: "0.875rem",
   }),
-  menu: (base) => ({ ...base, borderRadius: "0.75rem", overflow: "hidden", zIndex: 50 }),
+  menu: (base) => ({
+    ...base,
+    borderRadius: "0.75rem",
+    overflow: "hidden",
+    zIndex: 10070,
+  }),
+  menuPortal: (base) => ({ ...base, zIndex: 10070 }),
   option: (base, state) => ({
     ...base,
     fontSize: "0.875rem",

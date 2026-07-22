@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "التفتيش الهندسي آريا فولاد قرن"
+    "inspectionStandardsCompany": "التفتيش الهندسي آريا فولاد قرن",
+    "verifiedBadge": "موثّق",
+    "verifiedBadgeTitle": "مقدّم خدمة موثّق في زارعون"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "ميلادي",
     "calendarHijri": "هجري",
     "calendarShamsi": "شمسي",
-    "calendarClickHint": "{full} — انقر: {next}",
+    "calendarClickHint": "{full} — انقر لعرض المكافئات",
     "calendarAria": "التقويم {label}",
+    "calendarEquivalentsTitle": "ما يعادل التاريخ في التقويمات",
     "regionAria": "أسعار صرف اليوم",
     "loadingRates": "جاري تحميل الأسعار…",
     "ratesUnavailable": "الأسعار غير متاحة",

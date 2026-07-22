@@ -1,0 +1,341 @@
+"use client";
+
+import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
+import CbmFreightCalculator from "@/app/components/CbmFreightCalculator";
+import HsCodeTariffPanel from "@/app/components/HsCodeTariffPanel";
+
+const TABS = [
+  {
+    id: "cbm",
+    short: "CBM",
+    label: "حجم و حمل",
+    title: "محاسبه حجم و حمل CBM",
+    blurb:
+      "محاسبه حجم، وزن و برآورد اولیه حمل بین‌المللی — قبل از ثبت سفارش یا استعلام قیمت.",
+  },
+  {
+    id: "hs",
+    short: "HS",
+    label: "کد تعرفه",
+    title: "HS CODE",
+    blurb: "با کد یا شرح کالا، نرخ حقوق گمرکی و سود بازرگانی تعرفه ۱۴۰۵ را پیدا کنید.",
+  },
+];
+
+const GUIDES = {
+  cbm: {
+    title: "راهنمای محاسبه حجم و حمل (CBM)",
+    sections: [
+      {
+        heading: "این ابزار چه کاری می‌کند؟",
+        body: "با وارد کردن تعداد و ابعاد بسته‌ها، حجم کل بار (CBM)، وزن کل، وزن حجمی و وزن قابل‌محاسبه برای کرایه را می‌بینید. همچنین پیشنهاد تقریبی روش حمل (هوایی، دریایی، زمینی یا ریلی) و مناسب بودن خرده‌بار (LCL) یا کانتینر کامل (FCL) نمایش داده می‌شود.",
+      },
+      {
+        heading: "چگونه استفاده کنم؟",
+        body: "۱) روش حمل را انتخاب کنید یا روی «پیشنهاد خودکار» بگذارید. ۲) تعداد، طول، عرض، ارتفاع (سانتی‌متر) و وزن هر بسته (کیلوگرم) را وارد کنید. ۳) در صورت نیاز چند نوع بسته اضافه کنید. ۴) نتیجه به‌صورت زنده پایین فرم ظاهر می‌شود.",
+      },
+      {
+        heading: "مثال",
+        body: "۱۰ کارتن با ابعاد ۱۲۰×۸۰×۱۰۰ سانتی‌متر و وزن هر کارتن ۲۵ کیلوگرم: حجم هر کارتن حدود ۰٫۹۶ CBM و حجم کل حدود ۹٫۶ CBM است. ابزار وزن حجمی و پیشنهاد حمل را بر اساس همین اعداد محاسبه می‌کند.",
+      },
+      {
+        heading: "مبدأ و مقصد",
+        body: "پر کردن مبدأ و مقصد اختیاری است و در خود محاسبه حجم تأثیری ندارد. این فیلدها فقط وقتی معنا پیدا می‌کنند که بخواهید خلاصه بار را برای استعلام قیمت نهایی به شرکت‌های لجستیک و حمل‌ونقل ارسال کنید.",
+      },
+      {
+        heading: "نکته مهم",
+        body: "نتایج این ابزار صرفاً برآورد اولیه است و جایگزین استعلام قطعی شرکت حمل نیست. تعرفه اختیاری هم فقط برای تخمین هزینه با نرخ خودتان است.",
+      },
+    ],
+  },
+  hs: {
+    title: "راهنمای جستجوی کد HS و تعرفه",
+    sections: [
+      {
+        heading: "کد HS چیست؟",
+        body: "کد HS (Harmonized System) استاندارد بین‌المللی طبقه‌بندی کالا در گمرک است. با دانستن کد یا شرح کالا می‌توانید نرخ حقوق گمرکی و سود بازرگانی ردیف تعرفه را ببینید.",
+      },
+      {
+        heading: "چگونه جستجو کنم؟",
+        body: "کد تعرفه یا بخشی از شرح کالا را در کادر بنویسید (حداقل ۲ نویسه) و دکمه «جستجو» را بزنید. جستجو به‌صورت خودکار انجام نمی‌شود تا بتوانید متن را کامل کنید.",
+      },
+      {
+        heading: "مثال",
+        body: "می‌توانید کد عددی مانند 080410 را وارد کنید، یا شرحی مثل «خرما» را جستجو کنید تا ردیف‌های مرتبط تعرفه ۱۴۰۵ نمایش داده شود.",
+      },
+      {
+        heading: "نتایج چه معنایی دارند؟",
+        body: "در هر نتیجه، کد HS، درصد حقوق گمرکی و درصد سود بازرگانی به‌همراه شرح فارسی کالا نشان داده می‌شود. ملاحظات بخشنامه‌ای را هم از پایین پنل می‌توانید باز کنید.",
+      },
+      {
+        heading: "نکته مهم",
+        body: "اطلاعات بر اساس تعرفه سال ۱۴۰۵ است. برای تصمیم نهایی گمرکی، با مشاور یا شرکت ترخیص هماهنگ کنید؛ شرایط خاص کالا ممکن است نرخ نهایی را تغییر دهد.",
+      },
+    ],
+  },
+};
+
+function CubeIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 7.5l-9-4.5-9 4.5m18 0l-9 4.5m9-4.5v9l-9 4.5m0-9L3 7.5m9 4.5v9M3 7.5v9l9 4.5"
+      />
+    </svg>
+  );
+}
+
+function DocIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
+    </svg>
+  );
+}
+
+function HelpIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.25M12 18h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+}
+
+function ToolGuideModal({ open, onClose, guide }) {
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  if (!open || !guide) return null;
+
+  return (
+    <div className="fixed inset-0 z-[99990] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true">
+      <button type="button" className="absolute inset-0 bg-black/50 backdrop-blur-[1px]" aria-label="بستن" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3.5 sm:px-5">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold text-teal-700">راهنما</p>
+            <h4 className="mt-0.5 text-sm font-bold leading-snug text-slate-900 sm:text-base">{guide.title}</h4>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            aria-label="بستن راهنما"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        <div className="space-y-4 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
+          {guide.sections.map((section) => (
+            <div key={section.heading}>
+              <h5 className="text-[13px] font-bold text-slate-900">{section.heading}</h5>
+              <p className="mt-1.5 text-[13px] leading-7 text-slate-600">{section.body}</p>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-slate-100 px-4 py-3 sm:px-5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-teal-700 px-4 text-sm font-bold text-white transition hover:bg-teal-800"
+          >
+            متوجه شدم
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClearIcon({ className = "h-3.5 w-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"
+      />
+    </svg>
+  );
+}
+
+/**
+ * ابزارهای آنلاین بازرگانی — پیش‌فرض بسته؛ با انتخاب تب باز می‌شود
+ */
+export default function TradeToolsPanel({ className = "" }) {
+  const titleId = useId();
+  const [tab, setTab] = useState(null);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const cbmRef = useRef(null);
+  const hsRef = useRef(null);
+  const active = TABS.find((t) => t.id === tab) || null;
+  const isOpen = !!active;
+
+  const selectTab = (id) => {
+    setTab((prev) => (prev === id ? null : id));
+  };
+
+  const closePanel = () => setTab(null);
+
+  const clearActiveForm = () => {
+    if (tab === "cbm") cbmRef.current?.clearForm?.();
+    else if (tab === "hs") hsRef.current?.clearForm?.();
+  };
+
+  return (
+    <section className={`scroll-mt-20 ${className}`} aria-labelledby={titleId}>
+      <div className="relative overflow-hidden rounded-[1.4rem] border border-slate-200/80 bg-gradient-to-b from-white via-white to-slate-50/90 shadow-[0_16px_48px_-24px_rgba(15,23,42,0.28)]">
+        <div
+          className="pointer-events-none absolute -start-20 -top-24 h-56 w-56 rounded-full bg-teal-200/30 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-28 -end-16 h-64 w-64 rounded-full bg-sky-100/50 blur-3xl"
+          aria-hidden
+        />
+
+        <div className="relative px-4 py-4 sm:px-5 sm:py-5">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/images/logo.png"
+              alt="زارعون"
+              width={36}
+              height={36}
+              className="h-8 w-8 shrink-0 object-contain sm:h-9 sm:w-9"
+            />
+            <div className="min-w-0 flex-1">
+              <h2 id={titleId} className="text-[13px] font-bold leading-snug text-slate-900 sm:text-sm">
+                ابزارهای آنلاین بازرگانی زارعون
+              </h2>
+              {!isOpen ? (
+                <p className="mt-0.5 text-[11px] leading-5 text-slate-500 sm:text-xs">
+                  برای شروع، یکی از ابزارها را انتخاب کنید.
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div
+            role="tablist"
+            aria-label="انتخاب ابزار"
+            className="mt-3 grid grid-cols-2 gap-1 rounded-2xl bg-slate-100/90 p-1 ring-1 ring-slate-200/70"
+          >
+            {TABS.map((t) => {
+              const selected = tab === t.id;
+              const Icon = t.id === "cbm" ? CubeIcon : DocIcon;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  id={`${titleId}-tab-${t.id}`}
+                  aria-selected={selected}
+                  aria-expanded={selected}
+                  aria-controls={selected ? `${titleId}-panel` : undefined}
+                  onClick={() => selectTab(t.id)}
+                  className={`flex min-h-[3.15rem] items-center justify-center gap-2 rounded-[0.9rem] px-2 py-2 transition sm:min-h-[3.35rem] sm:gap-2.5 sm:px-3 ${
+                    selected
+                      ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/90"
+                      : "text-slate-600 hover:bg-white/55 hover:text-slate-900"
+                  }`}
+                >
+                  <span
+                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition ${
+                      selected ? "bg-teal-700 text-white" : "bg-white/80 text-slate-500 ring-1 ring-slate-200/80"
+                    }`}
+                  >
+                    <Icon />
+                  </span>
+                  <span className="min-w-0 text-start">
+                    <span className="block text-[11px] font-bold leading-tight sm:text-[13px]">
+                      <span className="sm:hidden">{t.short}</span>
+                      <span className="hidden sm:inline">{t.label}</span>
+                    </span>
+                    <span className="mt-0.5 block text-[10px] font-medium text-slate-500 sm:text-[11px]">
+                      {selected ? "باز · کلیک برای بستن" : t.id === "cbm" ? "محاسبه بار" : "حقوق گمرکی"}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {isOpen ? (
+            <div className="mt-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h3 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">{active.title}</h3>
+                    <button
+                      type="button"
+                      onClick={() => setGuideOpen(true)}
+                      className="inline-flex min-h-8 items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-teal-800 transition hover:bg-teal-100 sm:text-xs"
+                    >
+                      <HelpIcon className="h-3.5 w-3.5" />
+                      راهنما
+                    </button>
+                  </div>
+                  <p className="max-w-2xl text-[13px] leading-6 text-slate-600 sm:text-sm sm:leading-7">{active.blurb}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={clearActiveForm}
+                    title="پاک کردن فرم"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white/90 px-2.5 py-2 text-[11px] font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 sm:min-h-9 sm:px-3 sm:text-xs"
+                  >
+                    <ClearIcon />
+                    <span className="hidden min-[380px]:inline">پاک کردن</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closePanel}
+                    title="بستن ابزار"
+                    className="inline-flex min-h-9 items-center justify-center rounded-xl border border-slate-200/90 bg-white/90 px-2.5 py-2 text-[11px] font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 sm:px-3 sm:text-xs"
+                  >
+                    بستن
+                  </button>
+                </div>
+              </div>
+
+              <div
+                className="relative mt-4 border-t border-slate-100 pt-4"
+                id={`${titleId}-panel`}
+                role="tabpanel"
+                aria-labelledby={`${titleId}-tab-${tab}`}
+              >
+                {tab === "cbm" ? <CbmFreightCalculator ref={cbmRef} /> : <HsCodeTariffPanel ref={hsRef} />}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <ToolGuideModal open={guideOpen && isOpen} onClose={() => setGuideOpen(false)} guide={active ? GUIDES[active.id] : null} />
+    </section>
+  );
+}

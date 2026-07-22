@@ -1,10 +1,23 @@
 export function normalizeCatalogProduct(raw) {
+  const translations = raw.translations || null;
+  const faName = translations?.fa?.name;
+  const name =
+    raw.name ||
+    faName ||
+    raw.englishName ||
+    translations?.en?.name ||
+    raw.slug ||
+    `#${raw.id}`;
+
   return {
     ...raw,
     id: raw.id,
-    name: raw.name,
+    name,
     parentId: raw.parentId ?? raw.parent_id ?? null,
-    isOrderable: Boolean(raw.isOrderable ?? raw.is_orderable),
+    isOrderable: Boolean(raw.isOrderable ?? raw.is_orderable ?? raw.isLeaf),
+    isLeaf: raw.isLeaf != null ? Boolean(raw.isLeaf) : undefined,
+    listingPolicy: raw.listingPolicy ?? null,
+    translations,
   };
 }
 
@@ -13,26 +26,27 @@ export function isRootCatalogItem(item) {
 }
 
 export function isCategoryNode(item, childrenByParent) {
+  if (!item) return false;
+  if (item.listingPolicy === "category-navigation-only") return true;
+  if (item.isLeaf === false) return true;
   if (!item.isOrderable) return true;
   if (!childrenByParent) return false;
   return getChildren(item.id, childrenByParent).length > 0;
 }
 
 export function isSelectableProductNode(item, childrenByParent, { isAdmin = false } = {}) {
-  if (!item.isOrderable) return false;
-  if (!childrenByParent) {
-    return canListByPolicy(item, isAdmin);
-  }
-  if (getChildren(item.id, childrenByParent).length > 0) return false;
+  if (!item) return false;
+  if (isCategoryNode(item, childrenByParent)) return false;
+  if (!item.isOrderable && item.isLeaf !== true) return false;
   return canListByPolicy(item, isAdmin);
 }
 
 function canListByPolicy(item, isAdmin) {
   const policy = item.listingPolicy;
+  // فقط گره‌های صرفاً ناوبری قابل انتخاب برای عرضه نیستند
   if (policy === "category-navigation-only") return false;
-  if ((policy === "pre-approval-required" || policy === "manual-review-only") && !isAdmin) {
-    return false;
-  }
+  // pre-approval / manual-review: فروشنده می‌تواند انتخاب کند (ثبت با بررسی)
+  void isAdmin;
   return true;
 }
 

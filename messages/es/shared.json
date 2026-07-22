@@ -143,7 +143,9 @@
     "distributor": ""
   },
   "vip": {
-    "inspectionStandardsCompany": "Inspección de ingeniería Arya Foulad Gharn"
+    "inspectionStandardsCompany": "Inspección de ingeniería Arya Foulad Gharn",
+    "verifiedBadge": "Verificado",
+    "verifiedBadgeTitle": "Proveedor verificado en Zareoon"
   },
   "attributeFields": {
     "yes": "",
@@ -259,8 +261,9 @@
     "calendarGregorian": "Gregoriano",
     "calendarHijri": "Hégira",
     "calendarShamsi": "Solar",
-    "calendarClickHint": "{full} — clic: {next}",
+    "calendarClickHint": "{full} — clic para ver equivalentes",
     "calendarAria": "Calendario {label}",
+    "calendarEquivalentsTitle": "Fechas equivalentes",
     "regionAria": "Tipos de cambio del día",
     "loadingRates": "Cargando tipos…",
     "ratesUnavailable": "Tipos no disponibles",

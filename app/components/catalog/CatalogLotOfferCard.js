@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import TieredPricingDisplay from "../ui/TieredPricingDisplay";
 import {
@@ -15,8 +15,11 @@ import {
 } from "../../utils/localize";
 import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
 import Link from "next/link";
-import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplier } from "../../utils/catalogLotSupplier";
+import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplier, lotSupplierHasPhone } from "../../utils/catalogLotSupplier";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
+import { getAllowedMeasurementUnits } from "../../utils/productCatalogSchema";
+import { buildHashtagSearchHref } from "../../utils/mobileSearchUtils";
+import { API_ENDPOINTS } from "../../config/api";
 import CatalogPdfDownload from "./CatalogPdfDownload";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { GradeMediaBadge } from "./CatalogGradeMediaPanel";
@@ -36,6 +39,30 @@ function DetailRow({ label, value, highlight = false }) {
   );
 }
 
+function PhoneIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+      />
+    </svg>
+  );
+}
+
+function StoreIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 9l1-4h16l1 4M4 9v10a1 1 0 001 1h4V13h6v7h4a1 1 0 001-1V9"
+      />
+    </svg>
+  );
+}
+
 export default function CatalogLotOfferCard({
   lot,
   language,
@@ -46,6 +73,7 @@ export default function CatalogLotOfferCard({
   placingLotId,
   onAddToCart,
   productUnit,
+  product = null,
   productId,
   showMedia = true,
   embedded = false,
@@ -56,7 +84,6 @@ export default function CatalogLotOfferCard({
   const coverUrl = resolveMediaUrl(lot.coverImageUrl);
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
   const gradeLabel = getLocalizedLotLabel(lot, language, t);
-  const unitLabel = localizeUnit(lot.unit || productUnit || "-", language);
   const statusLabel = localizeStatus(lot.status, t);
   const display = getLotDisplayForLanguage(lot, language);
   const lotDescription = display.description;
@@ -65,6 +92,31 @@ export default function CatalogLotOfferCard({
   const supplier = getLotSupplierDisplay(lot, t);
   const supplierUser = getLotSupplier(lot);
   const supplierProfileUrl = getLotSupplierProfileUrl(lot);
+  const canRevealPhone = lotSupplierHasPhone(lot);
+
+  const unitOptions = useMemo(() => {
+    const allowed = getAllowedMeasurementUnits(product);
+    const lotUnit = lot.unit || productUnit || getAllowedMeasurementUnits(product)[0] || "kg";
+    const list = allowed.length ? [...allowed] : [lotUnit];
+    if (lotUnit && !list.includes(lotUnit)) list.unshift(lotUnit);
+    return [...new Set(list.filter(Boolean))];
+  }, [product, lot.unit, productUnit]);
+
+  const [orderUnit, setOrderUnit] = useState(lot.unit || productUnit || unitOptions[0] || "kg");
+  const [phone, setPhone] = useState("");
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
+
+  useEffect(() => {
+    const next = lot.unit || productUnit || unitOptions[0] || "kg";
+    setOrderUnit(next);
+    setPhone("");
+    setPhoneError("");
+    // فقط با تعویض لات ریست شود
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lot.id]);
+
+  const unitLabel = localizeUnit(orderUnit || "-", language);
 
   const slides = useMemo(
     () => buildMediaSlides({ coverUrl: coverUrl || undefined, media: preview, title: gradeLabel }),
@@ -80,6 +132,26 @@ export default function CatalogLotOfferCard({
       startIndex: index,
       galleryTitle: gradeLabel,
     });
+  };
+
+  const revealPhone = async () => {
+    if (phone || phoneLoading) return;
+    setPhoneLoading(true);
+    setPhoneError("");
+    try {
+      const res = await fetch(API_ENDPOINTS.farmer.inventoryLots.supplierContact(lot.id), {
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success || !json.data?.phone) {
+        throw new Error(json.message || t("phoneLoadError"));
+      }
+      setPhone(String(json.data.phone));
+    } catch (e) {
+      setPhoneError(e.message || t("phoneLoadError"));
+    } finally {
+      setPhoneLoading(false);
+    }
   };
 
   const articleClass = embedded
@@ -127,147 +199,174 @@ export default function CatalogLotOfferCard({
 
       <div className={bodyClass}>
         <div className={scrollableClass}>
-        <div className={embedded ? "p-5 pb-0" : "px-4 py-1"}>
-          {customTitle ? (
-            <div className={`border-b border-slate-100 ${embedded ? "pb-3" : "py-3"}`}>
-              <p className={`text-base font-bold leading-snug ${catalogText.heading}`}>{customTitle}</p>
+          <div className={embedded ? "p-5 pb-0" : "px-4 py-1"}>
+            {customTitle ? (
+              <div className={`border-b border-slate-100 ${embedded ? "pb-3" : "py-3"}`}>
+                <p className={`text-base font-bold leading-snug ${catalogText.heading}`}>{customTitle}</p>
+              </div>
+            ) : null}
+            <div className={`border-b border-slate-100 ${embedded ? "pb-4" : "py-3"}`}>
+              <p className={`mb-1 font-medium ${embedded ? "text-sm" : "text-xs"} ${catalogText.muted}`}>
+                {t("priceSectionTitle")}
+              </p>
+              {lot.tieredPricing?.length > 0 ? (
+                <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
+              ) : lot.price ? (
+                <p className={`text-xl font-extrabold ${catalogText.accentStrong}`}>
+                  {formatLocalizedPrice(lot.price, language, t)}
+                </p>
+              ) : (
+                <p className={`text-sm ${catalogText.muted}`}>{t("priceNotSet")}</p>
+              )}
+              {lot.minimumOrderQuantity && !lot.tieredPricing?.length ? (
+                <p className={`mt-1.5 text-xs ${catalogText.body}`}>
+                  {t("minimumOrder")}: {formatQuantityWithUnit(lot.minimumOrderQuantity, language, unitLabel)}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          {lotDescription ? (
+            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+              <p className={`mb-2 text-xs font-semibold ${catalogText.body}`}>{t("lotDescriptionTitle")}</p>
+              <p className={`whitespace-pre-wrap text-sm leading-relaxed ${catalogText.body}`}>{lotDescription}</p>
             </div>
           ) : null}
-          <div className={`border-b border-slate-100 ${embedded ? "pb-4" : "py-3"}`}>
-            <p className={`mb-1 font-medium ${embedded ? "text-sm" : "text-xs"} ${catalogText.muted}`}>{t("priceSectionTitle")}</p>
-            {lot.tieredPricing?.length > 0 ? (
-              <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
-            ) : lot.price ? (
-              <p className={`text-xl font-extrabold ${catalogText.accentStrong}`}>
-                {formatLocalizedPrice(lot.price, language, t)}
-              </p>
-            ) : (
-              <p className={`text-sm ${catalogText.muted}`}>{t("priceNotSet")}</p>
-            )}
-            {lot.minimumOrderQuantity && !lot.tieredPricing?.length ? (
-              <p className={`mt-1.5 text-xs ${catalogText.body}`}>
-                {t("minimumOrder")}: {formatQuantityWithUnit(lot.minimumOrderQuantity, language, unitLabel)}
-              </p>
-            ) : null}
-          </div>
-        </div>
 
-        {lotDescription ? (
-          <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
-            <p className={`mb-2 text-xs font-semibold ${catalogText.body}`}>{t("lotDescriptionTitle")}</p>
-            <p className={`whitespace-pre-wrap text-sm leading-relaxed ${catalogText.body}`}>{lotDescription}</p>
-          </div>
-        ) : null}
-
-        {Array.isArray(lotHashtags) && lotHashtags.length > 0 ? (
-          <div className={`flex flex-wrap gap-1.5 border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
-            {lotHashtags.map((tag) => (
-              <span key={tag} className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
-
-        {Array.isArray(lot.attributes) && lot.attributes.length > 0 ? (
-          <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
-            <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("technicalSpecsTitle")}</p>
-            {lot.attributes.map((a) => (
-              <DetailRow
-                key={a.id}
-                label={a.definition?.name || `#${a.attributeDefinitionId}`}
-                value={a.value ?? "—"}
-              />
-            ))}
-          </div>
-        ) : null}
-
-        {(lot.packagingType ||
-          lot.hsCode ||
-          (lot.filterValues && Object.keys(lot.filterValues).length > 0)) ? (
-          <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
-            <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("lotTradeDetailsTitle")}</p>
-            {lot.packagingType ? (
-              <DetailRow label={t("packagingType")} value={lot.packagingType} />
-            ) : null}
-            {lot.hsCode ? <DetailRow label={t("hsCode")} value={lot.hsCode} /> : null}
-            {lot.filterValues &&
-              Object.entries(lot.filterValues)
-                .filter(([k, v]) => v && k !== "hsCode")
-                .map(([k, v]) => (
-                  <DetailRow
-                    key={k}
-                    label={(() => {
-                      try {
-                        const tr = t(`filterKeys.${k}`);
-                        return tr && tr !== `filterKeys.${k}` ? tr : k;
-                      } catch {
-                        return k;
-                      }
-                    })()}
-                    value={String(v)}
-                  />
-                ))}
-          </div>
-        ) : null}
-
-        {getLotSupplier(lot) && (supplier.mobile || supplier.name) ? (
-          <div className={`border-t border-dashed border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
-            <p className={`mb-2 text-xs ${catalogText.muted}`}>{t("supplier")}</p>
-            <p className="mb-2 text-[11px] leading-5 text-slate-500">
-              ارتباط مستقیم با فروشنده — زارعون طرف معامله نیست.
-            </p>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              {supplier.name ? (
-                supplierProfileUrl ? (
-                  <Link href={supplierProfileUrl} className={`font-semibold text-emerald-700 hover:underline ${catalogText.heading}`}>
-                    {supplier.name}
-                  </Link>
-                ) : (
-                  <span className={`font-semibold ${catalogText.heading}`}>{supplier.name}</span>
-                )
-              ) : (
-                <span />
-              )}
-              <div className="flex flex-wrap items-center gap-2">
-                {supplier.mobile ? (
-                  <a
-                    href={`tel:${String(supplier.mobile).replace(/\s/g, "")}`}
-                    dir="ltr"
-                    className="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
-                  >
-                    {supplier.mobile}
-                  </a>
-                ) : null}
-                {supplierUser?.id ? (
-                  <Link
-                    href={`/dashboard/messages?u=${supplierUser.id}`}
-                    className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    پیام
-                  </Link>
-                ) : null}
-              </div>
+          {Array.isArray(lotHashtags) && lotHashtags.length > 0 ? (
+            <div className={`flex flex-wrap gap-1.5 border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+              {lotHashtags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={buildHashtagSearchHref(tag)}
+                  className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 transition hover:bg-emerald-100 hover:text-emerald-950"
+                >
+                  #{tag}
+                </Link>
+              ))}
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {productId ? (
-          <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
-            <CatalogPdfDownload
-              scope="lot"
-              productId={productId}
-              lotId={lot.id}
-              label={t("downloadSupplierCatalogPdf")}
-              compact
-              block
-              className="w-full"
-            />
-          </div>
-        ) : null}
+          {Array.isArray(lot.attributes) && lot.attributes.length > 0 ? (
+            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
+              <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("technicalSpecsTitle")}</p>
+              {lot.attributes.map((a) => (
+                <DetailRow
+                  key={a.id}
+                  label={a.definition?.name || `#${a.attributeDefinitionId}`}
+                  value={a.value ?? "—"}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          {(lot.packagingType || lot.hsCode || (lot.filterValues && Object.keys(lot.filterValues).length > 0)) ? (
+            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
+              <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("lotTradeDetailsTitle")}</p>
+              {lot.packagingType ? <DetailRow label={t("packagingType")} value={lot.packagingType} /> : null}
+              {lot.hsCode ? <DetailRow label={t("hsCode")} value={lot.hsCode} /> : null}
+              {lot.filterValues &&
+                Object.entries(lot.filterValues)
+                  .filter(([k, v]) => v && k !== "hsCode")
+                  .map(([k, v]) => (
+                    <DetailRow
+                      key={k}
+                      label={(() => {
+                        try {
+                          const tr = t(`filterKeys.${k}`);
+                          return tr && tr !== `filterKeys.${k}` ? tr : k;
+                        } catch {
+                          return k;
+                        }
+                      })()}
+                      value={String(v)}
+                    />
+                  ))}
+            </div>
+          ) : null}
+
+          {getLotSupplier(lot) && (supplier.name || canRevealPhone || supplierProfileUrl) ? (
+            <div className={`border-t border-dashed border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+              <p className={`mb-2 text-xs ${catalogText.muted}`}>{t("supplier")}</p>
+              <p className="mb-2 text-[11px] leading-5 text-slate-500">
+                ارتباط مستقیم با فروشنده — زارعون طرف معامله نیست.
+              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                {supplier.name ? (
+                  <span className={`font-semibold ${catalogText.heading}`}>{supplier.name}</span>
+                ) : (
+                  <span />
+                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {canRevealPhone ? (
+                    phone ? (
+                      <a
+                        href={`tel:${String(phone).replace(/\s/g, "")}`}
+                        dir="ltr"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
+                      >
+                        <PhoneIcon className="h-3.5 w-3.5" />
+                        {phone}
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={revealPhone}
+                        disabled={phoneLoading}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100 disabled:opacity-60"
+                        aria-label={t("showPhone")}
+                        title={t("showPhone")}
+                      >
+                        <PhoneIcon className="h-3.5 w-3.5" />
+                        {phoneLoading ? t("loadingPhone") : t("showPhone")}
+                      </button>
+                    )
+                  ) : null}
+                  {supplierProfileUrl ? (
+                    <Link
+                      href={supplierProfileUrl}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      <StoreIcon className="h-3.5 w-3.5" />
+                      {t("viewStore")}
+                    </Link>
+                  ) : null}
+                  {supplierUser?.id ? (
+                    <Link
+                      href={`/dashboard/messages?u=${supplierUser.id}`}
+                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      پیام
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+              {phoneError ? <p className="mt-2 text-[11px] text-rose-600">{phoneError}</p> : null}
+            </div>
+          ) : null}
+
+          {productId ? (
+            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+              <CatalogPdfDownload
+                scope="lot"
+                productId={productId}
+                lotId={lot.id}
+                lot={lot}
+                product={product}
+                label={t("downloadSupplierCatalogPdf")}
+                compact
+                block
+                className="w-full"
+              />
+            </div>
+          ) : null}
         </div>
 
-        <div className={`border-t border-green-200 bg-gradient-to-b from-green-50/90 to-white ${embedded ? "mx-0 mt-0 rounded-b-xl px-5 py-5" : "px-4 py-4"} ${orderSectionClass}`}>
+        <div
+          className={`border-t border-green-200 bg-gradient-to-b from-green-50/90 to-white ${
+            embedded ? "mx-0 mt-0 rounded-b-xl px-5 py-5" : "px-4 py-4"
+          } ${orderSectionClass}`}
+        >
           <p className={`mb-3 text-sm font-bold ${catalogText.accentStrong}`}>{t("orderSectionTitle")}</p>
           <p className={`mb-3 text-sm leading-relaxed ${catalogText.body}`}>
             {t("orderMaxHint", {
@@ -276,16 +375,38 @@ export default function CatalogLotOfferCard({
                 maximumFractionDigits: 3,
                 useGrouping: false,
               }),
-              unit: unitLabel,
+              unit: localizeUnit(lot.unit || orderUnit || "", language),
             })}
           </p>
           <label className={`mb-1.5 block text-sm font-semibold ${catalogText.heading}`} htmlFor={`lot-qty-${lot.id}`}>
             {t("orderQuantityLabel")}
           </label>
           <div className="mb-3 flex overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-green-600 focus-within:ring-2 focus-within:ring-green-100">
-            <span className={`flex shrink-0 items-center border-l border-slate-200 bg-slate-50 px-3 text-sm font-semibold ${catalogText.body}`}>
-              {unitLabel}
-            </span>
+            {unitOptions.length > 1 ? (
+              <label className="sr-only" htmlFor={`lot-unit-${lot.id}`}>
+                {t("orderUnitLabel")}
+              </label>
+            ) : null}
+            {unitOptions.length > 1 ? (
+              <select
+                id={`lot-unit-${lot.id}`}
+                value={orderUnit}
+                onChange={(e) => setOrderUnit(e.target.value)}
+                className={`max-w-[40%] shrink-0 border-0 border-l border-slate-200 bg-slate-50 px-2.5 py-3.5 text-sm font-semibold outline-none ${catalogText.body}`}
+              >
+                {unitOptions.map((u) => (
+                  <option key={u} value={u}>
+                    {localizeUnit(u, language)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span
+                className={`flex shrink-0 items-center border-l border-slate-200 bg-slate-50 px-3 text-sm font-semibold ${catalogText.body}`}
+              >
+                {unitLabel}
+              </span>
+            )}
             <input
               id={`lot-qty-${lot.id}`}
               type="text"
@@ -306,7 +427,7 @@ export default function CatalogLotOfferCard({
             type="button"
             className={catalogBtn.primaryBlock}
             disabled={placingLotId === lot.id}
-            onClick={() => onAddToCart(lot, productUnit)}
+            onClick={() => onAddToCart(lot, orderUnit)}
           >
             {placingLotId === lot.id ? "…" : t("addToCartAction")}
           </button>
