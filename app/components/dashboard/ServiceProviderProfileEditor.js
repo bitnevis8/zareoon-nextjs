@@ -399,10 +399,6 @@ function ProfileEditMode({
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-6xl space-y-4 pb-6">
-      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-700">
-        {te("saveNotice")}
-      </div>
-
       <div className="grid gap-4 xl:grid-cols-12 xl:items-start">
         <div className="space-y-4 xl:col-span-5">
           <section className={`${dash.card} ${dash.cardBody}`}>

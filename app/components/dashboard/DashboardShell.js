@@ -17,7 +17,7 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
   const { openSidebar } = useSidebar();
 
   return (
-    <div className="flex min-h-0 flex-1 bg-slate-100">
+    <div className="dashboard-scroll flex min-h-0 flex-1 bg-slate-100">
       <aside className="hidden w-[19rem] shrink-0 border-l border-slate-200 bg-white md:block">
         <div className="sticky top-0 max-h-[calc(100dvh-7rem)] overflow-y-auto">
           <Sidebar onLinkClick={() => {}} />

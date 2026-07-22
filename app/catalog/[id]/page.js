@@ -14,9 +14,7 @@ import LatestAvailableProductsSection from "@/app/components/LatestAvailableProd
 import CatalogProductHero from "@/app/components/catalog/CatalogProductHero";
 import CatalogProductDescription from "@/app/components/catalog/CatalogProductDescription";
 import CatalogGradeOffers from "@/app/components/catalog/CatalogGradeOffers";
-import CatalogLotFilters from "@/app/components/catalog/CatalogLotFilters";
 import CatalogTradeCompliance from "@/app/components/catalog/CatalogTradeCompliance";
-import { lotMatchesFilterValues } from "@/app/utils/productCatalogSchema";
 import { buildLotGalleryItems } from "@/app/utils/catalogGradeMedia";
 import CatalogMediaLightbox, { sortMediaItems, buildProductGalleryItems } from "@/app/components/catalog/CatalogMediaLightbox";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
@@ -81,7 +79,6 @@ export default function CatalogItemPage({ params }) {
   const mediaCacheRef = useRef(new Map());
   const [lotMediaPreview, setLotMediaPreview] = useState(new Map());
   const [activeOfferGrade, setActiveOfferGrade] = useState(null);
-  const [lotFilters, setLotFilters] = useState({});
   const [cartTotalQty, setCartTotalQty] = useState(0);
   const [cartUnit, setCartUnit] = useState("");
 
@@ -171,14 +168,10 @@ export default function CatalogItemPage({ params }) {
     () => (lots || []).filter((l) => l.productId === productIdNum),
     [lots, productIdNum]
   );
-  const filteredLots = useMemo(
-    () => productLots.filter((l) => lotMatchesFilterValues(l, lotFilters)),
-    [productLots, lotFilters]
-  );
   const summary = useMemo(() => {
     let total = 0;
     let reserved = 0;
-    for (const l of filteredLots) {
+    for (const l of productLots) {
       total += parseFloat(l.totalQuantity || 0);
       reserved += parseFloat(l.reservedQuantity || 0);
     }
@@ -186,13 +179,9 @@ export default function CatalogItemPage({ params }) {
       totalQuantity: total,
       reservedQuantity: reserved,
       availableQuantity: Math.max(0, total - reserved),
-      lots: filteredLots,
+      lots: productLots,
     };
-  }, [filteredLots]);
-
-  useEffect(() => {
-    setLotFilters({});
-  }, [id]);
+  }, [productLots]);
 
   useEffect(() => {
     if (!productLots.length) return;
@@ -237,7 +226,7 @@ export default function CatalogItemPage({ params }) {
       }
 
       if (module === "inventory") {
-        const lot = filteredLots.find((l) => Number(l.id) === Number(entityId));
+        const lot = productLots.find((l) => Number(l.id) === Number(entityId));
         if (lot) items = buildLotGalleryItems(lot, items);
       }
 
@@ -255,7 +244,7 @@ export default function CatalogItemPage({ params }) {
     } finally {
       setGalleryLoading(false);
     }
-  }, [filteredLots]);
+  }, [productLots]);
 
   // Load product-level media counts
   useEffect(() => {
@@ -365,30 +354,13 @@ export default function CatalogItemPage({ params }) {
         openMediaGallery={openMediaGallery}
         cartTotalQty={cartTotalQty}
         cartUnit={cartUnit}
-        hideMedia={filteredLots.length > 0 || productLots.length > 0}
+        hideMedia={productLots.length > 0}
       />
 
-      {productLots.length > 0 ? (
-        <CatalogLotFilters
-          product={item}
-          lots={productLots}
-          activeFilters={lotFilters}
-          onChange={(key, value) =>
-            setLotFilters((prev) => {
-              const next = { ...prev };
-              if (!value) delete next[key];
-              else next[key] = value;
-              return next;
-            })
-          }
-          onClear={() => setLotFilters({})}
-        />
-      ) : null}
-
-      {filteredLots.length > 0 && (
+      {productLots.length > 0 && (
         <CatalogGradeOffers
           item={item}
-          lots={filteredLots}
+          lots={productLots}
           language={language}
           activeGrade={activeOfferGrade}
           onActiveGradeChange={setActiveOfferGrade}
@@ -412,7 +384,7 @@ export default function CatalogItemPage({ params }) {
 
       {item?.isOrderable ? <CatalogTradeCompliance product={item} /> : null}
 
-      {item?.description && filteredLots.length === 0 ? (
+      {item?.description && productLots.length === 0 ? (
         <CatalogProductDescription description={item.description} />
       ) : null}
 

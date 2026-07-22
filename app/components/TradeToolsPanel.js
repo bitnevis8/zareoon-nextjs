@@ -9,17 +9,21 @@ const TABS = [
   {
     id: "cbm",
     short: "CBM",
-    label: "حجم و حمل",
-    title: "محاسبه حجم و حمل CBM",
+    label: "حجم و حمل بار",
+    title: "حجم و حمل بار · CBM",
+    panelTitle: "محاسبه حجم و حمل بار (CBM)",
     blurb:
       "محاسبه حجم، وزن و برآورد اولیه حمل بین‌المللی — قبل از ثبت سفارش یا استعلام قیمت.",
+    hint: "محاسبه بار",
   },
   {
     id: "hs",
-    short: "HS",
+    short: "HS CODE",
     label: "کد تعرفه",
-    title: "HS CODE",
+    title: "کد تعرفه · HS CODE",
+    panelTitle: "جستجوی کد تعرفه (HS CODE)",
     blurb: "با کد یا شرح کالا، نرخ حقوق گمرکی و سود بازرگانی تعرفه ۱۴۰۵ را پیدا کنید.",
+    hint: "حقوق گمرکی",
   },
 ];
 
@@ -242,7 +246,7 @@ export default function TradeToolsPanel({ className = "" }) {
           <div
             role="tablist"
             aria-label="انتخاب ابزار"
-            className="mt-3 grid grid-cols-2 gap-1 rounded-2xl bg-slate-100/90 p-1 ring-1 ring-slate-200/70"
+            className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
           >
             {TABS.map((t) => {
               const selected = tab === t.id;
@@ -257,27 +261,36 @@ export default function TradeToolsPanel({ className = "" }) {
                   aria-expanded={selected}
                   aria-controls={selected ? `${titleId}-panel` : undefined}
                   onClick={() => selectTab(t.id)}
-                  className={`flex min-h-[3.15rem] items-center justify-center gap-2 rounded-[0.9rem] px-2 py-2 transition sm:min-h-[3.35rem] sm:gap-2.5 sm:px-3 ${
+                  className={`flex min-h-[4.25rem] items-center gap-3 rounded-2xl border px-3.5 py-3 text-start transition sm:min-h-[4.5rem] sm:gap-3.5 sm:px-4 sm:py-3.5 ${
                     selected
-                      ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/90"
-                      : "text-slate-600 hover:bg-white/55 hover:text-slate-900"
+                      ? "border-teal-300 bg-white text-slate-900 shadow-md ring-2 ring-teal-100"
+                      : "border-slate-200/90 bg-white/90 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white hover:shadow-md"
                   }`}
                 >
                   <span
-                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition ${
-                      selected ? "bg-teal-700 text-white" : "bg-white/80 text-slate-500 ring-1 ring-slate-200/80"
+                    className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition sm:h-12 sm:w-12 ${
+                      selected
+                        ? "bg-teal-700 text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600 ring-1 ring-slate-200/80"
                     }`}
                   >
-                    <Icon />
+                    <Icon className="h-5 w-5" />
                   </span>
-                  <span className="min-w-0 text-start">
-                    <span className="block text-[11px] font-bold leading-tight sm:text-[13px]">
-                      <span className="sm:hidden">{t.short}</span>
-                      <span className="hidden sm:inline">{t.label}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[13px] font-extrabold leading-snug text-slate-900 sm:text-sm">
+                      {t.title}
                     </span>
-                    <span className="mt-0.5 block text-[10px] font-medium text-slate-500 sm:text-[11px]">
-                      {selected ? "باز · کلیک برای بستن" : t.id === "cbm" ? "محاسبه بار" : "حقوق گمرکی"}
+                    <span className="mt-1 block text-[11px] font-medium leading-5 text-slate-500 sm:text-xs">
+                      {selected ? "باز است · برای بستن دوباره بزنید" : t.hint}
                     </span>
+                  </span>
+                  <span
+                    dir="ltr"
+                    className={`shrink-0 rounded-lg px-2 py-1 font-mono text-[10px] font-bold tracking-wide sm:text-[11px] ${
+                      selected ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
+                    }`}
+                  >
+                    {t.short}
                   </span>
                 </button>
               );
@@ -289,7 +302,7 @@ export default function TradeToolsPanel({ className = "" }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <h3 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">{active.title}</h3>
+                    <h3 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">{active.panelTitle}</h3>
                     <button
                       type="button"
                       onClick={() => setGuideOpen(true)}

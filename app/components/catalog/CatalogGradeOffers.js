@@ -377,7 +377,6 @@ export default function CatalogGradeOffers({
         lot={activeLot}
         showMedia={false}
         embedded={embeddedLayout}
-        fillHeight={embeddedLayout}
         {...cardProps}
       />
     ) : null;
@@ -398,39 +397,42 @@ export default function CatalogGradeOffers({
   return (
     <section className="space-y-0 lg:space-y-0" id="catalog-grade-offers">
       {/* موبایل */}
-      <div className="-mx-3 flex flex-col gap-0 overflow-hidden border-y border-slate-200 bg-white lg:hidden">
+      <div className="-mx-3 flex flex-col gap-0 border-y border-slate-200 bg-slate-50 lg:hidden">
         {inventorySummary ? (
-          <CatalogInventoryOverview
-            summary={inventorySummary}
-            language={language}
-            productUnit={productUnit}
-            orderMsg={orderMsg}
-            orderMsgType={orderMsgType}
-          />
-        ) : null}
-
-        <div className="border-b border-slate-100 bg-white px-4 py-2">
-          {showTabs ? (
-            <GradeTabsRow
-              groups={groups}
-              displayGrade={displayGrade}
+          <div className="border-b border-slate-200 bg-white">
+            <CatalogInventoryOverview
+              summary={inventorySummary}
               language={language}
-              unitLabel={unitLabel}
-              onActiveGradeChange={onActiveGradeChange}
-              t={t}
-              tabsRef={tabsRef}
-              scrollable
+              productUnit={productUnit}
+              orderMsg={orderMsg}
+              orderMsgType={orderMsgType}
             />
-          ) : null}
-        </div>
-
-        {supplierTabsProps ? (
-          <div className="border-b border-slate-100 bg-white px-4 py-2">
-            <SupplierTabsRow {...supplierTabsProps} />
           </div>
         ) : null}
 
-        {mediaPanelBaseProps ? <CatalogGradeMediaPanel key={mediaPanelKey} {...mediaPanelBaseProps} /> : null}
+        {(showTabs || supplierTabsProps) ? (
+          <div className="space-y-2 border-b border-slate-200 bg-white px-4 py-2">
+            {showTabs ? (
+              <GradeTabsRow
+                groups={groups}
+                displayGrade={displayGrade}
+                language={language}
+                unitLabel={unitLabel}
+                onActiveGradeChange={onActiveGradeChange}
+                t={t}
+                tabsRef={tabsRef}
+                scrollable
+              />
+            ) : null}
+            {supplierTabsProps ? <SupplierTabsRow {...supplierTabsProps} /> : null}
+          </div>
+        ) : null}
+
+        {mediaPanelBaseProps ? (
+          <div className="border-b border-slate-200 bg-white p-3">
+            <CatalogGradeMediaPanel key={mediaPanelKey} {...mediaPanelBaseProps} />
+          </div>
+        ) : null}
 
         {cartTotalQty > 0 ? (
           <div className={`mx-3 mt-3 flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm ${catalogBadge.warning}`}>
@@ -446,86 +448,81 @@ export default function CatalogGradeOffers({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3 px-0 pb-3 pt-2">
-          {renderActiveLotCard(false)}
+        <div className="flex flex-col gap-3 p-3 pb-4">
+          {renderActiveLotCard(true)}
         </div>
 
-        {hasDescription ? <div className="border-t border-slate-100 px-3 py-3">{descriptionBlock}</div> : null}
+        {hasDescription ? <div className="border-t border-slate-200 bg-white px-3 py-3">{descriptionBlock}</div> : null}
 
-        {hasLocation ? <div className="border-t border-slate-100">{locationBlockMobile}</div> : null}
+        {hasLocation ? <div className="border-t border-slate-200 bg-white">{locationBlockMobile}</div> : null}
       </div>
 
       {/* دسکتاپ */}
-      <div className={`hidden lg:block ${catalogSurface.card} overflow-hidden`}>
+      <div className="hidden lg:block space-y-4">
         {inventorySummary ? (
-          <CatalogInventoryOverview
-            summary={inventorySummary}
-            language={language}
-            productUnit={productUnit}
-            orderMsg={orderMsg}
-            orderMsgType={orderMsgType}
-          />
-        ) : null}
-
-        {showTabs ? (
-          <div className="border-b border-slate-100 px-6 py-3">
-            <GradeTabsRow
-              groups={groups}
-              displayGrade={displayGrade}
+          <div className={`${catalogSurface.card} overflow-hidden`}>
+            <CatalogInventoryOverview
+              summary={inventorySummary}
               language={language}
-              unitLabel={unitLabel}
-              onActiveGradeChange={onActiveGradeChange}
-              t={t}
-              tabsRef={tabsRef}
-              size="compact"
+              productUnit={productUnit}
+              orderMsg={orderMsg}
+              orderMsgType={orderMsgType}
             />
           </div>
         ) : null}
 
-        {supplierTabsProps ? (
-          <div className="border-b border-slate-100 px-6 py-3">
-            <SupplierTabsRow {...supplierTabsProps} size="compact" />
+        {showTabs || supplierTabsProps ? (
+          <div className={`${catalogSurface.card} space-y-3 px-6 py-4`}>
+            {showTabs ? (
+              <GradeTabsRow
+                groups={groups}
+                displayGrade={displayGrade}
+                language={language}
+                unitLabel={unitLabel}
+                onActiveGradeChange={onActiveGradeChange}
+                t={t}
+                tabsRef={tabsRef}
+                size="compact"
+              />
+            ) : null}
+            {supplierTabsProps ? <SupplierTabsRow {...supplierTabsProps} size="compact" /> : null}
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-6 p-6">
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] xl:items-stretch">
-            <div className="flex min-h-0 min-w-0">
-              {mediaPanelBaseProps ? (
-                <CatalogGradeMediaPanel
-                  key={mediaPanelKey}
-                  {...mediaPanelBaseProps}
-                  aspectClass="aspect-[4/3] w-full"
-                  className="h-full w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm"
-                />
-              ) : null}
-            </div>
-
-            <div className="flex h-full min-h-0 min-w-0 flex-col gap-4">
-              {cartTotalQty > 0 ? (
-                <div className={`flex shrink-0 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm ${catalogBadge.warning}`}>
-                  <span className="leading-snug">
-                    {t("youHaveInCart", {
-                      quantity: cartTotalQty.toFixed(3),
-                      unit: localizeUnit(cartUnit || "", language),
-                    })}
-                  </span>
-                  <Link href="/cart" className={`shrink-0 font-semibold underline underline-offset-2 ${catalogText.accentStrong}`}>
-                    {t("viewCart")}
-                  </Link>
-                </div>
-              ) : null}
-
-              <div className="flex min-h-0 flex-1 flex-col">
-                {renderActiveLotCard(true)}
-              </div>
-            </div>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(280px,420px)_minmax(0,1fr)] xl:items-start">
+          <div className="min-w-0">
+            {mediaPanelBaseProps ? (
+              <CatalogGradeMediaPanel
+                key={mediaPanelKey}
+                {...mediaPanelBaseProps}
+                aspectClass="aspect-[4/3] w-full"
+                className="w-full shadow-sm"
+              />
+            ) : null}
           </div>
 
-          {hasDescription ? <div className="w-full">{descriptionBlock}</div> : null}
+          <div className="flex min-w-0 flex-col gap-3">
+            {cartTotalQty > 0 ? (
+              <div className={`flex shrink-0 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm ${catalogBadge.warning}`}>
+                <span className="leading-snug">
+                  {t("youHaveInCart", {
+                    quantity: cartTotalQty.toFixed(3),
+                    unit: localizeUnit(cartUnit || "", language),
+                  })}
+                </span>
+                <Link href="/cart" className={`shrink-0 font-semibold underline underline-offset-2 ${catalogText.accentStrong}`}>
+                  {t("viewCart")}
+                </Link>
+              </div>
+            ) : null}
 
-          {hasLocation ? <div className="w-full">{locationBlockDesktop}</div> : null}
+            {renderActiveLotCard(true)}
+          </div>
         </div>
+
+        {hasDescription ? <div className="w-full">{descriptionBlock}</div> : null}
+
+        {hasLocation ? <div className="w-full">{locationBlockDesktop}</div> : null}
       </div>
 
       {multiSupplier && activeGroup?.lots ? (

@@ -35,7 +35,7 @@ import {
 
 function DetailRow({ label, value, highlight = false }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-slate-100 py-3 last:border-0">
+    <div className="flex items-center justify-between gap-3 border-b border-slate-100 py-2.5 last:border-0">
       <span className={`text-sm ${catalogText.muted}`}>{label}</span>
       <span className={`text-sm font-bold ${highlight ? catalogText.accentStrong : catalogText.heading}`}>{value}</span>
     </div>
@@ -86,17 +86,30 @@ function SupplierAvatar({ supplier, label }) {
       <Image
         src={avatar}
         alt={label || ""}
-        width={48}
-        height={48}
+        width={44}
+        height={44}
         unoptimized
-        className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white"
+        className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white"
       />
     );
   }
   return (
-    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-base font-bold text-white ring-2 ring-white">
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-700 text-sm font-bold text-white ring-2 ring-white">
       {initial}
     </span>
+  );
+}
+
+function SectionCard({ title, children, className = "" }) {
+  return (
+    <section className={`rounded-xl border border-slate-200 bg-white ${className}`}>
+      {title ? (
+        <header className="border-b border-slate-100 px-4 py-2.5">
+          <h3 className={`text-xs font-bold tracking-wide ${catalogText.muted}`}>{title}</h3>
+        </header>
+      ) : null}
+      <div className="px-4 py-3">{children}</div>
+    </section>
   );
 }
 
@@ -114,7 +127,6 @@ export default function CatalogLotOfferCard({
   productId,
   showMedia = true,
   embedded = false,
-  fillHeight = false,
 }) {
   const t = useTranslations("catalog");
   const auth = useAuth();
@@ -173,7 +185,11 @@ export default function CatalogLotOfferCard({
   };
 
   const revealPhone = async () => {
-    if (phone || phoneLoading) return;
+    if (phoneLoading) return;
+    if (phone) {
+      window.location.href = `tel:${String(phone).replace(/\s/g, "")}`;
+      return;
+    }
     setPhoneLoading(true);
     setPhoneError("");
     try {
@@ -184,7 +200,9 @@ export default function CatalogLotOfferCard({
       if (!res.ok || !json.success || !json.data?.phone) {
         throw new Error(json.message || t("phoneLoadError"));
       }
-      setPhone(String(json.data.phone));
+      const nextPhone = String(json.data.phone);
+      setPhone(nextPhone);
+      window.location.href = `tel:${nextPhone.replace(/\s/g, "")}`;
     } catch (e) {
       setPhoneError(e.message || t("phoneLoadError"));
     } finally {
@@ -192,82 +210,223 @@ export default function CatalogLotOfferCard({
     }
   };
 
-  const articleClass = embedded
-    ? `overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm${fillHeight ? " flex h-full min-h-0 flex-col" : ""}`
-    : `overflow-hidden ${catalogSurface.card}`;
+  const iconBtn =
+    "inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60";
 
-  const bodyClass = embedded
-    ? fillHeight
-      ? "flex min-h-0 flex-1 flex-col"
-      : ""
-    : `mx-3 mb-3 sm:mx-4 sm:mb-4 ${showMedia ? catalogSurface.card : ""}`;
-
-  const scrollableClass = fillHeight ? "min-h-0 flex-1 overflow-y-auto" : "";
-  const orderSectionClass = fillHeight ? "mt-auto shrink-0" : "";
-  const padX = embedded ? "mx-5" : "px-4";
-
-  const supplierHeader =
+  const supplierBlock =
     supplierUser && (supplier.name || messageHref || canRevealPhone || supplierProfileUrl) ? (
-      <div className={`border-b border-slate-100 bg-slate-50/80 ${embedded ? "px-5 py-4" : "px-4 py-3"}`}>
-        <div className="flex items-start gap-3">
+      <SectionCard title={t("supplier")}>
+        <div className="flex items-center gap-3">
           <SupplierAvatar supplier={supplierUser} label={supplier.label} />
           <div className="min-w-0 flex-1">
             <p className={`truncate text-base font-bold ${catalogText.heading}`}>{supplier.label}</p>
             <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{t("supplierChatHint")}</p>
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              {messageHref ? (
-                <Link
-                  href={messageHref}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700"
-                >
-                  <ChatIcon className="h-3.5 w-3.5" />
-                  {t("sendMessage")}
-                </Link>
-              ) : null}
-              {canRevealPhone ? (
-                phone ? (
-                  <a
-                    href={`tel:${String(phone).replace(/\s/g, "")}`}
-                    dir="ltr"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
-                  >
-                    <PhoneIcon className="h-3.5 w-3.5" />
-                    {phone}
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={revealPhone}
-                    disabled={phoneLoading}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-50 disabled:opacity-60"
-                    aria-label={t("showPhone")}
-                    title={t("showPhone")}
-                  >
-                    <PhoneIcon className="h-3.5 w-3.5" />
-                    {phoneLoading ? t("loadingPhone") : t("showPhone")}
-                  </button>
-                )
-              ) : null}
-              {supplierProfileUrl ? (
-                <Link
-                  href={supplierProfileUrl}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  <StoreIcon className="h-3.5 w-3.5" />
-                  {t("viewStore")}
-                </Link>
-              ) : null}
-            </div>
-            {phoneError ? <p className="mt-2 text-[11px] text-rose-600">{phoneError}</p> : null}
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {messageHref ? (
+              <Link href={messageHref} className={`${iconBtn} !border-emerald-200 !bg-emerald-50 !text-emerald-800`} title={t("sendMessage")} aria-label={t("sendMessage")}>
+                <ChatIcon className="h-4 w-4" />
+              </Link>
+            ) : null}
+            {canRevealPhone ? (
+              <button
+                type="button"
+                onClick={revealPhone}
+                disabled={phoneLoading}
+                className={`${iconBtn} !border-emerald-200 !bg-emerald-50 !text-emerald-800`}
+                aria-label={phone ? phone : t("showPhone")}
+                title={phone ? phone : t("showPhone")}
+              >
+                <PhoneIcon className="h-4 w-4" />
+              </button>
+            ) : null}
+            {supplierProfileUrl ? (
+              <Link href={supplierProfileUrl} className={iconBtn} title={t("viewStore")} aria-label={t("viewStore")}>
+                <StoreIcon className="h-4 w-4" />
+              </Link>
+            ) : null}
           </div>
         </div>
-      </div>
+        {phoneError ? <p className="mt-2 text-[11px] text-rose-600">{phoneError}</p> : null}
+      </SectionCard>
     ) : null;
 
-  return (
-    <article className={articleClass}>
-      {supplierHeader}
+  const productBlock = (
+    <SectionCard title={t("product")}>
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className={`text-xs ${catalogText.muted}`}>{t("lotGradeLabel")}</p>
+          <p className={`text-base font-bold ${catalogText.heading}`}>{customTitle || gradeLabel}</p>
+        </div>
+        <span className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${catalogStatusClass(lot.status)}`}>
+          {statusLabel}
+        </span>
+      </div>
 
+      <div className="mb-3 border-t border-slate-100 pt-3">
+        <p className={`mb-1 text-xs font-medium ${catalogText.muted}`}>{t("priceSectionTitle")}</p>
+        {lot.tieredPricing?.length > 0 ? (
+          <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
+        ) : lot.price ? (
+          <p className={`text-xl font-extrabold ${catalogText.accentStrong}`}>
+            {formatLocalizedPrice(lot.price, language, t)}
+          </p>
+        ) : (
+          <p className={`text-sm ${catalogText.muted}`}>{t("priceNotSet")}</p>
+        )}
+        {lot.minimumOrderQuantity && !lot.tieredPricing?.length ? (
+          <p className={`mt-1.5 text-xs ${catalogText.body}`}>
+            {t("minimumOrder")}: {formatQuantityWithUnit(lot.minimumOrderQuantity, language, unitLabel)}
+          </p>
+        ) : null}
+      </div>
+
+      {lotDescription ? (
+        <div className="mb-3 border-t border-slate-100 pt-3">
+          <p className={`mb-1.5 text-xs font-semibold ${catalogText.body}`}>{t("lotDescriptionTitle")}</p>
+          <p className={`whitespace-pre-wrap text-sm leading-relaxed ${catalogText.body}`}>{lotDescription}</p>
+        </div>
+      ) : null}
+
+      {Array.isArray(lotHashtags) && lotHashtags.length > 0 ? (
+        <div className="mb-3 flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
+          {lotHashtags.map((tag) => (
+            <Link
+              key={tag}
+              href={buildHashtagSearchHref(tag)}
+              className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-200"
+            >
+              #{tag}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+
+      {Array.isArray(lot.attributes) && lot.attributes.length > 0 ? (
+        <div className="border-t border-slate-100 pt-1">
+          <p className={`py-2 text-xs font-semibold ${catalogText.body}`}>{t("technicalSpecsTitle")}</p>
+          {lot.attributes.map((a) => (
+            <DetailRow key={a.id} label={a.definition?.name || `#${a.attributeDefinitionId}`} value={a.value ?? "—"} />
+          ))}
+        </div>
+      ) : null}
+
+      {(lot.packagingType || lot.hsCode || (lot.filterValues && Object.keys(lot.filterValues).length > 0)) ? (
+        <div className="border-t border-slate-100 pt-1">
+          <p className={`py-2 text-xs font-semibold ${catalogText.body}`}>{t("lotTradeDetailsTitle")}</p>
+          {lot.packagingType ? <DetailRow label={t("packagingType")} value={lot.packagingType} /> : null}
+          {lot.hsCode ? <DetailRow label={t("hsCode")} value={lot.hsCode} /> : null}
+          {lot.filterValues &&
+            Object.entries(lot.filterValues)
+              .filter(([k, v]) => v && k !== "hsCode")
+              .map(([k, v]) => (
+                <DetailRow
+                  key={k}
+                  label={(() => {
+                    try {
+                      const tr = t(`filterKeys.${k}`);
+                      return tr && tr !== `filterKeys.${k}` ? tr : k;
+                    } catch {
+                      return k;
+                    }
+                  })()}
+                  value={String(v)}
+                />
+              ))}
+        </div>
+      ) : null}
+
+      {productId ? (
+        <div className="mt-3 border-t border-slate-100 pt-3">
+          <CatalogPdfDownload
+            scope="lot"
+            productId={productId}
+            lotId={lot.id}
+            lot={lot}
+            product={product}
+            label={t("downloadSupplierCatalogPdf")}
+            compact
+            block
+            className="w-full"
+          />
+        </div>
+      ) : null}
+    </SectionCard>
+  );
+
+  const orderBlock = (
+    <SectionCard title={t("orderSectionTitle")} className="border-emerald-200/80 bg-emerald-50/30">
+      <p className={`mb-3 text-sm leading-relaxed ${catalogText.body}`}>
+        {t("orderMaxHint", {
+          quantity: formatLocalizedNumber(available, language, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 3,
+            useGrouping: false,
+          }),
+          unit: localizeUnit(lot.unit || orderUnit || "", language),
+        })}
+      </p>
+      <label className={`mb-1.5 block text-sm font-semibold ${catalogText.heading}`} htmlFor={`lot-qty-${lot.id}`}>
+        {t("orderQuantityLabel")}
+      </label>
+      <div className="mb-3 flex overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-100">
+        {unitOptions.length > 1 ? (
+          <select
+            id={`lot-unit-${lot.id}`}
+            value={orderUnit}
+            onChange={(e) => setOrderUnit(e.target.value)}
+            className={`max-w-[40%] shrink-0 border-0 border-l border-slate-200 bg-slate-50 px-2.5 py-3.5 text-sm font-semibold outline-none ${catalogText.body}`}
+          >
+            {unitOptions.map((u) => (
+              <option key={u} value={u}>
+                {localizeUnit(u, language)}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className={`flex shrink-0 items-center border-l border-slate-200 bg-slate-50 px-3 text-sm font-semibold ${catalogText.body}`}>
+            {unitLabel}
+          </span>
+        )}
+        <input
+          id={`lot-qty-${lot.id}`}
+          type="text"
+          inputMode="decimal"
+          dir="ltr"
+          className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3.5 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+          placeholder={t("qtyPlaceholder")}
+          value={formatQuantityForInput(lotQtyById[lot.id] ?? "", language)}
+          onChange={(e) =>
+            setLotQtyById((prev) => ({
+              ...prev,
+              [lot.id]: parseLocalizedNumberInput(e.target.value),
+            }))
+          }
+        />
+      </div>
+      <button
+        type="button"
+        className={catalogBtn.primaryBlock}
+        disabled={placingLotId === lot.id}
+        onClick={() => onAddToCart(lot, orderUnit)}
+      >
+        {placingLotId === lot.id ? "…" : t("addToCartAction")}
+      </button>
+    </SectionCard>
+  );
+
+  if (embedded) {
+    return (
+      <div className="flex flex-col gap-3">
+        {supplierBlock}
+        {productBlock}
+        {orderBlock}
+      </div>
+    );
+  }
+
+  return (
+    <article className={`overflow-hidden ${catalogSurface.card}`}>
       {showMedia && slides.length > 0 ? (
         <CatalogMediaSlider
           slides={slides}
@@ -275,207 +434,12 @@ export default function CatalogLotOfferCard({
           onSlideTap={openAt}
           expandAriaLabel={t("viewGallery")}
           cornerTopStart={<GradeMediaBadge>{gradeLabel}</GradeMediaBadge>}
-          cornerBottomEnd={
-            <div>
-              <p className="text-[10px] font-semibold text-green-300">{t("gradeMediaBadge")}</p>
-              <p className="text-base font-bold leading-snug text-white drop-shadow-md">{gradeLabel}</p>
-            </div>
-          }
         />
-      ) : showMedia ? (
-        <div className="border-b border-slate-200 bg-slate-50 px-4 py-4">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <p className={`text-xs ${catalogText.muted}`}>{t("lotGradeLabel")}</p>
-              <p className={`text-lg font-bold ${catalogText.heading}`}>{gradeLabel}</p>
-            </div>
-            <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${catalogStatusClass(lot.status)}`}>
-              {statusLabel}
-            </span>
-          </div>
-        </div>
       ) : null}
-
-      <div className={bodyClass}>
-        <div className={scrollableClass}>
-          <div className={embedded ? "p-5 pb-0" : "px-4 py-1"}>
-            {customTitle ? (
-              <div className={`border-b border-slate-100 ${embedded ? "pb-3" : "py-3"}`}>
-                <p className={`text-base font-bold leading-snug ${catalogText.heading}`}>{customTitle}</p>
-              </div>
-            ) : null}
-            <div className={`border-b border-slate-100 ${embedded ? "pb-4" : "py-3"}`}>
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <p className={`font-medium ${embedded ? "text-sm" : "text-xs"} ${catalogText.muted}`}>
-                  {t("priceSectionTitle")}
-                </p>
-                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${catalogStatusClass(lot.status)}`}>
-                  {statusLabel}
-                </span>
-              </div>
-              {lot.tieredPricing?.length > 0 ? (
-                <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
-              ) : lot.price ? (
-                <p className={`text-xl font-extrabold ${catalogText.accentStrong}`}>
-                  {formatLocalizedPrice(lot.price, language, t)}
-                </p>
-              ) : (
-                <p className={`text-sm ${catalogText.muted}`}>{t("priceNotSet")}</p>
-              )}
-              {lot.minimumOrderQuantity && !lot.tieredPricing?.length ? (
-                <p className={`mt-1.5 text-xs ${catalogText.body}`}>
-                  {t("minimumOrder")}: {formatQuantityWithUnit(lot.minimumOrderQuantity, language, unitLabel)}
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          {lotDescription ? (
-            <div className={`border-t border-slate-100 ${padX} py-3`}>
-              <p className={`mb-2 text-xs font-semibold ${catalogText.body}`}>{t("lotDescriptionTitle")}</p>
-              <p className={`whitespace-pre-wrap text-sm leading-relaxed ${catalogText.body}`}>{lotDescription}</p>
-            </div>
-          ) : null}
-
-          {Array.isArray(lotHashtags) && lotHashtags.length > 0 ? (
-            <div className={`flex flex-wrap gap-1.5 border-t border-slate-100 ${padX} py-3`}>
-              {lotHashtags.map((tag) => (
-                <Link
-                  key={tag}
-                  href={buildHashtagSearchHref(tag)}
-                  className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 transition hover:bg-emerald-100 hover:text-emerald-950"
-                >
-                  #{tag}
-                </Link>
-              ))}
-            </div>
-          ) : null}
-
-          {Array.isArray(lot.attributes) && lot.attributes.length > 0 ? (
-            <div className={`border-t border-slate-100 ${padX} py-1`}>
-              <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("technicalSpecsTitle")}</p>
-              {lot.attributes.map((a) => (
-                <DetailRow
-                  key={a.id}
-                  label={a.definition?.name || `#${a.attributeDefinitionId}`}
-                  value={a.value ?? "—"}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          {(lot.packagingType || lot.hsCode || (lot.filterValues && Object.keys(lot.filterValues).length > 0)) ? (
-            <div className={`border-t border-slate-100 ${padX} py-1`}>
-              <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("lotTradeDetailsTitle")}</p>
-              {lot.packagingType ? <DetailRow label={t("packagingType")} value={lot.packagingType} /> : null}
-              {lot.hsCode ? <DetailRow label={t("hsCode")} value={lot.hsCode} /> : null}
-              {lot.filterValues &&
-                Object.entries(lot.filterValues)
-                  .filter(([k, v]) => v && k !== "hsCode")
-                  .map(([k, v]) => (
-                    <DetailRow
-                      key={k}
-                      label={(() => {
-                        try {
-                          const tr = t(`filterKeys.${k}`);
-                          return tr && tr !== `filterKeys.${k}` ? tr : k;
-                        } catch {
-                          return k;
-                        }
-                      })()}
-                      value={String(v)}
-                    />
-                  ))}
-            </div>
-          ) : null}
-
-          {productId ? (
-            <div className={`border-t border-slate-100 ${padX} py-3`}>
-              <CatalogPdfDownload
-                scope="lot"
-                productId={productId}
-                lotId={lot.id}
-                lot={lot}
-                product={product}
-                label={t("downloadSupplierCatalogPdf")}
-                compact
-                block
-                className="w-full"
-              />
-            </div>
-          ) : null}
-        </div>
-
-        <div
-          className={`border-t border-green-200 bg-gradient-to-b from-green-50/90 to-white ${
-            embedded ? "mx-0 mt-0 rounded-b-xl px-5 py-5" : "px-4 py-4"
-          } ${orderSectionClass}`}
-        >
-          <p className={`mb-3 text-sm font-bold ${catalogText.accentStrong}`}>{t("orderSectionTitle")}</p>
-          <p className={`mb-3 text-sm leading-relaxed ${catalogText.body}`}>
-            {t("orderMaxHint", {
-              quantity: formatLocalizedNumber(available, language, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 3,
-                useGrouping: false,
-              }),
-              unit: localizeUnit(lot.unit || orderUnit || "", language),
-            })}
-          </p>
-          <label className={`mb-1.5 block text-sm font-semibold ${catalogText.heading}`} htmlFor={`lot-qty-${lot.id}`}>
-            {t("orderQuantityLabel")}
-          </label>
-          <div className="mb-3 flex overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-green-600 focus-within:ring-2 focus-within:ring-green-100">
-            {unitOptions.length > 1 ? (
-              <label className="sr-only" htmlFor={`lot-unit-${lot.id}`}>
-                {t("orderUnitLabel")}
-              </label>
-            ) : null}
-            {unitOptions.length > 1 ? (
-              <select
-                id={`lot-unit-${lot.id}`}
-                value={orderUnit}
-                onChange={(e) => setOrderUnit(e.target.value)}
-                className={`max-w-[40%] shrink-0 border-0 border-l border-slate-200 bg-slate-50 px-2.5 py-3.5 text-sm font-semibold outline-none ${catalogText.body}`}
-              >
-                {unitOptions.map((u) => (
-                  <option key={u} value={u}>
-                    {localizeUnit(u, language)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                className={`flex shrink-0 items-center border-l border-slate-200 bg-slate-50 px-3 text-sm font-semibold ${catalogText.body}`}
-              >
-                {unitLabel}
-              </span>
-            )}
-            <input
-              id={`lot-qty-${lot.id}`}
-              type="text"
-              inputMode="decimal"
-              dir="ltr"
-              className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3.5 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
-              placeholder={t("qtyPlaceholder")}
-              value={formatQuantityForInput(lotQtyById[lot.id] ?? "", language)}
-              onChange={(e) =>
-                setLotQtyById((prev) => ({
-                  ...prev,
-                  [lot.id]: parseLocalizedNumberInput(e.target.value),
-                }))
-              }
-            />
-          </div>
-          <button
-            type="button"
-            className={catalogBtn.primaryBlock}
-            disabled={placingLotId === lot.id}
-            onClick={() => onAddToCart(lot, orderUnit)}
-          >
-            {placingLotId === lot.id ? "…" : t("addToCartAction")}
-          </button>
-        </div>
+      <div className="space-y-3 p-3 sm:p-4">
+        {supplierBlock}
+        {productBlock}
+        {orderBlock}
       </div>
     </article>
   );
