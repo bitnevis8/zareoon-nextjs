@@ -36,6 +36,29 @@ const MOBILE_QUICK_LINKS = [
   { href: "/about", key: "about" },
 ];
 
+const DEVELOPER_URL = "https://pourdian.com";
+const DEVELOPER_LABEL = "Pourdian.com";
+
+function DeveloperCredit({ className = "", compact = false }) {
+  return (
+    <p className={className}>
+      <span className="text-slate-400">{compact ? "توسعه" : "طراحی و توسعه"}</span>
+      <span className="mx-1 text-slate-300" aria-hidden>
+        ·
+      </span>
+      <a
+        href={DEVELOPER_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold text-slate-600 transition hover:text-emerald-700"
+        dir="ltr"
+      >
+        {DEVELOPER_LABEL}
+      </a>
+    </p>
+  );
+}
+
 export default function Footer({ className = "" }) {
   const { t, language } = useLanguage();
   const legalT = useTranslations("legal");
@@ -89,10 +112,7 @@ export default function Footer({ className = "" }) {
           ))}
         </nav>
 
-        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
-          <p className="min-w-0 text-[9px] leading-4 text-slate-400">
-            © {displayYear} {t("siteName")}
-          </p>
+        <div className="mt-2.5 flex justify-center border-t border-slate-100 pt-2.5">
           <EnamadSeal className="shrink-0 [&_img]:h-9 [&_img]:w-auto" />
         </div>
 
@@ -138,6 +158,13 @@ export default function Footer({ className = "" }) {
             </div>
           </div>
         ) : null}
+
+        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
+          <p className="min-w-0 text-[9px] leading-4 text-slate-400">
+            © {displayYear} {t("siteName")}
+          </p>
+          <DeveloperCredit compact className="shrink-0 text-[9px] leading-4" />
+        </div>
       </div>
 
       {/* —— دسکتاپ: بدون تغییر چیدمان —— */}
@@ -210,14 +237,17 @@ export default function Footer({ className = "" }) {
                 </Link>
               ))}
             </nav>
+            <div className="pt-1">
+              <EnamadSeal className="shrink-0" />
+            </div>
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 sm:mt-6">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-slate-100 pt-4 sm:mt-6">
           <p className="min-w-0 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
             © {displayYear} {t("siteName")}. {t("allRightsReserved")}
           </p>
-          <EnamadSeal className="shrink-0" />
+          <DeveloperCredit className="text-[11px] leading-relaxed sm:text-xs" />
         </div>
       </div>
     </footer>

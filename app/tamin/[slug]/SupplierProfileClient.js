@@ -152,7 +152,9 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
         hint: t("profile.tradeScoreHint"),
       },
       { label: t("profile.followers"), value: stats.followerCount?.toLocaleString("fa-IR") },
+      { label: t("profile.followingCount"), value: (stats.followingCount ?? 0).toLocaleString("fa-IR") },
       { label: t("profile.activeProducts"), value: stats.productCount?.toLocaleString("fa-IR") },
+      { label: t("profile.postsCount"), value: (stats.postsCount ?? 0).toLocaleString("fa-IR") },
       { label: t("profile.completedDeals"), value: stats.completedDeals?.toLocaleString("fa-IR") },
     ];
   }, [data, t]);

@@ -9,7 +9,6 @@ import {
   DashAction,
   DashActionGrid,
   DashEmpty,
-  DashHero,
   DashKpi,
   DashKpiGrid,
   DashListCard,
@@ -64,13 +63,6 @@ export default function ApplicantDashboardHome({ user }) {
 
   return (
     <DashPage>
-      <DashHero
-        tone="sky"
-        badge={t("badge")}
-        title={t("title", { name: user?.firstName || "" })}
-        subtitle={t("subtitle")}
-      />
-
       <DashKpiGrid>
         <DashKpi label={t("kpi.requests")} value={requests.length} hint={t("kpi.openHint", { count: openRequests })} href="/dashboard/applicant-requests" tone="sky" />
         <DashKpi label={t("kpi.cart")} value={cartCount} href="/cart" tone="emerald" />

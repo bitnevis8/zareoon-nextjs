@@ -44,9 +44,13 @@ const PROVIDER_ACTIONS = [
 
 function StatCell({ label, value }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center justify-center px-1">
-      <span className="text-base font-extrabold tabular-nums text-slate-900">{value}</span>
-      <span className="mt-0.5 text-[11px] font-medium text-slate-500">{label}</span>
+    <div className="flex min-w-0 flex-col items-center justify-center px-0.5 py-1">
+      <span className="text-sm font-extrabold tabular-nums leading-none text-slate-900 sm:text-base lg:text-lg">
+        {value}
+      </span>
+      <span className="mt-1 max-w-full truncate whitespace-nowrap text-[9px] font-medium leading-none text-slate-500 sm:text-[10px] lg:text-[11px]">
+        {label}
+      </span>
     </div>
   );
 }
@@ -109,6 +113,24 @@ function SetupCard({ href, title, hint }) {
   );
 }
 
+function resolveLotDisplayName(lot, language, fallback) {
+  const dc = lot?.displayContent;
+  if (dc && typeof dc === "object") {
+    const preferred = [language, "fa", "en", "ar", "tr", "ru", "ur", "es", "nl", "fi"];
+    for (const code of preferred) {
+      const title = dc[code]?.title;
+      if (title && String(title).trim()) return String(title).trim();
+    }
+  }
+  const product = lot?.product || lot?.Product || {};
+  return (
+    getLocalizedText(product, language) ||
+    product.name ||
+    (lot?.englishName && String(lot.englishName).trim()) ||
+    fallback
+  );
+}
+
 function SellerProductsStrip({ lots, language, t, loading }) {
   if (loading) {
     return (
@@ -137,9 +159,11 @@ function SellerProductsStrip({ lots, language, t, loading }) {
   return (
     <div className="mt-3 grid grid-cols-3 gap-2">
       {lots.slice(0, 9).map((lot) => {
+        const name = resolveLotDisplayName(lot, language, t("productFallback"));
         const product = lot.product || lot.Product || {};
-        const name = getLocalizedText(product, language) || product.name || t("productFallback");
-        const img = resolveMediaUrl(product.imageUrl || product.image || lot.imageUrl);
+        const img = resolveMediaUrl(
+          lot.coverImageUrl || product.imageUrl || product.image || lot.imageUrl
+        );
         return (
           <Link
             key={lot.id}
@@ -175,7 +199,7 @@ export default function MobileDashboardHome() {
   const dedicatedDisplayUrl = hasSlug && slug ? providerPublicDisplayUrl(slug) : null;
 
   const [bioOpen, setBioOpen] = useState(false);
-  const [stats, setStats] = useState({ products: 0, followers: 0, following: 0 });
+  const [stats, setStats] = useState({ products: 0, followers: 0, following: 0, posts: 0 });
   const [lots, setLots] = useState([]);
   const [lotsLoading, setLotsLoading] = useState(false);
   const [sellerMenu, setSellerMenu] = useState("products");
@@ -214,6 +238,7 @@ export default function MobileDashboardHome() {
         let followers = 0;
         let following = 0;
         let products = 0;
+        let posts = 0;
 
         if (statsRes?.ok) {
           const statsJson = await statsRes.json();
@@ -221,6 +246,7 @@ export default function MobileDashboardHome() {
           followers = Number(data.followerCount) || 0;
           following = Number(data.followingCount) || 0;
           products = Number(data.productCount) || 0;
+          posts = Number(data.postsCount) || 0;
         }
 
         if (lotsRes?.ok) {
@@ -234,9 +260,9 @@ export default function MobileDashboardHome() {
           }
         }
 
-        if (!cancelled) setStats({ products, followers, following });
+        if (!cancelled) setStats({ products, followers, following, posts });
       } catch {
-        if (!cancelled) setStats({ products: 0, followers: 0, following: 0 });
+        if (!cancelled) setStats({ products: 0, followers: 0, following: 0, posts: 0 });
       }
     })();
     return () => {
@@ -278,80 +304,82 @@ export default function MobileDashboardHome() {
   const rolesDisplay = bioOpen || !rolesNeedMore ? rolesLine : `${roleLabels.slice(0, 2).join(" | ")}${roleLabels.length > 2 ? " | …" : ""}`;
 
   return (
-    <div className="md:hidden" dir={isRTL ? "rtl" : "ltr"}>
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-4">
+    <div className="w-full" dir={isRTL ? "rtl" : "ltr"}>
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6 lg:gap-8">
           <Link
             href="/dashboard/account"
-            className="relative h-[4.75rem] w-[4.75rem] shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100"
+            className="relative mx-auto h-[4.75rem] w-[4.75rem] shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100 sm:mx-0 sm:h-24 sm:w-24 lg:h-28 lg:w-28"
             aria-label={t("editProfile")}
           >
             {avatarUrl ? (
-              <Image src={avatarUrl} alt="" fill unoptimized className="object-cover" sizes="76px" />
+              <Image src={avatarUrl} alt="" fill unoptimized className="object-cover" sizes="112px" />
             ) : (
-              <span className="flex h-full w-full items-center justify-center text-2xl font-black text-slate-500">
+              <span className="flex h-full w-full items-center justify-center text-2xl font-black text-slate-500 sm:text-3xl">
                 {initial}
               </span>
             )}
           </Link>
-          <div className="flex min-w-0 flex-1 items-stretch justify-around">
-            <StatCell label={t("stats.products")} value={fmt(stats.products)} />
+
+          <div className="min-w-0 flex-1 text-center sm:text-start">
+            <p className="text-base font-extrabold text-slate-900 sm:text-lg lg:text-xl">{displayName}</p>
+            {phone ? (
+              <p className="mt-1 text-[13px] tabular-nums text-slate-600 sm:text-sm" dir="ltr">
+                {formatLocalizedDigits(phone, language)}
+              </p>
+            ) : null}
+            {rolesLine ? (
+              <div className="mt-1.5">
+                <p className="text-[12px] font-medium leading-5 text-slate-500 sm:text-[13px]">{rolesDisplay}</p>
+                {rolesNeedMore ? (
+                  <button
+                    type="button"
+                    onClick={() => setBioOpen((v) => !v)}
+                    className="mt-0.5 text-[12px] font-bold text-slate-500"
+                  >
+                    {bioOpen ? t("bioLess") : t("bioMore")}
+                  </button>
+                ) : null}
+              </div>
+            ) : !phone ? (
+              <p className="mt-1 text-[13px] text-slate-500">{t("bioEmpty")}</p>
+            ) : null}
+
+            {dedicatedDisplayUrl && publicPath ? (
+              <Link
+                href={publicPath}
+                className="mt-2.5 inline-flex max-w-full items-center gap-1.5 text-emerald-800 transition hover:text-emerald-950"
+                dir="ltr"
+              >
+                <svg className="h-3.5 w-3.5 shrink-0 text-emerald-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a.75.75 0 001.061 1.06l3-3z" />
+                  <path d="M11.603 7.963a.75.75 0 00-1.061-1.06l-3 3a4 4 0 105.656 5.656l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a2.5 2.5 0 11-3.536-3.536l3-3z" />
+                </svg>
+                <span className="min-w-0 truncate text-[13px] font-semibold tabular-nums tracking-tight sm:text-sm">
+                  {dedicatedDisplayUrl}
+                </span>
+              </Link>
+            ) : null}
+
+            <Link
+              href="/dashboard/account"
+              className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-[13px] font-bold text-emerald-900 transition hover:bg-emerald-100 sm:mt-3.5 sm:w-auto"
+            >
+              {t("editProfile")}
+            </Link>
+          </div>
+
+          <div className="grid w-full grid-cols-4 gap-1 rounded-2xl border border-slate-100 bg-slate-50/80 p-2 sm:max-w-md sm:shrink-0 sm:gap-2 sm:p-3 lg:max-w-lg">
             <StatCell label={t("stats.followers")} value={fmt(stats.followers)} />
             <StatCell label={t("stats.following")} value={fmt(stats.following)} />
+            <StatCell label={t("stats.products")} value={fmt(stats.products)} />
+            <StatCell label={t("stats.posts")} value={fmt(stats.posts)} />
           </div>
         </div>
-
-        {dedicatedDisplayUrl && publicPath ? (
-          <Link
-            href={publicPath}
-            className="mt-2.5 flex min-w-0 items-center gap-1.5 rounded-xl border border-emerald-100 bg-emerald-50/70 px-2.5 py-1.5 text-emerald-800 transition hover:bg-emerald-50"
-            dir="ltr"
-          >
-            <svg className="h-3.5 w-3.5 shrink-0 text-emerald-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-              <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a.75.75 0 001.061 1.06l3-3z" />
-              <path d="M11.603 7.963a.75.75 0 00-1.061-1.06l-3 3a4 4 0 105.656 5.656l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a2.5 2.5 0 11-3.536-3.536l3-3z" />
-            </svg>
-            <span className="min-w-0 truncate text-[11px] font-semibold tabular-nums tracking-tight">
-              {dedicatedDisplayUrl}
-            </span>
-          </Link>
-        ) : null}
-
-        <div className="mt-3">
-          <p className="text-sm font-extrabold text-slate-900">{displayName}</p>
-          {phone ? (
-            <p className="mt-1 text-[13px] tabular-nums text-slate-600" dir="ltr">
-              {formatLocalizedDigits(phone, language)}
-            </p>
-          ) : null}
-          {rolesLine ? (
-            <div className="mt-1.5">
-              <p className="text-[12px] font-medium leading-5 text-slate-500">{rolesDisplay}</p>
-              {rolesNeedMore ? (
-                <button
-                  type="button"
-                  onClick={() => setBioOpen((v) => !v)}
-                  className="mt-0.5 text-[12px] font-bold text-slate-500"
-                >
-                  {bioOpen ? t("bioLess") : t("bioMore")}
-                </button>
-              ) : null}
-            </div>
-          ) : !phone ? (
-            <p className="mt-1 text-[13px] text-slate-500">{t("bioEmpty")}</p>
-          ) : null}
-        </div>
-
-        <Link
-          href="/dashboard/account"
-          className="mt-3.5 flex min-h-10 w-full items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-[13px] font-bold text-emerald-900 transition hover:bg-emerald-100"
-        >
-          {t("editProfile")}
-        </Link>
       </section>
 
       <div
-        className="mt-3 grid grid-cols-3 gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm"
+        className="mt-3 grid grid-cols-3 gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm sm:mt-4 sm:gap-1.5 sm:p-1.5"
         role="tablist"
         aria-label={t("tabsAria")}
       >
@@ -362,7 +390,7 @@ export default function MobileDashboardHome() {
             role="tab"
             aria-selected={tab.active}
             onClick={() => setPersona(tab.id)}
-            className={`rounded-xl px-2 py-2.5 text-[12px] font-bold transition ${
+            className={`rounded-xl px-2 py-2.5 text-[12px] font-bold transition sm:min-h-12 sm:text-sm ${
               tab.active ? "bg-emerald-700 text-white shadow-sm" : "text-slate-600 hover:bg-slate-50"
             }`}
           >
@@ -371,7 +399,7 @@ export default function MobileDashboardHome() {
         ))}
       </div>
 
-      <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3.5 shadow-sm">
+      <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3.5 shadow-sm sm:mt-4 sm:p-5">
         {isApplicantView ? (
           <ActionIconGrid items={BUYER_ACTIONS} t={t} />
         ) : null}

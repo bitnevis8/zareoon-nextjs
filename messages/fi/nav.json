@@ -32,6 +32,7 @@
     "settings": "",
     "siteSettings": "",
     "siteLanguages": "",
+    "cacheRedis": "",
     "blockedPageNames": "",
     "slugAliases": "",
     "publicPages": ""

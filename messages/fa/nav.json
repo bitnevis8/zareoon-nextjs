@@ -33,6 +33,7 @@
     "settings": "تنظیمات خدمات سامانه",
     "siteSettings": "تنظیمات سایت",
     "siteLanguages": "زبان‌های سایت",
+    "cacheRedis": "کش و Redis",
     "blockedPageNames": "اسامی غیرمجاز صفحه",
     "slugAliases": "آدرس‌های رزرو",
     "publicPages": "صفحات عمومی سامانه"

@@ -232,7 +232,7 @@ function SupplierAccountEditor() {
           {publicUrl ? (
             <Link
               href={publicUrl}
-              className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline"
+              className="mt-2 inline-flex items-center gap-1.5 text-[15px] font-semibold text-emerald-700 hover:underline"
               dir="ltr"
             >
               <IconLink className="h-4 w-4" />

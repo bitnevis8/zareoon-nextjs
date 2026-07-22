@@ -12,7 +12,6 @@ import {
   DashAction,
   DashActionGrid,
   DashEmpty,
-  DashHero,
   DashKpi,
   DashKpiGrid,
   DashLoading,
@@ -57,13 +56,6 @@ export default function TradeServicesDashboardHome({ user }) {
 
   return (
     <DashPage>
-      <DashHero
-        tone="violet"
-        badge={t("badge")}
-        title={t("title", { name: user?.firstName || "" })}
-        subtitle={hasProvider ? t("subtitleMember", { name: provider?.displayName || "" }) : t("subtitleGuest")}
-      />
-
       {!hasProvider ? (
         <>
           <ServiceProviderOnboardingIntro

@@ -80,7 +80,8 @@
     "stats": {
       "products": "Products",
       "followers": "Followers",
-      "following": "Following"
+      "following": "Following",
+      "posts": "Posts"
     },
     "bioMore": "more",
     "bioLess": "less",

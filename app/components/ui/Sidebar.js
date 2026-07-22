@@ -62,6 +62,7 @@ function useSidebarMenus() {
           title: t('admin.siteSettings'),
           submenu: [
             { title: t('admin.siteLanguages'), path: '/dashboard/site-settings/languages', icon: 'settings' },
+            { title: t('admin.cacheRedis'), path: '/dashboard/site-settings/cache-redis', icon: 'settings' },
             { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'list' },
             { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'list' },
             { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'home' },

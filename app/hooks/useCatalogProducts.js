@@ -48,7 +48,36 @@ const swrDefaults = {
 };
 
 const FULL_LITE_KEY = catalogUrl({ lite: true });
-const LOTS_KEY = API_ENDPOINTS.supplier.inventoryLots.getAll;
+
+/** URL موجودی با فیلتر/صفحه — برای جلوگیری از dump کامل جدول */
+export function inventoryLotsUrl(params = {}) {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params || {})) {
+    if (v === undefined || v === null || v === "") continue;
+    qs.set(k, String(v));
+  }
+  const s = qs.toString();
+  return s
+    ? `${API_ENDPOINTS.supplier.inventoryLots.getAll}?${s}`
+    : API_ENDPOINTS.supplier.inventoryLots.getAll;
+}
+
+/** پیش‌فرض مرور عمومی: فقط موجودی فعال، سبک */
+const DEFAULT_PUBLIC_LOTS_PARAMS = {
+  status: "harvested,reserved",
+  lite: "1",
+};
+
+const LOTS_KEY = inventoryLotsUrl(DEFAULT_PUBLIC_LOTS_PARAMS);
+
+/** فید صفحه اصلی — کم‌حجم و مرتب‌شده */
+export const HOMEPAGE_LOTS_PARAMS = {
+  public: "1",
+  available: "1",
+  lite: "1",
+  limit: "100",
+  order: "updated_at",
+};
 
 function childrenKey(parentId) {
   return catalogUrl({ parentId, lite: true });
@@ -117,8 +146,9 @@ export function useFullCatalog({ enabled = true, ...options } = {}) {
   };
 }
 
-export function useInventoryLots({ enabled = true, ...options } = {}) {
-  const key = enabled ? LOTS_KEY : null;
+export function useInventoryLots({ enabled = true, params, ...options } = {}) {
+  const resolved = params === undefined ? DEFAULT_PUBLIC_LOTS_PARAMS : params;
+  const key = enabled ? inventoryLotsUrl(resolved) : null;
   const { data, error, isLoading, isValidating, mutate: revalidate } = useSWR(key, jsonFetcher, {
     ...swrDefaults,
     revalidateIfStale: false,
@@ -151,8 +181,8 @@ export function prefetchFullCatalogLite() {
   return preload(FULL_LITE_KEY, jsonFetcher);
 }
 
-export function prefetchInventoryLots() {
-  return preload(LOTS_KEY, jsonFetcher);
+export function prefetchInventoryLots(params) {
+  return preload(inventoryLotsUrl(params === undefined ? DEFAULT_PUBLIC_LOTS_PARAMS : params), jsonFetcher);
 }
 
 export async function seedProductCache(product) {
@@ -237,7 +267,11 @@ export async function runSiteCatalogWarmup({ cancelled } = {}) {
   );
   if (isCancelled()) return;
 
-  await Promise.allSettled([prefetchFullCatalogLite(), prefetchInventoryLots()]);
+  await Promise.allSettled([
+    prefetchFullCatalogLite(),
+    prefetchInventoryLots(HOMEPAGE_LOTS_PARAMS),
+    prefetchInventoryLots(DEFAULT_PUBLIC_LOTS_PARAMS),
+  ]);
 }
 
 export function useSiteCatalogWarmup() {
@@ -277,4 +311,4 @@ export function useBackgroundCatalogWarmup(roots = []) {
   }, [roots]);
 }
 
-export { catalogUrl, childrenKey, FULL_LITE_KEY, jsonFetcher, productFetcher, STATIC_ROOT_CATEGORIES };
+export { catalogUrl, childrenKey, FULL_LITE_KEY, inventoryLotsUrl, jsonFetcher, productFetcher, STATIC_ROOT_CATEGORIES };

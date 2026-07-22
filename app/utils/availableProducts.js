@@ -66,8 +66,15 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
       availableQty,
       unit: lot.unit || "kg",
       price: lot.price,
+      updatedAt: lot.updatedAt || null,
+      createdAt: lot.createdAt || null,
     });
     entry.totalAvailable += availableQty;
+    const lotTs = lot.updatedAt || lot.createdAt;
+    if (lotTs) {
+      const t = new Date(lotTs).getTime();
+      if (!entry._newestLotAt || t > entry._newestLotAt) entry._newestLotAt = t;
+    }
   }
 
   return Array.from(grouped.values());
@@ -85,7 +92,20 @@ export function sortAvailableByCreatedDesc(entries) {
 }
 
 export function getLatestAvailableProducts(entries, limit = 20) {
-  return sortAvailableByCreatedDesc(entries).slice(0, limit);
+  return [...entries]
+    .sort((a, b) => {
+      const dateA =
+        a._newestLotAt ||
+        (a.product?.createdAt ? new Date(a.product.createdAt).getTime() : 0) ||
+        0;
+      const dateB =
+        b._newestLotAt ||
+        (b.product?.createdAt ? new Date(b.product.createdAt).getTime() : 0) ||
+        0;
+      if (dateA !== dateB) return dateB - dateA;
+      return (b.product?.id || 0) - (a.product?.id || 0);
+    })
+    .slice(0, limit);
 }
 
 export function groupAvailableProducts(entries, productById, language, { scopeCategoryId = null } = {}) {

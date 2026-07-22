@@ -79,8 +79,9 @@
     "editProfile": "ویرایش نمایه",
     "stats": {
       "products": "محصولات",
-      "followers": "دنبال‌کننده",
-      "following": "دنبال‌شونده"
+      "followers": "دنبال‌کنندگان",
+      "following": "دنبال‌شوندگان",
+      "posts": "پست‌ها"
     },
     "bioMore": "بیشتر",
     "bioLess": "کمتر",

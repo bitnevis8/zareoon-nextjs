@@ -11,7 +11,7 @@ import {
   getLatestAvailableProducts,
   groupAvailableProducts,
 } from "../utils/availableProducts";
-import { useFullCatalog, useInventoryLots } from "../hooks/useCatalogProducts";
+import { useFullCatalog, useInventoryLots, HOMEPAGE_LOTS_PARAMS } from "../hooks/useCatalogProducts";
 import { ProductScrollSkeleton } from "./ui/Skeleton";
 
 const CARD_CLASS = "shrink-0 w-[7.75rem] min-[380px]:w-[8.25rem] sm:w-[8.75rem] md:w-[9.25rem] snap-start";
@@ -37,6 +37,7 @@ export default function LatestAvailableProductsSection({
   });
   const { lots: fetchedLots, loading: lotsLoading } = useInventoryLots({
     enabled: autoFetch && !inventoryLotsProp,
+    params: autoFetch ? HOMEPAGE_LOTS_PARAMS : undefined,
   });
 
   const inventoryLots = autoFetch ? fetchedLots : inventoryLotsProp || [];

@@ -274,6 +274,18 @@ export const API_ENDPOINTS = {
     inventoryLots: {
       base: `${API_BASE_URL}/supplier/inventory-lot`,
       getAll: `${API_BASE_URL}/supplier/inventory-lot`,
+      /** موجودی فیلترشده برای صفحه اصلی / کاتالوگ عمومی */
+      getPublic: (params = {}) => {
+        const qs = new URLSearchParams({
+          public: "1",
+          available: "1",
+          lite: "1",
+          limit: "100",
+          order: "updated_at",
+          ...params,
+        });
+        return `${API_BASE_URL}/supplier/inventory-lot?${qs}`;
+      },
       getById: (id) => `${API_BASE_URL}/supplier/inventory-lot/${id}`,
       supplierContact: (id) => `${API_BASE_URL}/supplier/inventory-lot/${id}/supplier-contact`,
       create: `${API_BASE_URL}/supplier/inventory-lot`,
@@ -387,6 +399,10 @@ export const API_ENDPOINTS = {
     getLanguages: `${API_BASE_URL}/site-setting/languages`,
     updateLanguages: `${API_BASE_URL}/site-setting/languages`,
     getLanguagesPublic: `${API_BASE_URL}/site-setting/languages/public`,
+    getCache: `${API_BASE_URL}/site-setting/cache`,
+    updateCache: `${API_BASE_URL}/site-setting/cache`,
+    flushCache: `${API_BASE_URL}/site-setting/cache/flush`,
+    pingCache: `${API_BASE_URL}/site-setting/cache/ping`,
     getBlockedPageSlugs: `${API_BASE_URL}/site-setting/blocked-page-slugs`,
     updateBlockedPageSlugs: `${API_BASE_URL}/site-setting/blocked-page-slugs`,
     exportBlockedPageSlugs: `${API_BASE_URL}/site-setting/blocked-page-slugs/export`,

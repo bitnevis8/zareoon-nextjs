@@ -33,6 +33,7 @@
     "settings": "Platform service settings",
     "siteSettings": "Site settings",
     "siteLanguages": "Site languages",
+    "cacheRedis": "Cache & Redis",
     "blockedPageNames": "Blocked page names",
     "slugAliases": "Reserved URLs",
     "publicPages": "Platform public pages"

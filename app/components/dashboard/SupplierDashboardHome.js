@@ -12,7 +12,6 @@ import {
   DashAction,
   DashActionGrid,
   DashEmpty,
-  DashHero,
   DashKpi,
   DashKpiGrid,
   DashListCard,
@@ -116,13 +115,6 @@ export default function SupplierDashboardHome({ user }) {
 
   return (
     <DashPage>
-      <DashHero
-        tone="emerald"
-        badge={t("badge")}
-        title={t("title", { name: user?.firstName || "" })}
-        subtitle={t("subtitle")}
-      />
-
       <DashKpiGrid>
         <DashKpi
           label={t("kpi.products")}

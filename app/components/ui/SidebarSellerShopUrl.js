@@ -53,19 +53,15 @@ export default function SidebarSellerShopUrl({ user }) {
 
   return (
     <div className="border-b border-slate-200 px-3 py-3">
-      <div className="relative rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 pb-2.5 pt-3.5">
-        <span className="absolute -top-2 right-3 bg-white px-1.5 text-[11px] font-semibold text-slate-600">
-          {t("myShopUrl")}
-        </span>
-        <Link
-          href={shopPath}
-          className="block truncate text-[11px] font-semibold leading-5 text-emerald-800 hover:text-emerald-950 hover:underline sm:text-xs"
-          dir="ltr"
-          title={displayUrl}
-        >
-          {displayUrl.replace(/^https?:\/\//, "")}
-        </Link>
-      </div>
+      <p className="mb-1 text-[11px] font-semibold text-slate-500">{t("myShopUrl")}</p>
+      <Link
+        href={shopPath}
+        className="block truncate text-[13px] font-semibold leading-6 text-emerald-800 hover:text-emerald-950 hover:underline"
+        dir="ltr"
+        title={displayUrl}
+      >
+        {displayUrl.replace(/^https?:\/\//, "")}
+      </Link>
     </div>
   );
 }

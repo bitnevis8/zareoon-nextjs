@@ -232,7 +232,7 @@ export default function UnifiedProviderPageClient({ slug }) {
       <header className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.14),transparent_55%)]" />
         <div className="relative mx-auto max-w-5xl px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
-          <p className="mb-4 text-[11px] font-medium text-emerald-100/80" dir="ltr">
+          <p className="mb-4 text-[12px] font-medium text-emerald-100/85 sm:text-[13px]" dir="ltr">
             zareoon.ir/{slug}
           </p>
 
@@ -270,27 +270,27 @@ export default function UnifiedProviderPageClient({ slug }) {
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-black/15 p-2.5 backdrop-blur-sm">
-            <div className="rounded-xl px-2 py-2 text-center">
-              <p className="text-base font-black tabular-nums sm:text-lg">
-                {(stats?.followerCount ?? 0).toLocaleString("fa-IR")}
-              </p>
-              <p className="text-[10px] text-emerald-100/80">دنبال‌کننده</p>
-            </div>
-            <div className="rounded-xl px-2 py-2 text-center">
-              <p className="text-base font-black tabular-nums sm:text-lg">
-                {Number(productCount).toLocaleString("fa-IR")}
-              </p>
-              <p className="text-[10px] text-emerald-100/80">محصول</p>
-            </div>
-            <div className="rounded-xl px-2 py-2 text-center">
-              <p className="text-base font-black tabular-nums sm:text-lg">
-                {hasServices
-                  ? Number(serviceCount).toLocaleString("fa-IR")
-                  : Number(postCount).toLocaleString("fa-IR")}
-              </p>
-              <p className="text-[10px] text-emerald-100/80">{hasServices ? "خدمت" : "پست"}</p>
-            </div>
+          <div
+            className={`mt-5 grid gap-1.5 rounded-2xl bg-black/15 p-2 backdrop-blur-sm sm:gap-2 sm:p-2.5 ${
+              hasServices ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4"
+            }`}
+          >
+            {[
+              { value: stats?.followerCount ?? 0, label: "دنبال‌کنندگان" },
+              { value: stats?.followingCount ?? 0, label: "دنبال‌شوندگان" },
+              { value: productCount, label: "محصول" },
+              ...(hasServices ? [{ value: serviceCount, label: "خدمت" }] : []),
+              { value: stats?.postsCount ?? postCount, label: "پست" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl px-1.5 py-2 text-center sm:px-2">
+                <p className="text-sm font-black tabular-nums sm:text-lg">
+                  {Number(item.value).toLocaleString("fa-IR")}
+                </p>
+                <p className="mt-0.5 whitespace-nowrap text-[9px] leading-tight text-emerald-100/85 sm:text-[10px]">
+                  {item.label}
+                </p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-4 flex gap-2">
