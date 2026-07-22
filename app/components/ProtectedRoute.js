@@ -1,29 +1,30 @@
 "use client";
 
 import { useAuth } from "../context/AuthContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { buildLoginHref } from "../utils/safeAuthRedirect";
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const tCommon = useTranslations("common");
 
   useEffect(() => {
-    console.log("🔍 ProtectedRoute - user:", user, "loading:", loading);
     if (!loading && !user) {
-      console.log("🔍 Redirecting to login - user:", user, "loading:", loading);
+      const search = typeof window !== "undefined" ? window.location.search || "" : "";
+      const returnTo = `${pathname || "/dashboard"}${search}`;
       const timer = setTimeout(() => {
-        router.push("/auth/login");
+        router.push(buildLoginHref(returnTo));
       }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
 
   if (loading) {
-    console.log("🔍 ProtectedRoute - showing loading");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -35,10 +36,8 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    console.log("🔍 ProtectedRoute - no user, showing nothing");
     return null;
   }
 
-  console.log("🔍 ProtectedRoute - user exists, showing content");
   return <>{children}</>;
 }

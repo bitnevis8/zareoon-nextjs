@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useAuth } from "../../context/AuthContext";
@@ -10,6 +10,7 @@ import AuthShell, {
   AuthField,
   authInputClass,
 } from "../../components/auth/AuthShell";
+import { getSafeNextPath } from "../../utils/safeAuthRedirect";
 
 function LoginForm() {
   const t = useTranslations("auth");
@@ -18,14 +19,17 @@ function LoginForm() {
   const [error, setError] = useState(null);
   const [acceptTerms, setAcceptTerms] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
+  const nextPath = getSafeNextPath(searchParams.get("next"));
+  const nextQuery = nextPath !== "/dashboard" ? `&next=${encodeURIComponent(nextPath)}` : "";
 
   useEffect(() => {
     if (!authLoading && user) {
       if (user.mustChangePassword) router.replace("/auth/set-password");
-      else router.replace("/dashboard");
+      else router.replace(nextPath);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, nextPath]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,9 +58,11 @@ function LoginForm() {
         return;
       }
       if (data.data?.userExists) {
-        router.push(`/auth/login/password?identifier=${encodeURIComponent(mobile)}`);
+        router.push(`/auth/login/password?identifier=${encodeURIComponent(mobile)}${nextQuery}`);
       } else {
-        router.push(`/auth/verification/code?identifier=${encodeURIComponent(mobile)}&action=register`);
+        router.push(
+          `/auth/verification/code?identifier=${encodeURIComponent(mobile)}&action=register${nextQuery}`
+        );
       }
     } catch {
       setError(t("serverError"));

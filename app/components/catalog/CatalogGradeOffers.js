@@ -112,11 +112,23 @@ function SupplierTabsRow({
   tabsRef,
   size = "default",
   className = "",
+  onCompare,
 }) {
   if (lots.length <= 1) return null;
   return (
     <div className={className}>
-      <p className={`mb-2 ${size === "compact" ? "text-xs" : "text-[10px]"} ${catalogText.muted}`}>{t("selectSupplierHint")}</p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className={`${size === "compact" ? "text-xs" : "text-[10px]"} ${catalogText.muted}`}>{t("selectSupplierHint")}</p>
+        {onCompare ? (
+          <button
+            type="button"
+            onClick={onCompare}
+            className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100"
+          >
+            {t("compareSuppliers")}
+          </button>
+        ) : null}
+      </div>
       <div
         ref={tabsRef}
         className="flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin] [-ms-overflow-style:auto] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300"
@@ -142,6 +154,80 @@ function SupplierTabsRow({
   );
 }
 
+function SupplierCompareModal({ open, lots, language, productUnit, t, activeLotId, onSelect, onClose }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center" onClick={onClose}>
+      <div
+        className="max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <h3 className={`text-base font-bold ${catalogText.heading}`}>{t("compareSuppliersTitle")}</h3>
+          <button type="button" onClick={onClose} className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
+            {t("compareClose")}
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[36rem] border-collapse text-sm">
+            <thead>
+              <tr className="bg-slate-50 text-right text-xs text-slate-500">
+                <th className="px-3 py-2 font-semibold">{t("supplier")}</th>
+                <th className="px-3 py-2 font-semibold">{t("comparePrice")}</th>
+                <th className="px-3 py-2 font-semibold">{t("compareStock")}</th>
+                <th className="px-3 py-2 font-semibold">{t("compareMinOrder")}</th>
+                <th className="px-3 py-2 font-semibold" />
+              </tr>
+            </thead>
+            <tbody>
+              {lots.map((lot) => {
+                const supplier = getLotSupplierDisplay(lot, t);
+                const available = lotAvailableQty(lot);
+                const unit = localizeUnit(lot.unit || productUnit, language);
+                const active = lot.id === activeLotId;
+                return (
+                  <tr key={lot.id} className={`border-t border-slate-100 ${active ? "bg-emerald-50/60" : ""}`}>
+                    <td className="px-3 py-3 font-bold text-slate-900">{supplier.label}</td>
+                    <td className="px-3 py-3 tabular-nums text-slate-800">
+                      {lot.price
+                        ? formatLocalizedNumber(lot.price, language, { maximumFractionDigits: 0 })
+                        : t("priceNotSet")}
+                    </td>
+                    <td className="px-3 py-3 tabular-nums text-slate-800">
+                      {formatLocalizedNumber(available, language)} {unit}
+                    </td>
+                    <td className="px-3 py-3 tabular-nums text-slate-800">
+                      {lot.minimumOrderQuantity
+                        ? `${formatLocalizedNumber(lot.minimumOrderQuantity, language)} ${unit}`
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelect(lot.id);
+                          onClose();
+                        }}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
+                          active
+                            ? "bg-emerald-700 text-white"
+                            : "border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                        }`}
+                      >
+                        {t("compareSelect")}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CatalogGradeOffers({
   item,
   lots = [],
@@ -162,11 +248,13 @@ export default function CatalogGradeOffers({
   orderMsg = "",
   orderMsgType = "info",
   productDescription = "",
+  productMedia = [],
 }) {
   const t = useTranslations("catalog");
   const tabsRef = useRef(null);
   const supplierTabsRef = useRef(null);
   const [activeLotId, setActiveLotId] = useState(null);
+  const [compareOpen, setCompareOpen] = useState(false);
   const productTitle = getLocalizedText(item, language) || "";
 
   const groups = useMemo(() => groupLotsByGrade(lots), [lots]);
@@ -239,6 +327,8 @@ export default function CatalogGradeOffers({
         language,
         lotMediaPreview,
         openMediaGallery,
+        productItem: item,
+        productMedia,
         supplierName: multiSupplier ? activeSupplier?.label : "",
         supplierIndex: activeSupplierIndex,
         supplierTotal,
@@ -301,6 +391,7 @@ export default function CatalogGradeOffers({
         productUnit,
         t,
         tabsRef: supplierTabsRef,
+        onCompare: () => setCompareOpen(true),
       }
     : null;
 
@@ -436,6 +527,19 @@ export default function CatalogGradeOffers({
           {hasLocation ? <div className="w-full">{locationBlockDesktop}</div> : null}
         </div>
       </div>
+
+      {multiSupplier && activeGroup?.lots ? (
+        <SupplierCompareModal
+          open={compareOpen}
+          lots={activeGroup.lots}
+          language={language}
+          productUnit={productUnit}
+          t={t}
+          activeLotId={activeLot?.id}
+          onSelect={setActiveLotId}
+          onClose={() => setCompareOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }

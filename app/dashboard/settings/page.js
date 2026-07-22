@@ -11,7 +11,6 @@ import { showToast } from "@/app/utils/toast";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { getL1Categories } from "@/app/data/tradeServicesCatalog";
 import { DEFAULT_VIP_MESSAGE } from "@/app/utils/vipCategoryHelpers";
-import BackupPanel from "@/app/components/dashboard/BackupPanel";
 
 export default function DashboardSettingsPage() {
   const t = useTranslations("product");
@@ -447,8 +446,6 @@ export default function DashboardSettingsPage() {
       <button type="button" onClick={save} disabled={saving} className={dash.btnPrimary}>
         {saving ? t("settings.saving") : t("settings.saveSettings")}
       </button>
-
-      <BackupPanel />
     </div>
   );
 }

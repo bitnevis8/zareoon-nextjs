@@ -41,8 +41,13 @@ function WhatsAppIcon({ className = "h-4 w-4" }) {
 
 /**
  * آیکن پشتیبانی — هاور/کلیک → منو: شماره موبایل، تلگرام، واتساپ
+ * @param {"up"|"down"} menuPlacement — جهت باز شدن منو نسبت به دکمه
  */
-export default function HeaderSupportContact() {
+export default function HeaderSupportContact({
+  className = "",
+  buttonClassName = "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-emerald-700 transition-colors hover:bg-gray-50 hover:text-emerald-800",
+  menuPlacement = "down",
+}) {
   const { t, isRTL, language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState(null);
@@ -104,7 +109,15 @@ export default function HeaderSupportContact() {
       let left = isRTL ? rect.right - menuWidth : rect.left;
       if (left + menuWidth > window.innerWidth - pad) left = window.innerWidth - menuWidth - pad;
       if (left < pad) left = pad;
-      setMenuStyle({ top: rect.bottom + gap, left, width: menuWidth });
+
+      if (menuPlacement === "up") {
+        const approxHeight = 150;
+        let top = rect.top - gap - approxHeight;
+        if (top < pad) top = rect.bottom + gap;
+        setMenuStyle({ top, left, width: menuWidth });
+      } else {
+        setMenuStyle({ top: rect.bottom + gap, left, width: menuWidth });
+      }
     };
 
     updatePosition();
@@ -114,7 +127,7 @@ export default function HeaderSupportContact() {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [open, isRTL]);
+  }, [open, isRTL, menuPlacement]);
 
   const channelItems = [
     {
@@ -170,7 +183,7 @@ export default function HeaderSupportContact() {
   return (
     <div
       ref={rootRef}
-      className="relative shrink-0"
+      className={`relative shrink-0 ${className}`}
       onMouseEnter={openMenu}
       onMouseLeave={scheduleClose}
     >
@@ -182,7 +195,7 @@ export default function HeaderSupportContact() {
         aria-haspopup="menu"
         aria-label={t("supportContact")}
         title={t("supportContact")}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-emerald-700 transition-colors hover:bg-gray-50 hover:text-emerald-800"
+        className={buttonClassName}
       >
         <PhoneIcon className="h-5 w-5" />
       </button>

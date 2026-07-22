@@ -245,9 +245,14 @@ export default function MobileExploreSearch({
     (async () => {
       try {
         const [productsRes, inventoryRes, catsRes, providersRes, postsRes] = await Promise.all([
-          fetch(API_ENDPOINTS.supplier.products.getAll, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
-          fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=`, { cache: "no-store" }),
+          fetch(`${API_ENDPOINTS.supplier.products.getAll}?lite=1`, { cache: "no-store" }),
+          fetch(
+            `${API_ENDPOINTS.supplier.inventoryLots.getAll}?status=harvested,reserved&lite=1`,
+            { cache: "no-store" }
+          ),
+          fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=&lite=1`, {
+            cache: "no-store",
+          }),
           fetch(`${API_ENDPOINTS.tradeServiceProviders.getPublic}?limit=200`, { cache: "no-store" }).catch(() => null),
           fetch(`${API_ENDPOINTS.tamin.publicPosts}?limit=40`, { cache: "no-store" }).catch(() => null),
         ]);
@@ -726,7 +731,7 @@ export default function MobileExploreSearch({
               </section>
             ) : null}
 
-            {showProducts && types.length > 0 ? (
+            {showProducts && types.length > 0 && filter !== "hashtag" ? (
               <section className={splitResultsOnDesktop ? "xl:col-span-4" : ""}>
                 <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchTypesSection")}</h2>
                 <div className="grid grid-cols-1 gap-1.5 lg:gap-2">
@@ -744,7 +749,7 @@ export default function MobileExploreSearch({
             ) : null}
 
             {showProducts && listings.length > 0 ? (
-              <section className={splitResultsOnDesktop ? "xl:col-span-8" : ""}>
+              <section className={splitResultsOnDesktop && filter !== "hashtag" ? "xl:col-span-8" : ""}>
                 <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchListingsSection")}</h2>
                 <div
                   className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${
@@ -754,6 +759,23 @@ export default function MobileExploreSearch({
                   {listings.map((row) => (
                     <ListingResultCard
                       key={row.lot.id}
+                      row={row}
+                      language={language}
+                      t={t}
+                      onNavigate={handleResultNavigate}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {showProducts && filter === "hashtag" && !listings.length && types.length > 0 ? (
+              <section>
+                <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchListingsSection")}</h2>
+                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                  {types.map((row) => (
+                    <TypeResultCard
+                      key={row.product.id}
                       row={row}
                       language={language}
                       t={t}

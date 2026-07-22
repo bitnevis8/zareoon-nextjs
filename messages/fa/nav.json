@@ -26,11 +26,12 @@
     "orderManagement": "سفارش‌های کاربران سامانه",
     "homepageOrder": "ترتیب نمایش صفحه اصلی",
     "escrowSettings": "تنظیمات تضمین معاملات سامانه",
-    "servicesManagement": "خدمات بازرگانی سامانه",
+    "servicesManagement": "خدمات بازرگانی",
     "providerRequests": "درخواست عضویت خدمات‌دهندگان",
     "providersList": "فهرست خدمات‌دهندگان سامانه",
     "serviceCategories": "دسته‌بندی خدمات سامانه",
-    "settings": "تنظیمات خدمات سامانه",
+    "settings": "تنظیمات خدمات",
+    "backupRestore": "بک‌آپ و بازیابی",
     "siteSettings": "تنظیمات سایت",
     "siteLanguages": "زبان‌های سایت",
     "cacheRedis": "کش و Redis",
@@ -41,7 +42,7 @@
   "sections": {
     "seller": "فروشنده",
     "applicant": "خریدار",
-    "servicesProvider": "خدمات‌دهنده",
+    "servicesProvider": "خدمات من",
     "admin": "مدیریت کل"
   }
 }

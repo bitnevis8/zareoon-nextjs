@@ -278,7 +278,6 @@ export const API_ENDPOINTS = {
       getPublic: (params = {}) => {
         const qs = new URLSearchParams({
           public: "1",
-          available: "1",
           lite: "1",
           limit: "100",
           order: "updated_at",

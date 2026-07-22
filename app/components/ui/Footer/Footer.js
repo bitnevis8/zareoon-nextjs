@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "../../../context/LanguageContext";
 import EnamadSeal from "../../legal/EnamadSeal";
+import HeaderSupportContact from "../Header/HeaderSupportContact";
 import {
   SITE_EMAIL,
   SITE_EMAIL_MAILTO,
@@ -88,13 +89,10 @@ export default function Footer({ className = "" }) {
             />
             <span className="truncate text-xs font-bold text-slate-800">{t("siteName")}</span>
           </Link>
-          <a
-            href={SITE_PHONE_TEL}
-            className="shrink-0 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold tabular-nums text-emerald-800"
-            dir="ltr"
-          >
-            {displayPhone}
-          </a>
+          <HeaderSupportContact
+            menuPlacement="up"
+            buttonClassName="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800"
+          />
         </div>
 
         <nav

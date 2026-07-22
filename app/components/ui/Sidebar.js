@@ -66,6 +66,7 @@ function useSidebarMenus() {
             { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'list' },
             { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'list' },
             { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'home' },
+            { title: t('admin.backupRestore'), path: '/dashboard/site-settings/backup', icon: 'settings' },
           ],
         },
       ],

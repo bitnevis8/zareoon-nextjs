@@ -293,7 +293,7 @@ export default function UnifiedProviderPageClient({ slug }) {
             ))}
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {shopData?.isOwner ? (
               <Link
                 href="/dashboard/supplier-profile"
@@ -307,7 +307,7 @@ export default function UnifiedProviderPageClient({ slug }) {
                   type="button"
                   disabled={followBusy}
                   onClick={toggleFollow}
-                  className={`flex min-h-11 flex-1 items-center justify-center rounded-xl text-sm font-bold transition disabled:opacity-60 ${
+                  className={`flex min-h-11 min-w-[7.5rem] flex-1 items-center justify-center rounded-xl text-sm font-bold transition disabled:opacity-60 ${
                     shopData?.isFollowing
                       ? "border border-white/40 bg-white/10 text-white"
                       : "bg-white text-emerald-900"
@@ -315,20 +315,25 @@ export default function UnifiedProviderPageClient({ slug }) {
                 >
                   {shopData?.isFollowing ? "دنبال می‌کنید" : "دنبال کردن"}
                 </button>
+                {profile?.id ? (
+                  <Link
+                    href={
+                      auth?.user
+                        ? `/dashboard/messages?u=${profile.id}`
+                        : `/auth/login?next=${encodeURIComponent(`/dashboard/messages?u=${profile.id}`)}`
+                    }
+                    className="flex min-h-11 min-w-[7.5rem] flex-1 items-center justify-center rounded-xl bg-white text-sm font-bold text-emerald-900"
+                  >
+                    ارسال پیام
+                  </Link>
+                ) : null}
                 {phone ? (
                   <a
                     href={`tel:${phone}`}
-                    className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-white/35 bg-white/10 text-sm font-bold text-white backdrop-blur"
+                    className="flex min-h-11 min-w-[5.5rem] items-center justify-center rounded-xl border border-white/35 bg-white/10 px-3 text-sm font-bold text-white backdrop-blur"
                   >
                     تماس
                   </a>
-                ) : auth?.user && profile?.id ? (
-                  <Link
-                    href={`/dashboard/messages?u=${profile.id}`}
-                    className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-white/35 bg-white/10 text-sm font-bold text-white backdrop-blur"
-                  >
-                    پیام
-                  </Link>
                 ) : null}
               </>
             )}
@@ -385,14 +390,30 @@ export default function UnifiedProviderPageClient({ slug }) {
         </div>
       </div>
 
-      {!shopData?.isOwner && phone ? (
+      {!shopData?.isOwner && (profile?.id || phone) ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
-          <a
-            href={`tel:${phone}`}
-            className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-600/25"
-          >
-            تماس با {displayName.split(" ")[0]}
-          </a>
+          <div className="flex gap-2">
+            {profile?.id ? (
+              <Link
+                href={
+                  auth?.user
+                    ? `/dashboard/messages?u=${profile.id}`
+                    : `/auth/login?next=${encodeURIComponent(`/dashboard/messages?u=${profile.id}`)}`
+                }
+                className="flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-600/25"
+              >
+                ارسال پیام
+              </Link>
+            ) : null}
+            {phone ? (
+              <a
+                href={`tel:${phone}`}
+                className="flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-sm font-bold text-emerald-900"
+              >
+                تماس
+              </a>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>

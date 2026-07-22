@@ -123,7 +123,7 @@ function HomeContent() {
 
         <LazyWhenVisible
           id="trade-tools"
-          className="mt-5 w-full scroll-mt-20 sm:mt-6 lg:mt-8"
+          className="mt-10 w-full scroll-mt-20 sm:mt-12 lg:mt-14"
           minHeight="8rem"
           fallback={<SectionSkeleton minHeight="8rem" variant="portal" />}
         >

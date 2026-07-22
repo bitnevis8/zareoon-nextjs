@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -41,8 +41,7 @@ function providerToForm(provider, profileFullName) {
 }
 
 function hydrateFormFromProvider(row, profileFullName, language) {
-  const pending = row.pendingChanges;
-  const source = pending && row.status === "approved" ? { ...row, ...pending } : row;
+  const source = row;
   const services = Array.isArray(source.selectedServices) ? source.selectedServices : [];
   return {
     form: providerToForm(source, profileFullName),
@@ -57,11 +56,7 @@ function hydrateFormFromProvider(row, profileFullName, language) {
         subcategoryTitle: s.subcategoryTitle || "",
       };
     }),
-    documents: Array.isArray(pending?.documentUrls)
-      ? pending.documentUrls
-      : Array.isArray(row.documentUrls)
-        ? row.documentUrls
-        : [],
+    documents: Array.isArray(row.documentUrls) ? row.documentUrls : [],
   };
 }
 
@@ -245,11 +240,7 @@ function ProfileViewMode({
         </div>
       </section>
 
-      {hasPendingChanges ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
-          {te("pendingChangesNotice")}
-        </div>
-      ) : provider.status === "pending" ? (
+      {provider.status === "pending" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
           {te("pendingApprovalNotice")}
         </div>

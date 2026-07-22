@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import TieredPricingDisplay from "../ui/TieredPricingDisplay";
 import {
   formatLocalizedNumber,
@@ -19,7 +20,9 @@ import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplier, lotSup
 import { resolveMediaUrl } from "../../utils/mediaUrl";
 import { getAllowedMeasurementUnits } from "../../utils/productCatalogSchema";
 import { buildHashtagSearchHref } from "../../utils/mobileSearchUtils";
+import { buildDirectMessageHref } from "../../utils/safeAuthRedirect";
 import { API_ENDPOINTS } from "../../config/api";
+import { useAuth } from "../../context/AuthContext";
 import CatalogPdfDownload from "./CatalogPdfDownload";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { GradeMediaBadge } from "./CatalogGradeMediaPanel";
@@ -63,6 +66,40 @@ function StoreIcon({ className = "h-4 w-4" }) {
   );
 }
 
+function ChatIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+      />
+    </svg>
+  );
+}
+
+function SupplierAvatar({ supplier, label }) {
+  const avatar = resolveMediaUrl(supplier?.avatar);
+  const initial = (label || "?").trim().charAt(0) || "?";
+  if (avatar) {
+    return (
+      <Image
+        src={avatar}
+        alt={label || ""}
+        width={48}
+        height={48}
+        unoptimized
+        className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white"
+      />
+    );
+  }
+  return (
+    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-base font-bold text-white ring-2 ring-white">
+      {initial}
+    </span>
+  );
+}
+
 export default function CatalogLotOfferCard({
   lot,
   language,
@@ -80,6 +117,7 @@ export default function CatalogLotOfferCard({
   fillHeight = false,
 }) {
   const t = useTranslations("catalog");
+  const auth = useAuth();
   const preview = lotMediaPreview.get(lot.id) || [];
   const coverUrl = resolveMediaUrl(lot.coverImageUrl);
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
@@ -93,6 +131,7 @@ export default function CatalogLotOfferCard({
   const supplierUser = getLotSupplier(lot);
   const supplierProfileUrl = getLotSupplierProfileUrl(lot);
   const canRevealPhone = lotSupplierHasPhone(lot);
+  const messageHref = buildDirectMessageHref(supplierUser?.id, { isLoggedIn: Boolean(auth?.user) });
 
   const unitOptions = useMemo(() => {
     const allowed = getAllowedMeasurementUnits(product);
@@ -112,7 +151,6 @@ export default function CatalogLotOfferCard({
     setOrderUnit(next);
     setPhone("");
     setPhoneError("");
-    // فقط با تعویض لات ریست شود
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lot.id]);
 
@@ -166,9 +204,70 @@ export default function CatalogLotOfferCard({
 
   const scrollableClass = fillHeight ? "min-h-0 flex-1 overflow-y-auto" : "";
   const orderSectionClass = fillHeight ? "mt-auto shrink-0" : "";
+  const padX = embedded ? "mx-5" : "px-4";
+
+  const supplierHeader =
+    supplierUser && (supplier.name || messageHref || canRevealPhone || supplierProfileUrl) ? (
+      <div className={`border-b border-slate-100 bg-slate-50/80 ${embedded ? "px-5 py-4" : "px-4 py-3"}`}>
+        <div className="flex items-start gap-3">
+          <SupplierAvatar supplier={supplierUser} label={supplier.label} />
+          <div className="min-w-0 flex-1">
+            <p className={`truncate text-base font-bold ${catalogText.heading}`}>{supplier.label}</p>
+            <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{t("supplierChatHint")}</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {messageHref ? (
+                <Link
+                  href={messageHref}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+                >
+                  <ChatIcon className="h-3.5 w-3.5" />
+                  {t("sendMessage")}
+                </Link>
+              ) : null}
+              {canRevealPhone ? (
+                phone ? (
+                  <a
+                    href={`tel:${String(phone).replace(/\s/g, "")}`}
+                    dir="ltr"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
+                  >
+                    <PhoneIcon className="h-3.5 w-3.5" />
+                    {phone}
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={revealPhone}
+                    disabled={phoneLoading}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-50 disabled:opacity-60"
+                    aria-label={t("showPhone")}
+                    title={t("showPhone")}
+                  >
+                    <PhoneIcon className="h-3.5 w-3.5" />
+                    {phoneLoading ? t("loadingPhone") : t("showPhone")}
+                  </button>
+                )
+              ) : null}
+              {supplierProfileUrl ? (
+                <Link
+                  href={supplierProfileUrl}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <StoreIcon className="h-3.5 w-3.5" />
+                  {t("viewStore")}
+                </Link>
+              ) : null}
+            </div>
+            {phoneError ? <p className="mt-2 text-[11px] text-rose-600">{phoneError}</p> : null}
+          </div>
+        </div>
+      </div>
+    ) : null;
 
   return (
     <article className={articleClass}>
+      {supplierHeader}
+
       {showMedia && slides.length > 0 ? (
         <CatalogMediaSlider
           slides={slides}
@@ -206,9 +305,14 @@ export default function CatalogLotOfferCard({
               </div>
             ) : null}
             <div className={`border-b border-slate-100 ${embedded ? "pb-4" : "py-3"}`}>
-              <p className={`mb-1 font-medium ${embedded ? "text-sm" : "text-xs"} ${catalogText.muted}`}>
-                {t("priceSectionTitle")}
-              </p>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <p className={`font-medium ${embedded ? "text-sm" : "text-xs"} ${catalogText.muted}`}>
+                  {t("priceSectionTitle")}
+                </p>
+                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${catalogStatusClass(lot.status)}`}>
+                  {statusLabel}
+                </span>
+              </div>
               {lot.tieredPricing?.length > 0 ? (
                 <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
               ) : lot.price ? (
@@ -227,14 +331,14 @@ export default function CatalogLotOfferCard({
           </div>
 
           {lotDescription ? (
-            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+            <div className={`border-t border-slate-100 ${padX} py-3`}>
               <p className={`mb-2 text-xs font-semibold ${catalogText.body}`}>{t("lotDescriptionTitle")}</p>
               <p className={`whitespace-pre-wrap text-sm leading-relaxed ${catalogText.body}`}>{lotDescription}</p>
             </div>
           ) : null}
 
           {Array.isArray(lotHashtags) && lotHashtags.length > 0 ? (
-            <div className={`flex flex-wrap gap-1.5 border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+            <div className={`flex flex-wrap gap-1.5 border-t border-slate-100 ${padX} py-3`}>
               {lotHashtags.map((tag) => (
                 <Link
                   key={tag}
@@ -248,7 +352,7 @@ export default function CatalogLotOfferCard({
           ) : null}
 
           {Array.isArray(lot.attributes) && lot.attributes.length > 0 ? (
-            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
+            <div className={`border-t border-slate-100 ${padX} py-1`}>
               <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("technicalSpecsTitle")}</p>
               {lot.attributes.map((a) => (
                 <DetailRow
@@ -261,7 +365,7 @@ export default function CatalogLotOfferCard({
           ) : null}
 
           {(lot.packagingType || lot.hsCode || (lot.filterValues && Object.keys(lot.filterValues).length > 0)) ? (
-            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-1`}>
+            <div className={`border-t border-slate-100 ${padX} py-1`}>
               <p className={`py-2.5 text-xs font-semibold ${catalogText.body}`}>{t("lotTradeDetailsTitle")}</p>
               {lot.packagingType ? <DetailRow label={t("packagingType")} value={lot.packagingType} /> : null}
               {lot.hsCode ? <DetailRow label={t("hsCode")} value={lot.hsCode} /> : null}
@@ -285,68 +389,8 @@ export default function CatalogLotOfferCard({
             </div>
           ) : null}
 
-          {getLotSupplier(lot) && (supplier.name || canRevealPhone || supplierProfileUrl) ? (
-            <div className={`border-t border-dashed border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
-              <p className={`mb-2 text-xs ${catalogText.muted}`}>{t("supplier")}</p>
-              <p className="mb-2 text-[11px] leading-5 text-slate-500">
-                ارتباط مستقیم با فروشنده — زارعون طرف معامله نیست.
-              </p>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                {supplier.name ? (
-                  <span className={`font-semibold ${catalogText.heading}`}>{supplier.name}</span>
-                ) : (
-                  <span />
-                )}
-                <div className="flex flex-wrap items-center gap-2">
-                  {canRevealPhone ? (
-                    phone ? (
-                      <a
-                        href={`tel:${String(phone).replace(/\s/g, "")}`}
-                        dir="ltr"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
-                      >
-                        <PhoneIcon className="h-3.5 w-3.5" />
-                        {phone}
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={revealPhone}
-                        disabled={phoneLoading}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100 disabled:opacity-60"
-                        aria-label={t("showPhone")}
-                        title={t("showPhone")}
-                      >
-                        <PhoneIcon className="h-3.5 w-3.5" />
-                        {phoneLoading ? t("loadingPhone") : t("showPhone")}
-                      </button>
-                    )
-                  ) : null}
-                  {supplierProfileUrl ? (
-                    <Link
-                      href={supplierProfileUrl}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      <StoreIcon className="h-3.5 w-3.5" />
-                      {t("viewStore")}
-                    </Link>
-                  ) : null}
-                  {supplierUser?.id ? (
-                    <Link
-                      href={`/dashboard/messages?u=${supplierUser.id}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      پیام
-                    </Link>
-                  ) : null}
-                </div>
-              </div>
-              {phoneError ? <p className="mt-2 text-[11px] text-rose-600">{phoneError}</p> : null}
-            </div>
-          ) : null}
-
           {productId ? (
-            <div className={`border-t border-slate-100 ${embedded ? "mx-5" : "px-4"} py-3`}>
+            <div className={`border-t border-slate-100 ${padX} py-3`}>
               <CatalogPdfDownload
                 scope="lot"
                 productId={productId}

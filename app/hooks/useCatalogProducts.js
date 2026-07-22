@@ -73,7 +73,6 @@ const LOTS_KEY = inventoryLotsUrl(DEFAULT_PUBLIC_LOTS_PARAMS);
 /** فید صفحه اصلی — کم‌حجم و مرتب‌شده */
 export const HOMEPAGE_LOTS_PARAMS = {
   public: "1",
-  available: "1",
   lite: "1",
   limit: "100",
   order: "updated_at",

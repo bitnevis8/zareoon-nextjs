@@ -140,7 +140,11 @@ export default function Header() {
     </div>
   );
 
-  const support = <HeaderSupportContact key="support" />;
+  const support = (
+    <div key="support" className="hidden lg:block">
+      <HeaderSupportContact />
+    </div>
+  );
   const languageSwitcher = <LanguageSwitcher key="language" buttonClass={headerIconBtnClass} />;
   const notifications = showUser ? (
     <HeaderNotificationBell key="bell" buttonClass={headerIconBtnClass} />
@@ -166,7 +170,11 @@ export default function Header() {
       </button>
     </LoginRequiredMessage>
   );
-  const account = <AuthButtons key="account" iconButtonClass={headerIconBtnClass} />;
+  const account = (
+    <div key="account" className="hidden lg:block">
+      <AuthButtons iconButtonClass={headerIconBtnClass} />
+    </div>
+  );
 
   const actionItems = (
     layoutRtl

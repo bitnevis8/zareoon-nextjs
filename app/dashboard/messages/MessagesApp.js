@@ -149,6 +149,7 @@ export default function MessagesApp() {
   const fileInputRef = useRef(null);
   const pollRef = useRef(null);
   const messagesRef = useRef([]);
+  const startingUserRef = useRef(null);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -192,19 +193,23 @@ export default function MessagesApp() {
     [loadConversations, router]
   );
 
-  const startWithUser = async (user) => {
-    setShowNew(false);
-    const res = await authFetch("/api/messaging/conversations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recipientId: user.id }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      await loadConversations();
-      openConversation(json.data.id);
-    }
-  };
+  const startWithUser = useCallback(
+    async (user) => {
+      if (!user?.id) return;
+      setShowNew(false);
+      const res = await authFetch("/api/messaging/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientId: user.id }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        await loadConversations();
+        openConversation(json.data.id);
+      }
+    },
+    [loadConversations, openConversation]
+  );
 
   useEffect(() => {
     loadConversations();
@@ -214,9 +219,13 @@ export default function MessagesApp() {
     const c = searchParams.get("c");
     const u = searchParams.get("u");
     if (c && Number(c) !== activeId) {
+      startingUserRef.current = null;
       openConversation(Number(c));
     } else if (u && !c) {
-      startWithUser({ id: Number(u) });
+      const uid = Number(u);
+      if (!Number.isFinite(uid) || startingUserRef.current === uid) return;
+      startingUserRef.current = uid;
+      startWithUser({ id: uid });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -225,22 +234,31 @@ export default function MessagesApp() {
     if (!activeId) return;
 
     const poll = async () => {
-      const lastId = messagesRef.current.at(-1)?.id;
-      const url = lastId
-        ? `/api/messaging/conversations/${activeId}/messages?after=${lastId}`
-        : `/api/messaging/conversations/${activeId}/messages?limit=50`;
-      const msgRes = await authFetch(url);
+      const msgRes = await authFetch(`/api/messaging/conversations/${activeId}/messages?limit=50`);
       const msgJson = await msgRes.json();
-      if (msgJson.success && msgJson.data?.length) {
-        setMessages((prev) => {
-          const ids = new Set(prev.map((m) => m.id));
-          const fresh = msgJson.data.filter((m) => !ids.has(m.id));
-          return fresh.length ? [...prev, ...fresh] : prev;
-        });
-        await authFetch(`/api/messaging/conversations/${activeId}/read`, { method: "PATCH" });
-        await loadConversations();
-        scrollToBottom();
+      if (!msgJson.success || !Array.isArray(msgJson.data)) return;
+
+      const next = msgJson.data;
+      const prev = messagesRef.current;
+      const prevMap = new Map(prev.map((m) => [m.id, m]));
+      let changed = next.length !== prev.length;
+      if (!changed) {
+        for (const m of next) {
+          const old = prevMap.get(m.id);
+          if (!old || old.readAt !== m.readAt || old.body !== m.body) {
+            changed = true;
+            break;
+          }
+        }
       }
+      if (!changed) return;
+
+      const hadNew =
+        next.length > prev.length || next.some((m) => !prevMap.has(m.id));
+      setMessages(next);
+      await authFetch(`/api/messaging/conversations/${activeId}/read`, { method: "PATCH" });
+      await loadConversations();
+      if (hadNew) scrollToBottom();
     };
 
     pollRef.current = setInterval(poll, POLL_MS);
@@ -315,11 +333,14 @@ export default function MessagesApp() {
         }`}
       >
         <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4">
-          <h2 className="text-lg font-bold text-slate-800">{t("messages")}</h2>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">{t("messages")}</h2>
+            <p className="mt-0.5 text-[11px] text-slate-500">{t("chatHistory")}</p>
+          </div>
           <button
             type="button"
             onClick={() => setShowNew(true)}
-            className="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             {t("newChat")}
           </button>
@@ -387,6 +408,10 @@ export default function MessagesApp() {
               </div>
             </header>
 
+            <div className="border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-[11px] leading-5 text-amber-950">
+              {t("chatPolicyWarning")}
+            </div>
+
             <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-slate-100/50 p-4">
               {loadingChat ? (
                 <div className="text-center text-sm text-slate-500">{t("loading")}</div>
@@ -411,9 +436,17 @@ export default function MessagesApp() {
                             </button>
                           ) : null}
                           {m.body ? <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{m.body}</p> : null}
-                          <div className={`mt-1 text-[10px] ${mine ? "text-emerald-100" : "text-slate-400"}`}>
-                            {formatTime(m.createdAt)}
-                            {mine && m.readAt ? ` · ${t("read")}` : ""}
+                          <div
+                            className={`mt-1 flex items-center gap-1.5 text-[10px] ${
+                              mine ? "justify-start text-emerald-100" : "justify-end text-slate-400"
+                            }`}
+                          >
+                            <span>{formatTime(m.createdAt)}</span>
+                            {mine ? (
+                              <span className={m.readAt ? "font-semibold text-white" : "text-emerald-200/90"}>
+                                {m.readAt ? t("read") : ""}
+                              </span>
+                            ) : null}
                           </div>
                         </div>
                       </div>

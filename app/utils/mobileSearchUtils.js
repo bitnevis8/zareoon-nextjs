@@ -88,11 +88,12 @@ export function flattenAvailableLots(inventoryLots, productById) {
   for (const entry of grouped) {
     for (const lot of entry.lots) {
       const availableQty = lot.availableQty ?? lotAvailableQty(lot);
-      if (availableQty <= 0) continue;
+      const isInquiry = Boolean(lot.inquiryOnly);
+      if (availableQty <= 0 && !isInquiry) continue;
       rows.push({
         lot,
         product: entry.product,
-        availableQty,
+        availableQty: Math.max(0, availableQty),
       });
     }
   }
@@ -181,8 +182,22 @@ export function searchHashtagMatches({ allProducts, flatLots, term, language, t 
   if (!q) return { tags: [], types: [], listings: [] };
 
   const tagSet = new Set();
-  const types = searchCatalogTypes(allProducts, q, language, buildListingCountMap(flatLots));
   const listings = searchAvailableListings(flatLots, q, language, t, { hashtagOnly: true });
+  const listingCountByProductId = buildListingCountMap(listings);
+  const productById = buildProductByIdMap(allProducts);
+
+  // کارت‌های محصولی که حداقل یک بار با این هشتگ دارند
+  const typedProducts = new Map();
+  for (const { lot, product } of listings) {
+    const p = product || productById.get(lot?.productId);
+    if (!p?.id || typedProducts.has(p.id)) continue;
+    typedProducts.set(p.id, {
+      product: p,
+      listingCount: listingCountByProductId.get(p.id) || 0,
+      isCategory: !p.isOrderable,
+      isOrderableType: Boolean(p.isOrderable),
+    });
+  }
 
   for (const { lot } of flatLots) {
     for (const tag of getLotDisplayForLanguage(lot, language).hashtags || []) {
@@ -190,14 +205,19 @@ export function searchHashtagMatches({ allProducts, flatLots, term, language, t 
     }
   }
 
+  const types = Array.from(typedProducts.values()).sort((a, b) => {
+    if (b.listingCount !== a.listingCount) return b.listingCount - a.listingCount;
+    return getLocalizedText(a.product, language).localeCompare(getLocalizedText(b.product, language), "fa");
+  });
+
   for (const row of types) {
     const label = getLocalizedText(row.product, language);
-    if (normalizeSearchTerm(label).includes(q)) tagSet.add(`#${label}`);
+    if (label) tagSet.add(`#${label}`);
   }
 
   return {
     tags: Array.from(tagSet).slice(0, 12),
-    types: types.filter((row) => row.isCategory || normalizeSearchTerm(getLocalizedText(row.product, language)).includes(q)),
+    types,
     listings,
   };
 }

@@ -13,9 +13,10 @@ import { resolveCategoryBrandLogo } from "@/app/data/tradeProviderBranding";
 import TradeServicesSectionHeader from "./TradeServicesSectionHeader";
 import ZareoonEscrowFeature from "./ZareoonEscrowFeature";
 import ZareoonPackagingAd from "./ZareoonPackagingAd";
+import AryaFouladAd from "./AryaFouladAd";
 import TradeServicesCategoryPager from "./TradeServicesCategoryPager";
 import AuthRequiredButton from "./ui/AuthRequiredButton";
-import { isPlatformExclusiveCategory, isZareoonOperatedCategory } from "@/app/utils/platformExclusiveCategories";
+import { isPlatformExclusiveCategory } from "@/app/utils/platformExclusiveCategories";
 
 function PeopleIcon({ className = "h-4 w-4" }) {
   return (
@@ -144,9 +145,6 @@ function CategoryCard({
   className = "",
 }) {
   const exclusive = isPlatformExclusiveCategory(item.id) || isVip;
-  const isInspection = item.id === "inspection-standards";
-  const isPackaging = isZareoonOperatedCategory(item.id);
-  const brandedExclusive = isInspection || isPackaging;
   const joinHref = `/trade-services/register?category=${encodeURIComponent(item.id)}`;
 
   const providersBtn =
@@ -158,46 +156,31 @@ function CategoryCard({
     <article
       className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border bg-white p-2.5 text-start shadow-[0_4px_20px_-12px_rgba(6,78,59,0.18)] transition duration-300 md:hover:-translate-y-1 md:hover:shadow-[0_14px_36px_-16px_rgba(6,95,70,0.22)] sm:rounded-2xl sm:p-5 ${
         exclusive
-          ? isPackaging
-            ? "border-emerald-200/90 md:hover:border-emerald-400"
-            : "border-amber-200/80 md:hover:border-amber-300"
+          ? "border-amber-200/80 md:hover:border-amber-300"
           : "border-emerald-100/90 md:hover:border-emerald-300"
       } ${className}`}
     >
-      {isInspection ? <VerifiedCornerBadge label={verifiedLabel} title={verifiedTitle} /> : null}
+      {isVip ? <VerifiedCornerBadge label={verifiedLabel} title={verifiedTitle} /> : null}
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 h-0.5 opacity-70 ${
           exclusive
-            ? isPackaging
-              ? "bg-gradient-to-r from-emerald-500 to-teal-600"
-              : "bg-gradient-to-r from-amber-500 to-emerald-600"
+            ? "bg-gradient-to-r from-amber-500 to-emerald-600"
             : "bg-gradient-to-r from-emerald-500 to-teal-500"
         }`}
       />
       <div className="mb-2 flex items-start justify-between gap-1.5 sm:mb-3 sm:gap-2">
-        <CategoryBrandMark
-          item={item}
-          size={brandedExclusive ? "wide" : "sm"}
-          alt={companyName || item.title}
-          tone={isPackaging ? "emerald" : "amber"}
-        />
-        {!brandedExclusive ? (
-          <div className="flex flex-col items-end gap-1">
-            {isVip ? (
-              <span className="rounded-full bg-amber-200/90 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-950">
-                VIP
-              </span>
-            ) : null}
-            <MemberCountBadge count={count} label={memberLabel(count)} locale={locale} compact />
-          </div>
-        ) : null}
+        <CategoryBrandMark item={item} size="sm" alt={companyName || item.title} tone="amber" />
+        <div className="flex flex-col items-end gap-1">
+          {isVip ? (
+            <span className="rounded-full bg-amber-200/90 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-950">
+              VIP
+            </span>
+          ) : null}
+          <MemberCountBadge count={count} label={memberLabel(count)} locale={locale} compact />
+        </div>
       </div>
-      {brandedExclusive && companyName ? (
-        <p
-          className={`mb-0.5 line-clamp-2 text-start text-[10px] font-semibold tracking-wide sm:mb-1 sm:text-xs ${
-            isPackaging ? "text-emerald-800" : "text-amber-800"
-          }`}
-        >
+      {companyName ? (
+        <p className="mb-0.5 line-clamp-2 text-start text-[10px] font-semibold tracking-wide text-amber-800 sm:mb-1 sm:text-xs">
           {companyName}
         </p>
       ) : null}
@@ -270,11 +253,12 @@ export default function ZareoonExclusiveServices({ className = "" }) {
     if (itemId === "inspection-standards") {
       return getVipCompanyName(providers, itemId, tShared) || tShared("vip.inspectionStandardsCompany");
     }
-    if (itemId === "packaging-prep") {
-      return t("packagingAdBrandName");
-    }
     return isVip ? getVipCompanyName(providers, itemId, tShared) : null;
   };
+
+  const pagerItems = content.items.filter(
+    (item) => item.id !== "packaging-prep" && item.id !== "inspection-standards"
+  );
 
   return (
     <section className={`w-full text-start ${className}`} dir={dir} aria-labelledby="trade-services-hub-title">
@@ -290,10 +274,14 @@ export default function ZareoonExclusiveServices({ className = "" }) {
 
         <div className="space-y-3 p-2.5 text-start sm:space-y-5 sm:p-5 lg:p-6">
           <ZareoonEscrowFeature />
-          <ZareoonPackagingAd />
+
+          <div className="mb-1 flex w-full flex-col gap-2.5 sm:mb-2 sm:gap-3">
+            <ZareoonPackagingAd />
+            <AryaFouladAd />
+          </div>
 
           <TradeServicesCategoryPager
-            items={content.items}
+            items={pagerItems}
             renderItem={(item) => {
               const count = memberCounts?.[item.id] ?? item.memberCount ?? 0;
               const isVip = !!vipCategories[item.id]?.enabled;

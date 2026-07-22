@@ -379,10 +379,14 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
                   >
                     {isFollowing ? t("profile.following") : t("profile.follow")}
                   </button>
-                  {auth?.user ? (
+                  {profile?.id ? (
                     <Link
-                      href={`/dashboard/messages?u=${profile.id}`}
-                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                      href={
+                        auth?.user
+                          ? `/dashboard/messages?u=${profile.id}`
+                          : `/auth/login?next=${encodeURIComponent(`/dashboard/messages?u=${profile.id}`)}`
+                      }
+                      className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                     >
                       {t("profile.message")}
                     </Link>

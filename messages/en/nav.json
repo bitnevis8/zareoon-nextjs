@@ -26,11 +26,12 @@
     "orderManagement": "Users' orders (platform)",
     "homepageOrder": "Homepage display order",
     "escrowSettings": "Platform escrow settings",
-    "servicesManagement": "Platform trade services",
+    "servicesManagement": "Trade services",
     "providerRequests": "Service provider join requests",
     "providersList": "Platform service providers",
     "serviceCategories": "Platform service categories",
-    "settings": "Platform service settings",
+    "settings": "Service settings",
+    "backupRestore": "Backup & restore",
     "siteSettings": "Site settings",
     "siteLanguages": "Site languages",
     "cacheRedis": "Cache & Redis",
@@ -41,7 +42,7 @@
   "sections": {
     "seller": "Seller",
     "applicant": "Buyer",
-    "servicesProvider": "Service provider",
+    "servicesProvider": "My services",
     "admin": "Super admin"
   }
 }

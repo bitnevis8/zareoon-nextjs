@@ -12,6 +12,7 @@ import AuthShell, {
   authGhostBtnClass,
 } from "../../../components/auth/AuthShell";
 import SmsCountdown from "../../../components/auth/SmsCountdown";
+import { getSafeNextPath } from "../../../utils/safeAuthRedirect";
 
 const TEMP_PASSWORD_MS = 5 * 60 * 1000;
 
@@ -30,6 +31,7 @@ function PasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
+  const nextPath = getSafeNextPath(searchParams.get("next"));
 
   useEffect(() => {
     const id = searchParams.get("identifier");
@@ -39,9 +41,9 @@ function PasswordForm() {
   useEffect(() => {
     if (!authLoading && user) {
       if (user.mustChangePassword) router.replace("/auth/set-password");
-      else router.replace("/dashboard");
+      else router.replace(nextPath);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, nextPath]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,7 +65,7 @@ function PasswordForm() {
       if (data.data?.mustChangePassword || data.data?.user?.mustChangePassword) {
         router.push("/auth/set-password");
       } else {
-        router.push("/dashboard");
+        router.push(nextPath);
       }
     } catch {
       setError(t("serverError"));

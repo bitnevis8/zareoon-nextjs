@@ -18,9 +18,11 @@ export default function CatalogProductHero({
   cartTotalQty = 0,
   cartUnit = "",
   hideMediaOnMobile = false,
+  hideMedia = false,
 }) {
   const t = useTranslations("catalog");
   const title = getLocalizedText(item, language) || "";
+  const hideAllMedia = hideMedia || hideMediaOnMobile;
   const slides = useMemo(
     () => buildMediaSlides({ product: item, media: productMedia, title }),
     [item, productMedia, title]
@@ -87,7 +89,31 @@ export default function CatalogProductHero({
 
   return (
     <>
-      {!hideMediaOnMobile ? (
+      {hideAllMedia ? (
+        <section className={`overflow-hidden ${catalogSurface.card} px-4 py-4 sm:px-5`}>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 space-y-2">
+              <h1 className={`text-xl font-bold leading-snug sm:text-2xl ${catalogText.heading}`}>{title}</h1>
+              {item?.isOrderable ? (
+                <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-medium ${catalogBadge.success}`}>
+                  {t("orderable")} • {localizeUnit(item?.unit || item?.defaultMeasurementUnit || "-", language)}
+                </span>
+              ) : (
+                <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-medium ${catalogBadge.neutral}`}>
+                  {t("nonOrderableCategoryRole")}
+                </span>
+              )}
+            </div>
+            <SupplyCountryFlag
+              countryCode={item?.supplyCountry || "IR"}
+              city={item?.supplyCity || ""}
+              className="shrink-0"
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {!hideAllMedia ? (
         <section className="lg:hidden -mx-3 overflow-hidden border-y border-slate-200 bg-white">
           <CatalogMediaSlider
             slides={slides}
@@ -124,7 +150,7 @@ export default function CatalogProductHero({
         </section>
       ) : null}
 
-      {!hideMediaOnMobile ? (
+      {!hideAllMedia ? (
         <section className={`hidden overflow-hidden lg:block ${catalogSurface.card}`}>
           <div className="grid grid-cols-1 items-stretch gap-0 lg:grid-cols-[minmax(280px,360px)_1fr]">
             <div className="relative min-h-[280px] overflow-hidden bg-slate-900 lg:min-h-[320px]">

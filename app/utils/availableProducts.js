@@ -47,7 +47,11 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
     const total = parseFloat(lot.totalQuantity || 0);
     const reserved = parseFloat(lot.reservedQuantity || 0);
     const availableQty = total - reserved;
-    if (!Number.isFinite(availableQty) || availableQty <= 0) continue;
+    const isInquiryOnly =
+      (lot.price == null || lot.price === "") &&
+      !(Array.isArray(lot.tieredPricing) && lot.tieredPricing.length);
+    // استعلامی‌ها حتی با موجودی صفر در ویترین می‌مانند
+    if ((!Number.isFinite(availableQty) || availableQty <= 0) && !isInquiryOnly) continue;
 
     const product = productById.get(lot.productId);
     if (!product || !product.isOrderable) continue;
@@ -63,13 +67,14 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
       russianName: lot.russianName || null,
       arabicName: lot.arabicName || null,
       qualityGrade: lot.qualityGrade || i18nData.noGrade,
-      availableQty,
+      availableQty: Math.max(0, availableQty),
       unit: lot.unit || "kg",
       price: lot.price,
       updatedAt: lot.updatedAt || null,
       createdAt: lot.createdAt || null,
+      inquiryOnly: isInquiryOnly,
     });
-    entry.totalAvailable += availableQty;
+    entry.totalAvailable += Math.max(0, availableQty);
     const lotTs = lot.updatedAt || lot.createdAt;
     if (lotTs) {
       const t = new Date(lotTs).getTime();

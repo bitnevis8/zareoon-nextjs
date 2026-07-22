@@ -90,7 +90,7 @@
     "tabs": {
       "buyer": "خریدار",
       "seller": "فروشنده",
-      "provider": "خدمات‌دهنده"
+      "provider": "خدمات من"
     },
     "actions": {
       "submitRequest": "ثبت درخواست",
@@ -103,7 +103,7 @@
       "customerOrders": "سفارشات مشتری",
       "shopSettings": "تنظیمات فروشگاه",
       "incoming": "نیازمندی‌ها",
-      "serviceSettings": "تنظیمات خدمات",
+      "serviceSettings": "ویرایش خدمات من",
       "incomingServices": "درخواست‌ها"
     },
     "createShop": "ایجاد فروشگاه",

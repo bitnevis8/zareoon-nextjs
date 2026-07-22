@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import SupplyCountryFlag from "../ui/SupplyCountryFlag";
-import CatalogMediaSlider from "./CatalogMediaSlider";
+import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { buildGradeMediaSlides } from "../../utils/catalogGradeMedia";
 import { getGradeDisplayLabel } from "../../utils/catalogGrades";
 import { getLotSupplierDisplay } from "../../utils/catalogLotSupplier";
@@ -31,12 +31,29 @@ export default function CatalogGradeMediaPanel({
   supplierName = "",
   supplierIndex = 1,
   supplierTotal = 1,
+  productItem = null,
+  productMedia = [],
 }) {
   const t = useTranslations("catalog");
-  const slides = useMemo(
+  const lotSlides = useMemo(
     () => buildGradeMediaSlides(lots, lotMediaPreview, language, t),
     [lots, lotMediaPreview, language, t]
   );
+
+  const slides = useMemo(() => {
+    if (lotSlides.length > 0) return lotSlides;
+    if (!productItem && !(productMedia || []).length) return [];
+    return buildMediaSlides({
+      product: productItem,
+      media: productMedia,
+      title: productTitle || gradeLabel,
+    }).map((slide, index) => ({
+      ...slide,
+      lotId: lots[0]?.id,
+      galleryIndex: index,
+      gradeLabel,
+    }));
+  }, [lotSlides, productItem, productMedia, productTitle, gradeLabel, lots]);
 
   const label = gradeLabel || getGradeDisplayLabel(lots, language, t);
   const activeLot = lots[0];
@@ -48,14 +65,24 @@ export default function CatalogGradeMediaPanel({
 
   const openAt = (index) => {
     const slide = slides[index];
-    if (!slide?.lotId) return;
-    const galleryTitle = supplier.label ? `${label} — ${supplier.label}` : label;
-    openMediaGallery({
-      module: "inventory",
-      entityId: slide.lotId,
-      startIndex: slide.galleryIndex ?? 0,
-      galleryTitle,
-    });
+    if (slide?.lotId && lotSlides.length > 0) {
+      const galleryTitle = supplier.label ? `${label} — ${supplier.label}` : label;
+      openMediaGallery({
+        module: "inventory",
+        entityId: slide.lotId,
+        startIndex: slide.galleryIndex ?? 0,
+        galleryTitle,
+      });
+      return;
+    }
+    if (productItem?.id) {
+      openMediaGallery({
+        module: "products",
+        entityId: productItem.id,
+        startIndex: index,
+        productItem,
+      });
+    }
   };
 
   const topOverlay = productTitle ? (

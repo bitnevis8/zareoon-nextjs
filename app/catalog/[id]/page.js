@@ -365,10 +365,8 @@ export default function CatalogItemPage({ params }) {
         openMediaGallery={openMediaGallery}
         cartTotalQty={cartTotalQty}
         cartUnit={cartUnit}
-        hideMediaOnMobile={filteredLots.length > 0 || productLots.length > 0}
+        hideMedia={filteredLots.length > 0 || productLots.length > 0}
       />
-
-      {item?.isOrderable ? <CatalogTradeCompliance product={item} /> : null}
 
       {productLots.length > 0 ? (
         <CatalogLotFilters
@@ -408,8 +406,11 @@ export default function CatalogItemPage({ params }) {
           orderMsg={orderMsg}
           orderMsgType={orderMsgType}
           productDescription={item?.description}
+          productMedia={productMedia}
         />
       )}
+
+      {item?.isOrderable ? <CatalogTradeCompliance product={item} /> : null}
 
       {item?.description && filteredLots.length === 0 ? (
         <CatalogProductDescription description={item.description} />
