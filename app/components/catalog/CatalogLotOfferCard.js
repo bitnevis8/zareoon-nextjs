@@ -16,7 +16,7 @@ import {
 } from "../../utils/localize";
 import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
 import Link from "next/link";
-import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplier, lotSupplierHasPhone } from "../../utils/catalogLotSupplier";
+import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplierProfileSlug, getLotSupplierPageImage, getLotSupplier, lotSupplierHasPhone } from "../../utils/catalogLotSupplier";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
 import { getAllowedMeasurementUnits } from "../../utils/productCatalogSchema";
 import { buildHashtagSearchHref } from "../../utils/mobileSearchUtils";
@@ -32,6 +32,7 @@ import {
   catalogSurface,
   catalogText,
 } from "./catalogTheme";
+import { providerPublicDisplayUrl } from "@/app/utils/providerPublicPath";
 
 function DetailRow({ label, value, highlight = false }) {
   return (
@@ -78,23 +79,23 @@ function ChatIcon({ className = "h-4 w-4" }) {
   );
 }
 
-function SupplierAvatar({ supplier, label }) {
-  const avatar = resolveMediaUrl(supplier?.avatar);
+function SupplierAvatar({ imageSrc, label }) {
+  const avatar = resolveMediaUrl(imageSrc);
   const initial = (label || "?").trim().charAt(0) || "?";
   if (avatar) {
     return (
       <Image
         src={avatar}
         alt={label || ""}
-        width={44}
-        height={44}
+        width={48}
+        height={48}
         unoptimized
-        className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white"
+        className="h-12 w-12 shrink-0 rounded-xl object-cover ring-2 ring-white"
       />
     );
   }
   return (
-    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-700 text-sm font-bold text-white ring-2 ring-white">
+    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-sm font-bold text-white ring-2 ring-white">
       {initial}
     </span>
   );
@@ -142,8 +143,11 @@ export default function CatalogLotOfferCard({
   const supplier = getLotSupplierDisplay(lot, t);
   const supplierUser = getLotSupplier(lot);
   const supplierProfileUrl = getLotSupplierProfileUrl(lot);
+  const supplierSlug = getLotSupplierProfileSlug(lot);
+  const supplierPageImage = getLotSupplierPageImage(lot);
   const canRevealPhone = lotSupplierHasPhone(lot);
   const messageHref = buildDirectMessageHref(supplierUser?.id, { isLoggedIn: Boolean(auth?.user) });
+  const commercialDisplayUrl = supplierSlug ? providerPublicDisplayUrl(supplierSlug) : null;
 
   const unitOptions = useMemo(() => {
     const allowed = getAllowedMeasurementUnits(product);
@@ -210,44 +214,71 @@ export default function CatalogLotOfferCard({
     }
   };
 
-  const iconBtn =
-    "inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60";
-
   const supplierBlock =
     supplierUser && (supplier.name || messageHref || canRevealPhone || supplierProfileUrl) ? (
       <SectionCard title={t("supplier")}>
-        <div className="flex items-center gap-3">
-          <SupplierAvatar supplier={supplierUser} label={supplier.label} />
+        <div className="flex items-start gap-3">
+          {supplierProfileUrl ? (
+            <Link href={supplierProfileUrl} className="shrink-0" aria-label={t("viewCommercialPage")}>
+              <SupplierAvatar imageSrc={supplierPageImage} label={supplier.label} />
+            </Link>
+          ) : (
+            <SupplierAvatar imageSrc={supplierPageImage} label={supplier.label} />
+          )}
           <div className="min-w-0 flex-1">
             <p className={`truncate text-base font-bold ${catalogText.heading}`}>{supplier.label}</p>
-            <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{t("supplierChatHint")}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            {messageHref ? (
-              <Link href={messageHref} className={`${iconBtn} !border-emerald-200 !bg-emerald-50 !text-emerald-800`} title={t("sendMessage")} aria-label={t("sendMessage")}>
-                <ChatIcon className="h-4 w-4" />
-              </Link>
-            ) : null}
-            {canRevealPhone ? (
-              <button
-                type="button"
-                onClick={revealPhone}
-                disabled={phoneLoading}
-                className={`${iconBtn} !border-emerald-200 !bg-emerald-50 !text-emerald-800`}
-                aria-label={phone ? phone : t("showPhone")}
-                title={phone ? phone : t("showPhone")}
+            {supplierProfileUrl && commercialDisplayUrl ? (
+              <Link
+                href={supplierProfileUrl}
+                className="mt-1 inline-flex max-w-full items-center gap-1.5 text-[12px] font-semibold text-emerald-800 hover:underline"
+                dir="ltr"
+                title={t("viewCommercialPage")}
               >
-                <PhoneIcon className="h-4 w-4" />
-              </button>
-            ) : null}
-            {supplierProfileUrl ? (
-              <Link href={supplierProfileUrl} className={iconBtn} title={t("viewStore")} aria-label={t("viewStore")}>
-                <StoreIcon className="h-4 w-4" />
+                <StoreIcon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{commercialDisplayUrl}</span>
               </Link>
-            ) : null}
+            ) : (
+              <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{t("supplierChatHint")}</p>
+            )}
           </div>
         </div>
+
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {messageHref ? (
+            <Link
+              href={messageHref}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-[13px] font-bold text-emerald-900 transition hover:bg-emerald-100"
+            >
+              <ChatIcon className="h-4 w-4" />
+              {t("sendMessage")}
+            </Link>
+          ) : null}
+          {canRevealPhone ? (
+            <button
+              type="button"
+              onClick={revealPhone}
+              disabled={phoneLoading}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-800 transition hover:bg-slate-50 disabled:opacity-60"
+              title={phone ? phone : t("showPhone")}
+            >
+              <PhoneIcon className="h-4 w-4" />
+              {phone ? phone : t("showPhone")}
+            </button>
+          ) : null}
+          {supplierProfileUrl ? (
+            <Link
+              href={supplierProfileUrl}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-800 transition hover:bg-slate-50"
+            >
+              <StoreIcon className="h-4 w-4" />
+              {t("viewCommercialPage")}
+            </Link>
+          ) : null}
+        </div>
         {phoneError ? <p className="mt-2 text-[11px] text-rose-600">{phoneError}</p> : null}
+        {supplierProfileUrl ? (
+          <p className="mt-2.5 text-[11px] leading-5 text-slate-500">{t("supplierChatHint")}</p>
+        ) : null}
       </SectionCard>
     ) : null;
 
@@ -412,6 +443,10 @@ export default function CatalogLotOfferCard({
       >
         {placingLotId === lot.id ? "…" : t("addToCartAction")}
       </button>
+      <div className="mt-3 rounded-xl border border-emerald-100 bg-white/80 px-3 py-2.5">
+        <p className={`text-[11px] font-bold ${catalogText.accentStrong}`}>{t("cartProcessTitle")}</p>
+        <p className={`mt-1 text-[11px] leading-6 ${catalogText.body}`}>{t("cartProcessSteps")}</p>
+      </div>
     </SectionCard>
   );
 

@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { authFetch } from "@/app/utils/authHeaders";
-import { providerPublicPath } from "@/app/utils/providerPublicPath";
+import { providerPublicDisplayUrl, providerPublicPath } from "@/app/utils/providerPublicPath";
 
 function resolveShopPath(profile) {
   const slug = profile?.profileSlug?.trim();
@@ -12,19 +11,19 @@ function resolveShopPath(profile) {
   return providerPublicPath(slug);
 }
 
-function buildDisplayUrl(path) {
-  if (!path) return "";
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}${path}`;
-  }
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://zareoon.ir").replace(/\/$/, "");
-  return `${base}${path}`;
+function resolveShopTitle(profile) {
+  return (
+    String(profile?.displayName || "").trim() ||
+    String(profile?.headline || "").trim() ||
+    String(profile?.shopName || "").trim() ||
+    ""
+  );
 }
 
-/** فقط بعد از عضویت فروشنده و داشتن اسلاگ — مثل صفحه خدمات؛ لینک «تنظیم آدرس» نشان داده نمی‌شود */
+/** فقط بعد از عضویت فروشنده و داشتن اسلاگ — آدرس صفحه + نام فروشگاه */
 export default function SidebarSellerShopUrl({ user }) {
-  const t = useTranslations("layout.sidebar");
   const [shopPath, setShopPath] = useState(null);
+  const [shopTitle, setShopTitle] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,10 +32,16 @@ export default function SidebarSellerShopUrl({ user }) {
     authFetch("/api/tamin/me", { cache: "no-store" })
       .then((r) => r.json())
       .then((json) => {
-        if (!cancelled) setShopPath(resolveShopPath(json?.data));
+        if (cancelled) return;
+        const data = json?.data;
+        setShopPath(resolveShopPath(data));
+        setShopTitle(resolveShopTitle(data));
       })
       .catch(() => {
-        if (!cancelled) setShopPath(null);
+        if (!cancelled) {
+          setShopPath(null);
+          setShopTitle("");
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -47,20 +52,29 @@ export default function SidebarSellerShopUrl({ user }) {
     };
   }, [user?.id, user?.userId]);
 
-  const displayUrl = useMemo(() => buildDisplayUrl(shopPath), [shopPath]);
+  const displayUrl = useMemo(() => {
+    const slug = shopPath?.replace(/^\//, "");
+    return slug ? providerPublicDisplayUrl(decodeURIComponent(slug)) : "";
+  }, [shopPath]);
 
   if (loading || !shopPath) return null;
 
   return (
     <div className="border-b border-slate-200 px-3 py-3">
-      <p className="mb-1 text-[11px] font-semibold text-slate-500">{t("myShopUrl")}</p>
       <Link
         href={shopPath}
-        className="block truncate text-[13px] font-semibold leading-6 text-emerald-800 hover:text-emerald-950 hover:underline"
-        dir="ltr"
+        className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 transition hover:border-emerald-200 hover:bg-emerald-50/50"
         title={displayUrl}
       >
-        {displayUrl.replace(/^https?:\/\//, "")}
+        <span className="min-w-0 truncate text-[12px] font-bold text-slate-800">
+          {shopTitle || "فروشگاه"}
+        </span>
+        <code
+          dir="ltr"
+          className="max-w-[55%] shrink-0 truncate text-end font-mono text-[11px] font-medium text-emerald-700"
+        >
+          {displayUrl}
+        </code>
       </Link>
     </div>
   );

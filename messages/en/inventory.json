@@ -22,6 +22,7 @@
   },
   "filters": {
     "searchPlaceholder": "",
+    "search": "Search",
     "filters": "",
     "product": "",
     "allProducts": "",

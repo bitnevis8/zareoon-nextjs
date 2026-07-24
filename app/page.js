@@ -69,14 +69,18 @@ function HomeContent() {
     <main className="pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4" dir={isRTL ? "rtl" : "ltr"}>
       <HomeSectionNav />
       <section className="page-shell section-stack space-y-4 text-start sm:space-y-6 lg:space-y-8">
-        <div className="mt-3 space-y-1.5 text-center sm:mt-4 sm:space-y-2 lg:mt-5">
-          <HomeLanguageLogo />
-          <QuickSearchBox variant="homepage" />
-          <HomeIntroLines
-            introOrder={introOrder}
-            language={language}
-            siteIntroByLang={siteIntroByLang}
-          />
+        <div className="mt-3 text-center sm:mt-4 lg:mt-5">
+          <div className="space-y-2 sm:space-y-2.5">
+            <HomeLanguageLogo />
+            <QuickSearchBox variant="homepage" />
+          </div>
+          <div className="mt-3 sm:mt-3.5 lg:mt-4">
+            <HomeIntroLines
+              introOrder={introOrder}
+              language={language}
+              siteIntroByLang={siteIntroByLang}
+            />
+          </div>
         </div>
 
         <MainCategoryGrid className="w-full scroll-mt-20" id="product-categories" />

@@ -2,38 +2,78 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import CbmFreightCalculator from "@/app/components/CbmFreightCalculator";
 import HsCodeTariffPanel from "@/app/components/HsCodeTariffPanel";
+import IncotermsGuide from "@/app/components/incoterms/IncotermsGuide";
+import TradeUnitConverter from "@/app/components/units/TradeUnitConverter";
+import { TRADE_TOOLS } from "@/app/data/tradeToolsMeta";
 
 const TABS = [
   {
     id: "cbm",
-    short: "CBM",
-    label: "حجم و حمل بار",
-    title: "حجم و حمل بار · CBM",
-    panelTitle: "محاسبه حجم و حمل بار (CBM)",
-    blurb:
-      "محاسبه حجم، وزن و برآورد اولیه حمل بین‌المللی — قبل از ثبت سفارش یا استعلام قیمت.",
-    hint: "محاسبه بار",
+    short: TRADE_TOOLS.cbm.short,
+    label: TRADE_TOOLS.cbm.labelFa,
+    title: TRADE_TOOLS.cbm.labelFa,
+    panelTitle: TRADE_TOOLS.cbm.titleFa,
+    blurb: TRADE_TOOLS.cbm.taglineFa,
+    hint: "حجم و وزن حجمی",
+    href: TRADE_TOOLS.cbm.href,
   },
   {
     id: "hs",
-    short: "HS CODE",
-    label: "کد تعرفه",
-    title: "کد تعرفه · HS CODE",
-    panelTitle: "جستجوی کد تعرفه (HS CODE)",
-    blurb: "با کد یا شرح کالا، نرخ حقوق گمرکی و سود بازرگانی تعرفه ۱۴۰۵ را پیدا کنید.",
+    short: TRADE_TOOLS.hs.short,
+    label: TRADE_TOOLS.hs.labelFa,
+    title: TRADE_TOOLS.hs.labelFa,
+    panelTitle: TRADE_TOOLS.hs.titleFa,
+    blurb: TRADE_TOOLS.hs.taglineFa,
     hint: "حقوق گمرکی",
+    href: TRADE_TOOLS.hs.href,
+  },
+  {
+    id: "incoterms",
+    short: TRADE_TOOLS.incoterms.short,
+    label: TRADE_TOOLS.incoterms.labelFa,
+    title: TRADE_TOOLS.incoterms.labelFa,
+    panelTitle: TRADE_TOOLS.incoterms.titleFa,
+    blurb: TRADE_TOOLS.incoterms.taglineFa,
+    hint: "مسئولیت و ریسک",
+    href: TRADE_TOOLS.incoterms.href,
+  },
+  {
+    id: "units",
+    short: TRADE_TOOLS.units.short,
+    label: TRADE_TOOLS.units.labelFa,
+    title: TRADE_TOOLS.units.labelFa,
+    panelTitle: TRADE_TOOLS.units.titleFa,
+    blurb: TRADE_TOOLS.units.taglineFa,
+    hint: "وزن، حجم، حمل…",
+    href: TRADE_TOOLS.units.href,
+  },
+  {
+    id: "exchange",
+    short: TRADE_TOOLS.exchange.short,
+    label: TRADE_TOOLS.exchange.labelFa,
+    title: TRADE_TOOLS.exchange.titleFa,
+    panelTitle: TRADE_TOOLS.exchange.titleFa,
+    blurb: TRADE_TOOLS.exchange.taglineFa,
+    hint: "تبدیل و نرخ‌های به‌روز",
+    href: TRADE_TOOLS.exchange.href,
+    emphasize: true,
   },
 ];
 
 const GUIDES = {
   cbm: {
-    title: "راهنمای محاسبه حجم و حمل (CBM)",
+    title: "راهنمای محاسبه CBM و وزن حجمی",
     sections: [
       {
         heading: "این ابزار چه کاری می‌کند؟",
         body: "با وارد کردن تعداد و ابعاد بسته‌ها، حجم کل بار (CBM)، وزن کل، وزن حجمی و وزن قابل‌محاسبه برای کرایه را می‌بینید. همچنین پیشنهاد تقریبی روش حمل (هوایی، دریایی، زمینی یا ریلی) و مناسب بودن خرده‌بار (LCL) یا کانتینر کامل (FCL) نمایش داده می‌شود.",
+      },
+      {
+        heading: "وزن حجمی چیست؟",
+        body: "وزن حجمی بر اساس حجم بار و ضریب روش حمل محاسبه می‌شود (مثلاً هوایی ≈ CBM × ۱۶۷، دریایی ≈ CBM × ۱۰۰۰). کرایه معمولاً بر اساس بیشترین مقدار بین وزن واقعی و وزن حجمی (وزن قابل‌محاسبه) تعیین می‌شود.",
       },
       {
         heading: "چگونه استفاده کنم؟",
@@ -57,24 +97,79 @@ const GUIDES = {
     title: "راهنمای جستجوی کد HS و تعرفه",
     sections: [
       {
-        heading: "کد HS چیست؟",
-        body: "کد HS (Harmonized System) استاندارد بین‌المللی طبقه‌بندی کالا در گمرک است. با دانستن کد یا شرح کالا می‌توانید نرخ حقوق گمرکی و سود بازرگانی ردیف تعرفه را ببینید.",
+        heading: "این ابزار برای چیست؟",
+        body: "کد HS استاندارد بین‌المللی طبقه‌بندی کالا در گمرک است. با کد یا شرح کالا، ردیف‌های تعرفه ۱۴۰۵ و نرخ حقوق گمرکی و سود بازرگانی را پیدا می‌کنید.",
       },
       {
         heading: "چگونه جستجو کنم؟",
-        body: "کد تعرفه یا بخشی از شرح کالا را در کادر بنویسید (حداقل ۲ نویسه) و دکمه «جستجو» را بزنید. جستجو به‌صورت خودکار انجام نمی‌شود تا بتوانید متن را کامل کنید.",
-      },
-      {
-        heading: "مثال",
-        body: "می‌توانید کد عددی مانند 080410 را وارد کنید، یا شرحی مثل «خرما» را جستجو کنید تا ردیف‌های مرتبط تعرفه ۱۴۰۵ نمایش داده شود.",
+        body: "کد تعرفه یا بخشی از شرح کالا را بنویسید (حداقل ۲ نویسه) و «جستجو» را بزنید. می‌توانید از پیشنهادهای نمونه مثل «خرما» هم شروع کنید.",
       },
       {
         heading: "نتایج چه معنایی دارند؟",
-        body: "در هر نتیجه، کد HS، درصد حقوق گمرکی و درصد سود بازرگانی به‌همراه شرح فارسی کالا نشان داده می‌شود. ملاحظات بخشنامه‌ای را هم از پایین پنل می‌توانید باز کنید.",
+        body: "در هر نتیجه، کد HS، درصد حقوق گمرکی و درصد سود بازرگانی به‌همراه شرح فارسی کالا نشان داده می‌شود. ملاحظات بخشنامه‌ای را از پایین پنل باز کنید.",
       },
       {
         heading: "نکته مهم",
-        body: "اطلاعات بر اساس تعرفه سال ۱۴۰۵ است. برای تصمیم نهایی گمرکی، با مشاور یا شرکت ترخیص هماهنگ کنید؛ شرایط خاص کالا ممکن است نرخ نهایی را تغییر دهد.",
+        body: "اطلاعات بر اساس تعرفه سال ۱۴۰۵ است. برای تصمیم نهایی با مشاور یا شرکت ترخیص هماهنگ کنید.",
+      },
+    ],
+  },
+  incoterms: {
+    title: "راهنمای شرایط تحویل (Incoterms® 2020)",
+    sections: [
+      {
+        heading: "این ابزار برای چیست؟",
+        body: "قبل از بستن قرارداد واردات یا صادرات، ببینید در هر شرط تحویل هزینه حمل، بیمه، ترخیص و ریسک با خریدار است یا فروشنده. یازده شرط رسمی ۲۰۲۰ را می‌توانید مرور و چندتایشان را مقایسه کنید.",
+      },
+      {
+        heading: "چگونه مقایسه کنم؟",
+        body: "۱) شرط اول را باز کنید و «افزودن به مقایسه» را بزنید. ۲) شرط دوم را هم اضافه کنید — جدول مقایسه خودکار باز می‌شود. ۳) از نوار پایین صفحه یا تب «مقایسه» هم می‌توانید لیست را ببینید.",
+      },
+      {
+        heading: "مثال کاربردی",
+        body: "در FOB فروشنده تا بارگیری روی کشتی در بندر مبدأ مسئول است؛ حمل اصلی و بیمه معمولاً با خریدار است. در CIF فروشنده کرایه و بیمه حداقلی تا بندر مقصد را می‌پردازد، ولی ریسک از روی کشتی مبدأ به خریدار منتقل می‌شود.",
+      },
+      {
+        heading: "نکته مهم",
+        body: "Incoterms® علامت تجاری ICC است. این راهنما آموزشی است و جایگزین متن رسمی یا مشاوره حقوقی نیست. شرط را همیشه صریح در قرارداد بنویسید.",
+      },
+    ],
+  },
+  units: {
+    title: "راهنمای تبدیل واحدهای بازرگانی",
+    sections: [
+      {
+        heading: "این ابزار برای چیست؟",
+        body: "واحدهای پرکاربرد تجارت و لجستیک را بین یکدیگر تبدیل می‌کند: وزن، طول، حجم، دما، فشار، کانتینر، کشاورزی و بیشتر — با نتیجه لحظه‌ای.",
+      },
+      {
+        heading: "چگونه استفاده کنم؟",
+        body: "۱) دسته را انتخاب کنید یا واحد را در جستجوی بالا پیدا کنید. ۲) مقدار را وارد کنید. ۳) مبدأ و مقصد را انتخاب کنید. ۴) با دکمه جابه‌جایی، جهت تبدیل را عوض کنید.",
+      },
+      {
+        heading: "مثال",
+        body: "۱۰۰۰ کیلوگرم = ۱ تن متریک. یا برای کانتینر، ۱ FEU معمولاً معادل ۲ TEU در نظر گرفته می‌شود.",
+      },
+      {
+        heading: "نکته مهم",
+        body: "ضرایب استاندارد بین‌المللی هستند. واحدهای تقریبی یا قراردادی ممکن است در توافق محلی متفاوت باشند.",
+      },
+    ],
+  },
+  exchange: {
+    title: "راهنمای محاسبه‌گر نرخ ارز",
+    sections: [
+      {
+        heading: "این ابزار برای چیست؟",
+        body: "نرخ ارزهای رایج را می‌بینید و مبلغ را بین ارزها تبدیل می‌کنید — مناسب برآورد هزینه واردات، صادرات و قراردادهای ارزی.",
+      },
+      {
+        heading: "چگونه استفاده کنم؟",
+        body: "صفحهٔ کامل نرخ ارز را باز کنید، ارز مبدأ و مقصد را انتخاب کنید، مبلغ را وارد کنید و نتیجه تبدیل را ببینید. جدول نرخ‌ها هم در همان صفحه به‌روز می‌شود.",
+      },
+      {
+        heading: "نکته مهم",
+        body: "نرخ‌ها برای برآورد اولیه است و ممکن است با نرخ قطعی بانک یا صرافی متفاوت باشد.",
       },
     ],
   },
@@ -99,6 +194,42 @@ function DocIcon({ className = "h-4 w-4" }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
+    </svg>
+  );
+}
+
+function RouteIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+      />
+    </svg>
+  );
+}
+
+function ConvertIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"
+      />
+    </svg>
+  );
+}
+
+function CurrencyIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
   );
@@ -196,6 +327,8 @@ export default function TradeToolsPanel({ className = "" }) {
   const [guideOpen, setGuideOpen] = useState(false);
   const cbmRef = useRef(null);
   const hsRef = useRef(null);
+  const incotermsRef = useRef(null);
+  const unitsRef = useRef(null);
   const active = TABS.find((t) => t.id === tab) || null;
   const isOpen = !!active;
 
@@ -208,6 +341,16 @@ export default function TradeToolsPanel({ className = "" }) {
   const clearActiveForm = () => {
     if (tab === "cbm") cbmRef.current?.clearForm?.();
     else if (tab === "hs") hsRef.current?.clearForm?.();
+    else if (tab === "incoterms") incotermsRef.current?.clearForm?.();
+    else if (tab === "units") unitsRef.current?.clearForm?.();
+  };
+
+  const tabIcon = (id) => {
+    if (id === "cbm") return CubeIcon;
+    if (id === "hs") return DocIcon;
+    if (id === "incoterms") return RouteIcon;
+    if (id === "exchange") return CurrencyIcon;
+    return ConvertIcon;
   };
 
   return (
@@ -237,7 +380,7 @@ export default function TradeToolsPanel({ className = "" }) {
               </h2>
               {!isOpen ? (
                 <p className="mt-0.5 text-[11px] leading-5 text-slate-500 sm:text-xs">
-                  برای شروع، یکی از ابزارها را انتخاب کنید.
+                  CBM، کد تعرفه، شرایط تحویل، تبدیل واحد و نرخ ارز — هر کدام صفحهٔ کامل هم دارد.
                 </p>
               ) : null}
             </div>
@@ -246,11 +389,12 @@ export default function TradeToolsPanel({ className = "" }) {
           <div
             role="tablist"
             aria-label="انتخاب ابزار"
-            className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
+            className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-3"
           >
             {TABS.map((t) => {
               const selected = tab === t.id;
-              const Icon = t.id === "cbm" ? CubeIcon : DocIcon;
+              const Icon = tabIcon(t.id);
+              const bold = !!t.emphasize;
               return (
                 <button
                   key={t.id}
@@ -264,12 +408,14 @@ export default function TradeToolsPanel({ className = "" }) {
                   className={`flex min-h-[4.25rem] items-center gap-3 rounded-2xl border px-3.5 py-3 text-start transition sm:min-h-[4.5rem] sm:gap-3.5 sm:px-4 sm:py-3.5 ${
                     selected
                       ? "border-teal-300 bg-white text-slate-900 shadow-md ring-2 ring-teal-100"
-                      : "border-slate-200/90 bg-white/90 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white hover:shadow-md"
+                      : bold
+                        ? "border-teal-300/90 bg-gradient-to-br from-teal-50 via-white to-white text-slate-900 shadow-md ring-1 ring-teal-100 hover:border-teal-400 hover:shadow-lg"
+                        : "border-slate-200/90 bg-white/90 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white hover:shadow-md"
                   }`}
                 >
                   <span
                     className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition sm:h-12 sm:w-12 ${
-                      selected
+                      selected || bold
                         ? "bg-teal-700 text-white shadow-sm"
                         : "bg-slate-100 text-slate-600 ring-1 ring-slate-200/80"
                     }`}
@@ -277,7 +423,11 @@ export default function TradeToolsPanel({ className = "" }) {
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-extrabold leading-snug text-slate-900 sm:text-sm">
+                    <span
+                      className={`block leading-snug text-slate-900 sm:text-sm ${
+                        bold ? "text-[14px] font-black" : "text-[13px] font-extrabold"
+                      }`}
+                    >
                       {t.title}
                     </span>
                     <span className="mt-1 block text-[11px] font-medium leading-5 text-slate-500 sm:text-xs">
@@ -287,7 +437,7 @@ export default function TradeToolsPanel({ className = "" }) {
                   <span
                     dir="ltr"
                     className={`shrink-0 rounded-lg px-2 py-1 font-mono text-[10px] font-bold tracking-wide sm:text-[11px] ${
-                      selected ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
+                      selected || bold ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
                     }`}
                   >
                     {t.short}
@@ -311,6 +461,12 @@ export default function TradeToolsPanel({ className = "" }) {
                       <HelpIcon className="h-3.5 w-3.5" />
                       راهنما
                     </button>
+                    <Link
+                      href={active.href}
+                      className="inline-flex min-h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 transition hover:border-teal-300 hover:text-teal-800 sm:text-xs"
+                    >
+                      صفحه کامل
+                    </Link>
                   </div>
                   <p className="max-w-2xl text-[13px] leading-6 text-slate-600 sm:text-sm sm:leading-7">{active.blurb}</p>
                 </div>
@@ -341,7 +497,28 @@ export default function TradeToolsPanel({ className = "" }) {
                 role="tabpanel"
                 aria-labelledby={`${titleId}-tab-${tab}`}
               >
-                {tab === "cbm" ? <CbmFreightCalculator ref={cbmRef} /> : <HsCodeTariffPanel ref={hsRef} />}
+                {tab === "cbm" ? (
+                  <CbmFreightCalculator ref={cbmRef} embedded />
+                ) : tab === "hs" ? (
+                  <HsCodeTariffPanel ref={hsRef} embedded />
+                ) : tab === "incoterms" ? (
+                  <IncotermsGuide ref={incotermsRef} embedded />
+                ) : tab === "exchange" ? (
+                  <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50/80 via-white to-white px-4 py-5 sm:px-5 sm:py-6">
+                    <p className="text-sm font-bold text-slate-900 sm:text-base">{TRADE_TOOLS.exchange.titleFa}</p>
+                    <p className="mt-2 max-w-2xl text-[13px] leading-7 text-slate-600 sm:text-sm">
+                      {TRADE_TOOLS.exchange.descriptionFa}
+                    </p>
+                    <Link
+                      href="/exchange-rates#converter"
+                      className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-700 px-4 text-sm font-bold text-white transition hover:bg-teal-800"
+                    >
+                      باز کردن محاسبه‌گر نرخ ارز
+                    </Link>
+                  </div>
+                ) : (
+                  <TradeUnitConverter ref={unitsRef} embedded />
+                )}
               </div>
             </div>
           ) : null}

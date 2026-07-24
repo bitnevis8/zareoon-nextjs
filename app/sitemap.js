@@ -16,6 +16,10 @@ export default function sitemap() {
     { path: "/help", priority: 0.6, changeFrequency: "monthly" },
     { path: "/trade-services", priority: 0.8, changeFrequency: "weekly" },
     { path: "/exchange-rates", priority: 0.6, changeFrequency: "daily" },
+    { path: "/incoterms", priority: 0.75, changeFrequency: "monthly" },
+    { path: "/unit-converter", priority: 0.75, changeFrequency: "monthly" },
+    { path: "/hs-code", priority: 0.75, changeFrequency: "monthly" },
+    { path: "/cbm", priority: 0.75, changeFrequency: "monthly" },
   ];
 
   return staticRoutes.map(({ path, priority, changeFrequency }) => ({

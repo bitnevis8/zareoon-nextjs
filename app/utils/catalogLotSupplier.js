@@ -13,6 +13,20 @@ export function getLotSupplierProfileUrl(lot) {
   return providerPublicPath(slug);
 }
 
+/** اسلاگ صفحهٔ تجاری تأمین‌کننده (نه شناسهٔ عددی کاتالوگ) */
+export function getLotSupplierProfileSlug(lot) {
+  const supplier = getLotSupplier(lot);
+  const slug = supplier?.account?.profileSlug || supplier?.profileSlug;
+  if (!slug || /^\d+$/.test(String(slug))) return null;
+  return String(slug).trim();
+}
+
+/** تصویر صفحهٔ تجاری (کاور فروشگاه) یا در صورت نبود، آواتار کاربر */
+export function getLotSupplierPageImage(lot) {
+  const supplier = getLotSupplier(lot);
+  return supplier?.account?.coverImage || supplier?.avatar || null;
+}
+
 /** نام فروشگاه / صفحه عمومی — نه نام شخصی */
 export function getLotSupplierDisplayName(lot) {
   const supplier = getLotSupplier(lot);

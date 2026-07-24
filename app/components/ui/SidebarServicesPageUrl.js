@@ -2,39 +2,40 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { providerPublicPath } from "@/app/utils/providerPublicPath";
+import { providerPublicDisplayUrl, providerPublicPath } from "@/app/utils/providerPublicPath";
 
-function buildDisplayUrl(path) {
-  if (!path) return "";
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}${path}`;
-  }
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://zareoon.ir").replace(/\/$/, "");
-  return `${base}${path}`;
-}
-
-/** فقط بعد از عضویت خدمات‌دهنده و داشتن اسلاگ انگلیسی */
+/** فقط بعد از عضویت خدمات‌دهنده و داشتن اسلاگ — آدرس صفحه + عنوان */
 export default function SidebarServicesPageUrl({ provider }) {
-  const t = useTranslations("layout.sidebar");
   const publicPath = provider?.profileSlug ? providerPublicPath(provider.profileSlug) : null;
-  const displayUrl = useMemo(() => buildDisplayUrl(publicPath), [publicPath]);
+  const title =
+    String(provider?.displayName || "").trim() ||
+    String(provider?.companyName || "").trim() ||
+    "خدمات";
+
+  const displayUrl = useMemo(() => {
+    if (!provider?.profileSlug) return "";
+    return providerPublicDisplayUrl(String(provider.profileSlug).trim());
+  }, [provider?.profileSlug]);
 
   if (!publicPath) return null;
 
   return (
     <div className="border-b border-slate-200 px-3 py-3">
-      <p className="mb-1 text-[11px] font-semibold text-slate-500">{t("myServicesPage")}</p>
       {provider?.isPublic === false ? (
         <p className="text-[12px] font-medium text-amber-700">صفحه غیرفعال است</p>
       ) : (
         <Link
           href={publicPath}
-          className="block truncate text-[13px] font-semibold leading-6 text-emerald-800 hover:text-emerald-950 hover:underline"
-          dir="ltr"
+          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 transition hover:border-emerald-200 hover:bg-emerald-50/50"
           title={displayUrl}
         >
-          {displayUrl.replace(/^https?:\/\//, "")}
+          <span className="min-w-0 truncate text-[12px] font-bold text-slate-800">{title}</span>
+          <code
+            dir="ltr"
+            className="max-w-[55%] shrink-0 truncate text-end font-mono text-[11px] font-medium text-emerald-700"
+          >
+            {displayUrl}
+          </code>
         </Link>
       )}
     </div>

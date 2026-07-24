@@ -6,6 +6,7 @@ export const DASHBOARD_PERSONAS = {
   BUYER: "buyer",
   SELLER: "seller",
   SERVICES: "services",
+  POSTS: "posts",
 };
 
 export const VALID_DASHBOARD_PERSONAS = [
@@ -13,6 +14,7 @@ export const VALID_DASHBOARD_PERSONAS = [
   DASHBOARD_PERSONAS.BUYER,
   DASHBOARD_PERSONAS.SELLER,
   DASHBOARD_PERSONAS.SERVICES,
+  DASHBOARD_PERSONAS.POSTS,
 ];
 
 /** Normalize legacy stored persona values */
@@ -27,7 +29,7 @@ export function canActAsSeller(user) {
 }
 
 export function getDefaultDashboardPersona(user) {
-  // هر کاربر لاگین‌شده پیش‌فرض خریدار است؛ فروشنده/خدمات با انتخاب نقش در سایدبار
-  if (!user) return DASHBOARD_PERSONAS.APPLICANT;
-  return DASHBOARD_PERSONAS.APPLICANT;
+  // پیش‌فرض: فروشگاه من
+  if (!user) return DASHBOARD_PERSONAS.SELLER;
+  return DASHBOARD_PERSONAS.SELLER;
 }

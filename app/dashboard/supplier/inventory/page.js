@@ -33,6 +33,7 @@ export default function InventoryListPage() {
   const showFarmerFilter = !isOwnScope && isAdmin(user);
 
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [viewMode, setViewMode] = useState("cards");
   const [selectedLot, setSelectedLot] = useState(null);
   const [editForm, setEditForm] = useState({ ...INITIAL_FORM });
   const [editAttributeDefs, setEditAttributeDefs] = useState([]);
@@ -210,6 +211,8 @@ export default function InventoryListPage() {
           totalCount={items.length}
           activeCount={activeFilterCount}
           onClear={() => setFilters(DEFAULT_FILTERS)}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
       </Section>
 
@@ -242,32 +245,31 @@ export default function InventoryListPage() {
               </button>
             )}
           </div>
+        ) : viewMode === "cards" ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredItems.map((x) => (
+              <InventoryLotCard
+                key={x.id}
+                lot={x}
+                productName={productName(x.productId)}
+                farmerName={farmerNameMap.get(x.farmerId)}
+                onView={openView}
+                onEdit={openEdit}
+                onMedia={openMedia}
+                onDelete={remove}
+              />
+            ))}
+          </div>
         ) : (
-          <>
-            <div className="space-y-3 lg:hidden">
-              {filteredItems.map((x) => (
-                <InventoryLotCard
-                  key={x.id}
-                  lot={x}
-                  productName={productName(x.productId)}
-                  farmerName={farmerNameMap.get(x.farmerId)}
-                  onView={openView}
-                  onEdit={openEdit}
-                  onMedia={openMedia}
-                  onDelete={remove}
-                />
-              ))}
-            </div>
-            <InventoryLotTable
-              items={filteredItems}
-              products={products}
-              farmerNameMap={farmerNameMap}
-              onView={openView}
-              onEdit={openEdit}
-              onMedia={openMedia}
-              onDelete={remove}
-            />
-          </>
+          <InventoryLotTable
+            items={filteredItems}
+            products={products}
+            farmerNameMap={farmerNameMap}
+            onView={openView}
+            onEdit={openEdit}
+            onMedia={openMedia}
+            onDelete={remove}
+          />
         )}
       </Section>
 

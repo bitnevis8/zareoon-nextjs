@@ -27,6 +27,26 @@ function Divider() {
   return <div className="my-4 border-t border-slate-100 sm:my-5" />;
 }
 
+function IdDocumentIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6a.75.75 0 010 1.5H7A.75.75 0 017 5zm0 3h6a.75.75 0 010 1.5H7A.75.75 0 017 8zm0 3h3.5a.75.75 0 010 1.5H7A.75.75 0 017 11z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function ProfileTabIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+    </svg>
+  );
+}
+
 export default function AccountPageContent() {
   const { user, updateUser, checkAuthStatus } = useAuth();
   const { t, isRTL } = useLanguage();
@@ -130,8 +150,8 @@ export default function AccountPageContent() {
   };
 
   const tabs = [
-    { id: "profile", label: t("profile"), icon: "👤" },
-    { id: "documents", label: t("accountTabDocuments"), icon: "📄" },
+    { id: "profile", label: t("profile"), accent: false },
+    { id: "documents", label: t("accountTabDocuments"), accent: true },
   ];
 
   if (loadingProfile) {
@@ -176,22 +196,49 @@ export default function AccountPageContent() {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
         <div className="border-b border-slate-100 bg-slate-50/60 px-2 pt-2 sm:px-4">
-          <nav className="flex gap-1 overflow-x-auto pb-0.5" aria-label={t("account")}>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-t-xl border px-3 py-2.5 text-xs font-semibold transition sm:px-4 sm:text-sm ${
-                  activeTab === tab.id
-                    ? "border-slate-200 border-b-white bg-white text-emerald-700"
-                    : "border-transparent text-slate-500 hover:bg-white/70 hover:text-slate-700"
-                }`}
-              >
-                <span aria-hidden>{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+          <nav className="flex gap-1.5 overflow-x-auto pb-0.5" aria-label={t("account")}>
+            {tabs.map((tab) => {
+              const selected = activeTab === tab.id;
+              if (tab.accent) {
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-t-xl border px-3 py-2.5 text-xs font-black transition sm:px-4 sm:text-sm ${
+                      selected
+                        ? "border-amber-300 border-b-white bg-white text-amber-800 shadow-sm"
+                        : "border-amber-200/80 bg-amber-50 text-amber-800 hover:bg-amber-100 hover:text-amber-950"
+                    }`}
+                  >
+                    <span
+                      className={`inline-flex h-7 w-7 items-center justify-center rounded-lg ${
+                        selected ? "bg-amber-100 text-amber-700" : "bg-amber-200/70 text-amber-800"
+                      }`}
+                    >
+                      <IdDocumentIcon className="h-4 w-4" />
+                    </span>
+                    {tab.label}
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-t-xl border px-3 py-2.5 text-xs font-semibold transition sm:px-4 sm:text-sm ${
+                    selected
+                      ? "border-slate-200 border-b-white bg-white text-emerald-700"
+                      : "border-transparent text-slate-500 hover:bg-white/70 hover:text-slate-700"
+                  }`}
+                >
+                  <ProfileTabIcon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
@@ -204,6 +251,8 @@ export default function AccountPageContent() {
                     currentAvatar={user?.avatar}
                     onUploadSuccess={() => checkAuthStatus()}
                     variant="profile"
+                    purpose="user"
+                    hint="دایره — پس از انتخاب، ناحیه نمایش را با کراپ تنظیم کنید"
                   />
                   {displayName ? (
                     <p className="mt-4 text-center text-sm font-bold text-slate-800 lg:mt-5">{displayName}</p>

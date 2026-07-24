@@ -27,12 +27,14 @@
     "providerMembershipHint": "",
     "sellerMembership": "",
     "sellerMembershipHint": "",
-    "myServicesPage": "",
-    "servicePageSettings": "",
-    "customerOrders": "",
-    "incomingServiceRequests": "",
-    "myShopUrl": "",
-    "configureShopUrl": ""
+    "myServicesPage": "My services page",
+    "servicePageSettings": "Edit my services",
+    "customerOrders": "Customer orders",
+    "incomingServiceRequests": "Incoming requests",
+    "myShopUrl": "Shop URL",
+    "configureShopUrl": "Set shop URL",
+    "commercialPageShop": "My business page (Shop)",
+    "commercialPageServices": "My business page (Services)"
   },
   "emailVerification": {
     "title": "",

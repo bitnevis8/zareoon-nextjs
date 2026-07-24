@@ -11,9 +11,10 @@ import { useDashboardPersona } from '@/app/context/DashboardPersonaContext';
 import { useMyTradeServiceProvider } from '@/app/hooks/useMyTradeServiceProvider';
 import { usePendingTradeProviderCount } from '@/app/hooks/usePendingTradeProviderCount';
 import DashboardPersonaSwitcher from '@/app/components/dashboard/DashboardPersonaSwitcher';
-import SidebarMobileUserHeader from '@/app/components/ui/SidebarMobileUserHeader';
+import DashboardGuideModal, { DashboardGuideTrigger } from '@/app/components/dashboard/DashboardGuideModal';
 import SidebarSellerShopUrl from '@/app/components/ui/SidebarSellerShopUrl';
 import SidebarServicesPageUrl from '@/app/components/ui/SidebarServicesPageUrl';
+import SidebarPostsPageUrl from '@/app/components/ui/SidebarPostsPageUrl';
 import SidebarServicesSection from '@/app/components/ui/SidebarServicesSection';
 import SidebarSellerSection from '@/app/components/ui/SidebarSellerSection';
 import { SidebarIcon } from '@/app/components/ui/SidebarIcons';
@@ -29,115 +30,115 @@ function useSidebarMenus() {
         {
           id: 'users',
           title: t('admin.userManagement'),
+          icon: 'users',
           submenu: [
             { title: t('admin.usersList'), path: '/dashboard/user-management/users', icon: 'profile' },
-            { title: t('admin.rolesList'), path: '/dashboard/user-management/roles', icon: 'list' },
-          ],
-        },
-        {
-          id: 'supply',
-          title: t('admin.supplyManagement'),
-          submenu: [
-            { title: t('admin.productCategories'), path: '/dashboard/supplier/products', icon: 'products' },
-            { title: t('admin.productAttributes'), path: '/dashboard/supplier/attributes', icon: 'list' },
-            { title: t('admin.inventoryList'), path: '/dashboard/supplier/inventory', icon: 'products' },
-            { title: t('admin.createInventory'), path: '/dashboard/supplier/inventory/create', icon: 'plus' },
-            { title: t('admin.orderManagement'), path: '/dashboard/order-management', icon: 'orders' },
-            { title: t('admin.homepageOrder'), path: '/dashboard/homepage-order', icon: 'list' },
-            { title: t('admin.escrowSettings'), path: '/dashboard/escrow-settings', icon: 'escrow' },
+            { title: t('admin.rolesList'), path: '/dashboard/user-management/roles', icon: 'roles' },
           ],
         },
         {
           id: 'services',
           title: t('admin.servicesManagement'),
+          icon: 'services',
           submenu: [
             { title: t('admin.providerRequests'), path: '/dashboard/trade-service-provider-requests', icon: 'inbox' },
-            { title: t('admin.providersList'), path: '/dashboard/trade-service-providers', icon: 'profile' },
-            { title: t('admin.serviceCategories'), path: '/dashboard/service-categories', icon: 'list' },
-            { title: t('admin.settings'), path: '/dashboard/settings', icon: 'settings' },
+            { title: t('admin.providersList'), path: '/dashboard/trade-service-providers', icon: 'providers' },
+            { title: t('admin.serviceCategories'), path: '/dashboard/service-categories', icon: 'categories' },
+            { title: t('admin.settings'), path: '/dashboard/settings', icon: 'sliders' },
           ],
         },
         {
           id: 'site-settings',
           title: t('admin.siteSettings'),
+          icon: 'globe',
           submenu: [
-            { title: t('admin.siteLanguages'), path: '/dashboard/site-settings/languages', icon: 'settings' },
-            { title: t('admin.cacheRedis'), path: '/dashboard/site-settings/cache-redis', icon: 'settings' },
-            { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'list' },
-            { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'list' },
-            { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'home' },
-            { title: t('admin.backupRestore'), path: '/dashboard/site-settings/backup', icon: 'settings' },
+            { title: t('admin.siteLanguages'), path: '/dashboard/site-settings/languages', icon: 'language' },
+            { title: t('admin.cacheRedis'), path: '/dashboard/site-settings/cache-redis', icon: 'database' },
+            { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'block' },
+            { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'link' },
+            { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'pages' },
+            { title: t('admin.backupRestore'), path: '/dashboard/site-settings/backup', icon: 'backup' },
+          ],
+        },
+        {
+          id: 'supply',
+          title: t('admin.supplyManagement'),
+          icon: 'supply',
+          submenu: [
+            { title: t('admin.productCategories'), path: '/dashboard/supplier/products', icon: 'categories' },
+            { title: t('admin.productAttributes'), path: '/dashboard/supplier/attributes', icon: 'attributes' },
+            { title: t('admin.inventoryList'), path: '/dashboard/supplier/inventory', icon: 'inventory' },
+            { title: t('admin.createInventory'), path: '/dashboard/supplier/inventory/create', icon: 'plus' },
+            { title: t('admin.orderManagement'), path: '/dashboard/order-management', icon: 'orders' },
+            { title: t('admin.homepageOrder'), path: '/dashboard/homepage-order', icon: 'layout' },
+            { title: t('admin.escrowSettings'), path: '/dashboard/escrow-settings', icon: 'escrow' },
           ],
         },
       ],
       adminDashboardLink: {
         title: t('admin.managementDashboard'),
         path: '/dashboard/management',
-        icon: 'home',
+        icon: 'chart',
       },
       sellerMenuLinksPrimary: [
-        { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own', icon: 'products' },
+        { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own', icon: 'inventory' },
         { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own', icon: 'plus' },
         { title: t('customerOrders'), path: '/dashboard/supplier/orders?scope=own', icon: 'orders' },
-        { title: t('shopSettings'), path: '/dashboard/supplier-profile', icon: 'settings' },
+        { title: t('shopSettings'), path: '/dashboard/supplier-profile', icon: 'store' },
       ],
       sellerMenuLinksSecondary: [
         { title: t('incomingToMyProducts'), path: '/dashboard/incoming-requests', icon: 'inbox' },
       ],
-      applicantMenuLinksBeforeEscrow: [
-        { title: t('submitRequest'), path: '/dashboard/submit-request', icon: 'request' },
-        { title: t('myRequests'), path: '/dashboard/applicant-requests', icon: 'list' },
-      ],
-      applicantMenuLinksAfterEscrow: [
-        { title: t('cart'), path: '/cart', icon: 'cart' },
-        { title: t('myOrders'), path: '/dashboard/my-orders', icon: 'orders' },
-      ],
       primaryLinks: [{ title: t('dashboard'), path: '/dashboard', icon: 'home' }],
       escrowMenuTitle: t('escrow'),
-      sectionApplicant: t('sections.applicant'),
       sectionAdmin: t('sections.admin'),
     }),
     [t]
   );
 }
 
-function NavItem({ href, label, active, onClick, nested = false, badge = 0, icon }) {
+function NavItem({ href, label, active, onClick, nested = false, badge = 0, icon, compact = false }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`flex h-9 items-center gap-2.5 rounded-md px-3 text-[13px] font-medium transition-colors ${
-        nested ? 'mr-3' : ''
+      title={label}
+      className={`flex h-9 items-center rounded-md text-[13px] font-medium transition-colors ${
+        compact ? "justify-center px-1.5" : nested ? "mr-3 gap-2.5 px-3" : "gap-2.5 px-3"
       } ${
         active
-          ? 'bg-emerald-50 text-emerald-800'
-          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          ? "bg-emerald-50 text-emerald-800"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
       {icon ? (
-        <span className={`shrink-0 ${active ? 'text-emerald-700' : 'text-slate-400'}`}>
+        <span className={`relative shrink-0 ${active ? "text-emerald-700" : "text-slate-400"}`}>
           <SidebarIcon name={icon} />
+          {compact && badge > 0 ? (
+            <span className="absolute -end-1.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-0.5 text-[9px] font-bold text-white">
+              {badge > 99 ? "99+" : badge}
+            </span>
+          ) : null}
         </span>
       ) : (
-        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${active ? 'bg-emerald-600' : 'bg-slate-300'}`} />
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${active ? "bg-emerald-600" : "bg-slate-300"}`} />
       )}
-      <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-        <span className="truncate">{label}</span>
-        {badge > 0 ? (
-          <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-none text-white">
-            {badge > 99 ? '99+' : badge.toLocaleString('fa-IR')}
-          </span>
-        ) : null}
-      </span>
+      {!compact ? (
+        <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+          <span className="truncate">{label}</span>
+          {badge > 0 ? (
+            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-none text-white">
+              {badge > 99 ? "99+" : badge.toLocaleString("fa-IR")}
+            </span>
+          ) : null}
+        </span>
+      ) : null}
     </Link>
   );
 }
 
-function MenuDivider() {
-  return <hr className="mx-3 my-2 border-slate-200" />;
-}
-
-function SectionLabel({ children }) {
+function SectionLabel({ children, compact = false }) {
+  if (compact) return null;
   return (
     <p className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
       {children}
@@ -145,28 +146,54 @@ function SectionLabel({ children }) {
   );
 }
 
-function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick, badge = 0, itemBadges = {} }) {
-  const expanded = openMenu === section.id;
+function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick, badge = 0, itemBadges = {}, compact = false }) {
+  const expanded = !compact && openMenu === section.id;
   const sectionActive = section.submenu.some((item) => isActive(item.path));
+
+  if (compact) {
+    return (
+      <div className="space-y-0.5 px-1.5">
+        {section.submenu.map((item) => (
+          <NavItem
+            key={item.path}
+            href={item.path}
+            label={item.title}
+            active={isActive(item.path)}
+            onClick={onLinkClick}
+            badge={itemBadges[item.path] || 0}
+            icon={item.icon || section.icon}
+            compact
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="px-2">
       <button
         type="button"
         onClick={() => onToggle(section.id)}
-        className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-[13px] font-medium transition-colors ${
-          sectionActive ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100'
+        className={`flex h-9 w-full items-center justify-between gap-2 rounded-md px-3 text-[13px] font-medium transition-colors ${
+          sectionActive ? "bg-emerald-50 text-emerald-800" : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
         }`}
       >
-        <span className="flex min-w-0 items-center gap-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2.5">
+          {section.icon ? (
+            <span className={`shrink-0 ${sectionActive ? "text-emerald-700" : "text-slate-400"}`}>
+              <SidebarIcon name={section.icon} />
+            </span>
+          ) : null}
           <span className="truncate">{section.title}</span>
           {badge > 0 ? (
             <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-none text-white">
-              {badge > 99 ? '99+' : badge.toLocaleString('fa-IR')}
+              {badge > 99 ? "99+" : badge.toLocaleString("fa-IR")}
             </span>
           ) : null}
         </span>
-        <span className="text-xs text-slate-400">{expanded ? '−' : '+'}</span>
+        <span className={`shrink-0 text-xs ${sectionActive ? "text-emerald-600" : "text-slate-400"}`}>
+          {expanded ? "−" : "+"}
+        </span>
       </button>
       {expanded ? (
         <div className="mt-0.5 space-y-0.5 border-r border-slate-200 pr-1">
@@ -188,56 +215,47 @@ function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick, badg
   );
 }
 
-function SidebarNavFallback({ onLinkClick, showMobileUserHeader = false }) {
-  const auth = useAuth();
-  const user = auth?.user;
+function SidebarNavFallback() {
   const tCommon = useTranslations('common');
 
   return (
     <div>
-      {showMobileUserHeader && user ? (
-        <SidebarMobileUserHeader user={user} onLinkClick={onLinkClick} />
-      ) : null}
       <div className="px-4 py-6 text-center text-xs text-slate-400">{tCommon('loading')}</div>
     </div>
   );
 }
 
-function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
+function SidebarInner({ onLinkClick, compact = false }) {
   const menus = useSidebarMenus();
   const {
     adminMenuSections,
     adminDashboardLink,
     sellerMenuLinksPrimary,
     sellerMenuLinksSecondary,
-    applicantMenuLinksBeforeEscrow,
-    applicantMenuLinksAfterEscrow,
     primaryLinks,
     escrowMenuTitle,
-    sectionApplicant,
     sectionAdmin,
   } = menus;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const auth = useAuth();
   const user = auth?.user;
-  const { isApplicantView, isSellerView, isServicesView, canSwitchPersona, hydrated } = useDashboardPersona();
+  const { isSellerView, isServicesView, isPostsView, canSwitchPersona } = useDashboardPersona();
 
   const canSell = isSeller(user);
   const showAdmin = isAdmin(user);
   const implicitOwnScope = canSell && !isAdmin(user);
   const navMatchOptions = useMemo(() => ({ implicitOwnScope }), [implicitOwnScope]);
-  const showApplicantNav = isApplicantView;
   const showSellerNav = isSellerView;
   const showServicesNav = isServicesView;
+  const showPostsNav = isPostsView;
   const { provider: myServiceProvider, hasProvider: hasServiceProvider, refresh: refreshMyServiceProvider } =
     useMyTradeServiceProvider(isServicesView && !!user);
   const { pendingCount: pendingProviderRequests, refresh: refreshPendingProviderCount } = usePendingTradeProviderCount(
     showAdmin && !!user
   );
-  const showDashboardLink = hydrated && !isApplicantView && !isServicesView && !isSellerView;
-
   const [openMenu, setOpenMenu] = useState(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const isActive = (path) => isSidebarNavActive(path, pathname, searchParams, navMatchOptions);
 
@@ -265,77 +283,47 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
     setOpenMenu((prev) => (prev === id ? null : id));
   };
 
-  return (
-    <div>
-      {showMobileUserHeader && user ? (
-        <SidebarMobileUserHeader user={user} onLinkClick={onLinkClick} />
-      ) : null}
+  const dashboardHomeActive = isActive("/dashboard");
+  const dashboardHomeLabel = primaryLinks[0]?.title || "داشبورد";
 
-      {canSwitchPersona ? (
-        <div className="border-b border-slate-200 px-3 py-3">
-          <DashboardPersonaSwitcher onLinkClick={onLinkClick} />
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      {user ? (
+        <div className={compact ? "px-1.5 pt-3 pb-1" : "px-3 pt-3 pb-1"}>
+          <Link
+            href="/dashboard"
+            onClick={onLinkClick}
+            title={dashboardHomeLabel}
+            aria-current={dashboardHomeActive ? "page" : undefined}
+            className={`flex h-10 w-full items-center justify-center rounded-xl text-[13px] font-semibold transition ${
+              compact ? "px-1" : "gap-2"
+            } ${
+              dashboardHomeActive
+                ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200/80"
+                : "bg-slate-50 text-slate-700 ring-1 ring-slate-200/80 hover:bg-white hover:text-slate-900"
+            }`}
+          >
+            <SidebarIcon name="home" className={`h-4 w-4 ${dashboardHomeActive ? "text-emerald-700" : "text-slate-400"}`} />
+            {!compact ? dashboardHomeLabel : null}
+          </Link>
         </div>
       ) : null}
 
-      {showSellerNav && canSell ? <SidebarSellerShopUrl user={user} /> : null}
+      {canSwitchPersona ? (
+        <div className={compact ? "px-1.5 py-2" : "px-3 py-2.5"}>
+          <DashboardPersonaSwitcher onLinkClick={onLinkClick} compact={compact} />
+        </div>
+      ) : null}
 
-      {showServicesNav && hasServiceProvider ? (
+      {!compact && showSellerNav && canSell ? <SidebarSellerShopUrl user={user} /> : null}
+
+      {!compact && showServicesNav && hasServiceProvider ? (
         <SidebarServicesPageUrl provider={myServiceProvider} />
       ) : null}
 
-      <nav className="space-y-0.5 px-2 py-3">
-        {showDashboardLink ? (
-          <div className="space-y-0.5">
-            {primaryLinks.map((item) => (
-              <NavItem
-                key={item.path}
-                href={item.path}
-                label={item.title}
-                active={isActive(item.path)}
-                onClick={onLinkClick}
-                icon={item.icon}
-              />
-            ))}
-          </div>
-        ) : null}
+      {!compact && showPostsNav ? <SidebarPostsPageUrl /> : null}
 
-        {showApplicantNav ? (
-          <>
-            <SectionLabel>{sectionApplicant}</SectionLabel>
-            <div className="space-y-0.5">
-              {applicantMenuLinksBeforeEscrow.map((item) => (
-                <NavItem
-                  key={item.path}
-                  href={item.path}
-                  label={item.title}
-                  active={isActive(item.path)}
-                  onClick={onLinkClick}
-                  icon={item.icon}
-                />
-              ))}
-              <MenuDivider />
-              <NavItem
-                href={ESCROW_MENU_PATH}
-                label={escrowMenuTitle}
-                active={isActive(ESCROW_MENU_PATH)}
-                onClick={onLinkClick}
-                icon="escrow"
-              />
-              <MenuDivider />
-              {applicantMenuLinksAfterEscrow.map((item) => (
-                <NavItem
-                  key={item.path}
-                  href={item.path}
-                  label={item.title}
-                  active={isActive(item.path)}
-                  onClick={onLinkClick}
-                  icon={item.icon}
-                />
-              ))}
-            </div>
-          </>
-        ) : null}
-
+      <nav className={`flex-1 space-y-0.5 py-3 ${compact ? "px-1.5" : "px-2"}`}>
         {showSellerNav ? (
           <SidebarSellerSection
             canSell={canSell}
@@ -345,6 +333,7 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
             secondaryLinks={sellerMenuLinksSecondary}
             escrowHref={ESCROW_MENU_PATH}
             escrowLabel={escrowMenuTitle}
+            compact={compact}
           />
         ) : null}
 
@@ -353,20 +342,24 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
             hasProvider={hasServiceProvider}
             isActive={isActive}
             onLinkClick={onLinkClick}
+            escrowHref={ESCROW_MENU_PATH}
+            escrowLabel={escrowMenuTitle}
+            compact={compact}
           />
         ) : null}
 
         {showAdmin ? (
           <>
-            <SectionLabel>{sectionAdmin}</SectionLabel>
+            <SectionLabel compact={compact}>{sectionAdmin}</SectionLabel>
             {adminDashboardLink ? (
-              <div className="px-2">
+              <div className={compact ? "px-0" : "px-2"}>
                 <NavItem
                   href={adminDashboardLink.path}
                   label={adminDashboardLink.title}
                   active={isActive(adminDashboardLink.path)}
                   onClick={onLinkClick}
                   icon={adminDashboardLink.icon}
+                  compact={compact}
                 />
               </div>
             ) : null}
@@ -378,17 +371,36 @@ function SidebarInner({ onLinkClick, showMobileUserHeader = false }) {
                 onToggle={toggleMenu}
                 isActive={isActive}
                 onLinkClick={onLinkClick}
-                badge={section.id === 'services' ? pendingProviderRequests : 0}
+                badge={section.id === "services" ? pendingProviderRequests : 0}
                 itemBadges={
-                  section.id === 'services'
-                    ? { '/dashboard/trade-service-provider-requests': pendingProviderRequests }
+                  section.id === "services"
+                    ? { "/dashboard/trade-service-provider-requests": pendingProviderRequests }
                     : {}
                 }
+                compact={compact}
               />
             ))}
           </>
         ) : null}
       </nav>
+
+      {user ? (
+        <div
+          className={`sticky bottom-0 mt-auto border-t border-slate-100 bg-white/95 backdrop-blur-sm ${
+            compact ? "px-1.5 py-2" : "px-3 py-3"
+          }`}
+        >
+          <DashboardGuideTrigger
+            onClick={() => setGuideOpen(true)}
+            showIcon
+            variant="box"
+            className="w-full"
+            compact={compact}
+          />
+        </div>
+      ) : null}
+
+      <DashboardGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useCallback, useId, useImperativeHandle, useRef, useState } from "react";
+import Link from "next/link";
 import { API_ENDPOINTS } from "@/app/config/api";
 
 const NOTES = [
@@ -30,8 +31,8 @@ function formatHs(code) {
   return raw;
 }
 
-/** تب جستجوی تعرفه HS — سال ۱۴۰۵ */
-const HsCodeTariffPanel = forwardRef(function HsCodeTariffPanel(_props, ref) {
+/** تب / صفحه جستجوی تعرفه HS — سال ۱۴۰۵ */
+const HsCodeTariffPanel = forwardRef(function HsCodeTariffPanel({ embedded = false }, ref) {
   const inputId = useId();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,8 +56,8 @@ const HsCodeTariffPanel = forwardRef(function HsCodeTariffPanel(_props, ref) {
 
   useImperativeHandle(ref, () => ({ clearForm }), []);
 
-  const runSearch = useCallback(async () => {
-    const q = query.trim();
+  const runSearch = useCallback(async (overrideQ) => {
+    const q = String(overrideQ ?? query).trim();
     if (q.length < 2) {
       setRows([]);
       setCount(0);
@@ -188,7 +189,24 @@ const HsCodeTariffPanel = forwardRef(function HsCodeTariffPanel(_props, ref) {
             <SearchIcon className="h-5 w-5" />
           </div>
           <p className="mt-3 text-sm font-semibold text-slate-700">کد یا نام کالا را وارد کنید</p>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">سپس دکمه جستجو را بزنید.</p>
+          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+            مثلاً <span className="font-mono" dir="ltr">080410</span> یا «خرما» — سپس جستجو را بزنید.
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {["خرما", "زعفران", "پسته", "080410"].map((sample) => (
+              <button
+                key={sample}
+                type="button"
+                onClick={() => {
+                  setQuery(sample);
+                  runSearch(sample);
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-700 shadow-sm hover:border-teal-300 hover:text-teal-800"
+              >
+                {sample}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
 
@@ -215,6 +233,19 @@ const HsCodeTariffPanel = forwardRef(function HsCodeTariffPanel(_props, ref) {
           </ol>
         ) : null}
       </div>
+
+      {embedded ? (
+        <p className="text-center text-xs text-slate-500">
+          صفحه کامل با توضیحات بیشتر:{" "}
+          <Link href="/hs-code" className="font-bold text-teal-700 hover:underline">
+            جستجوی کد تعرفه (HS CODE)
+          </Link>
+        </p>
+      ) : (
+        <p className="text-[11px] leading-6 text-slate-400">
+          اطلاعات بر اساس تعرفه سال ۱۴۰۵ است. برای تصمیم نهایی گمرکی با مشاور یا شرکت ترخیص هماهنگ کنید؛ شرایط خاص کالا ممکن است نرخ نهایی را تغییر دهد.
+        </p>
+      )}
     </div>
   );
 });

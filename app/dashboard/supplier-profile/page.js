@@ -17,6 +17,8 @@ import { normalizeShopContacts, serializeShopContacts } from "@/app/utils/shopCo
 import { API_ENDPOINTS } from "@/app/config/api";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 import { showToast } from "@/app/utils/toast";
+import AvatarUpload from "@/app/components/ui/AvatarUpload";
+import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 
 function IconLink({ className = "h-5 w-5" }) {
   return (
@@ -67,6 +69,19 @@ function IconContact({ className = "h-5 w-5" }) {
   );
 }
 
+function IconPhoto({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
 function SectionCard({ icon, title, subtitle, children, className = "" }) {
   return (
     <section className={`${dash.card} overflow-hidden ${className}`}>
@@ -93,6 +108,7 @@ function SupplierAccountEditor() {
     displayName: "",
     headline: "",
     bio: "",
+    coverImage: null,
     shopContacts: normalizeShopContacts(null),
     isProfilePublic: true,
     shopStatus: "ACTIVE",
@@ -117,6 +133,7 @@ function SupplierAccountEditor() {
             displayName: d.displayName || "",
             headline: d.headline || "",
             bio: d.bio || "",
+            coverImage: d.coverImage || null,
             shopContacts: normalizeShopContacts(d.shopContacts, {
               publicPhone: d.publicPhone,
               publicLandline: d.publicLandline,
@@ -142,6 +159,7 @@ function SupplierAccountEditor() {
       displayName: form.displayName,
       headline: form.headline,
       bio: form.bio,
+      coverImage: form.coverImage,
       shopContacts: serializeShopContacts(form.shopContacts),
       businessHours: form.businessHours,
       latitude: form.latitude,
@@ -162,6 +180,7 @@ function SupplierAccountEditor() {
         profileSlug: j.data.profileSlug || f.profileSlug,
         displayName: j.data.displayName || f.displayName,
         headline: j.data.headline ?? f.headline,
+        coverImage: j.data.coverImage ?? f.coverImage,
         latitude: j.data.latitude ?? f.latitude,
         longitude: j.data.longitude ?? f.longitude,
         addressLabel: j.data.addressLabel || f.addressLabel,
@@ -190,6 +209,44 @@ function SupplierAccountEditor() {
       setMsg(j.message || "درخواست تغییر آدرس ثبت شد");
     }
     setSaving(false);
+  };
+
+  const saveCoverImage = async (urlOrNull) => {
+    const prev = form.coverImage;
+    const coverImage = urlOrNull?.downloadUrl || urlOrNull || null;
+    setForm((f) => ({ ...f, coverImage }));
+
+    // حذف فایل قبلی از سرور (در صورت امکان)
+    if (!coverImage && prev) {
+      try {
+        await authFetch(API_ENDPOINTS.fileUpload.deleteFileByUrl, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileUrl: prev }),
+        });
+      } catch {
+        /* ignore — ممکن است فایل قبلاً حذف شده باشد */
+      }
+    }
+
+    try {
+      const res = await authFetch(API_ENDPOINTS.tamin.me, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverImage }),
+      });
+      const j = await res.json();
+      if (j.success) {
+        setForm((f) => ({ ...f, coverImage: j.data?.coverImage ?? coverImage }));
+        showToast.success(coverImage ? "تصویر فروشگاه ذخیره شد" : "تصویر فروشگاه حذف شد");
+      } else {
+        setForm((f) => ({ ...f, coverImage: prev }));
+        showToast.error(j.message || "خطا در ذخیره تصویر فروشگاه");
+      }
+    } catch {
+      setForm((f) => ({ ...f, coverImage: prev }));
+      showToast.error("خطا در ذخیره تصویر فروشگاه");
+    }
   };
 
   if (!isSeller(auth?.user)) {
@@ -326,6 +383,20 @@ function SupplierAccountEditor() {
         </div>
 
         <div className="space-y-4 lg:col-span-5">
+          <SectionCard
+            icon={<IconPhoto />}
+            title="تصویر فروشگاه"
+            subtitle="لوگو یا عکس مربعی — با کراپ مشخص کنید کدام بخش دیده شود"
+          >
+            <AvatarUpload
+              purpose="shop"
+              currentAvatar={resolveMediaUrl(form.coverImage)}
+              onUploadSuccess={saveCoverImage}
+              label="تصویر فروشگاه"
+              hint="مربع گرد — PNG/JPG/WEBP تا ۱۰ مگابایت"
+            />
+          </SectionCard>
+
           <SectionCard icon={<IconMap />} title="موقعیت روی نقشه" subtitle="جستجو یا کلیک روی نقشه">
             <LocationPickerMap
               latitude={form.latitude}

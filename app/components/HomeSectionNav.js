@@ -38,7 +38,9 @@ const LABELS = {
 };
 
 function iconClass(active) {
-  return `h-4 w-4 shrink-0 ${active ? "text-white" : "text-emerald-700"}`;
+  return `h-4 w-4 shrink-0 transition-colors duration-200 ${
+    active ? "text-emerald-600" : "text-slate-400 group-hover/nav:text-emerald-700"
+  }`;
 }
 
 function CategoriesIcon({ active }) {
@@ -130,15 +132,45 @@ const SECTIONS = [
   { id: "trade-tools", labelKey: "tradeTools", Icon: ToolsIcon },
 ];
 
-const itemClass = (active) =>
-  `flex h-10 w-full items-center justify-center gap-2 rounded-xl border px-2 shadow-sm backdrop-blur-sm transition xl:justify-start xl:px-2.5 ${
-    active
-      ? "border-emerald-500/50 bg-emerald-600/90 text-white shadow-emerald-900/20"
-      : "border-emerald-200/40 bg-white/45 text-slate-700 hover:border-emerald-300/70 hover:bg-white/70 hover:text-emerald-900"
-  }`;
+function NavItem({ active, label, onClick, href, Icon }) {
+  const content = (
+    <>
+      <Icon active={active} />
+      <span
+        className="pointer-events-none absolute right-full top-1/2 me-0 mr-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-slate-800/90 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-all duration-200 ease-out translate-x-1 group-hover/nav:translate-x-0 group-hover/nav:opacity-100"
+        aria-hidden
+      >
+        {label}
+      </span>
+    </>
+  );
+
+  const className =
+    "group/nav relative flex h-9 w-9 items-center justify-center rounded-full outline-none transition-transform duration-200 hover:scale-110 focus:outline-none focus-visible:outline-none";
+
+  if (href) {
+    return (
+      <Link href={href} aria-label={label} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? "true" : undefined}
+      aria-label={label}
+      className={className}
+    >
+      {content}
+    </button>
+  );
+}
 
 /**
- * دسکتاپ: آیتم‌های جدا کنار اسکرول‌بار — در مانیتور کوچک فقط آیکون
+ * دسکتاپ (lg+): فقط آیکون کنار اسکرول — عنوان با هاور به‌صورت تولتیپ انیمیشنی
  */
 export default function HomeSectionNav() {
   const { language, isRTL } = useLanguage();
@@ -218,40 +250,19 @@ export default function HomeSectionNav() {
       }}
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <ul className="pointer-events-auto flex w-10 flex-col items-stretch gap-1.5 xl:w-[9.75rem]">
-        {sections.map((section) => {
-          const active = activeId === section.id;
-          const Icon = section.Icon;
-          return (
-            <li key={section.id} className="w-full">
-              <button
-                type="button"
-                onClick={() => scrollTo(section.id)}
-                aria-current={active ? "true" : undefined}
-                title={section.label}
-                aria-label={section.label}
-                className={itemClass(active)}
-              >
-                <Icon active={active} />
-                <span className="hidden min-w-0 flex-1 truncate text-start text-[11px] font-bold leading-snug xl:inline xl:text-xs">
-                  {section.label}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-        <li className="w-full">
-          <Link
-            href="/help"
-            title={helpLabel}
-            aria-label={helpLabel}
-            className={itemClass(false)}
-          >
-            <HelpIcon active={false} />
-            <span className="hidden min-w-0 flex-1 truncate text-start text-[11px] font-bold leading-snug xl:inline xl:text-xs">
-              {helpLabel}
-            </span>
-          </Link>
+      <ul className="pointer-events-auto flex w-9 flex-col items-center gap-1">
+        {sections.map((section) => (
+          <li key={section.id}>
+            <NavItem
+              active={activeId === section.id}
+              label={section.label}
+              Icon={section.Icon}
+              onClick={() => scrollTo(section.id)}
+            />
+          </li>
+        ))}
+        <li>
+          <NavItem active={false} label={helpLabel} Icon={HelpIcon} href="/help" />
         </li>
       </ul>
     </nav>

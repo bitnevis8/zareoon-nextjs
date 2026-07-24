@@ -22,6 +22,7 @@
   },
   "filters": {
     "searchPlaceholder": "جستجو: نام محصول، تامین‌کننده، درجه، شناسه…",
+    "search": "جستجو",
     "filters": "فیلترها",
     "product": "محصول",
     "allProducts": "همه محصولات",

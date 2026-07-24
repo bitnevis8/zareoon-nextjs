@@ -5,14 +5,15 @@ import { useTranslations } from "next-intl";
 import SidebarSetupCta from "@/app/components/ui/SidebarSetupCta";
 import { SidebarIcon } from "@/app/components/ui/SidebarIcons";
 
-function SellerNavItem({ href, label, active, onClick, icon }) {
+function SellerNavItem({ href, label, active, onClick, icon, compact = false }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`flex h-9 items-center gap-2.5 rounded-md px-3 text-[13px] font-medium transition-colors ${
-        active ? "bg-emerald-50 text-emerald-800" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-      }`}
+      title={label}
+      className={`flex h-9 items-center rounded-md text-[13px] font-medium transition-colors ${
+        compact ? "justify-center px-1.5" : "gap-2.5 px-3"
+      } ${active ? "bg-emerald-50 text-emerald-800" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
     >
       {icon ? (
         <span className={`shrink-0 ${active ? "text-emerald-700" : "text-slate-400"}`}>
@@ -21,7 +22,7 @@ function SellerNavItem({ href, label, active, onClick, icon }) {
       ) : (
         <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${active ? "bg-emerald-600" : "bg-slate-300"}`} />
       )}
-      <span className="truncate">{label}</span>
+      {!compact ? <span className="truncate">{label}</span> : null}
     </Link>
   );
 }
@@ -38,6 +39,7 @@ export default function SidebarSellerSection({
   secondaryLinks = [],
   escrowHref,
   escrowLabel,
+  compact = false,
 }) {
   const t = useTranslations("layout.sidebar");
   const membershipPath = "/dashboard/seller/join";
@@ -50,12 +52,13 @@ export default function SidebarSellerSection({
         active={isActive(membershipPath)}
         onClick={onLinkClick}
         tone="emerald"
+        compact={compact}
       />
     );
   }
 
   return (
-    <div className="space-y-0.5 px-2 pt-1">
+    <div className={`space-y-0.5 pt-1 ${compact ? "px-0" : "px-2"}`}>
       {primaryLinks.map((item) => (
         <SellerNavItem
           key={item.path}
@@ -64,12 +67,13 @@ export default function SidebarSellerSection({
           active={isActive(item.path)}
           onClick={onLinkClick}
           icon={item.icon}
+          compact={compact}
         />
       ))}
 
       {secondaryLinks.length > 0 ? (
         <>
-          <hr className="mx-1 my-2 border-slate-200" />
+          {!compact ? <hr className="mx-1 my-2 border-slate-200" /> : <div className="my-1" />}
           {secondaryLinks.map((item) => (
             <SellerNavItem
               key={item.path}
@@ -78,18 +82,20 @@ export default function SidebarSellerSection({
               active={isActive(item.path)}
               onClick={onLinkClick}
               icon={item.icon}
+              compact={compact}
             />
           ))}
         </>
       ) : null}
 
-      <hr className="mx-1 my-2 border-slate-200" />
+      {!compact ? <hr className="mx-1 my-2 border-slate-200" /> : <div className="my-1" />}
       <SellerNavItem
         href={escrowHref}
         label={escrowLabel}
         active={isActive(escrowHref)}
         onClick={onLinkClick}
         icon="escrow"
+        compact={compact}
       />
     </div>
   );

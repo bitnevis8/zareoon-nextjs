@@ -16,12 +16,23 @@ import {
   runMobileSearch,
   buildListingCountMap,
   getListingDisplayTitle,
+  formatCatalogAncestorBreadcrumb,
 } from "@/app/utils/mobileSearchUtils";
+import { buildProductByIdMap } from "@/app/utils/availableProducts";
 import { useTradeServicesContent } from "@/app/hooks/useTradeServicesContent";
 import { providerPublicPath } from "@/app/utils/providerPublicPath";
+import CardsPerRowSelect from "@/app/components/ui/CardsPerRowSelect";
+import {
+  DEFAULT_CARDS_PER_ROW,
+  getCardsPerRowGridClass,
+  readStoredCardsPerRow,
+  writeStoredCardsPerRow,
+} from "@/app/utils/cardsPerRow";
 
 const RECENT_KEY = "recentSearches";
 const EXPLORE_LIMIT = 48;
+/** تأخیر قبل از فیلتر/درخواست سرور — تایپ روان می‌ماند بدون فشار بی‌مورد */
+const SEARCH_DEBOUNCE_MS = 420;
 
 function SearchIcon({ className = "h-5 w-5" }) {
   return (
@@ -31,36 +42,41 @@ function SearchIcon({ className = "h-5 w-5" }) {
   );
 }
 
-function ListingExploreTile({ row, language, t, tall = false }) {
+function ListingExploreTile({ row, language, t, productById }) {
   const { lot, product, availableQty } = row;
+  if (!product?.id) return null;
   const title = getListingDisplayTitle(lot, product, language, t);
-  const typeName = getLocalizedText(product, language);
+  const categoryPath = formatCatalogAncestorBreadcrumb(product, productById, language);
   const image =
     resolveMediaUrl(lot.coverImageUrl) ||
     resolveMediaUrl(product?.imageUrl) ||
     "/images/product-placeholder.svg";
   const supplier = getLotSupplierDisplayName(lot);
   const unit = lot.unit || product?.unit || "kg";
-  const tallClass = tall ? "max-lg:row-span-2 max-lg:aspect-[3/4]" : "";
 
   return (
     <Link
       href={`/catalog/${product.id}`}
-      className={`group relative block aspect-square overflow-hidden rounded-lg bg-slate-200 lg:rounded-xl ${tallClass}`}
+      className="group relative block aspect-[4/5] overflow-hidden rounded-xl bg-slate-200 sm:aspect-square"
     >
       <Image
         src={image}
-        alt={title}
+        alt={title || ""}
         fill
-        sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 20vw"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
         className="object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2">
-        <p className="line-clamp-2 text-[11px] font-bold leading-tight text-white">{title}</p>
-        {title !== typeName ? (
-          <p className="truncate text-[10px] text-white/80">{typeName}</p>
-        ) : null}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/35" />
+      {categoryPath ? (
+        <p
+          className="absolute inset-x-0 top-0 line-clamp-3 bg-gradient-to-b from-black/55 to-transparent px-2 pb-5 pt-2 text-[9px] font-medium leading-snug text-white/95 sm:text-[10px]"
+          title={categoryPath}
+        >
+          {categoryPath}
+        </p>
+      ) : null}
+      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2.5">
+        <p className="line-clamp-2 text-[11px] font-bold leading-snug text-white sm:text-xs">{title}</p>
         <p className="truncate text-[10px] font-medium text-emerald-200">
           {formatLocalizedNumber(availableQty, language)} {localizeUnit(unit, language)}
           {supplier ? ` · ${supplier}` : ""}
@@ -70,9 +86,10 @@ function ListingExploreTile({ row, language, t, tall = false }) {
   );
 }
 
-function TypeResultCard({ row, language, t, onNavigate }) {
+function TypeResultCard({ row, language, t, onNavigate, productById }) {
   const { product, listingCount, isCategory } = row;
   const title = getLocalizedText(product, language);
+  const categoryPath = formatCatalogAncestorBreadcrumb(product, productById, language);
   const image = resolveMediaUrl(product.imageUrl) || "/images/product-placeholder.svg";
 
   return (
@@ -85,6 +102,11 @@ function TypeResultCard({ row, language, t, onNavigate }) {
         <Image src={image} alt={title} fill sizes="48px" className="object-cover" />
       </div>
       <div className="min-w-0 flex-1">
+        {categoryPath ? (
+          <p className="mb-0.5 line-clamp-2 text-[10px] leading-snug text-slate-400" title={categoryPath}>
+            {categoryPath}
+          </p>
+        ) : null}
         <p className="truncate text-sm font-semibold text-slate-900">{title}</p>
         <p className="text-[11px] text-slate-500">
           {isCategory ? t("category") : t("mobileSearchProductType")}
@@ -98,10 +120,11 @@ function TypeResultCard({ row, language, t, onNavigate }) {
   );
 }
 
-function ListingResultCard({ row, language, t, onNavigate }) {
+function ListingResultCard({ row, language, t, onNavigate, productById }) {
   const { lot, product, availableQty } = row;
+  if (!product?.id) return null;
   const title = getListingDisplayTitle(lot, product, language, t);
-  const typeName = getLocalizedText(product, language);
+  const categoryPath = formatCatalogAncestorBreadcrumb(product, productById, language);
   const image =
     resolveMediaUrl(lot.coverImageUrl) ||
     resolveMediaUrl(product?.imageUrl) ||
@@ -113,16 +136,18 @@ function ListingResultCard({ row, language, t, onNavigate }) {
     <button
       type="button"
       onClick={() => onNavigate(`/catalog/${product.id}`, title)}
-      className="overflow-hidden rounded-xl border border-slate-100 bg-white text-start shadow-sm transition hover:border-emerald-200"
+      className="overflow-hidden rounded-xl border border-slate-100 bg-white text-start shadow-sm transition active:scale-[0.99] hover:border-emerald-200"
     >
       <div className="relative aspect-[4/3] bg-slate-100">
-        <Image src={image} alt={title} fill sizes="50vw" className="object-cover" />
+        <Image src={image} alt={title || ""} fill sizes="50vw" className="object-cover" />
       </div>
       <div className="space-y-1 p-2.5">
-        <p className="line-clamp-2 text-xs font-bold text-slate-900">{title}</p>
-        {title !== typeName ? (
-          <p className="truncate text-[11px] text-slate-500">{typeName}</p>
+        {categoryPath ? (
+          <p className="line-clamp-3 text-[10px] leading-snug text-slate-400" title={categoryPath}>
+            {categoryPath}
+          </p>
         ) : null}
+        <p className="line-clamp-2 text-xs font-bold text-slate-900">{title}</p>
         <p className="text-[10px] font-semibold text-emerald-700">
           {formatLocalizedNumber(availableQty, language)} {localizeUnit(unit, language)}
         </p>
@@ -218,6 +243,7 @@ export default function MobileExploreSearch({
   const tradeServices = useTradeServicesContent();
 
   const [query, setQuery] = useState(() => initialQuery || searchParams.get("q") || "");
+  const [debouncedQuery, setDebouncedQuery] = useState(() => initialQuery || searchParams.get("q") || "");
   const [filter, setFilter] = useState(() =>
     normalizeSearchFilter(initialFilter || searchParams.get("filter"))
   );
@@ -228,8 +254,15 @@ export default function MobileExploreSearch({
   const [publicPosts, setPublicPosts] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [cardsPerRow, setCardsPerRow] = useState(DEFAULT_CARDS_PER_ROW);
 
-  const parsed = useMemo(() => parseSearchQuery(query), [query]);
+  const parsed = useMemo(() => parseSearchQuery(debouncedQuery), [debouncedQuery]);
+  const isFiltering = query.trim() !== debouncedQuery.trim();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [query]);
 
   useEffect(() => {
     try {
@@ -238,6 +271,7 @@ export default function MobileExploreSearch({
     } catch {
       /* ignore */
     }
+    setCardsPerRow(readStoredCardsPerRow());
   }, []);
 
   useEffect(() => {
@@ -264,12 +298,14 @@ export default function MobileExploreSearch({
           postsRes?.ok ? postsRes.json() : Promise.resolve(null),
         ]);
         if (!cancelled) {
-          setAllProducts(productsJson?.data || []);
-          setInventoryLots(inventoryJson?.data || []);
-          setRootCategories(sortCatalogItems(catsJson?.data || [], language));
+          setAllProducts(Array.isArray(productsJson?.data) ? productsJson.data : []);
+          setInventoryLots(Array.isArray(inventoryJson?.data) ? inventoryJson.data : []);
+          setRootCategories(sortCatalogItems(Array.isArray(catsJson?.data) ? catsJson.data : [], language));
           setServiceProviders(Array.isArray(providersJson?.data) ? providersJson.data : []);
           setPublicPosts(Array.isArray(postsJson?.data) ? postsJson.data : []);
         }
+      } catch (err) {
+        console.error("MobileExploreSearch load:", err);
       } finally {
         if (!cancelled) setLoadingData(false);
       }
@@ -284,12 +320,14 @@ export default function MobileExploreSearch({
     const q = searchParams.get("q") || "";
     const urlFilter = normalizeSearchFilter(searchParams.get("filter"));
     setQuery((prev) => (prev !== q ? q : prev));
+    setDebouncedQuery((prev) => (prev !== q ? q : prev));
     setFilter((prev) => (prev !== urlFilter ? urlFilter : prev));
   }, [searchParams, isModal]);
 
   useEffect(() => {
     if (isModal && initialQuery != null) {
       setQuery(initialQuery);
+      setDebouncedQuery(initialQuery);
     }
   }, [isModal, initialQuery]);
 
@@ -301,7 +339,7 @@ export default function MobileExploreSearch({
 
   useEffect(() => {
     let cancelled = false;
-    const q = query.trim();
+    const q = debouncedQuery.trim();
     if (!q && filter !== "posts" && filter !== "all" && filter !== "hashtag") return undefined;
     (async () => {
       try {
@@ -316,20 +354,20 @@ export default function MobileExploreSearch({
     return () => {
       cancelled = true;
     };
-  }, [query, filter]);
+  }, [debouncedQuery, filter]);
 
   useEffect(() => {
-    if (parsed.term) return;
-    const timeout = setTimeout(() => inputRef.current?.focus(), 120);
+    if (parsed.term || isModal) return;
+    const timeout = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 180);
     return () => clearTimeout(timeout);
-  }, [parsed.term]);
+  }, [parsed.term, isModal]);
 
   const searchResult = useMemo(
     () =>
       runMobileSearch({
         allProducts,
         inventoryLots,
-        term: query,
+        term: debouncedQuery,
         language,
         t,
         filter,
@@ -337,8 +375,10 @@ export default function MobileExploreSearch({
         serviceCategories: tradeServices.categories || [],
         publicPosts,
       }),
-    [allProducts, inventoryLots, query, language, t, filter, serviceProviders, tradeServices.categories, publicPosts]
+    [allProducts, inventoryLots, debouncedQuery, language, t, filter, serviceProviders, tradeServices.categories, publicPosts]
   );
+
+  const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
 
   const listingCountByProductId = useMemo(
     () => buildListingCountMap(searchResult.flatLots),
@@ -388,7 +428,9 @@ export default function MobileExploreSearch({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (parsed.term) saveRecent(query.trim());
+    const trimmed = query.trim();
+    setDebouncedQuery(query);
+    if (trimmed) saveRecent(trimmed);
     syncUrl(query, filter);
   };
 
@@ -427,14 +469,9 @@ export default function MobileExploreSearch({
   const renderExplore = () => {
     if (loadingData) {
       return (
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 lg:gap-2.5">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className={`animate-pulse rounded-lg bg-slate-200 ${
-                !isModal && i % 5 === 0 ? "row-span-2 aspect-[3/4]" : "aspect-square"
-              }`}
-            />
+            <div key={i} className="aspect-[4/5] animate-pulse rounded-xl bg-slate-200 sm:aspect-square" />
           ))}
         </div>
       );
@@ -445,7 +482,7 @@ export default function MobileExploreSearch({
         return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
       }
       return (
-        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {exploreTypes.map((row) => (
             <TypeResultCard
               key={row.product.id}
@@ -453,6 +490,7 @@ export default function MobileExploreSearch({
               language={language}
               t={t}
               onNavigate={handleResultNavigate}
+              productById={productById}
             />
           ))}
         </div>
@@ -467,7 +505,7 @@ export default function MobileExploreSearch({
       return (
         <div className="space-y-4">
           {cats.length ? (
-            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {cats.slice(0, 12).map((category) => (
                 <ServiceCategoryCard
                   key={category.id}
@@ -479,7 +517,7 @@ export default function MobileExploreSearch({
             </div>
           ) : null}
           {serviceProviders.length ? (
-            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {serviceProviders.slice(0, 12).map((provider) => (
                 <ServiceProviderCard
                   key={provider.id || provider.profileSlug}
@@ -511,18 +549,14 @@ export default function MobileExploreSearch({
     }
 
     return (
-      <div
-        className={`grid grid-cols-2 gap-1.5 auto-rows-min sm:grid-cols-3 lg:gap-2.5 ${
-          isModal ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
-        }`}
-      >
-        {exploreListings.map((row, index) => (
+      <div className={`${getCardsPerRowGridClass(cardsPerRow, { gapClass: "gap-2 lg:gap-2.5" })} auto-rows-fr`}>
+        {exploreListings.map((row) => (
           <ListingExploreTile
             key={row.lot.id}
             row={row}
             language={language}
             t={t}
-            tall={!isModal && index % 5 === 0}
+            productById={productById}
           />
         ))}
       </div>
@@ -535,8 +569,14 @@ export default function MobileExploreSearch({
     <div
       className={
         isModal
-          ? "flex h-full min-h-0 w-full flex-col"
-          : "mx-auto flex w-full max-w-3xl flex-col max-lg:min-h-[calc(100dvh-var(--site-mobile-top-chrome)-4.25rem-env(safe-area-inset-bottom))] lg:max-w-7xl lg:px-6 lg:py-6"
+          ? "flex h-full min-h-0 w-full flex-col bg-white"
+          : [
+              "mx-auto flex w-full max-w-3xl flex-col bg-white",
+              "max-lg:h-[calc(100dvh-var(--site-top-chrome)-4.25rem-env(safe-area-inset-bottom))]",
+              "max-lg:max-h-[calc(100dvh-var(--site-top-chrome)-4.25rem-env(safe-area-inset-bottom))]",
+              "max-lg:overflow-hidden",
+              "lg:relative lg:max-w-7xl lg:px-6 lg:py-6",
+            ].join(" ")
       }
     >
       {!isModal ? (
@@ -547,10 +587,8 @@ export default function MobileExploreSearch({
       ) : null}
 
       <div
-        className={`shrink-0 border-b border-slate-100 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-4 ${
-          isModal
-            ? "sticky top-0 z-10"
-            : "sticky top-0 z-20 lg:static lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:px-5 lg:py-4 lg:shadow-sm"
+        className={`shrink-0 border-b border-slate-100 bg-white px-3 py-2.5 sm:px-4 ${
+          isModal ? "" : "lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:px-5 lg:py-4 lg:shadow-sm"
         }`}
       >
         <form onSubmit={handleSubmit} className="relative">
@@ -568,7 +606,7 @@ export default function MobileExploreSearch({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("mobileSearchPlaceholder")}
-            className={`w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2 text-[13px] outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 sm:py-2.5 sm:text-sm ${
+            className={`w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-[13px] outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 sm:text-sm ${
               isRTL
                 ? "pe-9 ps-9 text-right placeholder:text-right"
                 : "ps-9 pe-9 text-left placeholder:text-left"
@@ -580,6 +618,7 @@ export default function MobileExploreSearch({
               type="button"
               onClick={() => {
                 setQuery("");
+                setDebouncedQuery("");
                 syncUrl("", filter);
               }}
               className={`absolute top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 ${
@@ -594,14 +633,14 @@ export default function MobileExploreSearch({
           ) : null}
         </form>
 
-        <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5 lg:flex-wrap lg:overflow-visible lg:gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="product-scroll-row mt-2.5 flex gap-1.5 overflow-x-auto pb-0.5 lg:flex-wrap lg:overflow-visible lg:gap-2">
           {filterChips.map((chip) => (
             <button
               key={chip.id}
               type="button"
               onClick={() => handleFilterChange(chip.id)}
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition lg:px-4 lg:py-1.5 lg:text-sm ${
-                filter === chip.id ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              className={`shrink-0 snap-start rounded-full px-3.5 py-1.5 text-xs font-semibold transition lg:px-4 lg:text-sm ${
+                filter === chip.id ? "bg-emerald-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 active:bg-slate-200"
               }`}
             >
               {chip.label}
@@ -609,14 +648,13 @@ export default function MobileExploreSearch({
           ))}
         </div>
 
-        <p className="mt-2 text-[11px] leading-5 text-slate-500 lg:text-xs">
-          {t(activeFilterChip.descKey)}
-        </p>
+        <p className="mt-2 text-[11px] leading-5 text-slate-500 lg:text-xs">{t(activeFilterChip.descKey)}</p>
       </div>
+
       <div
-        className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4 ${
-          isModal ? "pb-6" : "lg:px-0 lg:py-5"
-        }`}
+        className={`min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] px-3 py-3 sm:px-4 ${
+          isModal ? "pb-6" : "pb-4 lg:px-0 lg:py-5"
+        } ${isFiltering ? "opacity-60 transition-opacity" : "opacity-100 transition-opacity"}`}
       >
         {!hasSearch ? (
           <div className="space-y-5">
@@ -642,6 +680,7 @@ export default function MobileExploreSearch({
                       type="button"
                       onClick={() => {
                         setQuery(item);
+                        setDebouncedQuery(item);
                         syncUrl(item, item.startsWith("#") ? "hashtag" : filter);
                         if (item.startsWith("#")) setFilter("hashtag");
                       }}
@@ -657,13 +696,14 @@ export default function MobileExploreSearch({
             {(filter === "all" || filter === "hashtag") && popularTags.length > 0 ? (
               <section>
                 <h2 className="mb-2 text-xs font-bold text-slate-700">{t("mobileSearchPopularTags")}</h2>
-                <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="product-scroll-row flex gap-2 overflow-x-auto pb-1">
                   {popularTags.map((tag) => (
                     <button
                       key={tag.id}
                       type="button"
                       onClick={() => {
                         setQuery(tag.label);
+                        setDebouncedQuery(tag.label);
                         setFilter("hashtag");
                         saveRecent(tag.label);
                         syncUrl(tag.label, "hashtag");
@@ -678,15 +718,24 @@ export default function MobileExploreSearch({
             ) : null}
 
             <section>
-              <h2 className="mb-2 text-xs font-bold text-slate-700">
-                {filter === "products"
-                  ? t("mobileSearchTypesSection")
-                  : filter === "services"
-                    ? t("mobileSearchServicesSection")
-                    : filter === "posts"
-                      ? t("mobileSearchPostsSection")
-                      : t("mobileSearchExploreTitle")}
-              </h2>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-xs font-bold text-slate-700">
+                  {filter === "products"
+                    ? t("mobileSearchTypesSection")
+                    : filter === "services"
+                      ? t("mobileSearchServicesSection")
+                      : filter === "posts"
+                        ? t("mobileSearchPostsSection")
+                        : t("mobileSearchExploreTitle")}
+                </h2>
+                {filter === "all" || filter === "products" || filter === "hashtag" ? (
+                  <CardsPerRowSelect
+                    value={cardsPerRow}
+                    onChange={(n) => setCardsPerRow(writeStoredCardsPerRow(n))}
+                    label={t("cardsPerRowLabel") || "در هر سطر"}
+                  />
+                ) : null}
+              </div>
               {renderExplore()}
             </section>
           </div>
@@ -720,6 +769,7 @@ export default function MobileExploreSearch({
                       type="button"
                       onClick={() => {
                         setQuery(tag);
+                        setDebouncedQuery(tag);
                         syncUrl(tag, "hashtag");
                       }}
                       className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-800 ring-1 ring-violet-100"
@@ -742,6 +792,7 @@ export default function MobileExploreSearch({
                       language={language}
                       t={t}
                       onNavigate={handleResultNavigate}
+                      productById={productById}
                     />
                   ))}
                 </div>
@@ -750,12 +801,15 @@ export default function MobileExploreSearch({
 
             {showProducts && listings.length > 0 ? (
               <section className={splitResultsOnDesktop && filter !== "hashtag" ? "xl:col-span-8" : ""}>
-                <h2 className="mb-2 text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchListingsSection")}</h2>
-                <div
-                  className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${
-                    isModal ? "lg:grid-cols-3 xl:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-                  }`}
-                >
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-xs font-bold text-slate-700 lg:text-sm">{t("mobileSearchListingsSection")}</h2>
+                  <CardsPerRowSelect
+                    value={cardsPerRow}
+                    onChange={(n) => setCardsPerRow(writeStoredCardsPerRow(n))}
+                    label={t("cardsPerRowLabel") || "در هر سطر"}
+                  />
+                </div>
+                <div className={getCardsPerRowGridClass(cardsPerRow, { gapClass: "gap-2" })}>
                   {listings.map((row) => (
                     <ListingResultCard
                       key={row.lot.id}
@@ -763,6 +817,7 @@ export default function MobileExploreSearch({
                       language={language}
                       t={t}
                       onNavigate={handleResultNavigate}
+                      productById={productById}
                     />
                   ))}
                 </div>
@@ -780,6 +835,7 @@ export default function MobileExploreSearch({
                       language={language}
                       t={t}
                       onNavigate={handleResultNavigate}
+                      productById={productById}
                     />
                   ))}
                 </div>

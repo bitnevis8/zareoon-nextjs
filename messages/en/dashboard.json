@@ -51,8 +51,11 @@
   "shell": {
     "openMenu": "Open menu",
     "menuLabel": "Menu",
+    "cycleSidebar": "Toggle sidebar mode",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
     "site": "Site",
-    "editProfile": "Edit profile",
+    "editProfile": "Edit personal profile",
     "userFallback": "User",
     "footer": "",
     "logoAlt": "",
@@ -64,9 +67,9 @@
     }
   },
   "dedicatedPage": {
-    "title": "My dedicated page",
+    "title": "My business page",
     "subtitle": "You do not have a public page yet. Create a shop or a trade-services page — after that, this menu item opens your page directly.",
-    "loading": "Checking your dedicated page…",
+    "loading": "Checking your business page…",
     "shopTitle": "Shop",
     "shopBody": "If you sell products, create a shop so buyers can see your page and contact you directly.",
     "shopCta": "Create shop",
@@ -76,22 +79,39 @@
   },
   "mobileProfile": {
     "userFallback": "User",
-    "editProfile": "Edit profile",
+    "welcome": "Welcome",
+    "editProfile": "Edit personal profile",
+    "editDedicatedPage": "Edit business page",
+    "dedicatedShopTitle": "Shop",
+    "dedicatedServicesTitle": "Trade services",
+    "dedicatedBothTitle": "Shop & services",
+    "commercialPageShop": "My business page (Shop)",
+    "commercialPageServices": "My business page (Services)",
+    "commercialPageBoth": "My business page (Shop & services)",
     "stats": {
       "products": "Products",
       "followers": "Followers",
       "following": "Following",
-      "posts": "Posts"
+      "posts": "Posts",
+      "services": "Services",
+      "employees": "Employees",
+      "managers": "Managers"
     },
+    "createWorkspace": "Create new business page",
     "bioMore": "more",
     "bioLess": "less",
     "bioEmpty": "Your phone and roles will appear here.",
     "tabsAria": "Dashboard role",
     "tabs": {
-      "buyer": "Buyer",
-      "seller": "Seller",
-      "provider": "Services"
+      "buyer": "Buy",
+      "seller": "My shop",
+      "provider": "My services",
+      "posts": "My posts"
     },
+    "postsHint": "Publish posts for your commercial page so they appear in search and on your public profile.",
+    "postsNeedPage": "Create a shop or services page before publishing posts.",
+    "postsOpenPage": "View posts on commercial page",
+    "postsEmpty": "You have not published any posts yet.",
     "actions": {
       "submitRequest": "Submit request",
       "myRequests": "My requests",
@@ -107,11 +127,18 @@
       "incomingServices": "Requests"
     },
     "createShop": "Create shop",
-    "createShopHint": "Create your dedicated page — sell products and optionally offer services too.",
+    "createShopHint": "Create your business page — sell products and optionally offer services too.",
     "createServices": "Create services",
-    "createServicesHint": "Create your dedicated page — offer services and optionally sell products too.",
+    "createServicesHint": "Create your business page — offer services and optionally sell products too.",
     "emptyProducts": "You have not listed any products for sale yet.",
-    "productFallback": "Product"
+    "productFallback": "Product",
+    "searchProducts": "Search products…",
+    "search": "Search",
+    "filter": "Filter",
+    "statusFilter": "Status",
+    "allStatuses": "All statuses",
+    "noSearchResults": "No results for this search",
+    "deleteConfirm": "Delete this inventory lot?"
   },
   "guide": {
     "triggerLabel": "",

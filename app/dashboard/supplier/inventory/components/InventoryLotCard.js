@@ -1,18 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import { localizeStatus } from "@/app/utils/localize";
+import { resolveMediaUrl } from "@/app/utils/mediaUrl";
+import { DashboardItemActions } from "@/app/components/dashboard/DashboardListToolbar";
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
-
-function ActionBtn({ onClick, className, children, ariaLabel }) {
-  return (
-    <button type="button" onClick={onClick} aria-label={ariaLabel} className={`${inv.btnGhost} ${className}`}>
-      {children}
-    </button>
-  );
-}
 
 export default function InventoryLotCard({
   lot,
@@ -26,99 +21,94 @@ export default function InventoryLotCard({
   const t = useTranslations("inventory");
   const tShared = useTranslations("shared");
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
+  const image =
+    resolveMediaUrl(lot.coverImageUrl) ||
+    resolveMediaUrl(lot.product?.imageUrl) ||
+    resolveMediaUrl(lot.Product?.imageUrl) ||
+    null;
 
   return (
-    <article className={`${inv.card} transition hover:shadow-md`}>
-      <div className="flex items-start justify-between gap-3 border-b border-slate-100 p-4">
+    <article className={`${inv.card} overflow-hidden transition hover:shadow-md`}>
+      <div className="flex gap-3 p-3 sm:p-3.5">
+        <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-24 sm:w-24">
+          {image ? (
+            <Image src={image} alt="" fill unoptimized className="object-cover" sizes="96px" />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center text-slate-300">
+              <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                />
+              </svg>
+            </span>
+          )}
+        </div>
+
         <div className="min-w-0 flex-1">
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">#{lot.id}</span>
+          <div className="mb-1 flex flex-wrap items-center gap-1.5">
+            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-600">#{lot.id}</span>
             <span className={gradeBadgeClass()}>{lot.qualityGrade}</span>
             <span className={statusBadgeClass(lot.status)}>{localizeStatus(lot.status, t)}</span>
           </div>
-          <h3 className="truncate text-base font-bold text-slate-900">{productName}</h3>
-          {farmerName ? <p className="mt-0.5 text-xs text-slate-500">{t("lot.supplierLabel", { name: farmerName })}</p> : null}
-        </div>
-        <div className="flex shrink-0 gap-0.5">
-          <ActionBtn onClick={() => onView(lot)} className={inv.btnView} ariaLabel={t("lot.view")}>
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-          </ActionBtn>
-          <ActionBtn onClick={() => onEdit(lot)} className={inv.btnEdit} ariaLabel={t("lot.edit")}>
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </ActionBtn>
-          <ActionBtn onClick={() => onMedia(lot)} className={inv.btnMedia} ariaLabel={t("lot.media")}>
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </ActionBtn>
-          <ActionBtn onClick={() => onDelete(lot.id)} className={inv.btnDanger} ariaLabel={t("lot.delete")}>
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </ActionBtn>
+          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-slate-900 sm:text-base">{productName}</h3>
+          {farmerName ? <p className="mt-0.5 truncate text-[11px] text-slate-500">{farmerName}</p> : null}
+          <p className="mt-1.5 text-xs font-semibold text-emerald-700">
+            {available.toLocaleString("fa-IR")} {lot.unit}
+            <span className="mx-1 font-normal text-slate-300">·</span>
+            <span className="font-semibold text-slate-800">
+              {lot.tieredPricing?.length > 0
+                ? t("lot.tiered")
+                : lot.price
+                  ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency, tShared)
+                  : "—"}
+            </span>
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-px bg-slate-100 sm:grid-cols-4">
-        <div className="bg-white p-3">
-          <p className="text-[10px] font-medium text-slate-500">{t("lot.totalInventory")}</p>
-          <p className="mt-0.5 text-sm font-bold text-slate-900">
-            {parseFloat(lot.totalQuantity || 0).toLocaleString("fa-IR")} <span className="text-xs font-normal text-slate-500">{lot.unit}</span>
+      <div className="grid grid-cols-3 gap-px border-t border-slate-100 bg-slate-100">
+        <div className="bg-white px-2 py-2 text-center">
+          <p className="text-[9px] font-medium text-slate-500">{t("lot.totalInventory")}</p>
+          <p className="mt-0.5 text-[11px] font-bold tabular-nums text-slate-900 sm:text-xs">
+            {parseFloat(lot.totalQuantity || 0).toLocaleString("fa-IR")}
           </p>
         </div>
-        <div className="bg-white p-3">
-          <p className="text-[10px] font-medium text-slate-500">{t("lot.available")}</p>
-          <p className="mt-0.5 text-sm font-bold text-emerald-700">
-            {available.toLocaleString("fa-IR")} <span className="text-xs font-normal text-slate-500">{lot.unit}</span>
+        <div className="bg-white px-2 py-2 text-center">
+          <p className="text-[9px] font-medium text-slate-500">{t("lot.available")}</p>
+          <p className="mt-0.5 text-[11px] font-bold tabular-nums text-emerald-700 sm:text-xs">
+            {available.toLocaleString("fa-IR")}
           </p>
         </div>
-        <div className="bg-white p-3">
-          <p className="text-[10px] font-medium text-slate-500">{t("lot.price")}</p>
-          <p className="mt-0.5 text-sm font-bold text-slate-900">
-            {lot.tieredPricing?.length > 0 ? (
-              <span className="text-sky-700">{t("lot.tiered")}</span>
-            ) : lot.price ? (
-              <>{formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency, tShared)}</>
-            ) : (
-              <span className="text-slate-400">—</span>
-            )}
-          </p>
-        </div>
-        <div className="bg-white p-3">
-          <p className="text-[10px] font-medium text-slate-500">{t("lot.minOrder")}</p>
-          <p className="mt-0.5 text-sm font-bold text-slate-900">
-            {lot.minimumOrderQuantity ? (
-              <>{lot.minimumOrderQuantity} {lot.unit}</>
-            ) : (
-              <span className="text-slate-400">—</span>
-            )}
+        <div className="bg-white px-2 py-2 text-center">
+          <p className="text-[9px] font-medium text-slate-500">{t("lot.minOrder")}</p>
+          <p className="mt-0.5 text-[11px] font-bold tabular-nums text-slate-900 sm:text-xs">
+            {lot.minimumOrderQuantity || "—"}
           </p>
         </div>
       </div>
 
       {lot.tieredPricing?.length > 0 ? (
-        <div className="border-t border-slate-100 px-4 py-3">
+        <div className="border-t border-slate-100 px-3 py-2">
           <TieredPricingDisplay tieredPricing={lot.tieredPricing} unit={lot.unit} />
         </div>
       ) : null}
 
-      {lot.attributes?.length > 0 ? (
-        <div className="border-t border-slate-100 px-4 py-3">
-          <p className="mb-2 text-xs font-semibold text-slate-600">{t("lot.specs")}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {lot.attributes.map((a) => (
-              <span key={a.id} className="rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-700">
-                {a.definition?.name}: <strong>{a.value}</strong>
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <div className="border-t border-slate-100 bg-slate-50/80 px-2.5 py-2 sm:px-3">
+        <DashboardItemActions
+          onView={() => onView(lot)}
+          onEdit={() => onEdit(lot)}
+          onMedia={() => onMedia(lot)}
+          onDelete={() => onDelete(lot.id)}
+          viewLabel={t("lot.view")}
+          editLabel={t("lot.edit")}
+          mediaLabel={t("lot.media")}
+          deleteLabel={t("lot.delete")}
+          compact
+        />
+      </div>
     </article>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -8,6 +8,13 @@ import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import TradeServicesCategoryPager from "@/app/components/TradeServicesCategoryPager";
+import CardsPerRowSelect from "@/app/components/ui/CardsPerRowSelect";
+import {
+  DEFAULT_CARDS_PER_ROW,
+  getCardsPerRowGridClass,
+  readStoredCardsPerRow,
+  writeStoredCardsPerRow,
+} from "@/app/utils/cardsPerRow";
 
 const ADD_PRODUCT_HREF = "/dashboard/supplier/inventory/create?scope=own";
 const MANAGE_PRODUCTS_HREF = "/dashboard/supplier/inventory?scope=own";
@@ -241,6 +248,11 @@ export default function SupplierActiveProductsRail({
   const [listPage, setListPage] = useState(0);
   const [localProducts, setLocalProducts] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [cardsPerRow, setCardsPerRow] = useState(DEFAULT_CARDS_PER_ROW);
+
+  useEffect(() => {
+    setCardsPerRow(readStoredCardsPerRow());
+  }, []);
 
   const list = localProducts ?? (Array.isArray(products) ? products : []);
 
@@ -323,6 +335,14 @@ export default function SupplierActiveProductsRail({
                 </button>
               </div>
             ) : null}
+            {list.length > 0 && viewMode === "cards" ? (
+              <CardsPerRowSelect
+                value={cardsPerRow}
+                onChange={(n) => setCardsPerRow(writeStoredCardsPerRow(n))}
+                label={t("cardsPerRowLabel")}
+                className="hidden sm:inline-flex"
+              />
+            ) : null}
           </div>
           {isOwner ? (
             <div className="flex items-center gap-2">
@@ -370,7 +390,7 @@ export default function SupplierActiveProductsRail({
           </div>
         ) : (
           <>
-            <div className="sm:hidden">
+            <div className="px-8 sm:hidden">
               <TradeServicesCategoryPager
                 items={list}
                 pageSize={4}
@@ -378,7 +398,12 @@ export default function SupplierActiveProductsRail({
                 renderItem={(item) => <ProductCard item={item} />}
               />
             </div>
-            <div className="hidden grid-cols-2 gap-3 sm:grid sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            <div
+              className={`hidden sm:grid ${getCardsPerRowGridClass(cardsPerRow, {
+                gapClass: "gap-3 sm:gap-4",
+                withGrid: false,
+              })}`}
+            >
               {list.map((item) => (
                 <ProductCard key={item.id} item={item} />
               ))}

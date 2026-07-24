@@ -1,6 +1,6 @@
 import { getLocalizedText, getLocalizedLotLabel } from "./localize";
 import { getLotDisplayForLanguage } from "@/app/dashboard/supplier/inventory/utils/inventoryDisplayLocales";
-import { buildAvailableProducts, buildProductByIdMap } from "./availableProducts";
+import { buildProductByIdMap } from "./availableProducts";
 
 export const SEARCH_FILTERS = ["all", "products", "services", "posts", "hashtag"];
 
@@ -82,20 +82,23 @@ function lotAvailableQty(lot) {
 }
 
 export function flattenAvailableLots(inventoryLots, productById) {
-  const grouped = buildAvailableProducts(inventoryLots, productById);
   const rows = [];
 
-  for (const entry of grouped) {
-    for (const lot of entry.lots) {
-      const availableQty = lot.availableQty ?? lotAvailableQty(lot);
-      const isInquiry = Boolean(lot.inquiryOnly);
-      if (availableQty <= 0 && !isInquiry) continue;
-      rows.push({
-        lot,
-        product: entry.product,
-        availableQty: Math.max(0, availableQty),
-      });
-    }
+  for (const lot of inventoryLots || []) {
+    const product = productById.get(lot.productId);
+    if (!product || !product.isOrderable) continue;
+
+    const availableQty = lotAvailableQty(lot);
+    const isInquiry =
+      (lot.price == null || lot.price === "") &&
+      !(Array.isArray(lot.tieredPricing) && lot.tieredPricing.length);
+    if (availableQty <= 0 && !isInquiry) continue;
+
+    rows.push({
+      lot,
+      product,
+      availableQty: Math.max(0, availableQty),
+    });
   }
 
   return rows.sort((a, b) => {
@@ -113,6 +116,51 @@ export function getListingDisplayTitle(lot, product, language, t) {
   const grade = getLocalizedLotLabel(lot, language, t);
   if (productName && grade && grade !== productName) return `${productName} — ${grade}`;
   return productName || grade || (t ? t("product") : "");
+}
+
+/** مسیر کامل دسته از ریشه تا خود محصول، مثلاً: کشاورزی › میوه › خرما › کلوته خرما */
+export function formatCatalogCategoryPath(product, productById, language, { separator = " › " } = {}) {
+  if (!product || !productById) return "";
+  const path = [];
+  let current = product;
+  let safety = 0;
+  while (current && safety < 30) {
+    path.unshift(current);
+    current = current.parentId ? productById.get(current.parentId) : null;
+    safety += 1;
+  }
+  if (!path.length) return getLocalizedText(product, language) || "";
+  return path
+    .map((node) => getLocalizedText(node, language))
+    .filter(Boolean)
+    .join(separator);
+}
+
+/**
+ * بردکرامب دسته برای کارت‌ها: فقط اجداد (بدون خود محصول)، حداکثر maxLevels سطح.
+ * مثال: محصولات کشاورزی › میوه › خرما  — عنوان محصول جدا پایین کارت می‌ماند.
+ */
+export function formatCatalogAncestorBreadcrumb(
+  product,
+  productById,
+  language,
+  { separator = " › ", maxLevels = 3 } = {}
+) {
+  if (!product || !productById) return "";
+  const path = [];
+  let current = product.parentId ? productById.get(product.parentId) : null;
+  let safety = 0;
+  while (current && safety < 30) {
+    path.unshift(current);
+    current = current.parentId ? productById.get(current.parentId) : null;
+    safety += 1;
+  }
+  if (!path.length) return "";
+  const limited = path.length > maxLevels ? path.slice(-maxLevels) : path;
+  return limited
+    .map((node) => getLocalizedText(node, language))
+    .filter(Boolean)
+    .join(separator);
 }
 
 function lotHashtagValues(lot, language) {

@@ -88,7 +88,8 @@ export default function PricingPage() {
         <header className="mx-auto mb-8 max-w-3xl text-center">
           <h1 className="text-3xl font-extrabold text-slate-900">اشتراک فروشندگان</h1>
           <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-            بسته مناسب را انتخاب کنید تا آگهی‌هایتان بهتر دیده شوند. ارتباط با خریدار مستقیم و بدون واسطه است.
+            چهار سطح رایگان، برنزی، نقره‌ای و طلایی — محدودیت‌ها روی موجودی، رسانه، پست، خدمات و اولویت نمایش تعریف شده‌اند.
+            ارتباط با خریدار مستقیم و بدون واسطه است.
           </p>
           {myPlan?.planId && myPlan.planId !== "free" && myPlan.status === "active" ? (
             <p className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
@@ -126,9 +127,11 @@ export default function PricingPage() {
                   {formatToman(plan.priceToman)}
                 </p>
                 {plan.totalMonths > 0 ? (
-                  <p className="mt-1 text-xs text-slate-500">مدت اعتبار: {plan.totalMonths.toLocaleString("fa-IR")} ماه</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    اشتراک ماهانه — اعتبار هر دوره: {plan.totalMonths.toLocaleString("fa-IR")} ماه
+                  </p>
                 ) : (
-                  <p className="mt-1 text-xs text-slate-500">شروع بدون هزینه</p>
+                  <p className="mt-1 text-xs text-slate-500">شروع بدون هزینه · سقف‌های پایه</p>
                 )}
 
                 <ul className="mt-5 flex-1 space-y-2 text-sm text-slate-700">
@@ -164,7 +167,7 @@ export default function PricingPage() {
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-600">
           <p className="font-semibold text-slate-800">نکات مهم</p>
           <ul className="mt-2 list-inside list-disc space-y-1">
-            <li>پرداخت از طریق درگاه اینترنتی زرین‌پال انجام می‌شود.</li>
+            <li>پرداخت از طریق درگاه اینترنتی زیبال انجام می‌شود.</li>
             <li>
               وضعیت درگاه:{" "}
               {gateway?.configured ? (gateway.sandbox ? "حالت آزمایشی (Sandbox)" : "فعال") : "هنوز Merchant ID تنظیم نشده"}

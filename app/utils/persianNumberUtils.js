@@ -20,11 +20,11 @@ export function toWesternDigits(value) {
 
 /**
  * Locale-aware digit shaping for phones, years, etc.
- * fa → Persian · ar → Arabic-Indic · others → Western
+ * fa / ur → Persian · ar → Arabic-Indic · others → Western
  */
 export function formatLocalizedDigits(value, language = "fa") {
   const western = toWesternDigits(value);
-  if (language === "fa") return toPersianDigits(western);
+  if (language === "fa" || language === "ur") return toPersianDigits(western);
   if (language === "ar") return toArabicIndicDigits(western);
   return western;
 }

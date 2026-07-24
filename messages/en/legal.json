@@ -521,11 +521,11 @@
     },
     "seller": {
       "title": "Seller guide",
-      "intro": "Create a shop to get a dedicated page and product list. Manage customer orders and related need requests from the seller dashboard.",
+      "intro": "Create a shop to get a business page and product list. Manage customer orders and related need requests from the seller dashboard.",
       "sections": {
         "join": {
           "title": "Create a shop",
-          "body": "From My dedicated page or the seller dashboard, open Create shop. Set your public page name, contact details, and optionally hours and location."
+          "body": "From My business page or the seller dashboard, open Create shop. Set your public page name, contact details, and optionally hours and location."
         },
         "products": {
           "title": "Products and inventory",
@@ -541,7 +541,7 @@
         },
         "page": {
           "title": "Your shop page",
-          "body": "Your public URL looks like zareoon.ir/your-page. My dedicated page in the header menu opens it. Edit shop settings from the seller dashboard."
+          "body": "Your public URL looks like zareoon.ir/your-page. My business page in the header menu opens it. Edit shop settings from the seller dashboard."
         },
         "desktop": {
           "title": "Selling on desktop",
@@ -555,11 +555,11 @@
     },
     "provider": {
       "title": "Service provider guide",
-      "intro": "Offer trade services (customs, logistics, inspection, finance, and more) with a dedicated page and respond to related requests.",
+      "intro": "Offer trade services (customs, logistics, inspection, finance, and more) with a business page and respond to related requests.",
       "sections": {
         "join": {
           "title": "Join as a provider",
-          "body": "Start trade-services registration from My dedicated page or the services dashboard. Pick a category, fill company or professional info, and set your page address. After admin review, your page goes live."
+          "body": "Start trade-services registration from My business page or the services dashboard. Pick a category, fill company or professional info, and set your page address. After admin review, your page goes live."
         },
         "page": {
           "title": "My services page",
@@ -584,12 +584,12 @@
       }
     },
     "account": {
-      "title": "Profile, security, and dedicated page",
+      "title": "Profile, security, and business page",
       "intro": "Your account underpins every role. Keep your profile accurate for easier contact and trust.",
       "sections": {
         "profile": {
-          "title": "Edit profile",
-          "body": "Use Edit profile from the user menu or Dashboard → Account to update name, contact, and address details."
+          "title": "Edit personal profile",
+          "body": "Use Edit personal profile from the user menu or Dashboard → Account to update name, contact, and address details."
         },
         "security": {
           "title": "Sign-in and security",
@@ -600,7 +600,7 @@
           "body": "You can be buyer, seller, and provider at once. Switch roles in the dashboard; the sidebar follows the active role."
         },
         "dedicated": {
-          "title": "My dedicated page",
+          "title": "My business page",
           "body": "If you already have a shop or services page, this opens your public page. Otherwise you see an intro that explains how to create a shop or services page."
         }
       }
@@ -611,7 +611,7 @@
       "sections": {
         "desktopNav": {
           "title": "Desktop",
-          "body": "Full header with search, language, and user icon. User menu: My Zareoon, Edit profile, My dedicated page, Guide, Log out. Dashboard uses a sidebar and role switcher."
+          "body": "Full header with search, language, and user icon. User menu: My Zareoon, Edit personal profile, My business page, Guide, Log out. Dashboard uses a sidebar and role switcher."
         },
         "mobileNav": {
           "title": "Mobile",

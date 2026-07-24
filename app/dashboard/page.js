@@ -11,8 +11,8 @@ import { dash } from "../components/dashboard/dashboardTheme";
 function DashboardContent() {
   const { user } = useAuth();
   const admin = isAdmin(user);
-  const { isSellerView, isServicesView, isApplicantView } = useDashboardPersona();
-  const personaHome = isSellerView || isServicesView || isApplicantView;
+  const { isSellerView, isServicesView, isApplicantView, isPostsView } = useDashboardPersona();
+  const personaHome = isSellerView || isServicesView || isApplicantView || isPostsView;
 
   return (
     <div className={dash.page}>

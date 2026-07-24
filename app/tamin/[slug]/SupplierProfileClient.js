@@ -15,16 +15,20 @@ import PageStatusBanner from "@/app/components/ui/PageStatusBanner";
 import ShopPublicContacts from "@/app/components/ui/ShopPublicContacts";
 import { mergeBusinessHours } from "@/app/utils/businessHours";
 
-function Stars({ value, onChange, readonly }) {
+function Stars({ value, onChange, readonly, size = "md" }) {
+  const sizeClass = size === "lg" ? "text-2xl sm:text-3xl" : size === "sm" ? "text-base" : "text-xl";
   return (
-    <div className="flex gap-0.5">
+    <div className="flex items-center gap-1" role={readonly ? "img" : "group"} aria-label={`${value} از ۵ ستاره`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
           type="button"
           disabled={readonly}
           onClick={() => onChange?.(n)}
-          className={`text-lg ${n <= value ? "text-amber-400" : "text-slate-300"} ${readonly ? "cursor-default" : "hover:scale-110"}`}
+          aria-label={`${n} ستاره`}
+          className={`${sizeClass} leading-none transition ${
+            n <= Number(value || 0) ? "text-amber-400" : "text-slate-300"
+          } ${readonly ? "cursor-default" : "cursor-pointer hover:scale-110 active:scale-95"}`}
         >
           ★
         </button>
@@ -123,6 +127,13 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
     }
     return false;
   };
+
+  useEffect(() => {
+    if (data?.myReview?.rating) {
+      setReviewRating(Number(data.myReview.rating) || 5);
+      setReviewComment(String(data.myReview.comment || ""));
+    }
+  }, [data?.myReview?.id, data?.myReview?.rating, data?.myReview?.comment]);
 
   const submitReview = async () => {
     setReviewSubmitting(true);
@@ -233,28 +244,52 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
             ) : null}
 
             <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <h2 className="mb-4 text-sm font-bold text-slate-800">
-                {t("profile.reviewsTitle", { count: stats.reviewCount?.toLocaleString("fa-IR") || 0 })}
-              </h2>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-bold text-slate-800">
+                  {t("profile.reviewsTitle", { count: stats.reviewCount?.toLocaleString("fa-IR") || 0 })}
+                </h2>
+                {stats.reviewAverage || stats.tradeScore ? (
+                  <div className="flex items-center gap-2">
+                    <Stars value={Math.round(Number(stats.reviewAverage || stats.tradeScore))} readonly size="sm" />
+                    <span className="text-sm font-bold tabular-nums text-slate-800">
+                      {Number(stats.reviewAverage || stats.tradeScore).toFixed(1)}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
 
-              {canReview && !myReview ? (
+              {!auth?.user && !isOwner ? (
+                <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
+                  <p className="text-sm text-slate-600">{t("profile.loginToReview")}</p>
+                  <Link
+                    href={`/auth/login?next=${encodeURIComponent(`/${slug}`)}`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-xs font-bold text-white"
+                  >
+                    ورود / ثبت‌نام
+                  </Link>
+                </div>
+              ) : null}
+
+              {canReview ? (
                 <div className="mb-4 rounded-xl border border-amber-100 bg-amber-50/80 p-4">
-                  <p className="mb-2 text-xs text-amber-900">{t("profile.canReviewHint")}</p>
-                  <Stars value={reviewRating} onChange={setReviewRating} />
+                  <p className="mb-2 text-xs text-amber-900">
+                    {myReview ? t("profile.canReviewUpdateHint") : t("profile.canReviewHint")}
+                  </p>
+                  <Stars value={reviewRating} onChange={setReviewRating} size="lg" />
                   <textarea
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     rows={2}
                     placeholder={t("profile.reviewPlaceholder")}
-                    className="mt-2 w-full rounded-lg border border-amber-200 px-3 py-2 text-sm"
+                    className="mt-3 w-full rounded-lg border border-amber-200 px-3 py-2 text-sm"
                   />
                   <button
                     type="button"
                     onClick={submitReview}
                     disabled={reviewSubmitting}
-                    className="mt-2 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white"
+                    className="mt-2 rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-amber-700 disabled:opacity-60"
                   >
-                    {t("profile.submitReview")}
+                    {myReview ? t("profile.updateReview") : t("profile.submitReview")}
                   </button>
                   {msg ? <p className="mt-2 text-xs text-amber-800">{msg}</p> : null}
                 </div>
@@ -270,7 +305,7 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
                         <span className="text-sm font-semibold text-slate-800">
                           {r.reviewer?.displayName || t("profile.defaultUser")}
                         </span>
-                        <Stars value={r.rating} readonly />
+                        <Stars value={r.rating} readonly size="sm" />
                       </div>
                       {r.comment ? <p className="mt-2 text-sm text-slate-600">{r.comment}</p> : null}
                     </li>

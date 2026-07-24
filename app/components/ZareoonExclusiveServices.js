@@ -272,7 +272,7 @@ export default function ZareoonExclusiveServices({ className = "" }) {
           dir={dir}
         />
 
-        <div className="space-y-3 p-2.5 text-start sm:space-y-5 sm:p-5 lg:p-6">
+        <div className="space-y-3 px-9 py-2.5 text-start sm:space-y-5 sm:px-11 sm:py-5 lg:px-12 lg:py-6">
           <ZareoonEscrowFeature />
 
           <div className="mb-1 flex w-full flex-col gap-2.5 sm:mb-2 sm:gap-3">

@@ -32,9 +32,9 @@ export const catalogBadge = {
 
 export const catalogBtn = {
   primary:
-    "rounded-xl bg-green-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full sm:w-auto",
+    "rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full sm:w-auto",
   primaryBlock:
-    "w-full rounded-xl bg-green-600 py-3.5 text-base font-bold text-white shadow-sm transition hover:bg-green-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50",
+    "w-full rounded-xl bg-emerald-700 py-3.5 text-base font-bold text-white shadow-md shadow-emerald-900/15 transition hover:bg-emerald-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50",
   secondary:
     "rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50",
 };

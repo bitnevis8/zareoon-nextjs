@@ -9,7 +9,7 @@ import { calculateAvailableStock } from "@/app/utils/stockUtils";
 import { formatLocalizedNumber, getLocalizedText, localizeUnit } from "@/app/utils/localize";
 import CartStatusBanner from "@/app/components/CartStatusBanner";
 import CatalogBreadcrumb, { buildCatalogPath } from "@/app/components/CatalogBreadcrumb";
-import CatalogChildrenGrid from "@/app/components/CatalogChildrenGrid";
+import CatalogChildrenGrid, { isFinalCatalogCategory } from "@/app/components/CatalogChildrenGrid";
 import LatestAvailableProductsSection from "@/app/components/LatestAvailableProductsSection";
 import CatalogProductHero from "@/app/components/catalog/CatalogProductHero";
 import CatalogProductDescription from "@/app/components/catalog/CatalogProductDescription";
@@ -438,7 +438,7 @@ export default function CatalogItemPage({ params }) {
         isRTL={isRTL}
       />
 
-      {item && !item.isOrderable ? (
+      {item && !item.isOrderable && !isFinalCatalogCategory(children) ? (
         <LatestAvailableProductsSection
           inventoryLots={inventoryLots}
           allProducts={allProducts}

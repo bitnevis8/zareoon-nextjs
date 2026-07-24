@@ -314,7 +314,7 @@ export default function TradeProviderRegisterForm() {
       <header className="mb-5 sm:mb-6">
         <p className="text-xs font-medium text-emerald-700">ایجاد خدمات</p>
         <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-          صفحه اختصاصی خدمات خود را بسازید
+          صفحه تجاری خدمات خود را بسازید
         </h1>
         <p className="mt-1.5 text-sm leading-6 text-slate-500">
           پنج مرحله — مثل ایجاد فروشگاه؛ ساعات کاری و موقعیت اختیاری‌اند و بعداً هم قابل تکمیل هستند.

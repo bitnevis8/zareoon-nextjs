@@ -6,64 +6,75 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { getAuthHeaders } from "@/app/utils/authHeaders";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { resolveMediaUrl } from "@/app/utils/mediaUrl";
+import ImageCropModal from "@/app/components/ui/ImageCropModal";
 import homeFa from "../../../messages/fa/home.json";
 
+/**
+ * آپلود آواتار با کراپ مربعی
+ * @param {'user'|'shop'} purpose — user: دایره / shop: مربع گرد
+ */
 export default function AvatarUpload({
   onUploadSuccess,
   currentAvatar,
   className = "",
   userId = null,
   variant = "profile",
+  purpose = "user",
+  label,
+  hint,
 }) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [cropSrc, setCropSrc] = useState(null);
   const fileInputRef = useRef(null);
   const { user, updateUser } = useAuth();
   const { t } = useLanguage();
 
-  const compressImage = (file, maxWidth = 800, quality = 0.8) => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const img = document.createElement("img");
+  const isShop = purpose === "shop";
+  const shapeClass = isShop ? "rounded-2xl" : "rounded-full";
+  const cropShape = isShop ? "rounded" : "circle";
 
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(resolve, "image/jpeg", quality);
-      };
-
-      img.onerror = () => resolve(file);
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  const uploadFile = async (file) => {
+  const uploadBlob = async (blob) => {
     setUploading(true);
     try {
+      const file = new File([blob], isShop ? "shop-avatar.jpg" : "avatar.jpg", {
+        type: "image/jpeg",
+      });
       const formData = new FormData();
       formData.append("file", file);
-      if (userId) formData.append("userId", userId);
 
-      const response = await fetch(API_ENDPOINTS.fileUpload.uploadAvatar, {
-        method: "POST",
-        credentials: "include",
-        headers: getAuthHeaders(),
-        body: formData,
-      });
-      const result = await response.json();
+      let result;
+      if (isShop) {
+        formData.append("module", "accounts");
+        formData.append("fileType", "images");
+        if (user?.id || user?.userId) {
+          formData.append("entityId", String(user.id || user.userId));
+        }
+        const response = await fetch(API_ENDPOINTS.fileUpload.upload, {
+          method: "POST",
+          credentials: "include",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+        result = await response.json();
+      } else {
+        if (userId) formData.append("userId", userId);
+        const response = await fetch(API_ENDPOINTS.fileUpload.uploadAvatar, {
+          method: "POST",
+          credentials: "include",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+        result = await response.json();
+      }
 
       if (result.success) {
-        if (!userId && updateUser && user) {
-          updateUser({ ...user, avatar: result.data.downloadUrl });
+        const url = result.data?.downloadUrl || null;
+        if (!isShop && !userId && updateUser && user) {
+          updateUser({ ...user, avatar: url });
         }
-        setPreview(null);
+        setPreview(url ? resolveMediaUrl(url) : null);
         onUploadSuccess?.(result.data);
         return true;
       }
@@ -79,7 +90,7 @@ export default function AvatarUpload({
     }
   };
 
-  const handleFileSelect = async (event) => {
+  const handleFileSelect = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -93,53 +104,84 @@ export default function AvatarUpload({
       return;
     }
 
-    const compressedFile = (await compressImage(file, 800, 0.8)) || file;
     const reader = new FileReader();
-    reader.onload = (e) => setPreview(e.target.result);
-    reader.readAsDataURL(compressedFile);
+    reader.onload = (e) => setCropSrc(String(e.target?.result || ""));
+    reader.readAsDataURL(file);
+  };
 
-    const ok = await uploadFile(compressedFile);
-    if (ok) setPreview(null);
+  const handleCropConfirm = async (blob) => {
+    setCropSrc(null);
+    const localUrl = URL.createObjectURL(blob);
+    setPreview(localUrl);
+    const ok = await uploadBlob(blob);
+    if (!ok) setPreview(null);
+    URL.revokeObjectURL(localUrl);
   };
 
   const handleDelete = async () => {
-    if (!currentAvatar) return;
+    if (!currentAvatar && !preview) return;
+    setUploading(true);
     try {
+      if (isShop) {
+        // حذف تصویر فروشگاه فقط از طریق callback والد (coverImage = null)
+        onUploadSuccess?.(null);
+        setPreview(null);
+        return;
+      }
+
       const response = await fetch(API_ENDPOINTS.fileUpload.deleteFileByUrl, {
         method: "DELETE",
         credentials: "include",
         headers: getAuthHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ fileUrl: currentAvatar }),
+        body: JSON.stringify({ fileUrl: currentAvatar, clearAvatar: true }),
       });
       const result = await response.json();
       if (result.success) {
         if (!userId && updateUser && user) {
           updateUser({ ...user, avatar: null });
         }
+        setPreview(null);
         onUploadSuccess?.(null);
       } else {
-        alert(result.message || t("photoUploadFailed"));
+        // حتی اگر فایل در FTP نبود، نمایه را خالی کن
+        if (!userId && updateUser && user) {
+          updateUser({ ...user, avatar: null });
+        }
+        setPreview(null);
+        onUploadSuccess?.(null);
+        if (result.message) {
+          console.warn(result.message);
+        }
       }
     } catch (error) {
-      alert(t("photoUploadFailed"));
+      console.error(error);
+      if (!userId && updateUser && user) {
+        updateUser({ ...user, avatar: null });
+      }
+      setPreview(null);
+      onUploadSuccess?.(null);
+    } finally {
+      setUploading(false);
     }
   };
 
-  const displaySrc = preview || currentAvatar || "/images/default/male.png";
+  const resolvedCurrent = resolveMediaUrl(currentAvatar);
+  const displaySrc = preview || resolvedCurrent || null;
   const initials =
     (user?.firstName?.[0] || user?.username?.[0] || homeFa.avatarFallbackInitial).toUpperCase();
+  const title = label || (isShop ? "تصویر فروشگاه" : t("changePhoto"));
 
   if (variant === "classic") {
     return (
       <div className={`avatar-upload ${className}`}>
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-          <Image
-            src={displaySrc}
-            alt={t("profile")}
-            className="h-16 w-16 rounded-lg object-cover sm:h-20 sm:w-20"
-            width={80}
-            height={80}
-          />
+          <div className={`relative h-16 w-16 overflow-hidden bg-slate-100 sm:h-20 sm:w-20 ${shapeClass}`}>
+            {displaySrc ? (
+              <Image src={displaySrc} alt="" fill className="object-cover object-center" sizes="80px" unoptimized />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-400">{initials}</span>
+            )}
+          </div>
           <div className="flex flex-col gap-2">
             <input
               ref={fileInputRef}
@@ -157,6 +199,17 @@ export default function AvatarUpload({
             </label>
           </div>
         </div>
+        <ImageCropModal
+          open={Boolean(cropSrc)}
+          imageSrc={cropSrc}
+          shape={cropShape}
+          onCancel={() => {
+            setCropSrc(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          }}
+          onConfirm={handleCropConfirm}
+          title={isShop ? "کراپ تصویر فروشگاه" : "کراپ آواتار شخصی"}
+        />
       </div>
     );
   }
@@ -168,17 +221,11 @@ export default function AvatarUpload({
           type="button"
           onClick={() => !uploading && fileInputRef.current?.click()}
           disabled={uploading}
-          className="group relative h-24 w-24 overflow-hidden rounded-full ring-2 ring-emerald-100 ring-offset-2 ring-offset-white transition hover:ring-emerald-300 focus:outline-none focus-visible:ring-emerald-500 disabled:cursor-wait sm:h-28 sm:w-28"
-          aria-label={t("changePhoto")}
+          className={`group relative h-24 w-24 overflow-hidden bg-slate-100 ring-2 ring-emerald-100 ring-offset-2 ring-offset-white transition hover:ring-emerald-300 focus:outline-none focus-visible:ring-emerald-500 disabled:cursor-wait sm:h-28 sm:w-28 ${shapeClass}`}
+          aria-label={title}
         >
-          {displaySrc && displaySrc !== "/images/default/male.png" ? (
-            <Image
-              src={displaySrc}
-              alt={t("profile")}
-              fill
-              className="object-cover"
-              sizes="112px"
-            />
+          {displaySrc ? (
+            <Image src={displaySrc} alt="" fill className="object-cover object-center" sizes="112px" unoptimized />
           ) : (
             <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-700 text-2xl font-bold text-white sm:text-3xl">
               {initials}
@@ -222,12 +269,9 @@ export default function AvatarUpload({
           disabled={uploading}
           className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-60 sm:text-sm"
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0-9l3 3m-3-3L9 15m8-9a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
           {uploading ? t("uploadingPhoto") : t("changePhoto")}
         </button>
-        {currentAvatar ? (
+        {displaySrc ? (
           <button
             type="button"
             onClick={handleDelete}
@@ -238,9 +282,21 @@ export default function AvatarUpload({
           </button>
         ) : null}
       </div>
-      <p className="max-w-[12rem] text-center text-[11px] leading-5 text-slate-400 sm:text-xs">
-        {t("photoHint")}
+      <p className="max-w-[14rem] text-center text-[11px] leading-5 text-slate-400 sm:text-xs">
+        {hint || (isShop ? "مربع — با کراپ مشخص کنید کدام بخش دیده شود" : t("photoHint"))}
       </p>
+
+      <ImageCropModal
+        open={Boolean(cropSrc)}
+        imageSrc={cropSrc}
+        shape={cropShape}
+        onCancel={() => {
+          setCropSrc(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        }}
+        onConfirm={handleCropConfirm}
+        title={isShop ? "کراپ تصویر فروشگاه" : "کراپ آواتار شخصی"}
+      />
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { AccountNavSubtitle } from '../utils/accountNav';
 import UserProfileMenu from './UserProfileMenu';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -130,14 +129,11 @@ export default function ProfileDropdown() {
                 <div className="truncate text-sm text-gray-600">
                   {user.mobile || user.phone || user.username}
                 </div>
-                <div className="mt-1.5">
-                  <AccountNavSubtitle user={user} />
-                </div>
               </div>
             </div>
           </div>
 
-          <div className="p-2">
+          <div className="py-0.5">
             <UserProfileMenu
               user={user}
               onClose={() => setIsOpen(false)}

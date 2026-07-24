@@ -13,11 +13,13 @@ function CallbackInner() {
   const [state, setState] = useState({ loading: true, ok: false, message: "", refId: "" });
 
   useEffect(() => {
-    const authority = params.get("Authority") || params.get("authority");
-    const status = params.get("Status") || params.get("status");
+    const trackId =
+      params.get("trackId") || params.get("Authority") || params.get("authority") || "";
+    const success = params.get("success");
+    const status = params.get("status") || params.get("Status") || "";
 
     const run = async () => {
-      if (!authority) {
+      if (!trackId) {
         setState({ loading: false, ok: false, message: "کد پیگیری پرداخت یافت نشد", refId: "" });
         return;
       }
@@ -28,7 +30,7 @@ function CallbackInner() {
         const res = await fetcher(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ authority, status }),
+          body: JSON.stringify({ trackId, success, status, authority: trackId }),
         });
         const json = await res.json();
         if (json.success) {

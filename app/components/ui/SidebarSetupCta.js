@@ -11,6 +11,7 @@ export default function SidebarSetupCta({
   active,
   onClick,
   tone = "emerald",
+  compact = false,
 }) {
   const tones = {
     emerald: {
@@ -35,18 +36,27 @@ export default function SidebarSetupCta({
   const c = tones[tone] || tones.emerald;
 
   return (
-    <div className="px-2 pt-3">
+    <div className={compact ? "px-0.5 pt-2" : "px-2 pt-3"}>
       <Link
         href={href}
         onClick={onClick}
-        className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-3 transition ${
-          active ? c.active : c.idle
-        }`}
+        title={label}
+        className={`flex items-center transition ${
+          compact ? "h-9 justify-center rounded-lg border px-1" : "justify-between gap-2 rounded-xl border px-3 py-3"
+        } ${active ? c.active : c.idle}`}
       >
-        <span className={`text-[13px] font-bold ${c.text}`}>{label}</span>
-        <span className={`text-sm font-semibold ${c.chevron}`} aria-hidden>
-          ←
-        </span>
+        {compact ? (
+          <span className={`text-lg font-bold leading-none ${c.chevron}`} aria-hidden>
+            +
+          </span>
+        ) : (
+          <>
+            <span className={`text-[13px] font-bold ${c.text}`}>{label}</span>
+            <span className={`text-sm font-semibold ${c.chevron}`} aria-hidden>
+              ←
+            </span>
+          </>
+        )}
       </Link>
     </div>
   );

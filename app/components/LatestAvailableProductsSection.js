@@ -14,7 +14,8 @@ import {
 import { useFullCatalog, useInventoryLots, HOMEPAGE_LOTS_PARAMS } from "../hooks/useCatalogProducts";
 import { ProductScrollSkeleton } from "./ui/Skeleton";
 
-const CARD_CLASS = "shrink-0 w-[7.75rem] min-[380px]:w-[8.25rem] sm:w-[8.75rem] md:w-[9.25rem] snap-start";
+const CARD_CLASS =
+  "shrink-0 w-[9.75rem] min-[380px]:w-[10.5rem] sm:w-[11.5rem] md:w-[12.25rem] lg:w-[12.75rem] snap-start";
 
 export default function LatestAvailableProductsSection({
   inventoryLots: inventoryLotsProp,

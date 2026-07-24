@@ -20,7 +20,7 @@ export default function DashboardSettingsPage() {
   const [tradeProvidersAutoApprove, setTradeProvidersAutoApprove] = useState(true);
   const [shopsAutoApprove, setShopsAutoApprove] = useState(true);
   const [pageDeletionGraceDays, setPageDeletionGraceDays] = useState(30);
-  const [showFooterBreakpoint, setShowFooterBreakpoint] = useState(false);
+  const [showFooterBreakpoint, setShowFooterBreakpoint] = useState(true);
   const [vipTradeCategories, setVipTradeCategories] = useState({});
   const [providers, setProviders] = useState([]);
   const [bannerUploading, setBannerUploading] = useState(null);
@@ -43,7 +43,7 @@ export default function DashboardSettingsPage() {
           setTradeProvidersAutoApprove(settingsData.data?.tradeProvidersAutoApprove !== false);
           setShopsAutoApprove(settingsData.data?.shopsAutoApprove !== false);
           setPageDeletionGraceDays(Number(settingsData.data?.pageDeletionGraceDays) || 30);
-          setShowFooterBreakpoint(!!settingsData.data?.showFooterBreakpoint);
+          setShowFooterBreakpoint(settingsData.data?.showFooterBreakpoint !== false);
           setVipTradeCategories(settingsData.data?.vipTradeCategories || {});
         }
         if (!cancelled && providersData.success) {

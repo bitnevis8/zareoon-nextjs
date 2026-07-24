@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * نکته کوتاه درباره صفحه اختصاصی مشترک فروشگاه / خدمات
+ * نکته کوتاه درباره صفحه تجاری مشترک فروشگاه / خدمات
  * @param {"shop-create" | "services-create"} context
  */
 export default function DedicatedPageTip({ context = "shop-create", className = "" }) {
@@ -16,7 +16,7 @@ export default function DedicatedPageTip({ context = "shop-create", className = 
       {isShop ? (
         <div className="mt-1.5 space-y-2 text-[12px] leading-6 text-emerald-950/90 sm:text-[13px]">
           <p>
-            با تکمیل این مراحل، <strong className="font-semibold">صفحه اختصاصی</strong> شما در زارعون ساخته
+            با تکمیل این مراحل، <strong className="font-semibold">صفحه تجاری</strong> شما در زارعون ساخته
             می‌شود؛ مثل یک ویترین یکتا برای کسب‌وکارتان.
           </p>
           <p>
@@ -37,7 +37,7 @@ export default function DedicatedPageTip({ context = "shop-create", className = 
       ) : (
         <div className="mt-1.5 space-y-2 text-[12px] leading-6 text-emerald-950/90 sm:text-[13px]">
           <p>
-            با تکمیل این مراحل، <strong className="font-semibold">صفحه اختصاصی</strong> شما در زارعون ساخته
+            با تکمیل این مراحل، <strong className="font-semibold">صفحه تجاری</strong> شما در زارعون ساخته
             می‌شود؛ محلی برای معرفی و ارائه خدمات بازرگانی‌تان.
           </p>
           <p>

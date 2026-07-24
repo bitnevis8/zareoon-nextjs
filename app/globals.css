@@ -170,8 +170,10 @@ html {
 
 /* Mobile-first layout helpers */
 :root {
-  --site-mobile-top-chrome: 7.75rem;
-  --site-desktop-top-chrome: 10rem;
+  /* با ResizeObserver روی #site-header به‌روز می‌شود؛ این فقط fallback است */
+  --site-top-chrome: 8rem;
+  --site-mobile-top-chrome: 8rem;
+  --site-desktop-top-chrome: 8rem;
 }
 
 @layer utilities {
@@ -180,7 +182,7 @@ html {
   }
 
   .site-mobile-top-offset {
-    padding-top: var(--site-mobile-top-chrome);
+    padding-top: var(--site-top-chrome);
   }
 
   .touch-target {

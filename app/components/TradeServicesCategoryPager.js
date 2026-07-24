@@ -24,7 +24,7 @@ function ChevronRight({ className = "h-5 w-5" }) {
 }
 
 /**
- * اسلایدر کارت — فلش روی کارت‌ها (بدون گرفتن فضای شبکه)
+ * اسلایدر کارت — فلش مستطیل عمودی بیرون از شبکه (absolute، بدون گرفتن فضای کارت)
  */
 export default function TradeServicesCategoryPager({
   items,
@@ -148,9 +148,9 @@ export default function TradeServicesCategoryPager({
     suppressClick.current = false;
   };
 
-  // هر دو فلش همیشه دیده می‌شوند؛ غیرفعال فقط کم‌رنگ
+  // مستطیل عمودی خاکستری شفاف — absolute بیرون از شبکه تا فضای کارت‌ها را نگیرد
   const arrowBtn =
-    "pointer-events-auto absolute top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white/95 text-emerald-800 shadow-md backdrop-blur-sm transition hover:bg-white hover:shadow-lg disabled:cursor-default disabled:border-slate-200/80 disabled:bg-white/80 disabled:text-slate-300 disabled:shadow-sm sm:h-10 sm:w-10";
+    "pointer-events-auto absolute top-1/2 z-30 flex h-14 w-7 -translate-y-1/2 items-center justify-center rounded-md border border-slate-400/20 bg-slate-600/30 text-slate-800 shadow-none backdrop-blur-[1.5px] transition hover:bg-slate-600/45 hover:text-slate-950 disabled:cursor-default disabled:opacity-20 sm:h-[4.25rem] sm:w-8";
 
   if (!items?.length) return null;
 
@@ -167,7 +167,7 @@ export default function TradeServicesCategoryPager({
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="relative">
+      <div className="relative overflow-visible">
         <div
           className="select-none"
           onPointerDown={onPointerDown}
@@ -207,21 +207,21 @@ export default function TradeServicesCategoryPager({
               type="button"
               onClick={onLeftArrow}
               disabled={leftDisabled}
-              className={`${arrowBtn} left-1 sm:left-1.5`}
+              className={`${arrowBtn} left-0 -translate-x-[calc(100%+0.35rem)]`}
               aria-label={leftLabel}
               aria-disabled={leftDisabled}
             >
-              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              <ChevronLeft className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
             </button>
             <button
               type="button"
               onClick={onRightArrow}
               disabled={rightDisabled}
-              className={`${arrowBtn} right-1 sm:right-1.5`}
+              className={`${arrowBtn} right-0 translate-x-[calc(100%+0.35rem)]`}
               aria-label={rightLabel}
               aria-disabled={rightDisabled}
             >
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+              <ChevronRight className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
             </button>
           </>
         ) : null}

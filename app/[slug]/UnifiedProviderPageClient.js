@@ -9,8 +9,10 @@ import { useAuth } from "@/app/context/AuthContext";
 import { authFetch } from "@/app/utils/authHeaders";
 import { mapApiProviderRow } from "@/app/utils/tradeProviderMapper";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { formatLocalizedDigits } from "@/app/utils/persianNumberUtils";
 import SupplierProfileClient from "@/app/tamin/[slug]/SupplierProfileClient";
 import TradeProviderProfileView from "@/app/components/TradeProviderProfileView";
+import ProfileHeaderMetrics from "@/app/components/ProfileHeaderMetrics";
 
 function IconShop({ className }) {
   return (
@@ -53,6 +55,33 @@ function IconPosts({ className }) {
       />
       <path d="M8 9h8M8 12h8M8 15h5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
+  );
+}
+
+function HeroStars({ average, count }) {
+  const avg = Number(average);
+  if (!Number.isFinite(avg) || avg <= 0) {
+    return (
+      <p className="mt-2 text-[12px] text-emerald-100/80">هنوز امتیازی ثبت نشده</p>
+    );
+  }
+  const filled = Math.round(avg);
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2">
+      <span className="inline-flex gap-0.5 text-amber-300" aria-label={`${avg} از ۵`}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <span key={n} className={n <= filled ? "text-amber-300" : "text-white/25"}>
+            ★
+          </span>
+        ))}
+      </span>
+      <span className="text-sm font-bold tabular-nums text-white">{avg.toFixed(1)}</span>
+      {count > 0 ? (
+        <span className="text-[12px] text-emerald-100/85">
+          ({Number(count).toLocaleString("fa-IR")} نظر)
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -232,66 +261,65 @@ export default function UnifiedProviderPageClient({ slug }) {
       <header className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.14),transparent_55%)]" />
         <div className="relative mx-auto max-w-5xl px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
-          <p className="mb-4 text-[12px] font-medium text-emerald-100/85 sm:text-[13px]" dir="ltr">
+          <p className="mb-3 text-[12px] font-medium text-emerald-100/85 sm:mb-4 sm:text-[13px]" dir="ltr">
             zareoon.ir/{slug}
           </p>
 
-          <div className="flex items-start gap-3.5 sm:gap-4">
-            {avatar ? (
-              <Image
-                src={avatar}
-                alt=""
-                width={88}
-                height={88}
-                unoptimized
-                className="h-[4.5rem] w-[4.5rem] shrink-0 rounded-2xl border-2 border-white/30 object-cover shadow-lg sm:h-24 sm:w-24"
-              />
-            ) : (
-              <span className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-2xl border-2 border-white/20 bg-white/15 text-2xl font-black shadow-lg sm:h-24 sm:w-24 sm:text-3xl">
-                {initial}
-              </span>
-            )}
-
-            <div className="min-w-0 flex-1 pt-0.5">
-              <h1 className="text-xl font-black leading-snug tracking-tight sm:text-2xl">{displayName}</h1>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                <span className="rounded-md bg-white/15 px-2 py-0.5 text-[11px] font-semibold backdrop-blur">
-                  فروشگاه
+          <ProfileHeaderMetrics
+            variant="dark"
+            followers={stats?.followerCount ?? 0}
+            following={stats?.followingCount ?? 0}
+            products={productCount}
+            posts={stats?.postsCount ?? postCount}
+            services={serviceCount}
+            showServices
+            formatValue={(n) => formatLocalizedDigits(Number(n || 0).toLocaleString("en-US"), language)}
+            labels={{
+              followers: "دنبال‌کنندگان",
+              following: "دنبال‌شوندگان",
+              products: "محصولات",
+              posts: "پست‌ها",
+              services: "خدمات",
+            }}
+          >
+            <div className="flex items-start gap-3.5 sm:gap-4">
+              {avatar ? (
+                <Image
+                  src={avatar}
+                  alt=""
+                  width={88}
+                  height={88}
+                  unoptimized
+                  className="h-[4.5rem] w-[4.5rem] shrink-0 rounded-2xl border-2 border-white/30 object-cover shadow-lg sm:h-24 sm:w-24"
+                />
+              ) : (
+                <span className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-2xl border-2 border-white/20 bg-white/15 text-2xl font-black shadow-lg sm:h-24 sm:w-24 sm:text-3xl">
+                  {initial}
                 </span>
-                {hasServices ? (
-                  <span className="rounded-md bg-sky-400/25 px-2 py-0.5 text-[11px] font-semibold text-sky-50 backdrop-blur">
-                    خدمات بازرگانی
+              )}
+
+              <div className="min-w-0 flex-1 pt-0.5">
+                <h1 className="text-xl font-black leading-snug tracking-tight sm:text-2xl">{displayName}</h1>
+                <HeroStars
+                  average={stats?.reviewAverage ?? stats?.tradeScore}
+                  count={stats?.reviewCount}
+                />
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <span className="rounded-md bg-white/15 px-2 py-0.5 text-[11px] font-semibold backdrop-blur">
+                    فروشگاه
                   </span>
+                  {hasServices ? (
+                    <span className="rounded-md bg-sky-400/25 px-2 py-0.5 text-[11px] font-semibold text-sky-50 backdrop-blur">
+                      خدمات بازرگانی
+                    </span>
+                  ) : null}
+                </div>
+                {headline ? (
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-emerald-50/90">{headline}</p>
                 ) : null}
               </div>
-              {headline ? (
-                <p className="mt-2 line-clamp-2 text-sm leading-6 text-emerald-50/90">{headline}</p>
-              ) : null}
             </div>
-          </div>
-
-          <div
-            className={`mt-5 grid gap-1.5 rounded-2xl bg-black/15 p-2 backdrop-blur-sm sm:gap-2 sm:p-2.5 ${
-              hasServices ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4"
-            }`}
-          >
-            {[
-              { value: stats?.followerCount ?? 0, label: "دنبال‌کنندگان" },
-              { value: stats?.followingCount ?? 0, label: "دنبال‌شوندگان" },
-              { value: productCount, label: "محصول" },
-              ...(hasServices ? [{ value: serviceCount, label: "خدمت" }] : []),
-              { value: stats?.postsCount ?? postCount, label: "پست" },
-            ].map((item) => (
-              <div key={item.label} className="rounded-xl px-1.5 py-2 text-center sm:px-2">
-                <p className="text-sm font-black tabular-nums sm:text-lg">
-                  {Number(item.value).toLocaleString("fa-IR")}
-                </p>
-                <p className="mt-0.5 whitespace-nowrap text-[9px] leading-tight text-emerald-100/85 sm:text-[10px]">
-                  {item.label}
-                </p>
-              </div>
-            ))}
-          </div>
+          </ProfileHeaderMetrics>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {shopData?.isOwner ? (

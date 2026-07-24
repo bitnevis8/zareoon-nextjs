@@ -22,9 +22,12 @@
     "myServicesPage": "آدرس صفحه خدمات",
     "servicePageSettings": "ویرایش خدمات من",
     "customerOrders": "سفارش‌های مشتریان",
-    "incomingServiceRequests": "درخواست‌های دریافتی",
+    "incomingServiceRequests": "نیازمندی‌ها به خدمات من",
+    "escrow": "حساب امانی زارعون",
     "myShopUrl": "آدرس فروشگاه",
-    "configureShopUrl": "تنظیم آدرس فروشگاه"
+    "configureShopUrl": "تنظیم آدرس فروشگاه",
+    "commercialPageShop": "صفحه تجاری من (فروشگاه)",
+    "commercialPageServices": "صفحه تجاری من (خدمات)"
   },
   "emailVerification": {
     "title": "ایمیل شما تأیید نشده است",

@@ -1,6 +1,6 @@
 {
   "dashboard": "داشبورد",
-  "escrow": "تضمین معاملات و حساب امانی",
+  "escrow": "حساب امانی زارعون",
   "cart": "سبد خرید",
   "myOrders": "سفارشات من",
   "startSelling": "راه‌اندازی فروشگاه",
@@ -10,7 +10,8 @@
   "newInventory": "ثبت موجودی جدید",
   "shopSettings": "تنظیمات فروشگاه من",
   "customerOrders": "سفارشات مشتری",
-  "incomingToMyProducts": "مشاهده نیازمندی‌ها به محصولات من",
+  "incomingToMyProducts": "نیازمندی‌ها به محصولات من",
+  "incomingToMyServices": "نیازمندی‌ها به خدمات من",
   "admin": {
     "managementDashboard": "داشبورد مدیریت",
     "overview": "نمای مدیریت",
@@ -40,8 +41,8 @@
     "publicPages": "صفحات عمومی سامانه"
   },
   "sections": {
-    "seller": "فروشنده",
-    "applicant": "خریدار",
+    "seller": "فروشگاه من",
+    "applicant": "خرید",
     "servicesProvider": "خدمات من",
     "admin": "مدیریت کل"
   }

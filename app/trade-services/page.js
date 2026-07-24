@@ -170,7 +170,7 @@ export default function TradeServicesHubPage() {
           dir={dir}
         />
 
-        <div className="space-y-3 p-2.5 text-start sm:space-y-5 sm:p-5">
+        <div className="space-y-3 px-9 py-2.5 text-start sm:space-y-5 sm:px-11 sm:py-5">
           <ZareoonEscrowFeature />
           <ZareoonPackagingAd />
           <TradeServicesCategoryPager

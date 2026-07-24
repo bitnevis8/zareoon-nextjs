@@ -34,6 +34,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["@heroicons/react", "react-leaflet"],
   },
+  allowedDevOrigins: ["10.16.239.78"],
   generateEtags: false,
   poweredByHeader: false,
   compress: true,
