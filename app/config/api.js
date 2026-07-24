@@ -394,6 +394,7 @@ export const API_ENDPOINTS = {
   siteSettings: {
     getTrade: `${API_BASE_URL}/site-setting/trade`,
     updateTrade: `${API_BASE_URL}/site-setting/trade`,
+    getUiPublic: `${API_BASE_URL}/site-setting/ui/public`,
     getVipPublic: `${API_BASE_URL}/site-setting/vip/public`,
     getLanguages: `${API_BASE_URL}/site-setting/languages`,
     updateLanguages: `${API_BASE_URL}/site-setting/languages`,

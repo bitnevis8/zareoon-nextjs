@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "../../../context/LanguageContext";
 import EnamadSeal from "../../legal/EnamadSeal";
@@ -13,8 +13,10 @@ import {
   SITE_PHONE_DISPLAY,
   SITE_PHONE_TEL,
 } from "@/app/config/siteContact";
+import { API_ENDPOINTS } from "@/app/config/api";
 import { formatLocalizedDigits } from "@/app/utils/persianNumberUtils";
 import { isRtlLanguage } from "@/app/config/siteLanguages";
+import { useTailwindBreakpoint } from "@/app/hooks/useTailwindBreakpoint";
 
 const LEGAL_LINKS = [
   { href: "/about", key: "about" },
@@ -64,12 +66,32 @@ export default function Footer({ className = "" }) {
   const { t, language } = useLanguage();
   const legalT = useTranslations("legal");
   const [legalOpen, setLegalOpen] = useState(false);
+  const [showBreakpoint, setShowBreakpoint] = useState(false);
+  const breakpoint = useTailwindBreakpoint();
   const year = new Date().getFullYear();
   const legalFromRight = isRtlLanguage(language);
   const legalDir = legalFromRight ? "rtl" : "ltr";
   const displayPhone = formatLocalizedDigits(SITE_PHONE_DISPLAY, language);
   const displayYear = formatLocalizedDigits(year, language);
   const siteAddress = formatLocalizedDigits(t("siteAddress"), language);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(API_ENDPOINTS.siteSettings.getUiPublic, { cache: "no-store" });
+        const json = await res.json();
+        if (!cancelled && json?.success) {
+          setShowBreakpoint(!!json.data?.showFooterBreakpoint);
+        }
+      } catch {
+        /* ignore — keep hidden */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <footer
@@ -161,6 +183,15 @@ export default function Footer({ className = "" }) {
           <p className="min-w-0 text-[9px] leading-4 text-slate-400">
             © {displayYear} {t("siteName")}
           </p>
+          {showBreakpoint ? (
+            <span
+              className="shrink-0 font-mono text-[9px] leading-4 text-slate-300"
+              dir="ltr"
+              title="Tailwind breakpoint"
+            >
+              {breakpoint}
+            </span>
+          ) : null}
           <DeveloperCredit compact className="shrink-0 text-[9px] leading-4" />
         </div>
       </div>
@@ -245,6 +276,15 @@ export default function Footer({ className = "" }) {
           <p className="min-w-0 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
             © {displayYear} {t("siteName")}. {t("allRightsReserved")}
           </p>
+          {showBreakpoint ? (
+            <span
+              className="shrink-0 font-mono text-[10px] leading-relaxed text-slate-300"
+              dir="ltr"
+              title="Tailwind breakpoint"
+            >
+              {breakpoint}
+            </span>
+          ) : null}
           <DeveloperCredit className="text-[11px] leading-relaxed sm:text-xs" />
         </div>
       </div>

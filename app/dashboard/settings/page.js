@@ -20,6 +20,7 @@ export default function DashboardSettingsPage() {
   const [tradeProvidersAutoApprove, setTradeProvidersAutoApprove] = useState(true);
   const [shopsAutoApprove, setShopsAutoApprove] = useState(true);
   const [pageDeletionGraceDays, setPageDeletionGraceDays] = useState(30);
+  const [showFooterBreakpoint, setShowFooterBreakpoint] = useState(false);
   const [vipTradeCategories, setVipTradeCategories] = useState({});
   const [providers, setProviders] = useState([]);
   const [bannerUploading, setBannerUploading] = useState(null);
@@ -42,6 +43,7 @@ export default function DashboardSettingsPage() {
           setTradeProvidersAutoApprove(settingsData.data?.tradeProvidersAutoApprove !== false);
           setShopsAutoApprove(settingsData.data?.shopsAutoApprove !== false);
           setPageDeletionGraceDays(Number(settingsData.data?.pageDeletionGraceDays) || 30);
+          setShowFooterBreakpoint(!!settingsData.data?.showFooterBreakpoint);
           setVipTradeCategories(settingsData.data?.vipTradeCategories || {});
         }
         if (!cancelled && providersData.success) {
@@ -173,6 +175,7 @@ export default function DashboardSettingsPage() {
           tradeProvidersAutoApprove,
           shopsAutoApprove,
           pageDeletionGraceDays: Number(pageDeletionGraceDays) || 30,
+          showFooterBreakpoint,
           vipTradeCategories,
         }),
       });
@@ -182,6 +185,9 @@ export default function DashboardSettingsPage() {
         if (data.data?.vipTradeCategories) setVipTradeCategories(data.data.vipTradeCategories);
         if (data.data?.pageDeletionGraceDays != null) {
           setPageDeletionGraceDays(Number(data.data.pageDeletionGraceDays) || 30);
+        }
+        if (typeof data.data?.showFooterBreakpoint === "boolean") {
+          setShowFooterBreakpoint(data.data.showFooterBreakpoint);
         }
       } else {
         showToast.error(data.message || t("settings.saveError"));
@@ -257,6 +263,32 @@ export default function DashboardSettingsPage() {
             onChange={(e) => setPageDeletionGraceDays(e.target.value)}
             className={`${dash.input} mt-3 max-w-[8rem]`}
           />
+        </label>
+      </section>
+
+      <section className={`${dash.card} ${dash.cardBody}`}>
+        <h2 className="text-sm font-bold text-slate-800">{t("settings.displaySectionTitle")}</h2>
+        <p className="mt-1 text-xs leading-6 text-slate-500">
+          {t("settings.displaySectionDesc")}
+        </p>
+
+        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-4 transition hover:border-emerald-200">
+          <input
+            type="checkbox"
+            checked={showFooterBreakpoint}
+            onChange={(e) => setShowFooterBreakpoint(e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-slate-800">
+              {t("settings.showFooterBreakpointLabel")}
+            </span>
+            <span className="mt-1 block text-xs leading-6 text-slate-500">
+              {showFooterBreakpoint
+                ? t("settings.showFooterBreakpointOn")
+                : t("settings.showFooterBreakpointOff")}
+            </span>
+          </span>
         </label>
       </section>
 
