@@ -129,7 +129,7 @@ function VerificationForm() {
 
       {isEmail ? (
         <p className="mb-4 rounded-xl bg-amber-50 px-3 py-2.5 text-center text-[11px] leading-5 text-amber-900 ring-1 ring-amber-100">
-          ممکن است ایمیل چند دقیقه طول بکشد. Inbox و پوشهٔ <strong>Spam / هرزنامه</strong> را بررسی کنید.
+          اگر در Inbox نبود، پوشه Spam را هم ببینید.
         </p>
       ) : null}
 
@@ -183,7 +183,7 @@ function VerificationForm() {
 
       <p className="mt-4 text-center text-[11px] leading-5 text-slate-400">
         {isEmail
-          ? "اگر کد را ندیدید، پوشه اسپم را چک کنید یا چند دقیقه صبر کنید و دوباره درخواست دهید."
+          ? "کد را ندیدید؟ Spam را چک کنید یا دوباره درخواست دهید."
           : t("blacklistHint")}
       </p>
     </AuthShell>
