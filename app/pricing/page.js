@@ -1,26 +1,50 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "@/app/context/AuthContext";
-import { authFetch } from "@/app/utils/authHeaders";
+import { useWorkspace } from "@/app/context/WorkspaceContext";
+import { authFetch, setActiveWorkspaceId } from "@/app/utils/authHeaders";
 
 function formatToman(value) {
   if (!value) return "رایگان";
   return `${Number(value).toLocaleString("fa-IR")} تومان`;
 }
 
+function workspaceLabel(w) {
+  if (!w) return "";
+  return w.displayName || w.name || `کسب‌وکار #${w.id}`;
+}
+
 export default function PricingPage() {
   const router = useRouter();
   const auth = useAuth();
+  const {
+    workspace,
+    workspaces,
+    hasMultiple,
+    switchWorkspace,
+    loading: wsLoading,
+  } = useWorkspace();
+
   const [plans, setPlans] = useState([]);
   const [gateway, setGateway] = useState(null);
   const [myPlan, setMyPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState(null);
   const [error, setError] = useState("");
+  const [checkoutWorkspaceId, setCheckoutWorkspaceId] = useState(null);
+
+  const activeWorkspaces = useMemo(
+    () => (workspaces || []).filter((w) => w.status === "active" || w.status == null),
+    [workspaces]
+  );
+
+  useEffect(() => {
+    if (workspace?.id) setCheckoutWorkspaceId(Number(workspace.id));
+  }, [workspace?.id]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,7 +73,18 @@ export default function PricingPage() {
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, checkoutWorkspaceId]);
+
+  const onSelectWorkspace = async (id) => {
+    const n = Number(id);
+    setCheckoutWorkspaceId(n);
+    setActiveWorkspaceId(n);
+    try {
+      await switchWorkspace(n);
+    } catch {
+      /* header کافی است؛ checkout با body.workspaceId هم کار می‌کند */
+    }
+  };
 
   const startPay = async (plan) => {
     setError("");
@@ -61,13 +96,21 @@ export default function PricingPage() {
       router.push(`/auth/login?next=${encodeURIComponent("/pricing")}`);
       return;
     }
+    if (!checkoutWorkspaceId) {
+      setError("ابتدا یک کسب‌وکار انتخاب کنید یا از داشبورد کسب‌وکار بسازید.");
+      return;
+    }
 
     setPayingId(plan.id);
     try {
+      setActiveWorkspaceId(checkoutWorkspaceId);
       const res = await authFetch(API_ENDPOINTS.subscription.checkout, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: plan.id }),
+        body: JSON.stringify({
+          planId: plan.id,
+          workspaceId: checkoutWorkspaceId,
+        }),
       });
       const json = await res.json();
       if (!json.success || !json.data?.paymentUrl) {
@@ -82,21 +125,68 @@ export default function PricingPage() {
     }
   };
 
+  const selectedWs =
+    activeWorkspaces.find((w) => Number(w.id) === Number(checkoutWorkspaceId)) || workspace;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-8 sm:py-12">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <header className="mx-auto mb-8 max-w-3xl text-center">
           <h1 className="text-3xl font-extrabold text-slate-900">اشتراک فروشندگان</h1>
           <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-            چهار سطح رایگان، برنزی، نقره‌ای و طلایی — محدودیت‌ها روی موجودی، رسانه، پست، خدمات و اولویت نمایش تعریف شده‌اند.
-            ارتباط با خریدار مستقیم و بدون واسطه است.
+            چهار سطح رایگان، برنزی، نقره‌ای و طلایی — محدودیت‌ها روی محصولات، رسانه، پست، خدمات و اولویت
+            نمایش تعریف شده‌اند. اشتراک به همان کسب‌وکاری که انتخاب می‌کنید وصل می‌شود.
           </p>
           {myPlan?.planId && myPlan.planId !== "free" && myPlan.status === "active" ? (
-            <p className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-              اشتراک فعال: {myPlan.plan?.name || myPlan.planId}
+            <p className="mt-3 inline-flex flex-wrap items-center justify-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <span>اشتراک فعال: {myPlan.plan?.name || myPlan.planId}</span>
+              {myPlan.workspaceId || selectedWs ? (
+                <span className="font-normal text-emerald-700">
+                  · برای {workspaceLabel(selectedWs) || `کسب‌وکار #${myPlan.workspaceId}`}
+                </span>
+              ) : null}
             </p>
           ) : null}
         </header>
+
+        {auth?.user ? (
+          <div className="mx-auto mb-8 max-w-xl rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-right shadow-sm">
+            <label className="block text-sm font-bold text-emerald-950">
+              این پلن برای کدام کسب‌وکار؟
+            </label>
+            <p className="mt-1 text-xs leading-5 text-emerald-800/90">
+              پلن برنزی/نقره‌ای/طلایی روی همان Workspace فعال می‌شود که اینجا انتخاب کرده‌اید (نه روی
+              حساب شخصی).
+            </p>
+            {wsLoading && !activeWorkspaces.length ? (
+              <p className="mt-3 text-xs text-emerald-700">در حال بارگذاری کسب‌وکارها…</p>
+            ) : !activeWorkspaces.length ? (
+              <p className="mt-3 text-sm text-emerald-900">
+                هنوز کسب‌وکاری ندارید.{" "}
+                <Link href="/dashboard/workspace" className="font-semibold underline">
+                  ایجاد کسب‌وکار
+                </Link>
+              </p>
+            ) : hasMultiple ? (
+              <select
+                className="mt-3 w-full rounded-xl border border-emerald-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-emerald-200"
+                value={checkoutWorkspaceId || ""}
+                onChange={(e) => onSelectWorkspace(e.target.value)}
+              >
+                {activeWorkspaces.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {workspaceLabel(w)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="mt-3 rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800">
+                {workspaceLabel(selectedWs || activeWorkspaces[0])}
+                <span className="ms-2 text-xs font-normal text-slate-500">(تنها کسب‌وکار شما)</span>
+              </p>
+            )}
+          </div>
+        ) : null}
 
         {error ? (
           <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-center text-sm text-rose-800">
@@ -167,10 +257,15 @@ export default function PricingPage() {
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-600">
           <p className="font-semibold text-slate-800">نکات مهم</p>
           <ul className="mt-2 list-inside list-disc space-y-1">
+            <li>هر پلن به یک کسب‌وکار (Workspace) وصل می‌شود؛ از سلکتور بالا کسب‌وکار هدف را انتخاب کنید.</li>
             <li>پرداخت از طریق درگاه اینترنتی زیبال انجام می‌شود.</li>
             <li>
               وضعیت درگاه:{" "}
-              {gateway?.configured ? (gateway.sandbox ? "حالت آزمایشی (Sandbox)" : "فعال") : "هنوز Merchant ID تنظیم نشده"}
+              {gateway?.configured
+                ? gateway.sandbox
+                  ? "حالت آزمایشی (Sandbox)"
+                  : "فعال"
+                : "هنوز Merchant ID تنظیم نشده"}
             </li>
             <li>
               با خرید اشتراک، زارعون طرف معامله کالای شما نمی‌شود. جزئیات در{" "}

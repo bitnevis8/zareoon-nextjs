@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/context/AuthContext";
 import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { DASHBOARD_PERSONAS, canActAsSeller } from "@/app/utils/dashboardPersona";
-import { getRoleLabel } from "@/app/utils/roles";
+import { splitUserRoles } from "@/app/utils/roles";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { formatLocalizedDigits } from "@/app/utils/persianNumberUtils";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -16,10 +16,16 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { useMyTradeServiceProvider } from "@/app/hooks/useMyTradeServiceProvider";
 import { useExistingPublicSlug } from "@/app/hooks/useExistingPublicSlug";
+import { useMyWorkspace } from "@/app/hooks/useMyWorkspace";
+import { useWorkspace } from "@/app/context/WorkspaceContext";
 import { providerPublicDisplayUrl } from "@/app/utils/providerPublicPath";
 import { SidebarIcon } from "@/app/components/ui/SidebarIcons";
+import SidebarWorkspaceSwitcher from "@/app/components/ui/SidebarWorkspaceSwitcher";
 import ProfileHeaderMetrics from "@/app/components/ProfileHeaderMetrics";
 import DashboardListToolbar, { DashboardItemActions } from "@/app/components/dashboard/DashboardListToolbar";
+import { VerificationLevelBars } from "@/app/components/dashboard/DashboardVerificationProgress";
+import DashboardBusinessMap from "@/app/components/dashboard/DashboardBusinessMap";
+import { VERIFICATION_LEVEL_LABELS_FA, PERSON_PATH, resolvePersonPathReached } from "@/app/utils/verification";
 import { getLocalizedText } from "@/app/utils/localize";
 import SupplierPostComposer from "@/app/tamin/[slug]/SupplierPostComposer";
 import SupplierPostItem from "@/app/tamin/[slug]/SupplierPostItem";
@@ -29,7 +35,6 @@ const BUYER_ACTIONS = [
   { id: "requests", href: "/dashboard/applicant-requests", icon: "list", labelKey: "actions.myRequests" },
   { id: "orders", href: "/dashboard/my-orders", icon: "orders", labelKey: "actions.myOrders" },
   { id: "cart", href: "/cart", icon: "cart", labelKey: "actions.cart" },
-  { id: "escrow", href: "/dashboard/escrow", icon: "escrow", labelKey: "actions.escrow" },
 ];
 
 const SELLER_ACTIONS = [
@@ -38,7 +43,6 @@ const SELLER_ACTIONS = [
   { id: "orders", href: "/dashboard/supplier/orders?scope=own", icon: "orders", labelKey: "actions.customerOrders" },
   { id: "settings", href: "/dashboard/supplier-profile", icon: "settings", labelKey: "actions.shopSettings" },
   { id: "incoming", href: "/dashboard/incoming-requests", icon: "inbox", labelKey: "actions.incoming" },
-  { id: "escrow", href: "/dashboard/escrow", icon: "escrow", labelKey: "actions.escrow" },
 ];
 
 const PROVIDER_ACTIONS = [
@@ -105,38 +109,6 @@ function SetupCard({ href, title, hint }) {
   );
 }
 
-function IconFollowersMini({ className = "h-3.5 w-3.5" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M3.5 18.5c.8-2.6 2.9-4 5.5-4s4.7 1.4 5.5 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-      <path d="M16.5 8.5a2.5 2.5 0 1 1 0 5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-      <path d="M18.2 14.2c1.8.4 3 1.6 3.5 3.3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconFollowingMini({ className = "h-3.5 w-3.5" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M5.5 18.5c1-3 3.3-4.5 6.5-4.5s5.5 1.5 6.5 4.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-      <path d="M17 5.5v4M15 7.5h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconEmployeesMini({ className = "h-3.5 w-3.5" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="9" cy="8" r="2.75" stroke="currentColor" strokeWidth="1.75" />
-      <circle cx="16.5" cy="9" r="2.25" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M3.5 18.5c.9-2.5 2.9-3.8 5.5-3.8s4.6 1.3 5.5 3.8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-      <path d="M14.5 18.5c.5-1.7 1.7-2.7 3.5-2.7 1.4 0 2.5.7 3.2 1.9" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function IconProductsMini({ className = "h-3.5 w-3.5" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -162,30 +134,6 @@ function IconServicesMini({ className = "h-3.5 w-3.5" }) {
       <rect x="4" y="7" width="16" height="13" rx="2" stroke="currentColor" strokeWidth="1.75" />
       <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
-  );
-}
-
-function CommercialInlineStat({ icon: Icon, value, label, onDark = false }) {
-  return (
-    <span className="inline-flex min-w-[3.25rem] flex-col items-center gap-0.5 text-center sm:min-w-[3.5rem]" title={label}>
-      <span className="inline-flex items-center gap-0.5">
-        <Icon className={`h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4 ${onDark ? "text-emerald-100" : "text-slate-500"}`} />
-        <span
-          className={`text-[13px] font-bold tabular-nums leading-none sm:text-sm ${
-            onDark ? "text-white" : "text-slate-900"
-          }`}
-        >
-          {value}
-        </span>
-      </span>
-      <span
-        className={`max-w-[4.5rem] truncate text-[9px] font-medium leading-tight sm:text-[10px] ${
-          onDark ? "text-emerald-100/80" : "text-slate-500"
-        }`}
-      >
-        {label}
-      </span>
-    </span>
   );
 }
 
@@ -241,10 +189,15 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
 
   if (loading) {
     return (
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="aspect-[4/5] animate-pulse rounded-xl bg-slate-200/70" />
-        ))}
+      <div className="-mx-1 mt-3">
+        <div className="flex gap-2.5 overflow-x-auto px-1 pb-1 md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-40 w-[min(42vw,9.5rem)] shrink-0 animate-pulse rounded-xl bg-slate-200/70 md:h-44 md:w-auto"
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -301,49 +254,60 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
           {t("noSearchResults") || "نتیجه‌ای یافت نشد"}
         </p>
       ) : viewMode === "cards" ? (
-        <div className="grid grid-cols-1 gap-2.5 xs:grid-cols-2 sm:grid-cols-2">
-          {filtered.map((lot) => {
-            const name = resolveLotDisplayName(lot, language, t("productFallback"));
-            const product = lot.product || lot.Product || {};
-            const img = resolveMediaUrl(
-              lot.coverImageUrl || product.imageUrl || product.image || lot.imageUrl
-            );
-            const available = Math.max(
-              0,
-              parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0)
-            );
-            return (
-              <article
-                key={lot.id}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-              >
-                <div className="relative aspect-[5/4] bg-slate-100">
-                  {img ? (
-                    <Image src={img} alt="" fill unoptimized className="object-cover" sizes="50vw" />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center text-slate-300">
-                      <SidebarIcon name="products" className="h-8 w-8" />
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5 p-2.5">
-                  <p className="line-clamp-2 text-xs font-bold text-slate-900">{name}</p>
-                  <p className="text-[10px] font-semibold text-emerald-700">
-                    {available.toLocaleString("fa-IR")} {lot.unit || "kg"}
-                  </p>
-                  <DashboardItemActions
-                    compact
-                    onView={() => router.push("/dashboard/supplier/inventory?scope=own")}
-                    onEdit={() => router.push("/dashboard/supplier/inventory?scope=own")}
-                    onDelete={busyId === lot.id ? undefined : () => remove(lot.id)}
-                    viewLabel="مشاهده"
-                    editLabel="ویرایش"
-                    deleteLabel="حذف"
-                  />
-                </div>
-              </article>
-            );
-          })}
+        <div className="-mx-1">
+          <div className="flex gap-2.5 overflow-x-auto px-1 pb-2 snap-x snap-mandatory scroll-smooth [scrollbar-width:thin] md:grid md:grid-cols-3 md:gap-2.5 md:overflow-visible md:pb-0 md:snap-none lg:grid-cols-4">
+            {filtered.map((lot) => {
+              const name = resolveLotDisplayName(lot, language, t("productFallback"));
+              const product = lot.product || lot.Product || {};
+              const img = resolveMediaUrl(
+                lot.coverImageUrl || product.imageUrl || product.image || lot.imageUrl
+              );
+              const available = Math.max(
+                0,
+                parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0)
+              );
+              return (
+                <article
+                  key={lot.id}
+                  className="flex w-[min(42vw,9.75rem)] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:w-auto md:min-w-0"
+                >
+                  <div className="relative aspect-[4/3] bg-slate-100">
+                    {img ? (
+                      <Image
+                        src={img}
+                        alt=""
+                        fill
+                        unoptimized
+                        className="object-cover"
+                        sizes="(max-width: 768px) 42vw, 25vw"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-slate-300">
+                        <SidebarIcon name="products" className="h-6 w-6" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1 p-2">
+                    <p className="line-clamp-2 text-[11px] font-bold leading-snug text-slate-900">{name}</p>
+                    <p className="text-[10px] font-semibold text-emerald-700">
+                      {available.toLocaleString("fa-IR")} {lot.unit || "kg"}
+                    </p>
+                    <div className="mt-auto">
+                      <DashboardItemActions
+                        compact
+                        onView={() => router.push("/dashboard/supplier/inventory?scope=own")}
+                        onEdit={() => router.push("/dashboard/supplier/inventory?scope=own")}
+                        onDelete={busyId === lot.id ? undefined : () => remove(lot.id)}
+                        viewLabel="مشاهده"
+                        editLabel="ویرایش"
+                        deleteLabel="حذف"
+                      />
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <ul className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -370,8 +334,8 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
                   />
                 </div>
               </li>
-            );
-          })}
+        );
+      })}
         </ul>
       )}
 
@@ -393,13 +357,19 @@ export default function MobileDashboardHome() {
   const { setPersona, isApplicantView, isSellerView, isServicesView, isPostsView } = useDashboardPersona();
   const canSell = canActAsSeller(user);
   const { provider, hasProvider, loading: providerLoading } = useMyTradeServiceProvider(true);
-  const { slug, publicPath, hasSlug, pageTitle, pageKind, pageImage, editPath } = useExistingPublicSlug();
-  const dedicatedDisplayUrl = hasSlug && slug ? providerPublicDisplayUrl(slug) : null;
+  const { slug, publicPath, hasSlug, pageKind, pageImage, editPath } = useExistingPublicSlug();
+  const { badges: workspaceBadges } = useMyWorkspace({ enabled: Boolean(user) });
+  const {
+    canUseShop,
+    canUseServices,
+    canUsePosts,
+    ready: workspaceReady,
+    workspace,
+    loading: workspaceLoading,
+  } = useWorkspace();
+  const hasBusiness = Boolean(workspace);
   const pageImageUrl = resolveMediaUrl(pageImage);
 
-  const commercialPageUrlDisplay = dedicatedDisplayUrl || "";
-
-  const [bioOpen, setBioOpen] = useState(false);
   const [stats, setStats] = useState({ products: 0, followers: 0, following: 0, posts: 0, services: 0 });
   const [lots, setLots] = useState([]);
   const [lotsLoading, setLotsLoading] = useState(false);
@@ -418,32 +388,53 @@ export default function MobileDashboardHome() {
     user?.username ||
     t("userFallback");
 
-  const dedicatedKindLabel =
-    pageKind === "both"
-      ? t("dedicatedBothTitle")
-      : pageKind === "services"
-        ? t("dedicatedServicesTitle")
-        : pageKind === "shop"
-          ? t("dedicatedShopTitle")
-          : null;
-
-  const dedicatedPageHeading = pageTitle || dedicatedKindLabel;
   const dedicatedEditHref =
     editPath ||
     (pageKind === "services" ? "/dashboard/service-provider-profile" : "/dashboard/supplier-profile");
 
   const phone = user?.mobile || user?.phone || "";
-  const roleLabels = useMemo(() => {
-    const roles = user?.roles || [];
-    const labels = roles.map((r) => getRoleLabel(r, tShared)).filter(Boolean);
-    return [...new Set(labels)];
-  }, [user?.roles, tShared]);
-
-  const rolesLine = roleLabels.join(" | ");
-  const rolesNeedMore = rolesLine.length > 42 || roleLabels.length > 3;
+  const { management: managementRoles } = useMemo(
+    () => splitUserRoles(user, tShared),
+    [user, tShared]
+  );
 
   const avatarUrl = resolveMediaUrl(user?.avatar);
   const initial = (displayName?.[0] || "؟").toUpperCase();
+
+  const [verificationBundle, setVerificationBundle] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch(API_ENDPOINTS.workspace.verificationMe, { cache: "no-store" });
+        const json = await res.json().catch(() => ({}));
+        if (!cancelled && json?.success) setVerificationBundle(json.data || null);
+      } catch {
+        if (!cancelled) setVerificationBundle(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const personVerification = verificationBundle?.person || null;
+  const businessVerificationById = useMemo(() => {
+    const map = {};
+    for (const b of verificationBundle?.businesses || []) {
+      const id = b?.workspace?.id;
+      if (id != null) map[Number(id)] = b.verification || null;
+    }
+    return map;
+  }, [verificationBundle]);
+
+  const personLevelDone = useMemo(() => {
+    return resolvePersonPathReached({
+      contactVerified: Boolean(user?.isMobileVerified || user?.isEmailVerified),
+      overall: personVerification?.overall || "none",
+      level: personVerification?.level || "none",
+    });
+  }, [personVerification, user?.isMobileVerified, user?.isEmailVerified]);
 
   useEffect(() => {
     let cancelled = false;
@@ -563,6 +554,10 @@ export default function MobileDashboardHome() {
   };
 
   const selectHomeTab = (tabId) => {
+    if (!hasBusiness && !workspaceLoading) return;
+    if (tabId === DASHBOARD_PERSONAS.SELLER && workspaceReady && !canUseShop) return;
+    if (tabId === DASHBOARD_PERSONAS.SERVICES && workspaceReady && !canUseServices) return;
+    if (tabId === DASHBOARD_PERSONAS.POSTS && workspaceReady && !canUsePosts) return;
     setPersona(tabId);
   };
 
@@ -578,6 +573,24 @@ export default function MobileDashboardHome() {
     return hasProvider ? 1 : 0;
   }, [provider, hasProvider]);
 
+  const tabEnabled = {
+    [DASHBOARD_PERSONAS.SELLER]: workspaceLoading || (hasBusiness && canUseShop),
+    [DASHBOARD_PERSONAS.SERVICES]: workspaceLoading || (hasBusiness && canUseServices),
+    [DASHBOARD_PERSONAS.POSTS]: workspaceLoading || (hasBusiness && canUsePosts),
+  };
+
+  const tabHints = {
+    [DASHBOARD_PERSONAS.SELLER]: hasBusiness
+      ? "برای این کسب‌وکار فروشگاه فعال نیست. از «مدیریت کسب‌وکار» نوع فعالیت فروشنده را روشن کنید."
+      : "برای داشتن فروشگاه، ابتدا باید کسب‌وکار خود را بسازید.",
+    [DASHBOARD_PERSONAS.SERVICES]: hasBusiness
+      ? "برای این کسب‌وکار خدمات فعال نیست. از «مدیریت کسب‌وکار» نوع فعالیت خدمات‌دهنده را روشن کنید."
+      : "برای ارائه خدمات، ابتدا باید کسب‌وکار خود را بسازید.",
+    [DASHBOARD_PERSONAS.POSTS]: hasBusiness
+      ? "برای پست‌ها باید فروش یا خدمات این کسب‌وکار فعال باشد."
+      : "برای انتشار پست، ابتدا باید کسب‌وکار خود را بسازید.",
+  };
+
   const tabs = [
     {
       id: DASHBOARD_PERSONAS.SELLER,
@@ -585,6 +598,8 @@ export default function MobileDashboardHome() {
       icon: IconProductsMini,
       count: stats.products,
       active: isSellerView,
+      enabled: tabEnabled[DASHBOARD_PERSONAS.SELLER],
+      hint: tabHints[DASHBOARD_PERSONAS.SELLER],
     },
     {
       id: DASHBOARD_PERSONAS.SERVICES,
@@ -592,6 +607,8 @@ export default function MobileDashboardHome() {
       icon: IconServicesMini,
       count: serviceCount,
       active: isServicesView,
+      enabled: tabEnabled[DASHBOARD_PERSONAS.SERVICES],
+      hint: tabHints[DASHBOARD_PERSONAS.SERVICES],
     },
     {
       id: DASHBOARD_PERSONAS.POSTS,
@@ -599,163 +616,162 @@ export default function MobileDashboardHome() {
       icon: IconPostsMini,
       count: stats.posts,
       active: isPostsView,
+      enabled: tabEnabled[DASHBOARD_PERSONAS.POSTS],
+      hint: tabHints[DASHBOARD_PERSONAS.POSTS],
     },
   ];
 
-  const rolesDisplay = bioOpen || !rolesNeedMore ? rolesLine : `${roleLabels.slice(0, 2).join(" | ")}${roleLabels.length > 2 ? " | …" : ""}`;
+  const showSellerPanel = isSellerView && hasBusiness && canUseShop;
+  const showServicesPanel = isServicesView && hasBusiness && canUseServices;
+  const showPostsPanel = isPostsView && hasBusiness && canUsePosts;
+
+  useEffect(() => {
+    if (!workspaceReady) return;
+    if (isSellerView && !canUseShop) {
+      if (canUseServices) setPersona(DASHBOARD_PERSONAS.SERVICES);
+      else if (canUsePosts) setPersona(DASHBOARD_PERSONAS.POSTS);
+      else setPersona(DASHBOARD_PERSONAS.APPLICANT);
+      return;
+    }
+    if (isServicesView && !canUseServices) {
+      if (canUseShop) setPersona(DASHBOARD_PERSONAS.SELLER);
+      else if (canUsePosts) setPersona(DASHBOARD_PERSONAS.POSTS);
+      else setPersona(DASHBOARD_PERSONAS.APPLICANT);
+      return;
+    }
+    if (isPostsView && !canUsePosts) {
+      if (canUseShop) setPersona(DASHBOARD_PERSONAS.SELLER);
+      else if (canUseServices) setPersona(DASHBOARD_PERSONAS.SERVICES);
+      else setPersona(DASHBOARD_PERSONAS.APPLICANT);
+    }
+  }, [
+    workspaceReady,
+    canUseShop,
+    canUseServices,
+    canUsePosts,
+    isSellerView,
+    isServicesView,
+    isPostsView,
+    setPersona,
+  ]);
 
   return (
     <div className="w-full" dir={isRTL ? "rtl" : "ltr"}>
       <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
         <ProfileHeaderMetrics showFollowStats={false} showContentStats={false} afterProfile={null}>
           <div className="flex items-start gap-3 sm:gap-4">
-            <Link
-              href="/dashboard/account"
+          <Link
+            href="/dashboard/account"
               className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 sm:h-[4.5rem] sm:w-[4.5rem]"
-              aria-label={t("editProfile")}
-            >
-              {avatarUrl ? (
+            aria-label={t("editProfile")}
+          >
+            {avatarUrl ? (
                 <Image src={avatarUrl} alt="" fill unoptimized className="object-cover" sizes="72px" />
-              ) : (
+            ) : (
                 <span className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-500">
-                  {initial}
-                </span>
-              )}
-            </Link>
+                {initial}
+              </span>
+            )}
+          </Link>
 
             <div className="min-w-0 flex-1 pt-0.5 text-start">
-              <p className="truncate text-base font-medium text-slate-900 sm:text-[17px]">{displayName}</p>
+              <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <p className="truncate text-base font-medium text-slate-900 sm:text-[17px]">{displayName}</p>
+                {personVerification?.overall === "verified" && personVerification?.level ? (
+                  <span className="shrink-0 text-[11px] font-semibold text-sky-700">
+                    {VERIFICATION_LEVEL_LABELS_FA[personVerification.level] || personVerification.levelLabelFa}
+                  </span>
+                ) : null}
+              </div>
 
-              {phone ? (
+          {phone ? (
                 <p className="mt-0.5 text-start text-sm leading-5 text-slate-500">
                   <span className="inline-block tabular-nums" dir="ltr">
-                    {formatLocalizedDigits(phone, language)}
+              {formatLocalizedDigits(phone, language)}
                   </span>
-                </p>
-              ) : null}
-
-              {rolesLine ? (
-                <div className="mt-1">
-                  <p className="text-sm leading-6 text-slate-500">{rolesDisplay}</p>
-                  {rolesNeedMore ? (
-                    <button
-                      type="button"
-                      onClick={() => setBioOpen((v) => !v)}
-                      className="mt-0.5 text-xs font-semibold text-slate-500"
-                    >
-                      {bioOpen ? t("bioLess") : t("bioMore")}
-                    </button>
-                  ) : null}
-                </div>
-              ) : !phone ? (
+            </p>
+          ) : !managementRoles.length ? (
                 <p className="mt-1 text-sm text-slate-500">{t("bioEmpty")}</p>
-              ) : null}
-            </div>
+          ) : null}
 
-            <button
-              type="button"
-              onClick={() => {}}
-              title={t("createWorkspace")}
-              aria-label={t("createWorkspace")}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-2.5 py-1.5 text-slate-700 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-800"
-            >
-              <span className="text-lg font-bold leading-none">+</span>
-              <span className="max-w-[7.5rem] text-start text-[11px] font-bold leading-tight sm:max-w-none sm:text-xs">
-                {t("createWorkspace")}
-              </span>
-            </button>
+              {/* فقط نقش‌های مدیریتی سامانه — فروشنده/خدمات‌دهنده متعلق به کسب‌وکار است */}
+              {managementRoles.length ? (
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-violet-500">مدیریت سامانه:</span>
+                  {managementRoles.map((label) => (
+                    <span
+                      key={label}
+                      className="inline-flex rounded-lg bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-800 ring-1 ring-violet-100"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
+              <Link
+                href="/dashboard/verification"
+                className="mt-2.5 block max-w-md transition hover:opacity-90"
+                title="تکمیل پروفایل و احراز هویت"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold text-slate-400">تکمیل پروفایل</span>
+                  <span className="text-[10px] font-semibold tabular-nums text-slate-500">
+                    {personLevelDone} از {PERSON_PATH.length}
+                  </span>
+                </div>
+                <VerificationLevelBars
+                  kind="person"
+                  overall={personVerification?.overall || "none"}
+                  level={personVerification?.level || "none"}
+                  requestedLevel={personVerification?.requestedLevel}
+                  contactVerified={Boolean(user?.isMobileVerified || user?.isEmailVerified)}
+                  showLabels
+                />
+              </Link>
+        </div>
+
+        <Link
+          href="/dashboard/account"
+              className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+        >
+          {t("editProfile")}
+        </Link>
           </div>
         </ProfileHeaderMetrics>
-
-        {dedicatedDisplayUrl && publicPath ? (
-          <div className="mt-4 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:px-3.5">
-            <div className="flex items-start gap-3">
-              <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white text-sm font-bold text-slate-600">
-                {pageImageUrl ? (
-                  <Image src={pageImageUrl} alt="" fill unoptimized className="object-cover" sizes="40px" />
-                ) : (
-                  (pageTitle?.[0] || "ص").toUpperCase()
-                )}
-              </span>
-              <div className="min-w-0 flex-1 pt-0.5">
-                {dedicatedPageHeading ? (
-                  <p className="truncate text-sm font-semibold text-slate-900">{dedicatedPageHeading}</p>
-                ) : null}
-                {dedicatedKindLabel ? (
-                  <p className="mt-0.5 text-xs text-slate-500">{dedicatedKindLabel}</p>
-                ) : null}
-              </div>
-              <div className="flex shrink-0 flex-col gap-2">
-                <div className="grid grid-cols-3 gap-x-2.5 sm:gap-x-3.5">
-                  <CommercialInlineStat
-                    icon={IconEmployeesMini}
-                    value={fmt(0)}
-                    label={t("stats.managers")}
-                  />
-                  <CommercialInlineStat
-                    icon={IconFollowingMini}
-                    value={fmt(stats.following)}
-                    label={t("stats.following")}
-                  />
-                  <CommercialInlineStat
-                    icon={IconFollowersMini}
-                    value={fmt(stats.followers)}
-                    label={t("stats.followers")}
-                  />
-                </div>
-                <div className="mx-1 h-px bg-gradient-to-l from-transparent via-slate-300/90 to-transparent" aria-hidden />
-                <div className="grid grid-cols-3 gap-x-2.5 sm:gap-x-3.5">
-                  <CommercialInlineStat
-                    icon={IconProductsMini}
-                    value={fmt(stats.products)}
-                    label={t("stats.products")}
-                  />
-                  <CommercialInlineStat
-                    icon={IconServicesMini}
-                    value={fmt(serviceCount)}
-                    label={t("stats.services")}
-                  />
-                  <CommercialInlineStat
-                    icon={IconPostsMini}
-                    value={fmt(stats.posts)}
-                    label={t("stats.posts")}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-3 flex items-center gap-2">
-              <Link
-                href={publicPath}
-                title={commercialPageUrlDisplay}
-                className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 transition hover:border-emerald-200 hover:bg-emerald-50/50"
-              >
-                <svg className="h-3.5 w-3.5 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                  <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a.75.75 0 001.061 1.06l3-3z" />
-                  <path d="M11.603 7.963a.75.75 0 00-1.061-1.06l-3 3a4 4 0 105.656 5.656l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a2.5 2.5 0 11-3.536-3.536l3-3z" />
-                </svg>
-                <code
-                  dir="ltr"
-                  className="min-w-0 flex-1 truncate text-start font-mono text-[12px] font-medium tracking-tight text-emerald-700 sm:text-[13px]"
-                >
-                  {commercialPageUrlDisplay}
-                </code>
-              </Link>
-              <Link
-                href={dedicatedEditHref}
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                title={t("editDedicatedPage")}
-                aria-label={t("editDedicatedPage")}
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
-                <span className="hidden sm:inline">{t("editDedicatedPage")}</span>
-              </Link>
-            </div>
-          </div>
-        ) : null}
       </section>
+
+      <div className="mt-3 sm:mt-4">
+        <SidebarWorkspaceSwitcher
+          variant="dashboard"
+          businessVerificationById={businessVerificationById}
+          pageExtras={{
+            editHref: dedicatedEditHref,
+            pageImageUrl,
+            badges: workspaceBadges,
+            publicPath: hasSlug ? publicPath : null,
+            displayUrl: hasSlug && slug ? providerPublicDisplayUrl(slug) : null,
+            stats: {
+              managers: 0,
+              following: stats.following,
+              followers: stats.followers,
+              products: stats.products,
+              services: serviceCount,
+              posts: stats.posts,
+            },
+            statsLabels: {
+              managers: t("stats.managers"),
+              following: t("stats.following"),
+              followers: t("stats.followers"),
+              products: t("stats.products"),
+              services: t("stats.services"),
+              posts: t("stats.posts"),
+            },
+          }}
+        />
+      </div>
+
+      {workspace ? <DashboardBusinessMap workspace={workspace} className="mt-3 sm:mt-4" /> : null}
 
       <div
         className="mt-3 grid grid-cols-3 gap-2 sm:mt-4 sm:gap-2.5"
@@ -764,36 +780,57 @@ export default function MobileDashboardHome() {
       >
         {tabs.map((tab) => {
           const TabIcon = tab.icon;
+          const disabled = tab.enabled === false;
           return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={tab.active}
-              onClick={() => selectHomeTab(tab.id)}
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+              aria-selected={tab.active && !disabled}
+              aria-disabled={disabled}
+              title={disabled ? tab.hint : undefined}
+              onClick={() => !disabled && selectHomeTab(tab.id)}
               className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-center transition ${
-                tab.active
-                  ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200/90"
-                  : "text-slate-600 ring-1 ring-slate-200/80 hover:bg-slate-50 hover:text-slate-800"
+                disabled
+                  ? "cursor-not-allowed bg-slate-100/80 text-slate-400 opacity-60 ring-1 ring-slate-200/70"
+                  : tab.active
+                    ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200/90"
+                    : "text-slate-600 ring-1 ring-slate-200/80 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
               <span className="inline-flex items-center gap-1">
-                <TabIcon className={`h-4 w-4 shrink-0 ${tab.active ? "text-emerald-700" : "text-slate-400"}`} />
+                <TabIcon
+                  className={`h-4 w-4 shrink-0 ${
+                    disabled ? "text-slate-400" : tab.active ? "text-emerald-700" : "text-slate-400"
+                  }`}
+                />
                 <span
-                  className={`text-[11px] font-semibold tabular-nums leading-none ${tab.active ? "text-emerald-700" : "text-slate-500"}`}
+                  className={`text-[11px] font-semibold tabular-nums leading-none ${
+                    disabled ? "text-slate-400" : tab.active ? "text-emerald-700" : "text-slate-500"
+                  }`}
                   dir="ltr"
                 >
                   {fmt(tab.count)}
                 </span>
               </span>
               <span className="truncate text-[11px] font-medium leading-tight sm:text-xs">{tab.label}</span>
-            </button>
+          </button>
           );
         })}
       </div>
 
+      {workspaceReady && !canUseShop && !canUseServices ? (
+        <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-6 text-amber-950">
+          برای این کسب‌وکار هنوز فروشگاه یا خدمات فعال نیست. از{" "}
+          <Link href="/dashboard/workspace" className="font-semibold underline">
+            کسب‌وکار و تیم
+          </Link>{" "}
+          نوع فعالیت را روشن کنید.
+        </p>
+      ) : null}
+
       <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3.5 shadow-sm sm:mt-4 sm:p-5">
-        {isPostsView ? (
+        {showPostsPanel ? (
           hasSlug && slug ? (
             <div className="space-y-3">
               <p className="text-xs leading-5 text-slate-600">{t("postsHint")}</p>
@@ -830,9 +867,11 @@ export default function MobileDashboardHome() {
           )
         ) : null}
 
-        {!isPostsView && isApplicantView ? <ActionIconGrid items={BUYER_ACTIONS} t={t} /> : null}
+        {!showPostsPanel && !showSellerPanel && !showServicesPanel && isApplicantView ? (
+          <ActionIconGrid items={BUYER_ACTIONS} t={t} />
+        ) : null}
 
-        {!isPostsView && isSellerView ? (
+        {showSellerPanel ? (
           canSell ? (
             <div>
               <HorizontalMenu
@@ -866,7 +905,7 @@ export default function MobileDashboardHome() {
           )
         ) : null}
 
-        {!isPostsView && isServicesView ? (
+        {showServicesPanel ? (
           providerLoading ? (
             <div className="h-24 animate-pulse rounded-xl bg-slate-200/70" />
           ) : hasProvider ? (

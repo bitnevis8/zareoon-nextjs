@@ -13,7 +13,7 @@ function CompleteForm() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
-    mobile: "",
+    identifier: "",
     password: "",
     confirmPassword: "",
     acceptTerms: true,
@@ -23,11 +23,12 @@ function CompleteForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
+  const isEmail = String(form.identifier).includes("@");
 
   useEffect(() => {
     const id = searchParams.get("identifier");
-    if (id && /^09\d{9}$/.test(id)) {
-      setForm((prev) => ({ ...prev, mobile: id }));
+    if (id) {
+      setForm((prev) => ({ ...prev, identifier: id }));
     }
   }, [searchParams]);
 
@@ -57,7 +58,7 @@ function CompleteForm() {
         body: JSON.stringify({
           firstName: form.firstName.trim(),
           lastName: form.lastName.trim(),
-          mobile: form.mobile,
+          identifier: form.identifier,
           password: form.password,
           acceptTerms: true,
         }),
@@ -125,11 +126,14 @@ function CompleteForm() {
           </AuthField>
         </div>
 
-        <AuthField label={t("mobileLabelLocked")} hint={t("mobileLockedHint")}>
+        <AuthField
+          label={isEmail ? "ایمیل تأییدشده" : t("mobileLabelLocked")}
+          hint={isEmail ? "این ایمیل تأیید شده و قابل تغییر نیست" : t("mobileLockedHint")}
+        >
           <input
-            type="tel"
+            type={isEmail ? "email" : "tel"}
             dir="ltr"
-            value={form.mobile}
+            value={form.identifier}
             readOnly
             disabled
             className={`${authInputClass} text-center tracking-wider`}

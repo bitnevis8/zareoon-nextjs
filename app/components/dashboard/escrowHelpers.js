@@ -1,11 +1,12 @@
-/** Escrow i18n helpers — all UI text from messages/fa/escrow.json */
+/** Escrow i18n helpers — workflow + guides */
 
 export function workflowStepIndex(status) {
   if (status === "draft") return 0;
-  if (status === "awaiting_payment") return 1;
-  if (status === "funds_locked") return 2;
-  if (["in_progress", "partially_released", "disputed"].includes(status)) return 3;
-  if (["completed", "fully_released", "refunded", "cancelled", "expired"].includes(status)) return 4;
+  if (status === "awaiting_signatures") return 1;
+  if (status === "awaiting_payment") return 2;
+  if (status === "funds_locked") return 3;
+  if (["in_progress", "partially_released", "disputed"].includes(status)) return 4;
+  if (["completed", "fully_released", "refunded", "cancelled", "expired"].includes(status)) return 5;
   return 0;
 }
 
@@ -19,14 +20,10 @@ export function getStatusGuide(t, agreement, role) {
   }
 
   let body = guide.bodyDefault || "";
-  if (s === "draft") {
-    if (role === "admin") body = guide.bodyAdmin || body;
-    else if (role === "buyer") body = guide.bodyBuyer || body;
-    else if (role === "seller") body = guide.bodySeller || body;
-    else body = t("statusGuides.draft.bodyDefault", { role: roleLabel });
-  } else if (s === "awaiting_payment") {
-    if (role === "buyer" || role === "admin") body = guide.bodyBuyer || body;
-  }
+  if (role === "admin" && guide.bodyAdmin) body = guide.bodyAdmin;
+  else if (role === "buyer" && guide.bodyBuyer) body = guide.bodyBuyer;
+  else if (role === "seller" && guide.bodySeller) body = guide.bodySeller;
+  else if (guide.bodyDefault) body = String(guide.bodyDefault).replace("{role}", roleLabel);
 
   return { title: guide.title || t("defaultStatusTitle"), body: body || t("genericHint") };
 }
@@ -45,6 +42,7 @@ export function labelMap(t, prefix) {
 
 const WORKFLOW_STEP_ORDER = [
   "draft",
+  "awaiting_signatures",
   "awaiting_payment",
   "funds_locked",
   "in_progress",

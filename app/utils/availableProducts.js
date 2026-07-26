@@ -66,14 +66,26 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
       englishName: lot.englishName || null,
       russianName: lot.russianName || null,
       arabicName: lot.arabicName || null,
+      displayContent: lot.displayContent || null,
       qualityGrade: lot.qualityGrade || i18nData.noGrade,
       availableQty: Math.max(0, availableQty),
       unit: lot.unit || "kg",
       price: lot.price,
+      priceCurrency: lot.priceCurrency || "TOMAN",
+      locationLabel: lot.locationLabel || null,
+      filterValues: lot.filterValues || null,
+      supplyCountry: lot.supplyCountry || lot.filterValues?.originCountry || null,
+      supplyCity: lot.supplyCity || lot.filterValues?.originCity || null,
+      listingVerified: Boolean(lot.filterValues?.listingVerified),
+      verificationLevel: lot.filterValues?.verificationLevel || null,
+      supplier: lot.supplier || lot.farmer || null,
       updatedAt: lot.updatedAt || null,
       createdAt: lot.createdAt || null,
       inquiryOnly: isInquiryOnly,
     });
+    if (!entry._primarySeller) {
+      entry._primarySeller = lot.supplier || lot.farmer || null;
+    }
     entry.totalAvailable += Math.max(0, availableQty);
     const lotTs = lot.updatedAt || lot.createdAt;
     if (lotTs) {

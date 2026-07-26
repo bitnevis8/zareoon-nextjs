@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/context/AuthContext';
 import { isAdmin, isSeller } from '@/app/utils/roles';
@@ -12,14 +12,13 @@ import { useMyTradeServiceProvider } from '@/app/hooks/useMyTradeServiceProvider
 import { usePendingTradeProviderCount } from '@/app/hooks/usePendingTradeProviderCount';
 import DashboardPersonaSwitcher from '@/app/components/dashboard/DashboardPersonaSwitcher';
 import DashboardGuideModal, { DashboardGuideTrigger } from '@/app/components/dashboard/DashboardGuideModal';
-import SidebarSellerShopUrl from '@/app/components/ui/SidebarSellerShopUrl';
-import SidebarServicesPageUrl from '@/app/components/ui/SidebarServicesPageUrl';
-import SidebarPostsPageUrl from '@/app/components/ui/SidebarPostsPageUrl';
 import SidebarServicesSection from '@/app/components/ui/SidebarServicesSection';
 import SidebarSellerSection from '@/app/components/ui/SidebarSellerSection';
+import SidebarWorkspaceSwitcher from '@/app/components/ui/SidebarWorkspaceSwitcher';
+import SidebarIdentityCard from '@/app/components/ui/SidebarIdentityCard';
+import { VerificationLevelBadge } from '@/app/components/verification/VerificationLevelIcon';
 import { SidebarIcon } from '@/app/components/ui/SidebarIcons';
-
-const ESCROW_MENU_PATH = '/dashboard/escrow';
+import { useWorkspace } from '@/app/context/WorkspaceContext';
 
 function useSidebarMenus() {
   const t = useTranslations('nav');
@@ -53,11 +52,13 @@ function useSidebarMenus() {
           icon: 'globe',
           submenu: [
             { title: t('admin.siteLanguages'), path: '/dashboard/site-settings/languages', icon: 'language' },
+            { title: 'ثبت‌نام ایمیل/موبایل', path: '/dashboard/site-settings/auth-signup', icon: 'phone' },
             { title: t('admin.cacheRedis'), path: '/dashboard/site-settings/cache-redis', icon: 'database' },
             { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'block' },
             { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'link' },
             { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'pages' },
             { title: t('admin.backupRestore'), path: '/dashboard/site-settings/backup', icon: 'backup' },
+            { title: 'مدیریت احراز', path: '/dashboard/workspace/verification-admin', icon: 'shield' },
           ],
         },
         {
@@ -85,19 +86,21 @@ function useSidebarMenus() {
         { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own', icon: 'plus' },
         { title: t('customerOrders'), path: '/dashboard/supplier/orders?scope=own', icon: 'orders' },
         { title: t('shopSettings'), path: '/dashboard/supplier-profile', icon: 'store' },
+        { title: 'مدیریت کسب‌وکار', path: '/dashboard/workspace', icon: 'users' },
       ],
       sellerMenuLinksSecondary: [
         { title: t('incomingToMyProducts'), path: '/dashboard/incoming-requests', icon: 'inbox' },
       ],
       primaryLinks: [{ title: t('dashboard'), path: '/dashboard', icon: 'home' }],
-      escrowMenuTitle: t('escrow'),
       sectionAdmin: t('sections.admin'),
+      workspaceHubTitle: 'مدیریت کسب‌وکار',
+      verificationTitle: 'احراز هویت',
     }),
     [t]
   );
 }
 
-function NavItem({ href, label, active, onClick, nested = false, badge = 0, icon, compact = false }) {
+function NavItem({ href, label, active, onClick, nested = false, badge = 0, icon, compact = false, trailing = null }) {
   return (
     <Link
       href={href}
@@ -126,11 +129,14 @@ function NavItem({ href, label, active, onClick, nested = false, badge = 0, icon
       {!compact ? (
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
           <span className="truncate">{label}</span>
-          {badge > 0 ? (
-            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-none text-white">
-              {badge > 99 ? "99+" : badge.toLocaleString("fa-IR")}
-            </span>
-          ) : null}
+          <span className="flex shrink-0 items-center gap-1">
+            {trailing}
+            {badge > 0 ? (
+              <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-none text-white">
+                {badge > 99 ? "99+" : badge.toLocaleString("fa-IR")}
+              </span>
+            ) : null}
+          </span>
         </span>
       ) : null}
     </Link>
@@ -180,18 +186,18 @@ function SubmenuBlock({ section, openMenu, onToggle, isActive, onLinkClick, badg
       >
         <span className="flex min-w-0 flex-1 items-center gap-2.5">
           {section.icon ? (
-            <span className={`shrink-0 ${sectionActive ? "text-emerald-700" : "text-slate-400"}`}>
+            <span className={`flex h-4 w-4 shrink-0 items-center justify-center ${sectionActive ? "text-emerald-700" : "text-slate-400"}`}>
               <SidebarIcon name={section.icon} />
             </span>
           ) : null}
-          <span className="truncate">{section.title}</span>
+          <span className="truncate leading-none">{section.title}</span>
           {badge > 0 ? (
             <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-none text-white">
               {badge > 99 ? "99+" : badge.toLocaleString("fa-IR")}
             </span>
           ) : null}
         </span>
-        <span className={`shrink-0 text-xs ${sectionActive ? "text-emerald-600" : "text-slate-400"}`}>
+        <span className={`flex h-4 w-4 shrink-0 items-center justify-center text-xs leading-none ${sectionActive ? "text-emerald-600" : "text-slate-400"}`}>
           {expanded ? "−" : "+"}
         </span>
       </button>
@@ -225,7 +231,7 @@ function SidebarNavFallback() {
   );
 }
 
-function SidebarInner({ onLinkClick, compact = false }) {
+function SidebarInner({ onLinkClick, compact = false, showMobileUserHeader = false }) {
   const menus = useSidebarMenus();
   const {
     adminMenuSections,
@@ -233,23 +239,24 @@ function SidebarInner({ onLinkClick, compact = false }) {
     sellerMenuLinksPrimary,
     sellerMenuLinksSecondary,
     primaryLinks,
-    escrowMenuTitle,
     sectionAdmin,
+    verificationTitle,
   } = menus;
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const auth = useAuth();
   const user = auth?.user;
-  const { isSellerView, isServicesView, isPostsView, canSwitchPersona } = useDashboardPersona();
+  const { isSellerView, isServicesView, canSwitchPersona } = useDashboardPersona();
+  const { canUseShop, canUseServices, ready: workspaceReady, data: wsData, workspaces } = useWorkspace();
 
   const canSell = isSeller(user);
   const showAdmin = isAdmin(user);
   const implicitOwnScope = canSell && !isAdmin(user);
   const navMatchOptions = useMemo(() => ({ implicitOwnScope }), [implicitOwnScope]);
-  const showSellerNav = isSellerView;
-  const showServicesNav = isServicesView;
-  const showPostsNav = isPostsView;
-  const { provider: myServiceProvider, hasProvider: hasServiceProvider, refresh: refreshMyServiceProvider } =
+  const showSellerNav = isSellerView && workspaceReady && canUseShop;
+  const showServicesNav = isServicesView && workspaceReady && canUseServices;
+  const { hasProvider: hasServiceProvider, refresh: refreshMyServiceProvider } =
     useMyTradeServiceProvider(isServicesView && !!user);
   const { pendingCount: pendingProviderRequests, refresh: refreshPendingProviderCount } = usePendingTradeProviderCount(
     showAdmin && !!user
@@ -287,106 +294,152 @@ function SidebarInner({ onLinkClick, compact = false }) {
   const dashboardHomeLabel = primaryLinks[0]?.title || "داشبورد";
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      {user ? (
-        <div className={compact ? "px-1.5 pt-3 pb-1" : "px-3 pt-3 pb-1"}>
-          <Link
-            href="/dashboard"
-            onClick={onLinkClick}
-            title={dashboardHomeLabel}
-            aria-current={dashboardHomeActive ? "page" : undefined}
-            className={`flex h-10 w-full items-center justify-center rounded-xl text-[13px] font-semibold transition ${
-              compact ? "px-1" : "gap-2"
-            } ${
-              dashboardHomeActive
-                ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200/80"
-                : "bg-slate-50 text-slate-700 ring-1 ring-slate-200/80 hover:bg-white hover:text-slate-900"
-            }`}
-          >
-            <SidebarIcon name="home" className={`h-4 w-4 ${dashboardHomeActive ? "text-emerald-700" : "text-slate-400"}`} />
-            {!compact ? dashboardHomeLabel : null}
-          </Link>
-        </div>
-      ) : null}
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div
+        className={`min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain touch-pan-y [scrollbar-gutter:stable] ${
+          compact ? "px-1.5" : "px-2"
+        }`}
+      >
+        {user ? (
+          <div className={compact ? "space-y-2 px-0 pt-3 pb-2" : "space-y-2.5 px-1 pt-3 pb-2"}>
+            <SidebarIdentityCard compact={compact} onLinkClick={onLinkClick} />
+            <Link
+              href="/dashboard"
+              onClick={onLinkClick}
+              title={dashboardHomeLabel}
+              aria-current={dashboardHomeActive ? "page" : undefined}
+              className={`flex h-10 w-full items-center justify-center rounded-xl text-[13px] font-semibold transition ${
+                compact ? "px-1" : "gap-2"
+              } ${
+                dashboardHomeActive
+                  ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200/80"
+                  : "bg-slate-50 text-slate-700 ring-1 ring-slate-200/80 hover:bg-white hover:text-slate-900"
+              }`}
+            >
+              <SidebarIcon name="home" className={`h-4 w-4 ${dashboardHomeActive ? "text-emerald-700" : "text-slate-400"}`} />
+              {!compact ? dashboardHomeLabel : null}
+            </Link>
 
-      {canSwitchPersona ? (
-        <div className={compact ? "px-1.5 py-2" : "px-3 py-2.5"}>
-          <DashboardPersonaSwitcher onLinkClick={onLinkClick} compact={compact} />
-        </div>
-      ) : null}
-
-      {!compact && showSellerNav && canSell ? <SidebarSellerShopUrl user={user} /> : null}
-
-      {!compact && showServicesNav && hasServiceProvider ? (
-        <SidebarServicesPageUrl provider={myServiceProvider} />
-      ) : null}
-
-      {!compact && showPostsNav ? <SidebarPostsPageUrl /> : null}
-
-      <nav className={`flex-1 space-y-0.5 py-3 ${compact ? "px-1.5" : "px-2"}`}>
-        {showSellerNav ? (
-          <SidebarSellerSection
-            canSell={canSell}
-            isActive={isActive}
-            onLinkClick={onLinkClick}
-            primaryLinks={sellerMenuLinksPrimary}
-            secondaryLinks={sellerMenuLinksSecondary}
-            escrowHref={ESCROW_MENU_PATH}
-            escrowLabel={escrowMenuTitle}
-            compact={compact}
-          />
+            <SidebarWorkspaceSwitcher
+              compact={compact}
+              onSwitched={() => {
+                router.push("/dashboard");
+                onLinkClick?.();
+              }}
+            />
+          </div>
         ) : null}
 
-        {showServicesNav ? (
-          <SidebarServicesSection
-            hasProvider={hasServiceProvider}
-            isActive={isActive}
-            onLinkClick={onLinkClick}
-            escrowHref={ESCROW_MENU_PATH}
-            escrowLabel={escrowMenuTitle}
-            compact={compact}
-          />
+        {canSwitchPersona ? (
+          <div className={compact ? "px-0 py-2" : "px-1 py-2.5"}>
+            <DashboardPersonaSwitcher onLinkClick={onLinkClick} compact={compact} />
+          </div>
         ) : null}
 
-        {showAdmin ? (
-          <>
-            <SectionLabel compact={compact}>{sectionAdmin}</SectionLabel>
-            {adminDashboardLink ? (
-              <div className={compact ? "px-0" : "px-2"}>
-                <NavItem
-                  href={adminDashboardLink.path}
-                  label={adminDashboardLink.title}
-                  active={isActive(adminDashboardLink.path)}
-                  onClick={onLinkClick}
-                  icon={adminDashboardLink.icon}
+        <nav className="space-y-0.5 py-2" aria-label="منوی داشبورد">
+          {user ? (
+            <NavItem
+              href="/dashboard/verification"
+              label={verificationTitle || "احراز هویت"}
+              active={isActive("/dashboard/verification")}
+              onClick={onLinkClick}
+              icon="shield"
+              compact={compact}
+              trailing={
+                !compact ? (
+                  <span className="ms-auto flex items-center gap-1">
+                    <VerificationLevelBadge
+                      kind="person"
+                      level={wsData?.verification?.person?.overall === "verified" ? wsData?.verification?.person?.level : "none"}
+                      status={wsData?.verification?.person?.overall || "none"}
+                      size="sm"
+                    />
+                    <VerificationLevelBadge
+                      kind="business"
+                      level={wsData?.verification?.business?.overall === "verified" ? wsData?.verification?.business?.level : "none"}
+                      status={wsData?.verification?.business?.overall || "none"}
+                      size="sm"
+                    />
+                    {(workspaces || [])
+                      .filter((w) => Number(w.id) !== Number(wsData?.workspace?.id))
+                      .slice(0, 3)
+                      .map((w) =>
+                        w.verificationLevel || w.verification?.level ? (
+                          <VerificationLevelBadge
+                            key={w.id}
+                            kind="business"
+                            level={w.verificationLevel || w.verification?.level}
+                            status={w.verificationOverall || w.verification?.overall || "verified"}
+                            size="sm"
+                          />
+                        ) : null
+                      )}
+                  </span>
+                ) : null
+              }
+            />
+          ) : null}
+
+          {showSellerNav ? (
+            <SidebarSellerSection
+              canSell={canSell}
+              isActive={isActive}
+              onLinkClick={onLinkClick}
+              primaryLinks={sellerMenuLinksPrimary}
+              secondaryLinks={sellerMenuLinksSecondary}
+              compact={compact}
+            />
+          ) : null}
+
+          {showServicesNav ? (
+            <SidebarServicesSection
+              hasProvider={hasServiceProvider}
+              isActive={isActive}
+              onLinkClick={onLinkClick}
+              compact={compact}
+            />
+          ) : null}
+
+          {showAdmin ? (
+            <>
+              <SectionLabel compact={compact}>{sectionAdmin}</SectionLabel>
+              {adminDashboardLink ? (
+                <div className={compact ? "px-0" : "px-0"}>
+                  <NavItem
+                    href={adminDashboardLink.path}
+                    label={adminDashboardLink.title}
+                    active={isActive(adminDashboardLink.path)}
+                    onClick={onLinkClick}
+                    icon={adminDashboardLink.icon}
+                    compact={compact}
+                  />
+                </div>
+              ) : null}
+              {adminMenuSections.map((section) => (
+                <SubmenuBlock
+                  key={section.id}
+                  section={section}
+                  openMenu={openMenu}
+                  onToggle={toggleMenu}
+                  isActive={isActive}
+                  onLinkClick={onLinkClick}
+                  badge={section.id === "services" ? pendingProviderRequests : 0}
+                  itemBadges={
+                    section.id === "services"
+                      ? { "/dashboard/trade-service-provider-requests": pendingProviderRequests }
+                      : {}
+                  }
                   compact={compact}
                 />
-              </div>
-            ) : null}
-            {adminMenuSections.map((section) => (
-              <SubmenuBlock
-                key={section.id}
-                section={section}
-                openMenu={openMenu}
-                onToggle={toggleMenu}
-                isActive={isActive}
-                onLinkClick={onLinkClick}
-                badge={section.id === "services" ? pendingProviderRequests : 0}
-                itemBadges={
-                  section.id === "services"
-                    ? { "/dashboard/trade-service-provider-requests": pendingProviderRequests }
-                    : {}
-                }
-                compact={compact}
-              />
-            ))}
-          </>
-        ) : null}
-      </nav>
+              ))}
+            </>
+          ) : null}
+        </nav>
+      </div>
 
       {user ? (
         <div
-          className={`sticky bottom-0 mt-auto border-t border-slate-100 bg-white/95 backdrop-blur-sm ${
+          className={`shrink-0 border-t border-slate-100 bg-white ${
             compact ? "px-1.5 py-2" : "px-3 py-3"
           }`}
         >

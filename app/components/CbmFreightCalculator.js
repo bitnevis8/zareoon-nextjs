@@ -9,8 +9,9 @@ import {
   formatNumber,
 } from "@/app/utils/cbmFreightCalculator";
 
-const emptyPackage = () => ({
-  id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+let _pkgSeq = 0;
+const emptyPackage = (stableId) => ({
+  id: stableId || `pkg-${++_pkgSeq}`,
   packages: "1",
   lengthCm: "",
   widthCm: "",
@@ -325,7 +326,7 @@ const CbmFreightCalculator = forwardRef(function CbmFreightCalculator({ embedded
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [transportMode, setTransportMode] = useState("auto");
-  const [packages, setPackages] = useState([emptyPackage()]);
+  const [packages, setPackages] = useState(() => [emptyPackage("pkg-0")]);
   const [ratePerCbm, setRatePerCbm] = useState("");
   const [ratePerKg, setRatePerKg] = useState("");
   const [showRates, setShowRates] = useState(false);

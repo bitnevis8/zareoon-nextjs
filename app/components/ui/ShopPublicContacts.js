@@ -1,31 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { MESSENGER_META, messengerHref } from "@/app/utils/shopContacts";
 import { MessengerGlyph, MESSENGER_COLORS } from "@/app/components/ui/ShopContactFields";
 import ShopPageQrCode from "@/app/components/ui/ShopPageQrCode";
-
-function ChatIcon({ className = "h-4 w-4" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3.5-3c-1.43.09-2.87.14-4.25.14-3.866 0-7-1.79-7-4s3.134-4 7-4c.85 0 1.67.07 2.45.2"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8.25 6.75h.008v.008H8.25V6.75zm3.75 0h.008v.008H12V6.75zm3.75 0h.008v.008H15.75V6.75z"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 3c-4.418 0-8 2.015-8 4.5S7.582 12 12 12c.85 0 1.67-.07 2.45-.2L18 14.25V11.4c.88-.28 1.5-1.12 1.5-2.09C19.5 7.22 16.09 3 12 3z"
-      />
-    </svg>
-  );
-}
+import OpenChatButton from "@/app/components/messaging/OpenChatButton";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 /**
  * نمایش عمومی تماس فروشگاه + چت داخلی زارعون + QR صفحه
@@ -37,7 +16,9 @@ export default function ShopPublicContacts({
   showInternalChat = true,
   profileSlug = null,
   displayName = "",
+  chatLabel,
 }) {
+  const { t } = useLanguage();
   const phones = Array.isArray(shopContacts?.phones)
     ? shopContacts.phones.filter(Boolean)
     : [legacy.publicPhone, legacy.publicLandline].filter(Boolean);
@@ -55,8 +36,8 @@ export default function ShopPublicContacts({
   }));
 
   const canShowChat = showInternalChat && chatUserId;
-  const chatHref = `/dashboard/messages?u=${chatUserId}`;
   const canShowQr = Boolean(profileSlug);
+  const label = chatLabel || t("chatWithShop") || "گفتگو با این فروشگاه";
 
   if (!phones.length && !emails.length && !messengerEntries.length && !canShowChat && !canShowQr) return null;
 
@@ -65,13 +46,11 @@ export default function ShopPublicContacts({
       <p className="text-sm font-semibold text-slate-800">راه‌های ارتباطی</p>
 
       {canShowChat ? (
-        <Link
-          href={chatHref}
+        <OpenChatButton
+          userId={chatUserId}
+          label={label}
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-bold text-white transition hover:bg-emerald-700"
-        >
-          <ChatIcon className="h-5 w-5" />
-          چت در زارعون
-        </Link>
+        />
       ) : null}
 
       {phones.length ? (
@@ -118,14 +97,14 @@ export default function ShopPublicContacts({
 
       {messengerEntries.length ? (
         <div className="flex flex-wrap gap-2 pt-1">
-          {messengerEntries.map(({ key, label, value, href }) => {
+          {messengerEntries.map(({ key, label: mLabel, value, href }) => {
             const inner = (
               <>
                 <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${MESSENGER_COLORS[key]}`}>
                   <MessengerGlyph type={key} className="h-4 w-4" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[11px] text-slate-500">{label}</span>
+                  <span className="block text-[11px] text-slate-500">{mLabel}</span>
                   <span className="block truncate text-xs font-semibold text-slate-800" dir="ltr">
                     {value}
                   </span>

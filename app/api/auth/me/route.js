@@ -2,9 +2,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 
 export async function GET(request) {
   try {
-    // Forward cookies to the backend (important for JWT token)
     const cookies = request.headers.get('cookie');
-    console.log("Cookies received in /api/auth/me proxy:", cookies);
 
     const backendResponse = await fetch(API_ENDPOINTS.auth.me, {
       method: 'GET',

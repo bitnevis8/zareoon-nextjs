@@ -1,18 +1,28 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { useMessaging } from "@/app/context/MessagingContext";
 import { authFetch } from "@/app/utils/authHeaders";
 
-function MessageIcon({ className = "h-5 w-5" }) {
+/** آیکون پیام مستقیم — شبیه اینستاگرام (کاغذ هواپیما) */
+function InstagramDmIcon({ className = "h-5 w-5" }) {
   return (
-    <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
+        d="M22 2L11 13"
+        stroke="currentColor"
+        strokeWidth="1.85"
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M8 10h8M8 14h5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+      <path
+        d="M22 2L15 22l-4-9-9-4 20-7z"
+        stroke="currentColor"
+        strokeWidth="1.85"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -22,6 +32,7 @@ export default function HeaderMessagesIcon({ buttonClass = "" }) {
   const auth = useAuth();
   const user = auth?.user;
   const { t } = useLanguage();
+  const { openMessaging } = useMessaging();
   const [count, setCount] = useState(0);
 
   const fetchCount = useCallback(async () => {
@@ -44,19 +55,22 @@ export default function HeaderMessagesIcon({ buttonClass = "" }) {
   if (!user) return null;
 
   return (
-    <Link
-      href="/dashboard/messages"
+    <button
+      type="button"
+      onClick={() => {
+        openMessaging();
+        fetchCount();
+      }}
       className={`relative ${buttonClass}`}
       aria-label={t("messages")}
       title={t("messages")}
-      prefetch
     >
-      <MessageIcon />
+      <InstagramDmIcon />
       {count > 0 ? (
         <span className="absolute -top-1 -left-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
           {count > 99 ? "99+" : count}
         </span>
       ) : null}
-    </Link>
+    </button>
   );
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
@@ -226,7 +226,7 @@ export default function ProductsPage() {
                   <td className="p-2">{x.unit || "-"}</td>
                   <td className="p-2">
                     <div className="flex items-center gap-2 rtl:space-x-reverse">
-                      <Link href={`/catalog/${x.id}`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">{t("view")}</Link>
+                      <Link href={`/catalog/${x.slug || x.id}`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">{t("view")}</Link>
                       <Link href={`/dashboard/farmer/products/${x.id}/edit`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50">{t("edit")}</Link>
                       <Link href={`/dashboard/farmer/products/${x.id}/report`} className="px-2 py-1 rounded border text-xs hover:bg-slate-50 text-blue-700 border-blue-200">{t("report")}</Link>
                       <button onClick={()=>remove(x.id)} className="px-2 py-1 rounded border text-xs hover:bg-rose-50 text-rose-700 border-rose-200">{t("delete")}</button>
@@ -265,7 +265,7 @@ export default function ProductsPage() {
               </div>
               
               <div className="flex flex-wrap gap-2">
-                <Link href={`/catalog/${x.id}`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white">{t("view")}</Link>
+                <Link href={`/catalog/${x.slug || x.id}`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white">{t("view")}</Link>
                 <Link href={`/dashboard/farmer/products/${x.id}/edit`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 bg-white">{t("edit")}</Link>
                 <Link href={`/dashboard/farmer/products/${x.id}/report`} className="px-3 py-1 rounded border text-xs hover:bg-slate-50 text-blue-700 border-blue-200 bg-white">{t("report")}</Link>
                 <button onClick={()=>remove(x.id)} className="px-3 py-1 rounded border text-xs hover:bg-rose-50 text-rose-700 border-rose-200 bg-white">{t("delete")}</button>

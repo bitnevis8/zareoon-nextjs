@@ -31,7 +31,14 @@ function SearchIcon({ className = "h-4 w-4" }) {
 }
 
 function CategoryGlyph({ name, className = "h-4 w-4" }) {
-  const common = { className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.75", "aria-hidden": true };
+  const common = {
+    className,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.75",
+    "aria-hidden": true,
+  };
   switch (name) {
     case "scale":
       return (
@@ -42,13 +49,21 @@ function CategoryGlyph({ name, className = "h-4 w-4" }) {
     case "ruler":
       return (
         <svg {...common}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 20L20 4M8 20l2-2M12 20l2-2M16 20l2-2M4 16l2-2M4 12l2-2M4 8l2-2" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 20L20 4M8 20l2-2M12 20l2-2M16 20l2-2M4 16l2-2M4 12l2-2M4 8l2-2"
+          />
         </svg>
       );
     case "cube":
       return (
         <svg {...common}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-4.5-9 4.5m18 0l-9 4.5m9-4.5v9l-9 4.5m0-9L3 7.5m9 4.5v9M3 7.5v9l9 4.5" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 7.5l-9-4.5-9 4.5m18 0l-9 4.5m9-4.5v9l-9 4.5m0-9L3 7.5m9 4.5v9M3 7.5v9l9 4.5"
+          />
         </svg>
       );
     case "temp":
@@ -60,7 +75,11 @@ function CategoryGlyph({ name, className = "h-4 w-4" }) {
     case "ship":
       return (
         <svg {...common}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 17.5c1.2-.7 2.5-1 4-1s2.6.4 4 1 2.5 1 4 1 2.8-.3 4-1M4.5 14.5l1.8-7.2A1 1 0 017.3 6.5h7.4a1 1 0 01.95.68l2.35 7.32" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3 17.5c1.2-.7 2.5-1 4-1s2.6.4 4 1 2.5 1 4 1 2.8-.3 4-1M4.5 14.5l1.8-7.2A1 1 0 017.3 6.5h7.4a1 1 0 01.95.68l2.35 7.32"
+          />
         </svg>
       );
     case "leaf":
@@ -82,13 +101,13 @@ function CategoryGlyph({ name, className = "h-4 w-4" }) {
 function UnitSelect({ id, label, units, value, onChange, disabled }) {
   return (
     <label className="block min-w-0 flex-1">
-      <span className="mb-1.5 block text-[11px] font-bold text-slate-500">{label}</span>
+      <span className="mb-1.5 block text-[11px] font-bold text-slate-500 sm:text-xs">{label}</span>
       <select
         id={id}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none ring-teal-500/0 transition focus:border-teal-400 focus:ring-4 focus:ring-teal-500/15 disabled:opacity-50"
+        className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-500/15 disabled:opacity-50"
       >
         {units.map((u) => (
           <option key={u.id} value={u.id}>
@@ -176,11 +195,11 @@ const TradeUnitConverter = forwardRef(function TradeUnitConverter(
 
   const resultDisplay = conversion?.result != null ? formatSmart(conversion.result) : "—";
   const amountNum = Number(String(amount).replace(/,/g, ""));
-
   const showHeader = !embedded && !hidePageHeader;
+  const unitOptions = filteredUnits.length ? filteredUnits : category.units;
 
   return (
-    <div className={embedded ? "space-y-4" : "space-y-5"}>
+    <div className={embedded ? "space-y-4 sm:space-y-5" : "space-y-5 sm:space-y-6"}>
       {showHeader ? (
         <header className="space-y-2">
           <p className="text-[11px] font-bold uppercase tracking-wide text-teal-700" dir="ltr">
@@ -200,12 +219,12 @@ const TradeUnitConverter = forwardRef(function TradeUnitConverter(
           value={globalQuery}
           onChange={(e) => setGlobalQuery(e.target.value)}
           placeholder="جستجوی سریع واحد: تن، گالن، TEU، °F…"
-          className="h-12 w-full rounded-xl border border-slate-200 bg-white pe-3 ps-10 text-sm outline-none ring-teal-500/0 transition focus:border-teal-400 focus:ring-4 focus:ring-teal-500/15"
+          className="h-12 w-full rounded-2xl border border-slate-200 bg-white pe-3 ps-10 text-sm shadow-sm outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-500/15"
           aria-label="جستجوی واحد در همه دسته‌ها"
         />
         {globalHits.length > 0 ? (
           <ul
-            className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+            className="absolute z-20 mt-1.5 max-h-56 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white py-1 shadow-xl"
             role="listbox"
           >
             {globalHits.map((hit) => (
@@ -213,7 +232,7 @@ const TradeUnitConverter = forwardRef(function TradeUnitConverter(
                 <button
                   type="button"
                   role="option"
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-start text-sm hover:bg-teal-50"
+                  className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-start text-sm hover:bg-teal-50"
                   onClick={() => pickGlobalHit(hit)}
                 >
                   <span className="font-semibold text-slate-900">
@@ -231,7 +250,7 @@ const TradeUnitConverter = forwardRef(function TradeUnitConverter(
       </div>
 
       <div
-        className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         role="tablist"
         aria-label="دسته‌بندی واحدها"
       >
@@ -244,33 +263,35 @@ const TradeUnitConverter = forwardRef(function TradeUnitConverter(
               role="tab"
               aria-selected={selected}
               onClick={() => selectCategory(cat.id)}
-              className={`shrink-0 rounded-xl border px-3 py-2 text-start transition ${
+              className={`rounded-2xl border px-3 py-2.5 text-start transition sm:py-3 ${
                 selected
                   ? "border-teal-400 bg-teal-50 shadow-sm ring-2 ring-teal-100"
-                  : "border-slate-200 bg-white hover:border-slate-300"
+                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              <span className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900">
+              <span className="flex items-center gap-1.5 text-[12px] font-extrabold text-slate-900 sm:text-[13px]">
                 <span className={selected ? "text-teal-700" : "text-slate-400"}>
                   <CategoryGlyph name={cat.icon} />
                 </span>
-                {cat.nameFa}
+                <span className="truncate">{cat.nameFa}</span>
               </span>
-              <span className="mt-0.5 block max-w-[8.5rem] truncate text-[10px] text-slate-500">{cat.hintFa}</span>
+              <span className="mt-1 block truncate text-[10px] leading-4 text-slate-500 sm:text-[11px]">
+                {cat.hintFa}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm sm:p-5">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-800 ring-1 ring-teal-100">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.35)] sm:rounded-[1.35rem]">
+        <div className="flex flex-col gap-3 border-b border-slate-100 bg-gradient-to-l from-teal-50/50 to-white px-3.5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white shadow-md shadow-teal-800/20 sm:h-12 sm:w-12">
               <CategoryGlyph name={category.icon} className="h-5 w-5" />
             </span>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 sm:text-base">{category.nameFa}</h2>
-              <p className="text-[11px] text-slate-500" dir="ltr">
+            <div className="min-w-0">
+              <h2 className="truncate text-sm font-bold text-slate-900 sm:text-base">{category.nameFa}</h2>
+              <p className="truncate text-[11px] text-slate-500" dir="ltr">
                 {category.nameEn}
               </p>
             </div>
@@ -280,112 +301,114 @@ const TradeUnitConverter = forwardRef(function TradeUnitConverter(
             value={unitQuery}
             onChange={(e) => setUnitQuery(e.target.value)}
             placeholder="فیلتر واحدهای این دسته…"
-            className="h-9 w-full max-w-xs rounded-lg border border-slate-200 px-2.5 text-xs outline-none focus:border-teal-400 sm:w-48"
+            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-teal-400 sm:h-11 sm:max-w-[14rem] sm:text-sm"
             aria-label="فیلتر واحد در دسته فعلی"
           />
         </div>
 
-        {category.noteFa ? (
-          <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-[12px] leading-6 text-amber-950 ring-1 ring-amber-100">
-            {category.noteFa}
-          </p>
-        ) : null}
-
-        <label className="block">
-          <span className="mb-1.5 block text-[11px] font-bold text-slate-500">مقدار</span>
-          <input
-            type="text"
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 font-mono text-lg font-bold text-slate-900 outline-none focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/15"
-            aria-label="مقدار مبدأ"
-            dir="ltr"
-          />
-        </label>
-
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
-          <UnitSelect
-            id="unit-from"
-            label="واحد مبدأ"
-            units={filteredUnits.length ? filteredUnits : category.units}
-            value={fromUnit?.id || ""}
-            onChange={setFromId}
-          />
-          <button
-            type="button"
-            onClick={swapUnits}
-            className="mx-auto inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-teal-700 shadow-sm transition hover:bg-teal-50 sm:mb-0.5"
-            aria-label="جابه‌جایی مبدأ و مقصد"
-            title="جابه‌جایی"
-          >
-            <SwapIcon />
-          </button>
-          <UnitSelect
-            id="unit-to"
-            label="واحد مقصد"
-            units={filteredUnits.length ? filteredUnits : category.units}
-            value={toUnit?.id || ""}
-            onChange={setToId}
-          />
-        </div>
-
-        <div className="mt-4 rounded-2xl bg-gradient-to-br from-teal-700 to-teal-900 px-4 py-4 text-white sm:px-5 sm:py-5">
-          <p className="text-[11px] font-semibold text-teal-100">نتیجه</p>
-          <p className="mt-1 break-all font-mono text-2xl font-black tracking-tight sm:text-3xl" dir="ltr">
-            {resultDisplay}
-            <span className="ms-2 text-base font-bold text-teal-100 sm:text-lg">{toUnit?.symbol}</span>
-          </p>
-          {fromUnit && toUnit && Number.isFinite(amountNum) ? (
-            <p className="mt-2 text-sm text-teal-50/95" dir="ltr">
-              {formatSmart(amountNum)} {fromUnit.symbol} = {resultDisplay} {toUnit.symbol}
+        <div className="space-y-4 p-3.5 sm:space-y-5 sm:p-5 lg:p-6">
+          {category.noteFa ? (
+            <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-[12px] leading-6 text-amber-950 ring-1 ring-amber-100 sm:text-[13px]">
+              {category.noteFa}
             </p>
           ) : null}
-          {conversion?.error ? <p className="mt-2 text-sm text-amber-200">{conversion.error}</p> : null}
-        </div>
 
-        {conversion?.formulaText ? (
-          <p className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 text-[12px] leading-6 text-slate-600">
-            <span className="font-bold text-slate-800">ضریب / فرمول: </span>
-            <span dir="ltr" className="font-mono">
-              {conversion.formulaText}
-            </span>
-          </p>
-        ) : null}
+          <label className="block">
+            <span className="mb-1.5 block text-[11px] font-bold text-slate-500 sm:text-xs">مقدار</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 font-mono text-xl font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/15 sm:h-14 sm:text-2xl"
+              aria-label="مقدار مبدأ"
+              dir="ltr"
+            />
+          </label>
 
-        {fromUnit && filteredUnits.length > 2 ? (
-          <div className="mt-4">
-            <p className="text-[11px] font-bold text-slate-500">معادل‌های رایج (همان مقدار مبدأ)</p>
-            <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
-              {category.units
-                .filter((u) => u.id !== fromUnit.id)
-                .slice(0, 6)
-                .map((u) => {
-                  const r = convertValue(category, fromUnit, u, amount);
-                  return (
-                    <li
-                      key={u.id}
-                      className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-white px-2.5 py-2 text-[12px]"
-                    >
-                      <span className="truncate font-medium text-slate-600">{u.nameFa}</span>
-                      <button
-                        type="button"
-                        className="shrink-0 font-mono font-bold text-teal-800 hover:underline"
-                        dir="ltr"
-                        onClick={() => setToId(u.id)}
-                        title="انتخاب به‌عنوان مقصد"
-                      >
-                        {r.result != null ? formatSmart(r.result, { maxFrac: 6 }) : "—"} {u.symbol}
-                      </button>
-                    </li>
-                  );
-                })}
-            </ul>
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end sm:gap-3.5">
+            <UnitSelect
+              id="unit-from"
+              label="واحد مبدأ"
+              units={unitOptions}
+              value={fromUnit?.id || ""}
+              onChange={setFromId}
+            />
+            <button
+              type="button"
+              onClick={swapUnits}
+              className="mx-auto inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-teal-200 bg-white text-teal-700 shadow-sm transition hover:bg-teal-50 sm:mb-0.5"
+              aria-label="جابه‌جایی مبدأ و مقصد"
+              title="جابه‌جایی"
+            >
+              <SwapIcon />
+            </button>
+            <UnitSelect
+              id="unit-to"
+              label="واحد مقصد"
+              units={unitOptions}
+              value={toUnit?.id || ""}
+              onChange={setToId}
+            />
           </div>
-        ) : null}
+
+          <div className="rounded-2xl bg-gradient-to-br from-teal-700 via-teal-800 to-slate-900 px-4 py-4 text-white sm:px-5 sm:py-5">
+            <p className="text-[11px] font-semibold text-teal-100 sm:text-xs">نتیجه تبدیل</p>
+            <p className="mt-1 break-all font-mono text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl" dir="ltr">
+              {resultDisplay}
+              <span className="ms-2 text-base font-bold text-teal-100 sm:text-lg">{toUnit?.symbol}</span>
+            </p>
+            {fromUnit && toUnit && Number.isFinite(amountNum) ? (
+              <p className="mt-2 text-sm text-teal-50/95 sm:text-[15px]" dir="ltr">
+                {formatSmart(amountNum)} {fromUnit.symbol} = {resultDisplay} {toUnit.symbol}
+              </p>
+            ) : null}
+            {conversion?.error ? <p className="mt-2 text-sm text-amber-200">{conversion.error}</p> : null}
+          </div>
+
+          {conversion?.formulaText ? (
+            <p className="rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-[12px] leading-6 text-slate-600 sm:text-[13px]">
+              <span className="font-bold text-slate-800">ضریب / فرمول: </span>
+              <span dir="ltr" className="font-mono">
+                {conversion.formulaText}
+              </span>
+            </p>
+          ) : null}
+
+          {fromUnit && category.units.length > 2 ? (
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 sm:text-xs">معادل‌های رایج (همان مقدار مبدأ)</p>
+              <ul className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                {category.units
+                  .filter((u) => u.id !== fromUnit.id)
+                  .slice(0, 6)
+                  .map((u) => {
+                    const r = convertValue(category, fromUnit, u, amount);
+                    return (
+                      <li key={u.id}>
+                        <button
+                          type="button"
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 text-start transition hover:border-teal-200 hover:bg-teal-50/50"
+                          onClick={() => setToId(u.id)}
+                          title="انتخاب به‌عنوان مقصد"
+                        >
+                          <span className="truncate text-[12px] font-medium text-slate-600 sm:text-[13px]">
+                            {u.nameFa}
+                          </span>
+                          <span className="shrink-0 font-mono text-[12px] font-bold text-teal-800 sm:text-[13px]" dir="ltr">
+                            {r.result != null ? formatSmart(r.result, { maxFrac: 6 }) : "—"} {u.symbol}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      <p className="text-[11px] leading-6 text-slate-400">{UNIT_CONVERTER_META.noteFa}</p>
+      <p className="text-[11px] leading-6 text-slate-400 sm:text-xs">{UNIT_CONVERTER_META.noteFa}</p>
 
       {embedded ? (
         <p className="text-center text-xs text-slate-500">

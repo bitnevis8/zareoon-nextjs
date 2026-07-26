@@ -1,11 +1,56 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { authFetch } from "@/app/utils/authHeaders";
 import { formatUserDisplayName } from "@/app/components/dashboard/escrowCopy";
 
-const MIN_QUERY_LENGTH = 2;
+const TEXT_MIN_QUERY_LENGTH = 2;
+const DIGIT_MIN_QUERY_LENGTH = 8;
+
+function toEnglishDigits(str) {
+  return String(str || "")
+    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+}
+
+function getMinQueryLength(query) {
+  const normalized = toEnglishDigits(query).trim().replace(/[\s-]/g, "");
+  if (/^\d+$/.test(normalized)) return DIGIT_MIN_QUERY_LENGTH;
+  return TEXT_MIN_QUERY_LENGTH;
+}
+
+function SelectedUserPreview({ user, t }) {
+  if (!user) return null;
+  const rows = [
+    { label: t("search.previewFirstName"), value: user.firstName },
+    { label: t("search.previewLastName"), value: user.lastName },
+    { label: t("search.previewUsername"), value: user.username },
+    { label: t("search.previewMobile"), value: user.mobile, ltr: true },
+    { label: t("search.previewNationalId"), value: user.nationalId, ltr: true },
+  ].filter((row) => row.value);
+
+  if (!rows.length) return null;
+
+  return (
+    <div className="mt-2 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2.5">
+      <p className="text-[11px] font-bold text-emerald-900">{t("search.previewTitle")}</p>
+      <dl className="mt-2 grid gap-1.5 text-[11px] sm:grid-cols-2">
+        {rows.map((row) => (
+          <div key={row.label} className="flex justify-between gap-2 sm:block">
+            <dt className="text-emerald-800/70">{row.label}</dt>
+            <dd
+              className="font-semibold text-slate-900 sm:mt-0.5"
+              dir={row.ltr ? "ltr" : undefined}
+            >
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
 
 export default function EscrowUserSearch({
   label,
@@ -23,6 +68,8 @@ export default function EscrowUserSearch({
   const [loading, setLoading] = useState(false);
   const wrapRef = useRef(null);
 
+  const minLen = useMemo(() => getMinQueryLength(query), [query]);
+
   useEffect(() => {
     setQuery(value ? formatUserDisplayName(value, userFallback) : "");
   }, [value, userFallback]);
@@ -30,7 +77,8 @@ export default function EscrowUserSearch({
   useEffect(() => {
     if (disabled || !open) return undefined;
     const trimmed = query.trim();
-    if (trimmed.length < MIN_QUERY_LENGTH) {
+    const required = getMinQueryLength(trimmed);
+    if (trimmed.length < required) {
       setResults([]);
       setLoading(false);
       return undefined;
@@ -84,7 +132,7 @@ export default function EscrowUserSearch({
   };
 
   const trimmed = query.trim();
-  const queryTooShort = open && trimmed.length > 0 && trimmed.length < MIN_QUERY_LENGTH;
+  const queryTooShort = open && trimmed.length > 0 && trimmed.length < minLen;
 
   return (
     <div ref={wrapRef} className="relative block">
@@ -116,15 +164,16 @@ export default function EscrowUserSearch({
           </button>
         ) : null}
       </div>
+      {value && !open ? <SelectedUserPreview user={value} t={t} /> : null}
       {open && !disabled ? (
         <ul className="absolute z-30 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
           {queryTooShort ? (
             <li className="px-3 py-2.5 text-xs text-amber-700">
-              {t("search.minChars", { count: MIN_QUERY_LENGTH })}
+              {t("search.minChars", { count: minLen })}
             </li>
           ) : loading ? (
             <li className="px-3 py-2.5 text-xs text-slate-500">{t("search.searching")}</li>
-          ) : trimmed.length < MIN_QUERY_LENGTH ? (
+          ) : trimmed.length < minLen ? (
             <li className="px-3 py-2.5 text-xs text-slate-500">{t("search.hint")}</li>
           ) : results.length === 0 ? (
             <li className="px-3 py-2.5 text-xs text-slate-500">{t("search.noResults")}</li>
@@ -140,7 +189,7 @@ export default function EscrowUserSearch({
                     {formatUserDisplayName(user, userFallback)}
                   </span>
                   <span className="text-[11px] text-slate-500" dir="ltr">
-                    {[user.mobile, user.username].filter(Boolean).join(" · ")}
+                    {[user.mobile, user.username, user.nationalId].filter(Boolean).join(" · ")}
                   </span>
                 </button>
               </li>

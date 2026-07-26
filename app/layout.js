@@ -7,9 +7,12 @@ import { AuthProvider } from "./context/AuthContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { DashboardPersonaProvider } from "./context/DashboardPersonaContext";
+import { WorkspaceProvider } from "./context/WorkspaceContext";
+import { MessagingProvider } from "./context/MessagingContext";
 import StructuredData from "./components/StructuredData";
 import AppToaster from "./components/ui/AppToaster";
 import SiteChrome from "./components/ui/SiteChrome";
+import MessagingModalHost from "./components/messaging/MessagingModalHost";
 
 export async function generateMetadata() {
   const t = await getTranslations("layout.metadata");
@@ -67,10 +70,6 @@ export async function generateMetadata() {
         "max-snippet": -1,
       },
     },
-    verification: {
-      google: "your-google-verification-code",
-      yandex: "your-yandex-verification-code",
-    },
     other: {
       enamad: "759645",
     },
@@ -97,11 +96,16 @@ export default async function RootLayout({ children }) {
           <LanguageProvider>
             <AppToaster />
             <AuthProvider>
-              <DashboardPersonaProvider>
-                <SidebarProvider>
-                  <SiteChrome>{children}</SiteChrome>
-                </SidebarProvider>
-              </DashboardPersonaProvider>
+              <WorkspaceProvider>
+                <DashboardPersonaProvider>
+                  <SidebarProvider>
+                    <MessagingProvider>
+                      <SiteChrome>{children}</SiteChrome>
+                      <MessagingModalHost />
+                    </MessagingProvider>
+                  </SidebarProvider>
+                </DashboardPersonaProvider>
+              </WorkspaceProvider>
             </AuthProvider>
           </LanguageProvider>
         </NextIntlClientProvider>

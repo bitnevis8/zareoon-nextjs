@@ -8,6 +8,7 @@ import { getLocalizedText } from "@/app/utils/localize";
 import { sortCatalogItems } from "@/app/utils/productSort";
 import { getMainCategoryIcon } from "@/app/utils/mainCategoryIcons";
 import { useFullCatalog } from "@/app/hooks/useCatalogProducts";
+import { catalogProductPath } from "@/app/utils/catalogProductPath";
 
 const HOVER_CLOSE_DELAY_MS = 400;
 const HOVER_BRIDGE_PX = 10;
@@ -75,7 +76,7 @@ function L2CategorySection({ l2, childrenMap, language, closeMenu }) {
   return (
     <section className="mb-3 min-w-0">
       <Link
-        href={`/catalog/${l2.id}`}
+        href={catalogProductPath(l2)}
         onClick={closeMenu}
         className="mb-1 block text-sm font-bold leading-snug text-slate-900 transition hover:text-emerald-700"
       >
@@ -86,7 +87,7 @@ function L2CategorySection({ l2, childrenMap, language, closeMenu }) {
           {products.map((product) => (
             <li key={product.id}>
               <Link
-                href={`/catalog/${product.id}`}
+                href={catalogProductPath(product)}
                 onClick={closeMenu}
                 className="block truncate py-0.5 text-[13px] leading-relaxed text-slate-600 transition hover:text-emerald-700 sm:text-sm"
               >
@@ -519,7 +520,7 @@ export default function CategoryMegaMenu() {
                       {getLocalizedText(activeRoot, language)}
                     </h3>
                     <Link
-                      href={`/catalog/${activeRoot.id}`}
+                      href={catalogProductPath(activeRoot)}
                       onClick={closeMenu}
                       className="shrink-0 text-xs font-semibold text-emerald-700 hover:text-emerald-900 sm:text-sm"
                     >

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { API_ENDPOINTS } from "../config/api";
 import { getProductStockClass, calculateAvailableStock } from "../utils/stockUtils";
 import { resolveMediaUrl } from "../utils/mediaUrl";
+import { catalogProductPath } from "../utils/catalogProductPath";
 import { useLanguage } from "../context/LanguageContext";
 import { useTranslations } from "next-intl";
 
@@ -204,7 +205,7 @@ export default function SearchModal({
                     return (
                       <Link
                         key={item.id}
-                        href={`/catalog/${item.id}`}
+                        href={catalogProductPath(item)}
                         onClick={() => handleResultClick(item)}
                         className={`flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 border border-transparent hover:border-gray-200 hover:shadow-sm group ${getProductStockClass(item, allProducts, inventoryLots)}`}
                       >

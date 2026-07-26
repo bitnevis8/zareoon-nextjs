@@ -19,9 +19,12 @@ import {
 } from "@/app/components/dashboard/escrowHelpers";
 import { formatEscrowMoney, getEscrowCurrency } from "@/app/utils/escrowCurrencies";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
+import EscrowContractSign from "@/app/components/dashboard/EscrowContractSign";
+import EscrowPaymentPanel from "@/app/components/dashboard/EscrowPaymentPanel";
 
 const STATUS_CLASS = {
   draft: "bg-slate-100 text-slate-700",
+  awaiting_signatures: "bg-violet-100 text-violet-900",
   awaiting_payment: "bg-amber-100 text-amber-800",
   funds_locked: "bg-sky-100 text-sky-800",
   in_progress: "bg-blue-100 text-blue-800",
@@ -267,7 +270,7 @@ export default function EscrowAgreementDetail() {
   };
 
   const partyName = (party, partyId) =>
-    formatUserDisplayName(party, userFallback) || userFallback.replace("{id}", String(partyId));
+    formatUserDisplayName(party, userFallback) || `${userFallback} ${partyId}`;
 
   if (loading) {
     return (
@@ -292,13 +295,16 @@ export default function EscrowAgreementDetail() {
 
   const openDispute = data.disputes?.find((d) => ["filed", "under_review"].includes(d.status));
   const canActivate = agreement.status === "draft";
-  const canPay =
-    ["draft", "awaiting_payment"].includes(agreement.status) && (role === "buyer" || admin);
   const canRelease =
     ["in_progress", "partially_released", "funds_locked"].includes(agreement.status) &&
     (role === "seller" || admin) &&
     availableToRelease > 0;
   const canCancel = !["cancelled", "completed", "refunded", "expired"].includes(agreement.status);
+  const showContract =
+    ["draft", "awaiting_signatures", "awaiting_payment", "funds_locked", "in_progress"].includes(
+      agreement.status
+    ) || Boolean(data.signatures);
+  const showPayment = Boolean(data.signatures?.bothSigned) && agreement.status !== "cancelled";
 
   const resolveOptions = t.raw("detail.resolveOptions") || {};
 
@@ -349,6 +355,31 @@ export default function EscrowAgreementDetail() {
           <WorkflowStepper status={agreement.status} steps={workflowSteps} />
         </div>
       </header>
+
+      {showContract ? (
+        <div className="mt-4">
+          <EscrowContractSign
+            agreementId={id}
+            contract={data.contract}
+            signatures={data.signatures}
+            viewerRole={role}
+            onSigned={load}
+          />
+        </div>
+      ) : null}
+
+      {showPayment ? (
+        <div className="mt-4">
+          <EscrowPaymentPanel
+            agreementId={id}
+            funding={data.funding}
+            signatures={data.signatures}
+            viewerRole={role}
+            isAdminUser={admin}
+            onPaid={load}
+          />
+        </div>
+      ) : null}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
@@ -410,42 +441,6 @@ export default function EscrowAgreementDetail() {
                 />
               ) : null}
 
-              {canPay ? (
-                <>
-                  <ActionCard
-                    actionId="createPaymentIntent"
-                    meta={getEscrowAction(t, "createPaymentIntent")}
-                    busy={busy}
-                    allowedForLabel={t("detail.actionAllowedFor")}
-                    busyLabel={t("detail.actionBusy")}
-                    onClick={() =>
-                      runAction(() =>
-                        post(API_ENDPOINTS.escrow.paymentIntents(id), {
-                          idempotencyKey: `pi-${id}-${Date.now()}`,
-                        })
-                      )
-                    }
-                  />
-                  {admin ? (
-                    <ActionCard
-                      actionId="confirmPaymentDemo"
-                      meta={getEscrowAction(t, "confirmPaymentDemo")}
-                      busy={busy}
-                      allowedForLabel={t("detail.actionAllowedFor")}
-                      busyLabel={t("detail.actionBusy")}
-                      onClick={() =>
-                        runAction(() =>
-                          post(API_ENDPOINTS.escrow.confirmPayment(id), {
-                            externalPaymentRef: `DEMO-${Date.now()}`,
-                            idempotencyKey: `pay-${id}-${Date.now()}`,
-                          })
-                        )
-                      }
-                    />
-                  ) : null}
-                </>
-              ) : null}
-
               {canRelease ? (
                 <ActionCard
                   actionId="requestRelease"
@@ -471,7 +466,7 @@ export default function EscrowAgreementDetail() {
                 />
               ) : null}
 
-              {!canActivate && !canPay && !canRelease && !canCancel ? (
+              {!canActivate && !canRelease && !canCancel ? (
                 <p className="rounded-xl border border-slate-100 bg-white px-4 py-3 text-xs leading-6 text-slate-500">
                   {t("detail.noDirectAction")}
                 </p>

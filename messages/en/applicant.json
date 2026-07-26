@@ -82,9 +82,9 @@
     "noRequests": ""
   },
   "contact": {
-    "ariaLabel": "",
-    "call": "",
-    "chat": ""
+    "ariaLabel": "Contact applicant",
+    "call": "Call",
+    "chat": "Chat with applicant"
   },
   "requestsList": {
     "title": "",

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-/** Tailwind default breakpoints (min-width), largest first. */
+/** Tailwind breakpoints (min-width), largest first — includes project `3xl`. */
 const BREAKPOINTS = [
+  { name: "3xl", min: 1920 },
   { name: "2xl", min: 1536 },
   { name: "xl", min: 1280 },
   { name: "lg", min: 1024 },

@@ -10,7 +10,7 @@
   "newInventory": "",
   "shopSettings": "",
   "customerOrders": "",
-  "incomingToMyProducts": "",
+  "incomingToMyProducts": "Buyer requests for your products",
   "admin": {
     "managementDashboard": "Admin dashboard",
     "overview": "Admin overview",

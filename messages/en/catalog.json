@@ -26,8 +26,14 @@
   "comparePrice": "Price",
   "compareStock": "Stock",
   "compareMinOrder": "Min. order",
-  "sendMessage": "Chat on Zareoon",
-  "supplierChatHint": "Message this supplier through Zareoon built-in chat.",
+  "sendMessage": "Chat with this seller",
+  "chatWithSeller": "Chat with seller",
+  "viewSellerPage": "Seller page",
+  "sellerSectionTitle": "Seller",
+  "supplierChatHint": "Message this seller through Zareoon built-in chat.",
+  "commercialPage": "Business page",
+  "viewCommercialPage": "View business page",
+  "commercialPageSlugLabel": "Business page URL",
   "youHaveInCart": "You already have {quantity} {unit} of this product in your cart.",
   "viewCart": "View cart",
   "viewGallery": "",
@@ -282,9 +288,6 @@
     "category-navigation-only": ""
   },
   "legalReviewRecommended": "",
-  "commercialPage": "Business page",
-  "viewCommercialPage": "View business page",
-  "commercialPageSlugLabel": "Business page URL",
   "cartProcessTitle": "From cart to completed order",
   "cartProcessSteps": "1) Enter the quantity and add it to your cart. 2) Review and edit items in the cart. 3) Submit the order so it reaches the supplier. 4) Track status and arrange delivery from your dashboard."
 }

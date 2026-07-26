@@ -93,6 +93,7 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
     depositPercent: "",
     customDepositAmount: "",
     milestonePreset: "on_delivery",
+    orderId: "",
   });
   const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -194,6 +195,10 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
     };
     if (form.holdMode === "percent") payload.depositPercent = Number(form.depositPercent);
     if (form.holdMode === "custom_amount") payload.depositAmount = Number(form.customDepositAmount);
+    const orderIdNum = Number(String(form.orderId).trim());
+    if (Number.isFinite(orderIdNum) && orderIdNum > 0) {
+      payload.orderId = orderIdNum;
+    }
 
     setSubmitting(true);
     try {
@@ -276,6 +281,21 @@ export default function EscrowCreateAgreementForm({ onCreated, onCancel }) {
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                   placeholder={t("form.dealTitlePlaceholder")}
                   className={inputClass}
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600">{t("form.orderId")}</span>
+                <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{t("form.orderIdHint")}</p>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.orderId}
+                  onChange={(e) => setForm((f) => ({ ...f, orderId: e.target.value }))}
+                  placeholder={t("form.orderIdPlaceholder")}
+                  className={inputClass}
+                  dir="ltr"
                 />
               </label>
 

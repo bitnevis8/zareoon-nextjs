@@ -16,6 +16,7 @@ import PageStatusBanner from "@/app/components/ui/PageStatusBanner";
 import { mergeBusinessHours } from "@/app/utils/businessHours";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
+import OpenChatButton from "@/app/components/messaging/OpenChatButton";
 
 function ReviewStars({ value, onChange, readonly }) {
   return (
@@ -340,10 +341,17 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
                 </div>
               ) : null}
             </dl>
+            {provider.userId && !isOwnerPreview ? (
+              <OpenChatButton
+                userId={provider.userId}
+                label={t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-700"
+              />
+            ) : null}
             {!panelOnly && provider.phone ? (
               <a
                 href={`tel:${provider.phone}`}
-                className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-700"
+                className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-sm font-bold text-emerald-900 hover:bg-emerald-100"
               >
                 {t("tradeProviderCall")}
               </a>
@@ -442,8 +450,20 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
             </div>
 
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {provider.userId && !isOwnerPreview ? (
+                <OpenChatButton
+                  userId={provider.userId}
+                  label={t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-700"
+                />
+              ) : null}
               {provider.phone ? (
-                <ContactButton href={`tel:${provider.phone}`} label={t("tradeProviderCall")} variant="primary" external />
+                <ContactButton
+                  href={`tel:${provider.phone}`}
+                  label={t("tradeProviderCall")}
+                  variant={provider.userId && !isOwnerPreview ? "secondary" : "primary"}
+                  external
+                />
               ) : null}
               {provider.email ? (
                 <ContactButton

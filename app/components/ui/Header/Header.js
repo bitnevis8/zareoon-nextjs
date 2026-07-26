@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -20,6 +20,8 @@ import BreakpointBadge from '../../BreakpointBadge';
 const headerIconBtnClass =
   'inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-emerald-700 hover:bg-gray-50 transition-colors';
 
+const AYAH_HOVER_DELAY_MS = 1000;
+
 function CartIcon() {
   return (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
@@ -37,8 +39,32 @@ export default function Header() {
   const showUser = isHydrated && !loading ? user : null;
   const layoutRtl = !isHydrated || isRTL;
   const [showHeaderSearch, setShowHeaderSearch] = useState(false);
+  const [ayahOpen, setAyahOpen] = useState(false);
+  const ayahTimerRef = useRef(null);
 
   const brandName = layoutRtl ? t('siteName') : 'Zareoon';
+
+  const clearAyahTimer = () => {
+    if (ayahTimerRef.current) {
+      clearTimeout(ayahTimerRef.current);
+      ayahTimerRef.current = null;
+    }
+  };
+
+  const openAyahAfterDelay = () => {
+    clearAyahTimer();
+    ayahTimerRef.current = setTimeout(() => {
+      setAyahOpen(true);
+      ayahTimerRef.current = null;
+    }, AYAH_HOVER_DELAY_MS);
+  };
+
+  const closeAyah = () => {
+    clearAyahTimer();
+    setAyahOpen(false);
+  };
+
+  useEffect(() => () => clearAyahTimer(), []);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -119,9 +145,9 @@ export default function Header() {
     <Image
       src="/images/logo.png"
       alt={brandName}
-      width={53}
-      height={53}
-      className="h-[3.3rem] w-[3.3rem] shrink-0 rounded object-contain"
+      width={64}
+      height={64}
+      className="h-10 w-10 shrink-0 rounded object-contain sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-[3.25rem] lg:w-[3.25rem] xl:h-14 xl:w-14 2xl:h-[3.75rem] 2xl:w-[3.75rem] 3xl:h-16 3xl:w-16"
       priority
     />
   );
@@ -131,72 +157,84 @@ export default function Header() {
   const ayahIsArabicScript = language === 'ar';
   const ayahDir = ayahIsArabicScript || isRTL ? 'rtl' : 'ltr';
 
-  const ayahTooltip = (
+  const ayahTooltip = isHydrated ? (
     <div
-      className={`pointer-events-none absolute top-full z-[10000] mt-2 w-max max-w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-emerald-100/90 bg-white/95 px-3.5 py-2.5 text-center shadow-lg shadow-slate-900/10 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-200 ease-out ${
-        layoutRtl ? 'end-0 origin-top-right' : 'start-0 origin-top-left'
-      } scale-95 opacity-0 translate-y-1 group-hover/brand:scale-100 group-hover/brand:opacity-100 group-hover/brand:translate-y-0 group-focus-within/brand:scale-100 group-focus-within/brand:opacity-100 group-focus-within/brand:translate-y-0`}
+      id="header-ayah-tooltip"
+      className={`pointer-events-none absolute top-full z-[10050] mt-2 w-[min(22rem,calc(100vw-1.5rem))] rounded-xl border border-emerald-100 bg-white px-3.5 py-3 text-start shadow-lg shadow-slate-900/10 ring-1 ring-slate-900/5 transition-[opacity,transform] duration-200 ease-out ${
+        layoutRtl ? 'end-0' : 'start-0'
+      } ${
+        ayahOpen
+          ? 'translate-y-0 opacity-100'
+          : 'pointer-events-none -translate-y-1 opacity-0'
+      }`}
       role="tooltip"
+      aria-hidden={!ayahOpen}
     >
       <p
-        className={`text-[12px] font-medium leading-6 text-slate-700 sm:text-[13px] ${
-          ayahIsArabicScript ? 'font-quran text-[14px] leading-7 sm:text-[15px]' : ''
+        className={`whitespace-normal break-words text-[13px] font-medium leading-7 text-slate-800 sm:text-[14px] sm:leading-7 ${
+          ayahIsArabicScript ? 'font-quran text-[15px] leading-8 text-slate-900 sm:text-[16px]' : ''
         }`}
         dir={ayahDir}
         lang={language || undefined}
       >
         {ayahText}
       </p>
-      <p className="mt-1 font-sans text-[10px] font-normal tracking-normal text-slate-400 sm:text-[11px]" dir={ayahDir}>
+      <p
+        className="mt-1.5 font-sans text-[11px] font-normal tracking-normal text-slate-500 sm:text-[12px]"
+        dir={ayahDir}
+      >
         {ayahRef}
       </p>
-      <span
-        className={`absolute -top-1.5 h-3 w-3 rotate-45 border-s border-t border-emerald-100/90 bg-white ${
-          layoutRtl ? 'end-5' : 'start-5'
-        }`}
-        aria-hidden
-      />
     </div>
-  );
+  ) : null;
 
   const titleBlock = (
-    <div className={`group/brand relative min-w-0 leading-tight ${layoutRtl ? 'text-right' : 'text-left'}`}>
+    <div
+      className={`relative min-w-0 leading-tight ${layoutRtl ? 'text-right' : 'text-left'}`}
+      onMouseEnter={openAyahAfterDelay}
+      onMouseLeave={closeAyah}
+      onFocus={openAyahAfterDelay}
+      onBlur={closeAyah}
+    >
       <Link
         href="/"
-        className="block min-w-0 rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400/50"
+        className="group/brand block min-w-0 rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400/50"
         prefetch={true}
-        aria-describedby="header-ayah-tooltip"
+        aria-describedby={isHydrated ? 'header-ayah-tooltip' : undefined}
       >
-        <div className={`flex items-baseline gap-1.5 ${layoutRtl ? 'flex-row-reverse justify-end' : 'flex-row'}`}>
-          <h1 className="shrink-0 whitespace-nowrap text-lg font-bold text-slate-800 transition-colors group-hover/brand:text-emerald-800 sm:text-2xl">
+        <div
+          className={`flex items-baseline gap-1 sm:gap-1.5 md:gap-2 ${
+            layoutRtl ? 'flex-row-reverse justify-start' : 'flex-row'
+          }`}
+        >
+          <h1 className="shrink-0 whitespace-nowrap text-base font-bold tracking-tight text-slate-800 transition-colors group-hover/brand:text-emerald-800 sm:text-lg md:text-xl lg:text-2xl xl:text-[1.65rem] 2xl:text-3xl 3xl:text-[2rem]">
             {brandName}
           </h1>
-          <BreakpointBadge className="text-[10px] leading-none sm:text-xs" />
+          <BreakpointBadge className="text-[9px] leading-none sm:text-[10px] md:text-xs" />
         </div>
-        <div className="mt-0.5 hidden md:block">
-          <p className="whitespace-nowrap text-[11px] font-medium leading-snug text-slate-600 sm:text-xs">
+        <div className="mt-0.5 hidden min-w-0 sm:mt-1 sm:block md:mt-1.5">
+          <p className="max-w-[11rem] truncate text-[10px] font-medium leading-snug text-slate-600 sm:max-w-[14rem] sm:text-[11px] md:max-w-none md:whitespace-nowrap md:text-xs lg:text-[13px] xl:text-sm 2xl:text-[15px] 3xl:text-base">
             {t('siteTagline')}
           </p>
         </div>
       </Link>
-      <div id="header-ayah-tooltip">{ayahTooltip}</div>
+      {ayahTooltip}
     </div>
   );
 
-  // RTL (dir=ltr روی ردیف): لوگو راست‌ترین → سپس عنوان (چسبیده به لوگو)
-  // LTR: لوگو → عنوان — آیه فقط با هاور روی نام «زارعون»، نه روی لوگو
+  // فاصلهٔ ثابت و مقیاس‌پذیر بین لوگو و عنوان/زیرعنوان در همه بریک‌پوینت‌ها
   const brandBlock = (
-    <div className="flex min-w-0 shrink-0 flex-row items-center gap-0">
+    <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5 md:gap-3 lg:gap-3.5 xl:gap-4 2xl:gap-5 3xl:gap-6">
       {layoutRtl ? (
         <>
           {titleBlock}
-          <Link href="/" className="-ms-1 shrink-0 leading-none" prefetch={true} aria-label={brandName}>
+          <Link href="/" className="shrink-0 leading-none" prefetch={true} aria-label={brandName}>
             {logo}
           </Link>
         </>
       ) : (
         <>
-          <Link href="/" className="-me-1 shrink-0 leading-none" prefetch={true} aria-label={brandName}>
+          <Link href="/" className="shrink-0 leading-none" prefetch={true} aria-label={brandName}>
             {logo}
           </Link>
           {titleBlock}
@@ -247,14 +285,17 @@ export default function Header() {
   ).filter(Boolean);
 
   const actionsNav = (
-    <nav className="flex shrink-0 items-center gap-1.5 overflow-visible sm:gap-2" aria-label="Header actions">
+    <nav
+      className="flex shrink-0 items-center gap-1 overflow-visible sm:gap-1.5 md:gap-2 lg:gap-2.5 xl:gap-3"
+      aria-label="Header actions"
+    >
       {actionItems}
     </nav>
   );
 
   const headerCenter = (
-    <div className="hidden min-w-0 flex-1 self-stretch flex-col items-center justify-center px-3 lg:flex">
-      <div className="flex min-h-10 w-full max-w-xl shrink-0 items-center justify-center">
+    <div className="hidden min-w-0 flex-1 self-stretch flex-col items-center justify-center px-2 md:px-3 lg:flex xl:px-5 2xl:px-6 3xl:px-8">
+      <div className="flex min-h-9 w-full max-w-md shrink-0 items-center justify-center lg:min-h-10 xl:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl">
         {showHeaderSearch ? <QuickSearchBox variant="header" className="w-full" /> : null}
       </div>
     </div>
@@ -263,14 +304,14 @@ export default function Header() {
     <>
       <div
         id="site-header"
-        className="fixed inset-x-0 top-0 z-[9999] border-b border-slate-200 bg-white shadow-sm"
+        className="fixed inset-x-0 top-0 z-[9999] overflow-visible border-b border-slate-200 bg-white shadow-sm"
         suppressHydrationWarning
       >
         {showUser ? <SlugChangePendingBanner /> : null}
         <header className="overflow-visible">
           <div className="w-full overflow-visible border-b border-slate-100">
             <div
-              className="flex min-h-16 items-center justify-between gap-3 overflow-visible px-4 py-2 sm:px-6 lg:min-h-[5.5rem] lg:px-8"
+              className="flex min-h-14 items-center justify-between gap-2 overflow-visible px-3 py-1.5 sm:min-h-16 sm:gap-3 sm:px-4 sm:py-2 md:gap-4 md:px-5 lg:min-h-[4.75rem] lg:gap-5 lg:px-6 lg:py-2.5 xl:min-h-[5.25rem] xl:gap-6 xl:px-8 2xl:min-h-[5.75rem] 2xl:px-10 3xl:min-h-24 3xl:gap-8 3xl:px-12"
               dir="ltr"
               suppressHydrationWarning
             >

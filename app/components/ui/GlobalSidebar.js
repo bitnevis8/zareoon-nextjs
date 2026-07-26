@@ -58,7 +58,7 @@ export default function GlobalSidebar() {
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <Sidebar onLinkClick={closeSidebar} showMobileUserHeader />
         </div>
       </aside>

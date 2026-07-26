@@ -1,5 +1,6 @@
 import { getTradeServicesContent } from "@/app/data/tradeServicesCatalog";
 import { getLocalizedText } from "./localize";
+import { catalogProductPath } from "./catalogProductPath";
 
 function normalizeTerm(term) {
   return String(term || "")
@@ -91,7 +92,7 @@ export function searchServiceProviders(providers, query, language) {
 export function mapProductResults(products, language) {
   return (products || []).map((item) => ({
     key: `product-${item.id}`,
-    href: `/catalog/${item.id}`,
+    href: catalogProductPath(item),
     label: getLocalizedText(item, language),
     kind: item.isOrderable ? "product" : "category",
   }));

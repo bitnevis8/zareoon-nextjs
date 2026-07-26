@@ -44,8 +44,16 @@ export default function EscrowAgreementList() {
     setLoading(true);
     try {
       const res = await authFetch(API_ENDPOINTS.escrow.agreements, { cache: "no-store" });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.warn("escrow list:", json?.message || res.status);
+        setItems([]);
+        return;
+      }
       setItems(Array.isArray(json?.data) ? json.data : []);
+    } catch (err) {
+      console.warn("escrow list fetch failed:", err?.message || err);
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -138,14 +146,14 @@ export default function EscrowAgreementList() {
                         <span className="text-slate-500">{t("list.buyer")}</span>
                         <p className="mt-0.5 font-semibold text-slate-800">
                           {formatUserDisplayName(item.buyer, userFallback) ||
-                            userFallback.replace("{id}", String(item.buyerId))}
+                            `${userFallback} ${item.buyerId}`}
                         </p>
                       </div>
                       <div className="rounded-lg bg-slate-50 px-3 py-2">
                         <span className="text-slate-500">{t("list.seller")}</span>
                         <p className="mt-0.5 font-semibold text-slate-800">
                           {formatUserDisplayName(item.seller, userFallback) ||
-                            userFallback.replace("{id}", String(item.sellerId))}
+                            `${userFallback} ${item.sellerId}`}
                         </p>
                       </div>
                     </div>

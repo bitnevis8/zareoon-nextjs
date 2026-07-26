@@ -66,6 +66,7 @@ export function inventoryLotsUrl(params = {}) {
 const DEFAULT_PUBLIC_LOTS_PARAMS = {
   status: "harvested,reserved",
   lite: "1",
+  withSupplier: "1",
 };
 
 const LOTS_KEY = inventoryLotsUrl(DEFAULT_PUBLIC_LOTS_PARAMS);
@@ -76,6 +77,7 @@ export const HOMEPAGE_LOTS_PARAMS = {
   lite: "1",
   limit: "100",
   order: "updated_at",
+  withSupplier: "1",
 };
 
 function childrenKey(parentId) {

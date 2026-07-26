@@ -29,14 +29,12 @@ function ServicesNavItem({ href, label, active, onClick, icon, compact = false }
 
 /**
  * قبل از عضویت: فقط دکمه ثبت‌نام.
- * بعد از عضویت: منوی خدمات؛ حساب امانی زارعون پایین‌ترین لینک کاربر.
+ * بعد از عضویت: منوی خدمات.
  */
 export default function SidebarServicesSection({
   hasProvider,
   isActive,
   onLinkClick,
-  escrowHref,
-  escrowLabel,
   compact = false,
 }) {
   const t = useTranslations("layout.sidebar");
@@ -56,7 +54,7 @@ export default function SidebarServicesSection({
   }
 
   return (
-    <div className={`space-y-0.5 pt-1 ${compact ? "px-0" : "px-2"}`}>
+    <div className={`space-y-0.5 pt-1 ${compact ? "px-0" : "px-0"}`}>
       <ServicesNavItem
         href="/dashboard/service-provider-profile"
         label={t("servicePageSettings")}
@@ -82,19 +80,6 @@ export default function SidebarServicesSection({
         icon="inbox"
         compact={compact}
       />
-      {escrowHref && escrowLabel ? (
-        <>
-          {!compact ? <hr className="mx-1 my-2 border-slate-200" /> : <div className="my-1" />}
-          <ServicesNavItem
-            href={escrowHref}
-            label={escrowLabel}
-            active={isActive(escrowHref)}
-            onClick={onLinkClick}
-            icon="escrow"
-            compact={compact}
-          />
-        </>
-      ) : null}
     </div>
   );
 }

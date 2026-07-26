@@ -10,6 +10,7 @@ import { getLocalizedText, formatLocalizedNumber, localizeUnit } from "@/app/uti
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { sortCatalogItems } from "@/app/utils/productSort";
 import { getLotSupplierDisplayName } from "@/app/utils/catalogLotSupplier";
+import { catalogProductPath } from "@/app/utils/catalogProductPath";
 import {
   normalizeSearchFilter,
   parseSearchQuery,
@@ -56,7 +57,7 @@ function ListingExploreTile({ row, language, t, productById }) {
 
   return (
     <Link
-      href={`/catalog/${product.id}`}
+      href={catalogProductPath(product)}
       className="group relative block aspect-[4/5] overflow-hidden rounded-xl bg-slate-200 sm:aspect-square"
     >
       <Image
@@ -95,7 +96,7 @@ function TypeResultCard({ row, language, t, onNavigate, productById }) {
   return (
     <button
       type="button"
-      onClick={() => onNavigate(`/catalog/${product.id}`, isCategory ? `#${title}` : title)}
+      onClick={() => onNavigate(catalogProductPath(product), isCategory ? `#${title}` : title)}
       className="flex w-full items-center gap-3 rounded-xl border border-slate-100 bg-white px-3 py-2.5 text-start shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50/40"
     >
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-100">
@@ -135,7 +136,7 @@ function ListingResultCard({ row, language, t, onNavigate, productById }) {
   return (
     <button
       type="button"
-      onClick={() => onNavigate(`/catalog/${product.id}`, title)}
+      onClick={() => onNavigate(catalogProductPath(product), title)}
       className="overflow-hidden rounded-xl border border-slate-100 bg-white text-start shadow-sm transition active:scale-[0.99] hover:border-emerald-200"
     >
       <div className="relative aspect-[4/3] bg-slate-100">

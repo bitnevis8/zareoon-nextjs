@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ProductCardMedia from "../ui/ProductCardMedia";
-import SupplyCountryFlag from "../ui/SupplyCountryFlag";
 import { getLocalizedText, localizeUnit } from "../../utils/localize";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { catalogBadge, catalogSurface, catalogText } from "./catalogTheme";
@@ -37,165 +36,112 @@ export default function CatalogProductHero({
     });
   };
 
-  const desktopMeta = (
-    <div className="flex min-w-0 flex-1 flex-col justify-center space-y-4">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 className={`flex-1 text-2xl font-bold leading-snug xl:text-3xl ${catalogText.heading}`}>{title}</h1>
-          <SupplyCountryFlag
-            countryCode={item?.supplyCountry || "IR"}
-            city={item?.supplyCity || ""}
-            className="shrink-0"
-          />
-        </div>
-        {item?.slug ? <p className={`text-sm ${catalogText.subtle}`}>{item.slug}</p> : null}
-        {item?.isOrderable ? (
-          <span className={`inline-flex rounded-lg px-3 py-1.5 text-sm font-medium ${catalogBadge.success}`}>
-            {t("orderable")} • {localizeUnit(item?.unit || item?.defaultMeasurementUnit || "-", language)}
-          </span>
-        ) : (
-          <span className={`inline-flex rounded-lg px-3 py-1.5 text-sm font-medium ${catalogBadge.neutral}`}>
-            {t("nonOrderableCategoryRole")}
-          </span>
-        )}
-        {item?.listingPolicy && item.listingPolicy !== "category-navigation-only" ? (
-          <span className={`inline-flex rounded-lg px-3 py-1.5 text-xs font-medium ${catalogBadge.neutral}`}>
-            {(() => {
-              try {
-                return t(`listingPolicies.${item.listingPolicy}`);
-              } catch {
-                return item.listingPolicy;
-              }
-            })()}
-          </span>
-        ) : null}
-      </div>
+  const unitLabel = localizeUnit(item?.unit || item?.defaultMeasurementUnit || "-", language);
+  const orderableBadge = item?.isOrderable ? (
+    <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${catalogBadge.success}`}>
+      {t("orderable")} · {unitLabel}
+    </span>
+  ) : (
+    <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${catalogBadge.neutral}`}>
+      {t("nonOrderableCategoryRole")}
+    </span>
+  );
 
-      {cartTotalQty > 0 ? (
-        <div className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm ${catalogBadge.warning}`}>
-          <span className="leading-snug">
-            {t("youHaveInCart", {
-              quantity: cartTotalQty.toFixed(3),
-              unit: localizeUnit(cartUnit || "", language),
-            })}
-          </span>
-          <Link href="/cart" className={`shrink-0 font-semibold underline underline-offset-2 ${catalogText.accentStrong}`}>
-            {t("viewCart")}
-          </Link>
-        </div>
-      ) : null}
+  const listingBadge =
+    item?.listingPolicy && item.listingPolicy !== "category-navigation-only" ? (
+      <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-medium ${catalogBadge.info}`}>
+        {(() => {
+          try {
+            return t(`listingPolicies.${item.listingPolicy}`);
+          } catch {
+            return item.listingPolicy;
+          }
+        })()}
+      </span>
+    ) : null;
+
+  const cartNotice =
+    cartTotalQty > 0 ? (
+      <div
+        className={`flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-sm ${catalogBadge.warning}`}
+      >
+        <span className="leading-snug">
+          {t("youHaveInCart", {
+            quantity: cartTotalQty.toFixed(3),
+            unit: localizeUnit(cartUnit || "", language),
+          })}
+        </span>
+        <Link href="/cart" className={`shrink-0 font-semibold underline underline-offset-2 ${catalogText.accentStrong}`}>
+          {t("viewCart")}
+        </Link>
+      </div>
+    ) : null;
+
+  const titleBlock = (
+    <div className="space-y-3">
+      <h1 className={`text-xl font-bold leading-snug tracking-tight sm:text-2xl ${catalogText.heading}`}>{title}</h1>
+      <div className="flex flex-wrap items-center gap-2">
+        {orderableBadge}
+        {listingBadge}
+      </div>
+      {cartNotice}
     </div>
   );
 
+  if (hideAllMedia) {
+    return <section className={`${catalogSurface.card} px-4 py-4 sm:px-5 sm:py-5`}>{titleBlock}</section>;
+  }
+
   return (
     <>
-      {hideAllMedia ? (
-        <section className={`overflow-hidden ${catalogSurface.card} px-4 py-4 sm:px-5`}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0 flex-1 space-y-2">
-              <h1 className={`text-xl font-bold leading-snug sm:text-2xl ${catalogText.heading}`}>{title}</h1>
-              {item?.isOrderable ? (
-                <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-medium ${catalogBadge.success}`}>
-                  {t("orderable")} • {localizeUnit(item?.unit || item?.defaultMeasurementUnit || "-", language)}
-                </span>
-              ) : (
-                <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-medium ${catalogBadge.neutral}`}>
-                  {t("nonOrderableCategoryRole")}
-                </span>
-              )}
-            </div>
-            <SupplyCountryFlag
-              countryCode={item?.supplyCountry || "IR"}
-              city={item?.supplyCity || ""}
-              className="shrink-0"
-            />
-          </div>
-        </section>
-      ) : null}
-
-      {!hideAllMedia ? (
-        <section className="lg:hidden -mx-3 overflow-hidden border-y border-slate-200 bg-white">
+      {/* موبایل: تصویر تمام‌عرض، عنوان زیر آن */}
+      <section className="space-y-3 lg:hidden">
+        <div className="-mx-3 overflow-hidden border-y border-slate-200 bg-slate-100 sm:mx-0 sm:rounded-2xl sm:border">
           <CatalogMediaSlider
             slides={slides}
-            aspectClass="aspect-[5/4]"
+            aspectClass="aspect-[4/3]"
             onSlideTap={openAt}
             expandAriaLabel={t("viewGallery")}
-            cornerTopStart={
-              <SupplyCountryFlag
-                countryCode={item?.supplyCountry || "IR"}
-                city={item?.supplyCity || ""}
-                className="shadow-lg"
-              />
-            }
-            cornerBottomEnd={
-              <div>
-                <h1 className="text-base font-bold leading-tight text-white drop-shadow-sm sm:text-lg">{title}</h1>
-              </div>
-            }
           />
+        </div>
+        <div className="px-0.5">{titleBlock}</div>
+      </section>
 
-          {cartTotalQty > 0 ? (
-            <div className={`mx-3 mt-3 flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm ${catalogBadge.warning}`}>
-              <span className="leading-snug">
-                {t("youHaveInCart", {
-                  quantity: cartTotalQty.toFixed(3),
-                  unit: localizeUnit(cartUnit || "", language),
-                })}
-              </span>
-              <Link href="/cart" className={`shrink-0 font-semibold underline underline-offset-2 ${catalogText.accentStrong}`}>
-                {t("viewCart")}
-              </Link>
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-
-      {!hideAllMedia ? (
-        <section className={`hidden overflow-hidden lg:block ${catalogSurface.card}`}>
-          <div className="grid grid-cols-1 items-stretch gap-0 lg:grid-cols-[minmax(280px,360px)_1fr]">
-            <div className="relative min-h-[280px] overflow-hidden bg-slate-900 lg:min-h-[320px]">
-              {slides.length > 0 ? (
-                <CatalogMediaSlider
-                  slides={slides}
-                  aspectClass="aspect-[4/3] lg:aspect-auto lg:h-full lg:min-h-[320px]"
-                  onSlideTap={openAt}
-                  expandAriaLabel={t("viewGallery")}
-                  expandAtBottom
-                  className="h-full"
-                  cornerTopBar={
-                    <div className="flex items-start justify-end gap-2 text-right">
-                      <h1 className="min-w-0 flex-1 text-lg font-bold leading-tight text-white">{title}</h1>
-                      <SupplyCountryFlag
-                        countryCode={item?.supplyCountry || "IR"}
-                        city={item?.supplyCity || ""}
-                        className="shrink-0 shadow-lg"
-                      />
-                    </div>
-                  }
+      {/* دسکتاپ: تصویر + متن کنار هم */}
+      <section className={`hidden overflow-hidden lg:block ${catalogSurface.card}`}>
+        <div className="grid grid-cols-[minmax(280px,40%)_1fr] items-stretch">
+          <div className="relative min-h-[300px] overflow-hidden bg-slate-100">
+            {slides.length > 0 ? (
+              <CatalogMediaSlider
+                slides={slides}
+                aspectClass="aspect-[4/3] lg:aspect-auto lg:h-full lg:min-h-[300px]"
+                onSlideTap={openAt}
+                expandAriaLabel={t("viewGallery")}
+                expandAtBottom
+                className="h-full"
+              />
+            ) : (
+              <button
+                type="button"
+                className="block h-full w-full min-h-[300px]"
+                onClick={() => openAt(0)}
+                aria-label={t("viewGallery")}
+              >
+                <ProductCardMedia
+                  product={item}
+                  alt={title}
+                  width={420}
+                  height={320}
+                  className="h-full w-full object-cover"
+                  figureClassName="h-full min-h-[300px]"
+                  showFlag={false}
                 />
-              ) : (
-                <button
-                  type="button"
-                  className="block h-full w-full min-h-[320px]"
-                  onClick={() => openAt(0)}
-                  aria-label={t("viewGallery")}
-                >
-                  <ProductCardMedia
-                    product={item}
-                    alt={title}
-                    width={360}
-                    height={320}
-                    className="h-full w-full object-cover"
-                    figureClassName="h-full min-h-[320px]"
-                    showFlag={false}
-                  />
-                </button>
-              )}
-            </div>
-            <div className="flex border-t border-slate-100 p-6 lg:border-t-0 lg:border-e lg:border-slate-100">{desktopMeta}</div>
+              </button>
+            )}
           </div>
-        </section>
-      ) : null}
+          <div className="flex flex-col justify-center border-s border-slate-100 p-6 xl:p-8">{titleBlock}</div>
+        </div>
+      </section>
     </>
   );
 }

@@ -96,9 +96,11 @@
       "bodyDefault": ""
     },
     "awaiting_payment": {
-      "title": "",
-      "bodyBuyer": "",
-      "bodyDefault": ""
+      "title": "Awaiting escrow deposit",
+      "bodyBuyer": "You can pay all or part of the deposit via online payment (IRR). Funds stay with Zareoon until release; Zareoon does not guarantee the deal.",
+      "bodySeller": "Wait for the buyer to deposit. After funding, delivery and release steps unlock.",
+      "bodyAdmin": "The buyer can pay via the payment gateway; for non-IRR deals, manual admin confirmation is available.",
+      "bodyDefault": "The buyer must deposit the escrow amount."
     },
     "funds_locked": {
       "title": "",
@@ -141,12 +143,12 @@
       "variant": ""
     },
     "confirmPaymentDemo": {
-      "title": "",
-      "shortLabel": "",
-      "description": "",
-      "who": "",
-      "variant": "",
-      "badge": ""
+      "title": "Admin manual confirmation",
+      "shortLabel": "Admin confirm",
+      "description": "For non-IRR cases or off-gateway coordination. Normally the buyer pays via online payment.",
+      "who": "Admin",
+      "variant": "demo",
+      "badge": "Admin"
     },
     "requestRelease": {
       "title": "",
@@ -192,14 +194,20 @@
     "released": ""
   },
   "search": {
-    "placeholder": "",
-    "clearAria": "",
-    "minChars": "",
-    "searching": "",
-    "hint": "",
-    "noResults": "",
-    "buyerHint": "",
-    "sellerHint": ""
+    "placeholder": "National ID, mobile, or username…",
+    "clearAria": "Clear selection",
+    "minChars": "Enter at least {count} characters to search",
+    "searching": "Searching…",
+    "hint": "Search by national ID, mobile, or username",
+    "noResults": "No users found",
+    "buyerHint": "Search by national ID, mobile, or username",
+    "sellerHint": "Search by national ID, mobile, or username",
+    "previewTitle": "Counterparty details",
+    "previewFirstName": "First name",
+    "previewLastName": "Last name",
+    "previewUsername": "Username",
+    "previewMobile": "Mobile",
+    "previewNationalId": "National ID"
   },
   "form": {
     "createTitle": "",
@@ -210,12 +218,15 @@
     "buyer": "",
     "seller": "",
     "partySelfNote": "",
-    "dealDetails": "",
-    "dealTitle": "",
-    "dealTitlePlaceholder": "",
-    "totalAmount": "",
-    "description": "",
-    "descriptionPlaceholder": "",
+    "dealDetails": "Deal details",
+    "dealTitle": "Deal title",
+    "dealTitlePlaceholder": "e.g. 10 tons export saffron",
+    "orderId": "Order ID (optional)",
+    "orderIdHint": "If linking to a reserved order, enter its ID so escrow payment is tied to that order.",
+    "orderIdPlaceholder": "e.g. 1234",
+    "totalAmount": "Total amount ({currency})",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Delivery terms, packaging, schedule…",
     "holdSectionTitle": "",
     "holdSectionHint": "",
     "holdModes": {

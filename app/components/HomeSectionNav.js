@@ -6,6 +6,7 @@ import { useLanguage } from "@/app/context/LanguageContext";
 
 const LABELS = {
   fa: {
+    whatIsZareoon: "زارعون چیست؟",
     productCategories: "دسته‌بندی",
     latestAvailable: "محصولات موجود",
     buyerRequest: "درخواست خرید",
@@ -16,6 +17,7 @@ const LABELS = {
     aria: "پرشی به بخش‌های صفحه اصلی",
   },
   en: {
+    whatIsZareoon: "What is Zareoon?",
     productCategories: "Categories",
     latestAvailable: "Latest products",
     buyerRequest: "Buyer request",
@@ -26,6 +28,7 @@ const LABELS = {
     aria: "Jump to homepage sections",
   },
   ar: {
+    whatIsZareoon: "ما هو زارعون؟",
     productCategories: "التصنيفات",
     latestAvailable: "أحدث المنتجات",
     buyerRequest: "طلب شراء",
@@ -123,7 +126,20 @@ function HelpIcon({ active }) {
   );
 }
 
+function InfoIcon({ active }) {
+  return (
+    <svg className={iconClass(active)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+      />
+    </svg>
+  );
+}
+
 const SECTIONS = [
+  { id: "what-is-zareoon", labelKey: "whatIsZareoon", Icon: InfoIcon },
   { id: "product-categories", labelKey: "productCategories", Icon: CategoriesIcon },
   { id: "latest-available", labelKey: "latestAvailable", Icon: ProductsIcon },
   { id: "buyer-request", labelKey: "buyerRequest", Icon: RequestIcon },

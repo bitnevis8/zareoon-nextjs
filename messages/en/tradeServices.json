@@ -1,9 +1,9 @@
 {
   "eyebrow": "Trade service provider network",
-  "title": "Trade & international business services",
-  "subtitle": "Find companies and specialists in inspection, logistics, customs, finance, and more — or join yourself.",
+  "title": "Domestic & international trade services",
+  "subtitle": "Looking for companies and specialists in trade services? Find them here with ease. If you offer a service yourself, join, select what you can provide, and let buyers discover you and get in touch.",
   "providerHint": "Companies and specialists in each field — contact info, licenses, track record, and ratings.",
-  "providerRegisterNote": "Introduce your services, find new clients, and show up in the international trade network with a dedicated profile.",
+  "providerRegisterNote": "Introduce your services, find new clients, and show up in the domestic and international trade network with a dedicated profile.",
   "categories": [
     {
       "id": "inspection-standards",
@@ -168,8 +168,8 @@
     {
       "id": "intl-finance",
       "icon": "intl-finance",
-      "title": "International trade finance",
-      "description": "Trade finance, LC, guarantees, FX, and payment solutions for cross-border deals.",
+      "title": "Trade finance & payments",
+      "description": "Letters of credit (LC) for domestic and international deals, FX transfers, commercial payments, trade finance, and currency services.",
       "children": [
         {
           "id": "letter-of-credit",

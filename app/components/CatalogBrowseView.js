@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -11,6 +11,7 @@ import MainCategoryGrid from "./MainCategoryGrid";
 import CatalogPdfDownload from "./catalog/CatalogPdfDownload";
 import { sortCatalogItems } from "../utils/productSort";
 import { getProductStockClass } from "../utils/stockUtils";
+import { catalogProductPath } from "../utils/catalogProductPath";
 
 export default function CatalogBrowseView() {
   const { t, language, isRTL } = useLanguage();
@@ -110,7 +111,7 @@ export default function CatalogBrowseView() {
                 searchResults.map((item) => (
                   <Link
                     key={item.id}
-                    href={`/catalog/${item.id}`}
+                    href={catalogProductPath(item)}
                     className={`flex items-center justify-between px-4 py-2 hover:bg-slate-50 ${getProductStockClass(item, allProducts, inventoryLots)}`}
                   >
                     <div className="text-sm font-medium text-slate-800">{getLocalizedText(item, language)}</div>

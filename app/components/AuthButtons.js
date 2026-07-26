@@ -7,11 +7,13 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import UserProfileMenu from "./UserProfileMenu";
 import { resolveMediaUrl } from "../utils/mediaUrl";
+import { useWorkspace } from "@/app/context/WorkspaceContext";
+import { VerificationLevelBadge } from "@/app/components/verification/VerificationLevelIcon";
 
 const defaultIconBtnClass =
   "inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors";
 
-const MENU_WIDTH = 272;
+const MENU_WIDTH = 300;
 const MENU_GAP = 8;
 const VIEWPORT_PAD = 8;
 
@@ -39,12 +41,14 @@ function AvatarCircle({ src, alt, size = "sm", fallback }) {
 
 export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
   const { user, loading, logout } = useAuth();
+  const { data: wsData } = useWorkspace();
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState(null);
   const rootRef = useRef(null);
   const btnRef = useRef(null);
   const menuRef = useRef(null);
   const { t, isRTL, isHydrated } = useLanguage();
+  const personVer = wsData?.verification?.person;
 
   const updateMenuPosition = useCallback(() => {
     const btn = btnRef.current;
@@ -128,26 +132,35 @@ export default function AuthButtons({ iconButtonClass = defaultIconBtnClass }) {
           ref={btnRef}
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className={`${iconButtonClass} overflow-hidden !p-0`}
+          className={`${iconButtonClass} relative overflow-visible !p-0`}
           aria-label={t("account")}
           title={displayName || t("account")}
           aria-expanded={open}
           aria-haspopup="menu"
         >
-          {user.avatar ? (
-            <Image
-              src={resolveMediaUrl(user.avatar)}
-              alt={displayName || ""}
-              width={40}
-              height={40}
-              className="h-full w-full object-cover"
-              unoptimized
-            />
-          ) : (
-            <span className="inline-flex h-full w-full items-center justify-center bg-emerald-50 text-sm font-bold text-emerald-800">
-              {initial}
-            </span>
-          )}
+          <span className="relative block h-full w-full overflow-hidden rounded-[inherit]">
+            {user.avatar ? (
+              <Image
+                src={resolveMediaUrl(user.avatar)}
+                alt={displayName || ""}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="inline-flex h-full w-full items-center justify-center bg-emerald-50 text-sm font-bold text-emerald-800">
+                {initial}
+              </span>
+            )}
+          </span>
+          <VerificationLevelBadge
+            kind="person"
+            level={personVer?.overall === "verified" ? personVer?.level : "none"}
+            status={personVer?.overall || "none"}
+            size="sm"
+            className="absolute -bottom-1 -end-1 z-10"
+          />
         </button>
 
         {open ? (

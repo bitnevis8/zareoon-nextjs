@@ -4,6 +4,7 @@ import Link from "next/link";
 import ProductImage from "./ui/ProductImage";
 import { getLocalizedText } from "../utils/localize";
 import { getMainCategoryIcon, hasCategoryImage, isMainRootCategory } from "../utils/mainCategoryIcons";
+import { catalogProductPath } from "../utils/catalogProductPath";
 
 function SubcategoryIcon() {
   return (
@@ -40,7 +41,7 @@ export default function CategoryTile({
 
   return (
     <Link
-      href={href || `/catalog/${item.id}`}
+      href={href || catalogProductPath(item)}
       className={`group flex min-h-[7.5rem] flex-col items-center rounded-xl border border-emerald-100/90 bg-white p-2.5 shadow-[0_4px_18px_-10px_rgba(15,23,42,0.28)] transition-all active:scale-[0.98] sm:min-h-0 sm:rounded-2xl sm:p-3 md:p-4 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_10px_28px_-12px_rgba(16,185,129,0.35)] ${stockClass}`}
     >
       <div

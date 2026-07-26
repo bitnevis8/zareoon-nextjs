@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 
-export function proxy() {
+export function proxy(request) {
+  const pathname = request?.nextUrl?.pathname || "";
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    (pathname.startsWith("/test-") || pathname.startsWith("/test/"))
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const response = NextResponse.next();
 
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");

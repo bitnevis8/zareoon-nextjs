@@ -13,7 +13,9 @@ import SupplierActiveProductsRail from "./SupplierActiveProductsRail";
 import PublicHoursAndMap from "@/app/components/ui/PublicHoursAndMap";
 import PageStatusBanner from "@/app/components/ui/PageStatusBanner";
 import ShopPublicContacts from "@/app/components/ui/ShopPublicContacts";
+import OpenChatButton from "@/app/components/messaging/OpenChatButton";
 import { mergeBusinessHours } from "@/app/utils/businessHours";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 function Stars({ value, onChange, readonly, size = "md" }) {
   const sizeClass = size === "lg" ? "text-2xl sm:text-3xl" : size === "sm" ? "text-base" : "text-xl";
@@ -64,6 +66,7 @@ function ProfileFieldsSection({ profile }) {
 
 export default function SupplierProfileClient({ slug, embedded = false, panelOnly = false, panelSection = "shop" }) {
   const t = useTranslations("supplier");
+  const { t: tSite } = useLanguage();
   const auth = useAuth();
   const router = useRouter();
   const [data, setData] = useState(null);
@@ -327,6 +330,7 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
               showInternalChat={!isOwner}
               profileSlug={profile.profileSlug}
               displayName={profile.displayName}
+              chatLabel={tSite("chatWithShop") || "گفتگو با این فروشگاه"}
             />
             {panelOnly && String(profile.bio || "").trim() ? (
               <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -415,16 +419,11 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
                     {isFollowing ? t("profile.following") : t("profile.follow")}
                   </button>
                   {profile?.id ? (
-                    <Link
-                      href={
-                        auth?.user
-                          ? `/dashboard/messages?u=${profile.id}`
-                          : `/auth/login?next=${encodeURIComponent(`/dashboard/messages?u=${profile.id}`)}`
-                      }
-                      className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                    >
-                      {t("profile.message")}
-                    </Link>
+                    <OpenChatButton
+                      userId={profile.id}
+                      label={tSite("chatWithShop") || t("profile.message")}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    />
                   ) : null}
                 </>
               )}

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState, useRef, use as usePromise } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useCallback } from "react";
@@ -13,6 +14,7 @@ import CatalogChildrenGrid, { isFinalCatalogCategory } from "@/app/components/Ca
 import LatestAvailableProductsSection from "@/app/components/LatestAvailableProductsSection";
 import CatalogProductHero from "@/app/components/catalog/CatalogProductHero";
 import CatalogProductDescription from "@/app/components/catalog/CatalogProductDescription";
+import CatalogProductSellerActions from "@/app/components/catalog/CatalogProductSellerActions";
 import CatalogGradeOffers from "@/app/components/catalog/CatalogGradeOffers";
 import CatalogTradeCompliance from "@/app/components/catalog/CatalogTradeCompliance";
 import { buildLotGalleryItems } from "@/app/utils/catalogGradeMedia";
@@ -24,6 +26,7 @@ import { sortCatalogItems } from "@/app/utils/productSort";
 import { authFetch } from "@/app/utils/authHeaders";
 import { isAdmin } from "@/app/utils/roles";
 import { useNavigationLoading } from "@/app/context/NavigationLoadingContext";
+import { catalogProductPath, isNumericCatalogParam } from "@/app/utils/catalogProductPath";
 import {
   useCatalogChildren,
   useCatalogProduct,
@@ -35,6 +38,7 @@ import {
 
 export default function CatalogItemPage({ params }) {
   const { id } = usePromise(params);
+  const router = useRouter();
   const auth = useAuth();
   const { language, isRTL } = useLanguage();
   const t = useTranslations("catalog");
@@ -45,8 +49,14 @@ export default function CatalogItemPage({ params }) {
 
   // Homepage warms these SWR keys — open category without waiting for the full tree.
   const { product: item } = useCatalogProduct(id);
+  const productIdNum = item?.id != null
+    ? Number(item.id)
+    : isNumericCatalogParam(id)
+      ? Number(id)
+      : null;
+
   const { children: rawChildren, loading: childrenLoading, hasCache: childrenCached } =
-    useCatalogChildren(id);
+    useCatalogChildren(productIdNum, { enabled: productIdNum != null });
   const { products: allProducts, loading: catalogLoading } = useFullCatalog({
     enabled: Boolean(item),
   });
@@ -82,7 +92,19 @@ export default function CatalogItemPage({ params }) {
   const [cartTotalQty, setCartTotalQty] = useState(0);
   const [cartUnit, setCartUnit] = useState("");
 
+  // آدرس عددی → اسلاگ
+  useEffect(() => {
+    if (!item?.slug) return;
+    const slug = String(item.slug).trim();
+    if (!slug || /^\d+$/.test(slug)) return;
+    const current = decodeURIComponent(String(id || ""));
+    if (current !== slug) {
+      router.replace(catalogProductPath(item), { scroll: false });
+    }
+  }, [item, id, router]);
+
   const fetchCart = useCallback(async () => {
+    if (productIdNum == null) return;
     try {
       const r = await authFetch(`${API_ENDPOINTS.farmer.cart.base}/me`, { cache: "no-store" });
       const j = await r.json();
@@ -90,7 +112,7 @@ export default function CatalogItemPage({ params }) {
       let sum = 0;
       let unit = cartUnit;
       for (const it of items) {
-        if (Number(it.productId) === Number(id)) {
+        if (Number(it.productId) === productIdNum) {
           const q = parseFloat(it.quantity || 0);
           if (Number.isFinite(q)) sum += q;
           if (!unit && it.unit) unit = it.unit;
@@ -99,7 +121,7 @@ export default function CatalogItemPage({ params }) {
       setCartTotalQty(sum);
       setCartUnit(unit || item?.unit || "");
     } catch {}
-  }, [id, cartUnit, item?.unit]);
+  }, [productIdNum, cartUnit, item?.unit]);
 
   const loadLotMediaCounts = useCallback(async (lotId) => {
     try {
@@ -133,7 +155,7 @@ export default function CatalogItemPage({ params }) {
 
   useEffect(() => {
     fetchCart();
-  }, [id, fetchCart]);
+  }, [productIdNum, fetchCart]);
 
   useEffect(() => {
     if (!children.length) return;
@@ -162,12 +184,15 @@ export default function CatalogItemPage({ params }) {
 
   const breadcrumbPath = useMemo(() => buildCatalogPath(item, productById), [item, productById]);
 
-  const productIdNum = Number(id);
   const lots = inventoryLots;
   const productLots = useMemo(
-    () => (lots || []).filter((l) => l.productId === productIdNum),
+    () => (productIdNum == null ? [] : (lots || []).filter((l) => Number(l.productId) === productIdNum)),
     [lots, productIdNum]
   );
+  const primarySellerLot = useMemo(() => {
+    if (!productLots.length) return null;
+    return productLots.find((l) => l.supplier?.id || l.farmer?.id) || productLots[0] || null;
+  }, [productLots]);
   const summary = useMemo(() => {
     let total = 0;
     let reserved = 0;
@@ -318,9 +343,10 @@ export default function CatalogItemPage({ params }) {
   }
 
   const stockExtrasLoading = (catalogLoading || lotsLoading) && !allProducts.length;
+  const productSharePath = catalogProductPath(item);
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-5 overflow-x-hidden px-3 py-3 pb-24 sm:space-y-6 sm:px-6 sm:py-4 sm:pb-6">
+    <main className="mx-auto w-full max-w-5xl space-y-5 overflow-x-hidden px-3 py-4 pb-24 sm:space-y-6 sm:px-6 sm:py-6 sm:pb-8">
       <CartStatusBanner />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
@@ -328,7 +354,7 @@ export default function CatalogItemPage({ params }) {
           <div className="flex shrink-0 flex-wrap items-center gap-2 self-start sm:self-center">
             <ShareButton
               variant="button"
-              url={`/catalog/${productIdNum || id}`}
+              url={productSharePath}
               title={getLocalizedText(item, language) || t("product")}
             />
             <CatalogPdfDownload
@@ -356,6 +382,8 @@ export default function CatalogItemPage({ params }) {
         cartUnit={cartUnit}
         hideMedia={productLots.length > 0}
       />
+
+      {primarySellerLot ? <CatalogProductSellerActions lot={primarySellerLot} /> : null}
 
       {productLots.length > 0 && (
         <CatalogGradeOffers

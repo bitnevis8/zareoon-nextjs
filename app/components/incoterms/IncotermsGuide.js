@@ -510,8 +510,8 @@ const IncotermsGuide = forwardRef(function IncotermsGuide(
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative min-w-0 flex-1 sm:max-w-md">
+      <div className="flex flex-col gap-2.5 rounded-2xl border border-slate-200/90 bg-white p-3 shadow-sm sm:gap-3 sm:p-3.5 lg:flex-row lg:flex-wrap lg:items-center">
+        <div className="relative min-w-0 flex-1 lg:min-w-[16rem] lg:max-w-md">
           <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-slate-400">
             <SearchIcon />
           </span>
@@ -520,70 +520,72 @@ const IncotermsGuide = forwardRef(function IncotermsGuide(
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="جستجو: FOB، CIF، بیمه، دریایی…"
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white pe-3 ps-10 text-sm outline-none ring-teal-500/0 transition focus:border-teal-400 focus:ring-4 focus:ring-teal-500/15"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/80 pe-3 ps-10 text-sm outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/15 sm:h-12"
             aria-label="جستجوی اینکوترمز"
           />
         </div>
-        <select
-          value={mode}
-          onChange={(e) => setMode(e.target.value)}
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
-          aria-label="فیلتر نوع حمل"
-        >
-          {TRANSPORT_MODES.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.labelFa}
-            </option>
-          ))}
-        </select>
-        <select
-          value={group}
-          onChange={(e) => setGroup(e.target.value)}
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
-          aria-label="فیلتر گروه"
-        >
-          {GROUPS.map((g) => (
-            <option key={g.id || "all"} value={g.id}>
-              {g.label}
-            </option>
-          ))}
-        </select>
-        <div className="inline-flex h-11 w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 sm:w-auto">
-          <button
-            type="button"
-            onClick={() => setView("detail")}
-            className={`flex-1 rounded-lg px-3 text-xs font-bold sm:flex-none ${
-              view === "detail" ? "bg-teal-700 text-white" : "text-slate-600"
-            }`}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 sm:h-12 sm:min-w-[10rem]"
+            aria-label="فیلتر نوع حمل"
           >
-            جزئیات
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("compare")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-bold sm:flex-none ${
-              view === "compare" ? "bg-violet-700 text-white" : "text-slate-600"
-            }`}
+            {TRANSPORT_MODES.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.labelFa}
+              </option>
+            ))}
+          </select>
+          <select
+            value={group}
+            onChange={(e) => setGroup(e.target.value)}
+            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 sm:h-12 sm:min-w-[10rem]"
+            aria-label="فیلتر گروه"
           >
-            <CompareIcon className="h-3.5 w-3.5" />
-            مقایسه
-            <span
-              className={`rounded-md px-1.5 py-0.5 text-[10px] ${
-                compareCodes.length > 0
-                  ? view === "compare"
-                    ? "bg-white/20 text-white"
-                    : "bg-violet-100 text-violet-800"
-                  : "bg-slate-100 text-slate-500"
+            {GROUPS.map((g) => (
+              <option key={g.id || "all"} value={g.id}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+          <div className="col-span-2 inline-flex h-11 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-0.5 sm:col-span-1 sm:h-12 sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setView("detail")}
+              className={`flex-1 rounded-lg px-3 text-xs font-bold sm:flex-none sm:px-4 ${
+                view === "detail" ? "bg-teal-700 text-white shadow-sm" : "text-slate-600 hover:bg-white"
               }`}
             >
-              {compareCodes.length}
-            </span>
-          </button>
+              جزئیات
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("compare")}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-bold sm:flex-none sm:px-4 ${
+                view === "compare" ? "bg-violet-700 text-white shadow-sm" : "text-slate-600 hover:bg-white"
+              }`}
+            >
+              <CompareIcon className="h-3.5 w-3.5" />
+              مقایسه
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[10px] ${
+                  compareCodes.length > 0
+                    ? view === "compare"
+                      ? "bg-white/20 text-white"
+                      : "bg-violet-100 text-violet-800"
+                    : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {compareCodes.length}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
       <div
-        className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         role="listbox"
         aria-label="انتخاب اینکوترمز"
       >
@@ -600,13 +602,13 @@ const IncotermsGuide = forwardRef(function IncotermsGuide(
                 setSelected(t.code);
                 setView("detail");
               }}
-              className={`shrink-0 rounded-xl border px-3 py-2 text-start transition ${
+              className={`rounded-2xl border px-3 py-2.5 text-start transition sm:py-3 ${
                 activeCode
                   ? "border-teal-400 bg-teal-50 shadow-sm ring-2 ring-teal-100"
-                  : "border-slate-200 bg-white hover:border-slate-300"
+                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              <span className="flex items-center gap-1.5 font-mono text-sm font-black text-slate-900">
+              <span className="flex items-center gap-1.5 font-mono text-sm font-black text-slate-900 sm:text-[15px]">
                 {t.code}
                 {inComp ? (
                   <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-violet-600 text-white">
@@ -614,15 +616,20 @@ const IncotermsGuide = forwardRef(function IncotermsGuide(
                   </span>
                 ) : null}
               </span>
-              <span className="mt-0.5 block max-w-[7.5rem] truncate text-[10px] font-medium text-slate-500">
+              <span className="mt-1 block truncate text-[10px] font-medium leading-4 text-slate-500 sm:text-[11px]">
                 {t.nameFa}
               </span>
             </button>
           );
         })}
-        {filtered.length === 0 ? <p className="px-2 py-3 text-sm text-slate-500">نتیجه‌ای یافت نشد.</p> : null}
+        {filtered.length === 0 ? (
+          <p className="col-span-full rounded-xl border border-dashed border-slate-200 px-3 py-6 text-center text-sm text-slate-500">
+            نتیجه‌ای یافت نشد.
+          </p>
+        ) : null}
       </div>
 
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-[0_12px_40px_-24px_rgba(15,23,42,0.3)] sm:rounded-[1.35rem] sm:p-5 lg:p-6">
       {view === "compare" ? (
         <CompareTable
           codes={compareCodes}
@@ -639,6 +646,7 @@ const IncotermsGuide = forwardRef(function IncotermsGuide(
           compareHint={compareHint}
         />
       ) : null}
+      </div>
 
       <p className="text-[11px] leading-6 text-slate-400">{INCOTERMS_META.trademarkNote}</p>
 

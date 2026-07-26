@@ -56,14 +56,14 @@ function SidebarEdgeControls({
 
   return (
     <div
-      className={`pointer-events-auto absolute top-1/2 z-50 hidden -translate-y-1/2 md:flex ${
-        collapsed ? "left-0 -translate-x-full" : "left-0 -translate-x-1/2"
+      className={`pointer-events-auto absolute top-1/2 left-0 z-[60] hidden -translate-y-1/2 md:flex ${
+        collapsed ? "-translate-x-full" : "-translate-x-1/2"
       }`}
       role="group"
       aria-label="کنترل سایدبار"
     >
       <div
-        className={`flex flex-col overflow-hidden border bg-white ring-1 ring-slate-900/5 ${
+        className={`flex flex-col border bg-white ring-1 ring-slate-900/5 ${
           collapsed
             ? "rounded-l-xl border-slate-300 shadow-[0_8px_28px_-8px_rgba(15,23,42,0.45)]"
             : "rounded-lg border-slate-200/90 shadow-[0_4px_18px_-6px_rgba(15,23,42,0.35)]"
@@ -122,12 +122,12 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
   return (
     <div className="dashboard-scroll relative flex h-full min-h-0 flex-1 overflow-hidden bg-slate-100">
       <aside
-        className={`relative z-40 hidden h-full shrink-0 self-stretch overflow-visible border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:block ${MODE_WIDTH[mode]} ${
+        className={`relative z-40 hidden h-full min-h-0 shrink-0 self-stretch border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:flex md:flex-col ${MODE_WIDTH[mode]} ${
           collapsed ? "border-l-0" : ""
         }`}
       >
         {!collapsed ? (
-          <div className="h-full min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain">
+          <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <Sidebar onLinkClick={() => {}} compact={iconsOnly} />
           </div>
         ) : null}

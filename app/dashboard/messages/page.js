@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
-import MessagesApp from "./MessagesApp";
+import MessagesPageClient from "./MessagesPageClient";
 
 export async function generateMetadata() {
   const t = await getTranslations("chat");
@@ -12,7 +12,7 @@ export default async function MessagesPage() {
 
   return (
     <Suspense fallback={<div className="p-8 text-center text-slate-500">{t("loading")}</div>}>
-      <MessagesApp />
+      <MessagesPageClient />
     </Suspense>
   );
 }

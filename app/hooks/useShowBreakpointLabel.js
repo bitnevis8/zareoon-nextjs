@@ -5,11 +5,10 @@ import { API_ENDPOINTS } from "@/app/config/api";
 
 /**
  * Admin toggle (site settings → showFooterBreakpoint).
- * Default ON until the public API says otherwise, so the badge is visible
- * right after deploy / before the first save.
+ * Default OFF for client delivery — only show when explicitly enabled.
  */
 export function useShowBreakpointLabel() {
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,7 +20,7 @@ export function useShowBreakpointLabel() {
           setEnabled(json.data.showFooterBreakpoint);
         }
       } catch {
-        /* keep default visible */
+        /* keep default off */
       }
     })();
     return () => {

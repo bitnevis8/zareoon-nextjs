@@ -7,6 +7,7 @@ import CbmFreightCalculator from "@/app/components/CbmFreightCalculator";
 import HsCodeTariffPanel from "@/app/components/HsCodeTariffPanel";
 import IncotermsGuide from "@/app/components/incoterms/IncotermsGuide";
 import TradeUnitConverter from "@/app/components/units/TradeUnitConverter";
+import ExchangeRateConverter from "@/app/components/exchange/ExchangeRateConverter";
 import { TRADE_TOOLS } from "@/app/data/tradeToolsMeta";
 
 const TABS = [
@@ -165,7 +166,7 @@ const GUIDES = {
       },
       {
         heading: "چگونه استفاده کنم؟",
-        body: "صفحهٔ کامل نرخ ارز را باز کنید، ارز مبدأ و مقصد را انتخاب کنید، مبلغ را وارد کنید و نتیجه تبدیل را ببینید. جدول نرخ‌ها هم در همان صفحه به‌روز می‌شود.",
+        body: "۱) مبلغ را وارد کنید. ۲) ارز مبدأ و مقصد را انتخاب کنید. ۳) در صورت نیاز با دکمه جابه‌جایی جهت تبدیل را عوض کنید. ۴) نتیجه و نرخ تقریبی همان‌جا نمایش داده می‌شود.",
       },
       {
         heading: "نکته مهم",
@@ -329,6 +330,7 @@ export default function TradeToolsPanel({ className = "" }) {
   const hsRef = useRef(null);
   const incotermsRef = useRef(null);
   const unitsRef = useRef(null);
+  const exchangeRef = useRef(null);
   const active = TABS.find((t) => t.id === tab) || null;
   const isOpen = !!active;
 
@@ -343,6 +345,7 @@ export default function TradeToolsPanel({ className = "" }) {
     else if (tab === "hs") hsRef.current?.clearForm?.();
     else if (tab === "incoterms") incotermsRef.current?.clearForm?.();
     else if (tab === "units") unitsRef.current?.clearForm?.();
+    else if (tab === "exchange") exchangeRef.current?.clearForm?.();
   };
 
   const tabIcon = (id) => {
@@ -389,7 +392,7 @@ export default function TradeToolsPanel({ className = "" }) {
           <div
             role="tablist"
             aria-label="انتخاب ابزار"
-            className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-3"
+            className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5"
           >
             {TABS.map((t) => {
               const selected = tab === t.id;
@@ -405,7 +408,7 @@ export default function TradeToolsPanel({ className = "" }) {
                   aria-expanded={selected}
                   aria-controls={selected ? `${titleId}-panel` : undefined}
                   onClick={() => selectTab(t.id)}
-                  className={`flex min-h-[4.25rem] items-center gap-3 rounded-2xl border px-3.5 py-3 text-start transition sm:min-h-[4.5rem] sm:gap-3.5 sm:px-4 sm:py-3.5 ${
+                  className={`flex min-h-[5.25rem] flex-col items-stretch gap-2 rounded-2xl border px-3 py-3 text-start transition sm:min-h-[5.5rem] sm:px-3.5 sm:py-3.5 ${
                     selected
                       ? "border-teal-300 bg-white text-slate-900 shadow-md ring-2 ring-teal-100"
                       : bold
@@ -413,34 +416,36 @@ export default function TradeToolsPanel({ className = "" }) {
                         : "border-slate-200/90 bg-white/90 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white hover:shadow-md"
                   }`}
                 >
-                  <span
-                    className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition sm:h-12 sm:w-12 ${
-                      selected || bold
-                        ? "bg-teal-700 text-white shadow-sm"
-                        : "bg-slate-100 text-slate-600 ring-1 ring-slate-200/80"
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
                     <span
-                      className={`block leading-snug text-slate-900 sm:text-sm ${
-                        bold ? "text-[14px] font-black" : "text-[13px] font-extrabold"
+                      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition sm:h-10 sm:w-10 ${
+                        selected || bold
+                          ? "bg-teal-700 text-white shadow-sm"
+                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200/80"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </span>
+                    <span
+                      dir="ltr"
+                      className={`rounded-lg px-2 py-0.5 font-mono text-[10px] font-bold tracking-wide sm:text-[11px] ${
+                        selected || bold ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
+                      }`}
+                    >
+                      {t.short}
+                    </span>
+                  </div>
+                  <span className="min-w-0">
+                    <span
+                      className={`block leading-snug text-slate-900 ${
+                        bold ? "text-[12px] font-black sm:text-[13px]" : "text-[12px] font-extrabold sm:text-[13px]"
                       }`}
                     >
                       {t.title}
                     </span>
-                    <span className="mt-1 block text-[11px] font-medium leading-5 text-slate-500 sm:text-xs">
-                      {selected ? "باز است · برای بستن دوباره بزنید" : t.hint}
+                    <span className="mt-0.5 block text-[10px] font-medium leading-4 text-slate-500 sm:mt-1 sm:text-[11px] sm:leading-5">
+                      {selected ? "باز است · دوباره بزنید" : t.hint}
                     </span>
-                  </span>
-                  <span
-                    dir="ltr"
-                    className={`shrink-0 rounded-lg px-2 py-1 font-mono text-[10px] font-bold tracking-wide sm:text-[11px] ${
-                      selected || bold ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
-                    }`}
-                  >
-                    {t.short}
                   </span>
                 </button>
               );
@@ -504,18 +509,7 @@ export default function TradeToolsPanel({ className = "" }) {
                 ) : tab === "incoterms" ? (
                   <IncotermsGuide ref={incotermsRef} embedded />
                 ) : tab === "exchange" ? (
-                  <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50/80 via-white to-white px-4 py-5 sm:px-5 sm:py-6">
-                    <p className="text-sm font-bold text-slate-900 sm:text-base">{TRADE_TOOLS.exchange.titleFa}</p>
-                    <p className="mt-2 max-w-2xl text-[13px] leading-7 text-slate-600 sm:text-sm">
-                      {TRADE_TOOLS.exchange.descriptionFa}
-                    </p>
-                    <Link
-                      href="/exchange-rates#converter"
-                      className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-700 px-4 text-sm font-bold text-white transition hover:bg-teal-800"
-                    >
-                      باز کردن محاسبه‌گر نرخ ارز
-                    </Link>
-                  </div>
+                  <ExchangeRateConverter ref={exchangeRef} embedded />
                 ) : (
                   <TradeUnitConverter ref={unitsRef} embedded />
                 )}

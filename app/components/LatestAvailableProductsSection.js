@@ -99,7 +99,15 @@ export default function LatestAvailableProductsSection({
 
       <div className="relative">
       <div className="mb-3 flex flex-col gap-3 px-0.5 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <h2 className="text-start text-base font-bold leading-snug text-slate-900 sm:text-lg">
+        <h2
+          className="text-start text-base font-normal leading-snug tracking-tight sm:text-lg"
+          style={{
+            color: "#ffffff",
+            WebkitTextStroke: "0.85px #2a2a2a",
+            paintOrder: "stroke fill",
+            textShadow: "0 0 1px rgba(42,42,42,0.35)",
+          }}
+        >
           {sectionTitle}
         </h2>
         {showGroupToggle ? (

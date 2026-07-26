@@ -322,8 +322,6 @@ export default function CatalogGradeOffers({
         lots: mediaLots,
         gradeLabel: activeGradeLabel,
         productTitle,
-        supplyCountry: item?.supplyCountry || "IR",
-        supplyCity: item?.supplyCity || "",
         language,
         lotMediaPreview,
         openMediaGallery,

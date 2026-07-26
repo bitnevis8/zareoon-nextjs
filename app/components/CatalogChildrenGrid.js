@@ -5,6 +5,9 @@ import Link from "next/link";
 import CategoryTile from "./CategoryTile";
 import ProductImage from "./ui/ProductImage";
 import CardsPerRowSelect from "./ui/CardsPerRowSelect";
+import AvailableProductCompactCard, {
+  resolveSellerDisplayName,
+} from "./AvailableProductCompactCard";
 import { useLanguage } from "../context/LanguageContext";
 import { sortCatalogItems } from "../utils/productSort";
 import { getLocalizedText } from "../utils/localize";
@@ -17,6 +20,12 @@ import {
   readStoredCardsPerRow,
   writeStoredCardsPerRow,
 } from "../utils/cardsPerRow";
+import { catalogProductPath } from "../utils/catalogProductPath";
+import {
+  buildAvailableProducts,
+  buildProductByIdMap,
+} from "../utils/availableProducts";
+import { resolveMediaUrl } from "../utils/mediaUrl";
 
 const PAGE_SIZE = 10;
 
@@ -28,26 +37,28 @@ const SORT_OPTIONS = [
   { value: "stock_asc", labelKey: "catalogSortStockAsc" },
 ];
 
-function AvailabilitySwitch({ value, onChange, availableLabel, unavailableLabel }) {
+function AvailabilitySwitch({ value, onChange, allLabel, availableLabel }) {
   return (
     <div className="inline-flex h-9 overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm">
       <button
         type="button"
+        onClick={() => onChange("all")}
+        aria-pressed={value === "all"}
+        className={`rounded-lg px-2.5 text-[11px] font-bold transition sm:px-3 sm:text-xs ${
+          value === "all" ? "bg-slate-700 text-white" : "text-slate-600 hover:bg-slate-50"
+        }`}
+      >
+        {allLabel}
+      </button>
+      <button
+        type="button"
         onClick={() => onChange("available")}
+        aria-pressed={value === "available"}
         className={`rounded-lg px-2.5 text-[11px] font-bold transition sm:px-3 sm:text-xs ${
           value === "available" ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-50"
         }`}
       >
         {availableLabel}
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("unavailable")}
-        className={`rounded-lg px-2.5 text-[11px] font-bold transition sm:px-3 sm:text-xs ${
-          value === "unavailable" ? "bg-slate-700 text-white" : "text-slate-600 hover:bg-slate-50"
-        }`}
-      >
-        {unavailableLabel}
       </button>
     </div>
   );
@@ -97,7 +108,7 @@ function LeafProductListRow({ item, language, stock, stockClass }) {
   return (
     <li className={`border-b border-slate-100 last:border-0 ${stockClass}`}>
       <Link
-        href={`/catalog/${item.id}`}
+        href={catalogProductPath(item)}
         className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-emerald-50/50 active:bg-emerald-50"
       >
         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
@@ -130,7 +141,6 @@ function LeafProductListRow({ item, language, stock, stockClass }) {
   );
 }
 
-/** بخش نهایی: فقط محصولات برگ (مثل انواع خرما) */
 function LeafVarietiesSection({
   products,
   parentItem,
@@ -138,6 +148,7 @@ function LeafVarietiesSection({
   inventoryLots,
   language,
   t,
+  isRTL,
 }) {
   const parentName = parentItem ? getLocalizedText(parentItem, language) : "";
   const [availability, setAvailability] = useState("available");
@@ -158,11 +169,24 @@ function LeafVarietiesSection({
     setCardsPerRow(writeStoredCardsPerRow(n));
   };
 
-  const filtered = useMemo(() => {
-    const base = products.filter((item) => {
-      const stock = calculateAvailableStock(item, allProducts, inventoryLots);
-      return availability === "available" ? stock > 0 : stock <= 0;
+  const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
+
+  const offerByProductId = useMemo(() => {
+    const entries = buildAvailableProducts(inventoryLots, productById, {
+      scopeCategoryId: parentItem?.id ?? null,
     });
+    const map = new Map();
+    for (const entry of entries) {
+      if (entry?.product?.id != null) map.set(Number(entry.product.id), entry);
+    }
+    return map;
+  }, [inventoryLots, productById, parentItem?.id]);
+
+  const filtered = useMemo(() => {
+    const base =
+      availability === "all"
+        ? products
+        : products.filter((item) => calculateAvailableStock(item, allProducts, inventoryLots) > 0);
     return sortLeafItems(base, sort, language, allProducts, inventoryLots);
   }, [products, availability, sort, language, allProducts, inventoryLots]);
 
@@ -182,8 +206,8 @@ function LeafVarietiesSection({
           <AvailabilitySwitch
             value={availability}
             onChange={setAvailability}
-            availableLabel={t("stockAvailable") || "موجود"}
-            unavailableLabel={t("stockUnavailable") || "ناموجود"}
+            allLabel={t("catalogShowAll") || "نمایش همه"}
+            availableLabel={t("catalogShowAvailable") || "نمایش کالاهای موجود"}
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -223,24 +247,32 @@ function LeafVarietiesSection({
         <p className="rounded-xl border bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
           {availability === "available"
             ? t("noProductsWithStock")
-            : t("noUnavailableProducts") || "مورد ناموجودی یافت نشد."}
+            : t("noCatalogItems") || "موردی یافت نشد."}
         </p>
       ) : viewMode === "cards" ? (
         <div className={getCardsPerRowGridClass(cardsPerRow)}>
           {pageItems.map((item) => {
-            const availableStock = calculateAvailableStock(item, allProducts, inventoryLots);
-            const stockClass = getProductStockClass(item, allProducts, inventoryLots);
-            const meta =
-              availableStock > 0
-                ? `${formatLocalizedNumber(availableStock, language)} ${localizeUnit("kg", language)}`
-                : null;
+            const offer = offerByProductId.get(Number(item.id));
+            const lots = offer?.lots || [];
+            const totalAvailable =
+              offer?.totalAvailable ?? calculateAvailableStock(item, allProducts, inventoryLots);
+            const seller =
+              offer?._primarySeller ||
+              lots.find((l) => l.supplier || l.farmer)?.supplier ||
+              lots.find((l) => l.supplier || l.farmer)?.farmer ||
+              null;
             return (
-              <CategoryTile
+              <AvailableProductCompactCard
                 key={item.id}
-                item={item}
+                product={offer?.product || item}
+                lots={lots}
+                totalAvailable={totalAvailable}
                 language={language}
-                stockClass={stockClass}
-                meta={meta}
+                isRTL={isRTL}
+                sellerName={resolveSellerDisplayName(seller, "زارعون")}
+                sellerAvatar={resolveMediaUrl(seller?.avatar || seller?.account?.coverImage)}
+                showSellerHeader
+                className="h-full w-full min-w-0"
               />
             );
           })}
@@ -307,10 +339,10 @@ function SubcategoriesSection({
   };
 
   const visible = useMemo(() => {
-    return subcategories.filter((item) => {
-      const stock = calculateAvailableStock(item, allProducts, inventoryLots);
-      return availability === "available" ? stock > 0 : stock <= 0;
-    });
+    if (availability === "all") return subcategories;
+    return subcategories.filter(
+      (item) => calculateAvailableStock(item, allProducts, inventoryLots) > 0
+    );
   }, [availability, subcategories, allProducts, inventoryLots]);
 
   const title = parentItem
@@ -327,8 +359,8 @@ function SubcategoriesSection({
           <AvailabilitySwitch
             value={availability}
             onChange={setAvailability}
-            availableLabel={t("stockAvailable") || "موجود"}
-            unavailableLabel={t("stockUnavailable") || "ناموجود"}
+            allLabel={t("catalogShowAll") || "نمایش همه"}
+            availableLabel={t("catalogShowAvailable") || "نمایش کالاهای موجود"}
           />
           <CardsPerRowSelect
             value={cardsPerRow}
@@ -362,7 +394,7 @@ function SubcategoriesSection({
         <p className="rounded-xl border bg-slate-50 px-4 py-5 text-center text-sm text-slate-500">
           {availability === "available"
             ? t("noProductsWithStock")
-            : t("noUnavailableProducts") || "مورد ناموجودی یافت نشد."}
+            : t("noCatalogItems") || "موردی یافت نشد."}
         </p>
       )}
     </section>
@@ -412,6 +444,7 @@ export default function CatalogChildrenGrid({
           inventoryLots={inventoryLots}
           language={language}
           t={t}
+          isRTL={isRTL}
         />
       ) : null}
     </div>

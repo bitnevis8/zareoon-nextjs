@@ -10,6 +10,7 @@ import MarketplaceDisclaimer from './components/MarketplaceDisclaimer';
 import QuickSearchBox from './components/QuickSearchBox';
 import HomeLanguageLogo from './components/HomeLanguageLogo';
 import HomeIntroLines from './components/HomeIntroLines';
+import WhatIsZareoonSection from './components/WhatIsZareoonSection';
 import LazyWhenVisible from './components/ui/LazyWhenVisible';
 import SectionSkeleton from './components/ui/SectionSkeleton';
 import { SITE_INTRO_ORDER } from './config/siteLanguages';
@@ -82,6 +83,8 @@ function HomeContent() {
             />
           </div>
         </div>
+
+        <WhatIsZareoonSection className="mt-1" />
 
         <MainCategoryGrid className="w-full scroll-mt-20" id="product-categories" />
 

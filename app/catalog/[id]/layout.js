@@ -17,6 +17,12 @@ function pickMeta(product, lang = "fa") {
   return { title, description };
 }
 
+function productCanonicalPath(product, fallbackId) {
+  const slug = String(product?.slug || "").trim();
+  if (slug && !/^\d+$/.test(slug)) return `/catalog/${encodeURIComponent(slug)}`;
+  return `/catalog/${product?.id || fallbackId}`;
+}
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zareoon.ir";
@@ -29,16 +35,17 @@ export async function generateMetadata({ params }) {
       return { title: "Zareoon Catalog" };
     }
 
+    const path = productCanonicalPath(product, id);
     const seo = product.seo || {};
     const { title, description } = pickMeta(product, seo.xDefaultLanguage || "fa");
     const indexable = seo.indexable !== false;
     const hreflang = Array.isArray(seo.hreflang) ? seo.hreflang : [];
     const languages = {};
     for (const lang of hreflang) {
-      languages[lang] = `${siteUrl}/catalog/${id}`;
+      languages[lang] = `${siteUrl}${path}`;
     }
     if (seo.xDefaultLanguage) {
-      languages["x-default"] = `${siteUrl}/catalog/${id}`;
+      languages["x-default"] = `${siteUrl}${path}`;
     }
 
     const imageUrl = product.imageUrl
@@ -54,12 +61,12 @@ export async function generateMetadata({ params }) {
         ? { index: true, follow: true }
         : { index: false, follow: false, googleBot: { index: false, follow: false } },
       alternates: Object.keys(languages).length
-        ? { canonical: `${siteUrl}/catalog/${id}`, languages }
-        : { canonical: `${siteUrl}/catalog/${id}` },
+        ? { canonical: `${siteUrl}${path}`, languages }
+        : { canonical: `${siteUrl}${path}` },
       openGraph: {
         title,
         description: description || undefined,
-        url: `${siteUrl}/catalog/${id}`,
+        url: `${siteUrl}${path}`,
         images: imageUrl ? [{ url: imageUrl }] : undefined,
       },
       other: seo.noindexReason && !indexable ? { "x-noindex-reason": seo.noindexReason } : undefined,

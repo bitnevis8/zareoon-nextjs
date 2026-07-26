@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import SupplyCountryFlag from "../ui/SupplyCountryFlag";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { buildGradeMediaSlides } from "../../utils/catalogGradeMedia";
 import { getGradeDisplayLabel } from "../../utils/catalogGrades";
@@ -20,8 +19,6 @@ export default function CatalogGradeMediaPanel({
   lots = [],
   gradeLabel,
   productTitle = "",
-  supplyCountry = "IR",
-  supplyCity = "",
   language,
   lotMediaPreview,
   openMediaGallery,
@@ -87,9 +84,8 @@ export default function CatalogGradeMediaPanel({
   return (
     <div className={`overflow-hidden rounded-xl border border-slate-200 bg-white ${className}`}>
       {productTitle ? (
-        <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-3 py-2.5">
-          <h1 className="min-w-0 flex-1 text-sm font-bold leading-snug text-slate-900 lg:text-base">{productTitle}</h1>
-          <SupplyCountryFlag countryCode={supplyCountry} city={supplyCity} className="shrink-0" />
+        <div className="border-b border-slate-100 px-3 py-2.5">
+          <h1 className="text-sm font-bold leading-snug text-slate-900 lg:text-base">{productTitle}</h1>
         </div>
       ) : null}
 

@@ -29,7 +29,7 @@ function SellerNavItem({ href, label, active, onClick, icon, compact = false }) 
 
 /**
  * قبل از عضویت: فقط دکمه ایجاد فروشگاه.
- * بعد از عضویت: منوی فروشگاه (بدون برچسب «فروشنده»).
+ * بعد از عضویت: منوی فروشگاه.
  */
 export default function SidebarSellerSection({
   canSell,
@@ -37,8 +37,6 @@ export default function SidebarSellerSection({
   onLinkClick,
   primaryLinks = [],
   secondaryLinks = [],
-  escrowHref,
-  escrowLabel,
   compact = false,
 }) {
   const t = useTranslations("layout.sidebar");
@@ -58,7 +56,7 @@ export default function SidebarSellerSection({
   }
 
   return (
-    <div className={`space-y-0.5 pt-1 ${compact ? "px-0" : "px-2"}`}>
+    <div className={`space-y-0.5 pt-1 ${compact ? "px-0" : "px-0"}`}>
       {primaryLinks.map((item) => (
         <SellerNavItem
           key={item.path}
@@ -87,16 +85,6 @@ export default function SidebarSellerSection({
           ))}
         </>
       ) : null}
-
-      {!compact ? <hr className="mx-1 my-2 border-slate-200" /> : <div className="my-1" />}
-      <SellerNavItem
-        href={escrowHref}
-        label={escrowLabel}
-        active={isActive(escrowHref)}
-        onClick={onLinkClick}
-        icon="escrow"
-        compact={compact}
-      />
     </div>
   );
 }

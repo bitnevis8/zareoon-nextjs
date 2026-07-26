@@ -7,6 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getLocalizedText } from "../utils/localize";
 import { sortCatalogItems } from "../utils/productSort";
 import { getMainCategoryIcon, isMainRootCategory } from "../utils/mainCategoryIcons";
+import { catalogProductPath } from "../utils/catalogProductPath";
 
 function ChevronIcon({ className = "" }) {
   return (
@@ -97,7 +98,7 @@ export default function CategoryDrillDownMenu({ isOpen, onClose, rootTitle }) {
       return;
     }
     onClose();
-    router.push(`/catalog/${item.id}`);
+    router.push(catalogProductPath(item));
   };
 
   const handleBack = () => {

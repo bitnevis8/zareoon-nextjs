@@ -122,13 +122,17 @@ function PageCard({ href, name, subtitle, avatar, badges = [], accent }) {
         )}
 
         <p
-          className={`mt-2 inline-flex max-w-full items-center gap-0.5 truncate rounded-full px-2 py-1 font-mono text-[9px] font-semibold sm:text-[10px] ${
+          className={`mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-full px-2.5 py-1.5 font-mono text-[11px] font-semibold sm:gap-1.5 sm:px-3 sm:text-xs ${
             isService
               ? "bg-teal-50 text-teal-800 ring-1 ring-teal-100"
               : "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100"
           }`}
           dir="ltr"
         >
+          <svg className="h-3.5 w-3.5 shrink-0 opacity-70 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+            <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a.75.75 0 001.061 1.06l3-3z" />
+            <path d="M11.603 7.963a.75.75 0 00-1.061-1.06l-3 3a4 4 0 105.656 5.656l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a2.5 2.5 0 11-3.536-3.536l3-3z" />
+          </svg>
           <span className="opacity-60">zareoon.ir/</span>
           <span className="truncate">{slug}</span>
         </p>
@@ -246,16 +250,42 @@ export default function BuyerSellerPortal({ className = "" }) {
     };
   }, []);
 
-  const sellerHref = seller
-    ? "/dashboard/supplier/inventory/create?scope=own"
-    : "/dashboard/seller/join";
+  const sellerHref = "/dashboard/dedicated-page";
 
   const sellerCtaClass =
-    "inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-white px-4 py-2.5 text-center text-sm font-bold leading-snug text-emerald-900 shadow-sm transition hover:bg-emerald-50 sm:min-h-11 sm:w-auto sm:min-w-[14rem] sm:rounded-lg sm:px-5";
+    "group inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-amber-200/80 bg-gradient-to-b from-white via-emerald-50 to-teal-50 px-4 py-3 text-center text-sm font-extrabold leading-snug text-emerald-950 shadow-[0_10px_28px_-12px_rgba(16,185,129,0.55)] ring-1 ring-emerald-900/10 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:from-white hover:via-emerald-100 hover:to-teal-100 hover:shadow-[0_16px_36px_-12px_rgba(16,185,129,0.65)] active:translate-y-0 sm:min-h-[3.25rem] sm:w-auto sm:max-w-md sm:px-5 sm:text-[15px]";
 
   const listTitle = useMemo(
     () => (tab === "shops" ? t("buyerSellerPortalRecentShops") : t("buyerSellerPortalRecentServices")),
     [tab, t]
+  );
+
+  const ctaLabel = (
+    <>
+      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-md shadow-emerald-800/30 transition group-hover:bg-emerald-800">
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M12 4.5v15m7.5-7.5h-15"
+            stroke="currentColor"
+            strokeWidth="2.25"
+            strokeLinecap="round"
+          />
+        </svg>
+      </span>
+      <span className="min-w-0 flex-1 text-start">{t("buyerSellerPortalSellerCta")}</span>
+      <svg
+        className="h-5 w-5 shrink-0 text-emerald-700 transition group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path
+          fillRule="evenodd"
+          d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </>
   );
 
   return (
@@ -280,17 +310,23 @@ export default function BuyerSellerPortal({ className = "" }) {
 
           <div className="relative mx-auto w-full max-w-[90rem] px-3.5 py-4 sm:px-6 sm:py-7 lg:px-10 lg:py-8">
             <div className="flex flex-col gap-3.5 sm:gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
-              <div className="min-w-0 max-w-2xl">
-                <p className="inline-flex rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold text-emerald-50 sm:px-2.5 sm:text-xs">
-                  {t("buyerSellerPortalBadge")}
-                </p>
+              <div className="min-w-0 max-w-3xl">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="inline-flex rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold text-emerald-50 sm:px-2.5 sm:text-xs">
+                    {t("buyerSellerPortalBadge")}
+                  </p>
+                  <p className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-400/15 px-2 py-0.5 text-[10px] font-extrabold text-amber-100 sm:px-2.5 sm:text-xs">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-300" aria-hidden />
+                    {t("buyerSellerPortalFreeStart")}
+                  </p>
+                </div>
                 <h2
                   id="buyer-seller-portal-title"
-                  className="mt-1.5 text-balance text-base font-bold tracking-tight text-white sm:mt-2 sm:text-lg"
+                  className="mt-1.5 text-balance text-base font-bold tracking-tight text-white sm:mt-2 sm:text-lg lg:text-xl"
                 >
                   {t("buyerSellerPortalSectionTitle")}
                 </h2>
-                <p className="mt-1 line-clamp-3 text-xs leading-6 text-emerald-50/90 sm:mt-1.5 sm:line-clamp-none sm:text-sm sm:leading-7">
+                <p className="mt-1.5 text-xs leading-6 text-emerald-50/90 sm:mt-2 sm:text-sm sm:leading-7">
                   {t("buyerSellerPortalSectionDesc")}
                 </p>
                 <p
@@ -303,14 +339,14 @@ export default function BuyerSellerPortal({ className = "" }) {
                 </p>
               </div>
 
-              <div className="flex w-full shrink-0 lg:w-auto">
+              <div className="flex w-full shrink-0 flex-col gap-2 lg:w-auto lg:items-end">
                 {seller ? (
                   <Link href={sellerHref} className={sellerCtaClass}>
-                    {t("buyerSellerPortalSellerCta")}
+                    {ctaLabel}
                   </Link>
                 ) : (
                   <AuthRequiredButton href={sellerHref} className={sellerCtaClass}>
-                    {t("buyerSellerPortalSellerCta")}
+                    {ctaLabel}
                   </AuthRequiredButton>
                 )}
               </div>
@@ -368,12 +404,24 @@ export default function BuyerSellerPortal({ className = "" }) {
               )}
             </div>
 
-            <p className="mt-2.5 text-center text-[10px] leading-5 text-emerald-100/65 sm:mt-3 sm:text-[11px] lg:text-start">
-              {t("buyerSellerPortalHint")}{" "}
-              <Link href="/pricing" className="font-semibold text-white underline-offset-2 hover:underline">
+            <div className="mt-2.5 flex flex-col gap-2 border-t border-white/10 pt-2.5 sm:mt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-3">
+              <p className="text-center text-[10px] leading-5 text-emerald-100/65 sm:text-start sm:text-[11px]">
+                {t("buyerSellerPortalHint")}
+              </p>
+              <Link
+                href="/pricing"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 self-center rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-white/15 sm:self-auto sm:text-xs"
+              >
                 {t("buyerSellerPortalPricingLink")}
+                <svg className="h-3.5 w-3.5 rtl:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path
+                    fillRule="evenodd"
+                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </Link>
-            </p>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,10 @@
 "use client";
 
+"use client";
+
 import Link from "next/link";
 import { getLocalizedText } from "../utils/localize";
+import { catalogProductPath } from "../utils/catalogProductPath";
 
 export function buildCatalogPath(item, productById) {
   if (!item) return [];
@@ -33,7 +36,7 @@ export default function CatalogBreadcrumb({ path, language, homeLabel }) {
             {isLast ? (
               <span className="font-medium text-slate-800">{label}</span>
             ) : (
-              <Link href={`/catalog/${node.id}`} className="text-slate-500 transition-colors hover:text-green-700">
+              <Link href={catalogProductPath(node)} className="text-slate-500 transition-colors hover:text-green-700">
                 {label}
               </Link>
             )}

@@ -18,24 +18,79 @@ function formatTime(iso) {
 }
 
 function UserAvatar({ user, size = "md" }) {
-  const dim = size === "lg" ? "h-11 w-11 text-base" : size === "sm" ? "h-8 w-8 text-xs" : "h-10 w-10 text-sm";
+  const dim =
+    size === "lg"
+      ? "h-12 w-12 text-base"
+      : size === "sm"
+        ? "h-8 w-8 text-xs"
+        : size === "xs"
+          ? "h-7 w-7 text-[10px]"
+          : "h-11 w-11 text-sm";
   const initial = (user?.firstName?.[0] || user?.username?.[0] || "?").toUpperCase();
   if (user?.avatar) {
     return (
       <Image
         src={user.avatar}
         alt={user.displayName || ""}
-        width={44}
-        height={44}
+        width={48}
+        height={48}
         unoptimized
         className={`${dim} shrink-0 rounded-full object-cover ring-2 ring-white`}
       />
     );
   }
   return (
-    <span className={`${dim} flex shrink-0 items-center justify-center rounded-full bg-emerald-600 font-semibold text-white ring-2 ring-white`}>
+    <span
+      className={`${dim} flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 font-semibold text-white ring-2 ring-white`}
+    >
       {initial}
     </span>
+  );
+}
+
+function PaperPlaneIcon({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M22 2L11 13" stroke="currentColor" strokeWidth="0" />
+      <path d="M22 2L15 22l-4-9-9-4 20-7z" />
+    </svg>
+  );
+}
+
+function ReadChecks({ read }) {
+  return (
+    <span className="inline-flex items-center" aria-label={read ? "خوانده شد" : "ارسال شد"} title={read ? "خوانده شد" : "ارسال شد"}>
+      <svg className={`h-3.5 w-3.5 ${read ? "text-sky-300" : "text-white/70"}`} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M1.5 12.5l4 4L14.5 7"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {read ? (
+          <path
+            d="M7.5 12.5l4 4L20.5 7"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ) : null}
+      </svg>
+    </span>
+  );
+}
+
+function ImageIcon({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+      />
+    </svg>
   );
 }
 
@@ -60,77 +115,26 @@ async function compressImageClient(file) {
   }
 }
 
-function NewChatModal({ open, onClose, onSelect }) {
-  const { t } = useLanguage();
-  const [q, setQ] = useState("");
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const id = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await authFetch(`/api/messaging/users/search?q=${encodeURIComponent(q)}`);
-        const json = await res.json();
-        if (json.success) setUsers(json.data || []);
-      } finally {
-        setLoading(false);
-      }
-    }, 300);
-    return () => clearTimeout(id);
-  }, [open, q]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="border-b border-slate-100 p-4">
-          <h3 className="text-lg font-bold text-slate-800">{t("newConversation")}</h3>
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchUserPlaceholder")}
-            className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-            autoFocus
-          />
-        </div>
-        <ul className="max-h-72 overflow-y-auto p-2">
-          {loading ? (
-            <li className="p-4 text-center text-sm text-slate-500">{t("loading")}</li>
-          ) : users.length === 0 ? (
-            <li className="p-4 text-center text-sm text-slate-500">{t("noUsersFound")}</li>
-          ) : (
-            users.map((u) => (
-              <li key={u.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(u)}
-                  className="flex w-full items-center gap-3 rounded-xl p-3 text-right hover:bg-slate-50"
-                >
-                  <UserAvatar user={u} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-slate-800">{u.displayName}</div>
-                    <div className="truncate text-xs text-slate-500">{u.mobile || u.username}</div>
-                  </div>
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-export default function MessagesApp() {
+/**
+ * @param {{
+ *   mode?: "page" | "modal",
+ *   initialUserId?: number | null,
+ *   initialConversationId?: number | null,
+ *   onClose?: () => void,
+ * }} props
+ */
+export default function MessagesApp({
+  mode = "page",
+  initialUserId = null,
+  initialConversationId = null,
+  onClose,
+}) {
   const auth = useAuth();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const myId = auth?.user?.id;
+  const isModal = mode === "modal";
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -140,7 +144,6 @@ export default function MessagesApp() {
   const [loadingList, setLoadingList] = useState(true);
   const [loadingChat, setLoadingChat] = useState(false);
   const [sending, setSending] = useState(false);
-  const [showNew, setShowNew] = useState(false);
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [lightbox, setLightbox] = useState(null);
@@ -150,10 +153,20 @@ export default function MessagesApp() {
   const pollRef = useRef(null);
   const messagesRef = useRef([]);
   const startingUserRef = useRef(null);
+  const bootstrappedRef = useRef(false);
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    if (!isModal) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isModal, onClose]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -173,11 +186,13 @@ export default function MessagesApp() {
       if (!silent) setLoadingChat(true);
       setActiveId(conversationId);
       setMobileShowChat(true);
-      router.replace(`/dashboard/messages?c=${conversationId}`, { scroll: false });
+      if (!isModal) {
+        router.replace(`/dashboard/messages?c=${conversationId}`, { scroll: false });
+      }
 
       const [convRes, msgRes] = await Promise.all([
         authFetch(`/api/messaging/conversations/${conversationId}`),
-        authFetch(`/api/messaging/conversations/${conversationId}/messages?limit=50`),
+        authFetch(`/api/messaging/conversations/${conversationId}/messages?limit=80`),
       ]);
       const convJson = await convRes.json();
       const msgJson = await msgRes.json();
@@ -190,13 +205,12 @@ export default function MessagesApp() {
       if (!silent) setLoadingChat(false);
       setTimeout(scrollToBottom, 80);
     },
-    [loadConversations, router]
+    [loadConversations, router, isModal]
   );
 
   const startWithUser = useCallback(
     async (user) => {
       if (!user?.id) return;
-      setShowNew(false);
       const res = await authFetch("/api/messaging/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -216,25 +230,30 @@ export default function MessagesApp() {
   }, [loadConversations]);
 
   useEffect(() => {
-    const c = searchParams.get("c");
-    const u = searchParams.get("u");
-    if (c && Number(c) !== activeId) {
-      startingUserRef.current = null;
-      openConversation(Number(c));
-    } else if (u && !c) {
-      const uid = Number(u);
-      if (!Number.isFinite(uid) || startingUserRef.current === uid) return;
-      startingUserRef.current = uid;
-      startWithUser({ id: uid });
+    const fromUrlC = !isModal ? Number(searchParams.get("c")) : null;
+    const fromUrlU = !isModal ? Number(searchParams.get("u")) : null;
+    const c = initialConversationId || (Number.isFinite(fromUrlC) ? fromUrlC : null);
+    const u = initialUserId || (Number.isFinite(fromUrlU) ? fromUrlU : null);
+
+    if (c) {
+      if (bootstrappedRef.current && activeId === c) return;
+      bootstrappedRef.current = true;
+      openConversation(c);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+    if (u) {
+      if (startingUserRef.current === u) return;
+      startingUserRef.current = u;
+      bootstrappedRef.current = true;
+      startWithUser({ id: u });
+    }
+  }, [initialConversationId, initialUserId, searchParams, isModal, openConversation, startWithUser, activeId]);
 
   useEffect(() => {
-    if (!activeId) return;
+    if (!activeId) return undefined;
 
     const poll = async () => {
-      const msgRes = await authFetch(`/api/messaging/conversations/${activeId}/messages?limit=50`);
+      const msgRes = await authFetch(`/api/messaging/conversations/${activeId}/messages?limit=80`);
       const msgJson = await msgRes.json();
       if (!msgJson.success || !Array.isArray(msgJson.data)) return;
 
@@ -253,8 +272,7 @@ export default function MessagesApp() {
       }
       if (!changed) return;
 
-      const hadNew =
-        next.length > prev.length || next.some((m) => !prevMap.has(m.id));
+      const hadNew = next.length > prev.length || next.some((m) => !prevMap.has(m.id));
       setMessages(next);
       await authFetch(`/api/messaging/conversations/${activeId}/read`, { method: "PATCH" });
       await loadConversations();
@@ -311,6 +329,7 @@ export default function MessagesApp() {
       }
     } finally {
       setSending(false);
+      if (fileInputRef.current) fileInputRef.current._pendingFile = null;
     }
   };
 
@@ -323,130 +342,185 @@ export default function MessagesApp() {
   };
 
   const activeConv = conversations.find((c) => c.id === activeId);
+  const peer = otherUser || activeConv?.otherUser;
+
+  const shellClass = isModal
+    ? "flex h-full min-h-0 w-full overflow-hidden bg-white"
+    : "flex h-[min(100dvh,56rem)] min-h-[28rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:h-[calc(100dvh-7rem)]";
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] min-h-[480px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className={shellClass} dir={isRTL ? "rtl" : "ltr"}>
       {/* لیست گفتگوها */}
       <aside
-        className={`flex w-full flex-col border-l border-slate-100 bg-slate-50/80 md:w-80 lg:w-96 ${
+        className={`flex w-full flex-col border-slate-100 bg-[#fafafa] md:w-[22rem] lg:w-[26rem] md:border-s ${
           mobileShowChat ? "hidden md:flex" : "flex"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4">
-          <div>
-            <h2 className="text-lg font-bold text-slate-800">{t("messages")}</h2>
+        <div className="flex items-center gap-2 border-b border-slate-100 bg-white px-4 py-3.5">
+          {isModal ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
+              aria-label={t("close") || "بستن"}
+              title={t("close") || "بستن"}
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[17px] font-bold tracking-tight text-slate-900">{t("messages")}</h2>
             <p className="mt-0.5 text-[11px] text-slate-500">{t("chatHistory")}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowNew(true)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            {t("newChat")}
-          </button>
+        </div>
+
+        <div className="border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-[11px] leading-5 text-amber-950">
+          {t("chatPolicyWarning")}
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {loadingList ? (
-            <div className="p-6 text-center text-sm text-slate-500">{t("loading")}</div>
+            <div className="space-y-2 p-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
           ) : conversations.length === 0 ? (
-            <div className="p-6 text-center text-sm text-slate-500">{t("noConversations")}</div>
+            <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <PaperPlaneIcon className="h-7 w-7" />
+              </span>
+              <p className="text-sm font-semibold text-slate-800">{t("noConversations")}</p>
+              <p className="text-xs leading-6 text-slate-500">{t("chatEmptyHint")}</p>
+            </div>
           ) : (
-            conversations.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => openConversation(c.id)}
-                className={`flex w-full items-center gap-3 border-b border-slate-100 p-4 text-right transition-colors hover:bg-white ${
-                  activeId === c.id ? "bg-white" : ""
-                }`}
-              >
-                <UserAvatar user={c.otherUser} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-semibold text-slate-800">{c.otherUser?.displayName}</span>
-                    <span className="shrink-0 text-[10px] text-slate-400">{formatTime(c.lastMessage?.at)}</span>
-                  </div>
-                  <div className="mt-0.5 flex items-center justify-between gap-2">
-                    <span className="truncate text-xs text-slate-500">{c.lastMessage?.preview || t("startChat")}</span>
-                    {c.unreadCount > 0 ? (
-                      <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[10px] font-bold text-white">
-                        {c.unreadCount > 99 ? "99+" : c.unreadCount}
+            conversations.map((c) => {
+              const active = activeId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => openConversation(c.id)}
+                  className={`flex w-full items-center gap-3 px-4 py-3 text-start transition ${
+                    active ? "bg-white shadow-[inset_3px_0_0_0_#059669]" : "hover:bg-white/80"
+                  }`}
+                >
+                  <UserAvatar user={c.otherUser} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-[14px] font-semibold text-slate-900">
+                        {c.otherUser?.displayName}
                       </span>
-                    ) : null}
+                      <span className="shrink-0 text-[10px] text-slate-400">{formatTime(c.lastMessage?.at)}</span>
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <span className="truncate text-[12px] text-slate-500">
+                        {c.lastMessage?.type === "image" ? "📷 " : ""}
+                        {c.lastMessage?.preview || t("startChat")}
+                      </span>
+                      {c.unreadCount > 0 ? (
+                        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[10px] font-bold text-white">
+                          {c.unreadCount > 99 ? "99+" : c.unreadCount}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              </button>
-            ))
+                </button>
+              );
+            })
           )}
         </div>
       </aside>
 
       {/* پنل چت */}
-      <section className={`flex min-w-0 flex-1 flex-col ${!mobileShowChat ? "hidden md:flex" : "flex"}`}>
+      <section className={`flex min-w-0 flex-1 flex-col bg-[#efefef] ${!mobileShowChat ? "hidden md:flex" : "flex"}`}>
         {!activeId ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center text-slate-500">
-            <span className="text-4xl">💬</span>
-            <p className="text-sm">{t("selectConversation")}</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-white p-8 text-center">
+            <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-900 text-slate-900">
+              <PaperPlaneIcon className="h-9 w-9" />
+            </span>
+            <p className="text-xl font-bold text-slate-900">{t("messages")}</p>
+            <p className="max-w-sm text-sm leading-7 text-slate-500">{t("selectConversation")}</p>
+            <p className="max-w-sm text-[11px] leading-5 text-amber-800">{t("chatPolicyWarning")}</p>
           </div>
         ) : (
           <>
-            <header className="flex items-center gap-3 border-b border-slate-100 bg-white px-4 py-3">
+            <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-4">
               <button
                 type="button"
-                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 md:hidden"
                 onClick={() => setMobileShowChat(false)}
                 aria-label={t("back")}
               >
-                →
+                <svg className="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
-              <UserAvatar user={otherUser || activeConv?.otherUser} size="sm" />
+              <UserAvatar user={peer} size="sm" />
               <div className="min-w-0 flex-1">
-                <div className="truncate font-bold text-slate-800">
-                  {otherUser?.displayName || activeConv?.otherUser?.displayName}
-                </div>
+                <div className="truncate text-[15px] font-bold text-slate-900">{peer?.displayName}</div>
+                <div className="truncate text-[11px] text-slate-500">{t("directChat")}</div>
               </div>
+              {isModal ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="hidden h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 md:inline-flex"
+                  aria-label={t("close") || "بستن"}
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              ) : null}
             </header>
 
-            <div className="border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-[11px] leading-5 text-amber-950">
-              {t("chatPolicyWarning")}
+            <div className="border-b border-amber-100 bg-amber-50 px-4 py-2 text-center text-[11px] font-medium leading-5 text-amber-950">
+              {t("chatImmutableBanner")}
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-slate-100/50 p-4">
+            <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-5">
               {loadingChat ? (
                 <div className="text-center text-sm text-slate-500">{t("loading")}</div>
               ) : (
-                <div className="space-y-3">
+                <div className="mx-auto flex max-w-2xl flex-col gap-2">
                   {messages.map((m) => {
                     const mine = m.senderId === myId;
                     return (
                       <div key={m.id} className={`flex ${mine ? "justify-start" : "justify-end"}`}>
                         <div
-                          className={`max-w-[85%] rounded-2xl px-4 py-2.5 shadow-sm sm:max-w-[70%] ${
-                            mine ? "rounded-br-md bg-emerald-600 text-white" : "rounded-bl-md bg-white text-slate-800"
+                          className={`max-w-[88%] rounded-2xl px-3.5 py-2 shadow-sm sm:max-w-[72%] ${
+                            mine
+                              ? "rounded-ee-md bg-gradient-to-br from-emerald-600 to-teal-700 text-white"
+                              : "rounded-es-md bg-white text-slate-800 ring-1 ring-black/5"
                           }`}
                         >
                           {m.messageType === "image" && m.attachment?.downloadUrl ? (
-                            <button type="button" onClick={() => setLightbox(m.attachment.downloadUrl)} className="block">
+                            <button
+                              type="button"
+                              onClick={() => setLightbox(m.attachment.downloadUrl)}
+                              className="mb-1.5 block overflow-hidden rounded-xl"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={m.attachment.downloadUrl}
                                 alt=""
-                                className="max-h-64 w-full rounded-xl object-cover"
+                                className="max-h-72 w-full object-cover"
                               />
                             </button>
                           ) : null}
-                          {m.body ? <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{m.body}</p> : null}
+                          {m.body ? (
+                            <p className="whitespace-pre-wrap break-words text-[14px] leading-6">{m.body}</p>
+                          ) : null}
                           <div
                             className={`mt-1 flex items-center gap-1.5 text-[10px] ${
-                              mine ? "justify-start text-emerald-100" : "justify-end text-slate-400"
+                              mine ? "justify-start text-emerald-50/90" : "justify-end text-slate-400"
                             }`}
                           >
                             <span>{formatTime(m.createdAt)}</span>
-                            {mine ? (
-                              <span className={m.readAt ? "font-semibold text-white" : "text-emerald-200/90"}>
-                                {m.readAt ? t("read") : ""}
-                              </span>
-                            ) : null}
+                            {mine ? <ReadChecks read={Boolean(m.readAt)} /> : null}
                           </div>
                         </div>
                       </div>
@@ -458,13 +532,17 @@ export default function MessagesApp() {
             </div>
 
             {previewImage ? (
-              <div className="border-t border-slate-100 bg-white px-4 py-2">
+              <div className="border-t border-slate-200 bg-white px-4 py-2">
                 <div className="relative inline-block">
-                  <img src={previewImage} alt="" className="h-20 rounded-lg object-cover" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={previewImage} alt="" className="h-20 rounded-xl object-cover ring-1 ring-slate-200" />
                   <button
                     type="button"
-                    onClick={() => setPreviewImage(null)}
-                    className="absolute -left-2 -top-2 rounded-full bg-slate-800 px-1.5 text-xs text-white"
+                    onClick={() => {
+                      setPreviewImage(null);
+                      if (fileInputRef.current) fileInputRef.current._pendingFile = null;
+                    }}
+                    className="absolute -end-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs text-white"
                   >
                     ×
                   </button>
@@ -472,8 +550,8 @@ export default function MessagesApp() {
               </div>
             ) : null}
 
-            <footer className="border-t border-slate-100 bg-white p-3">
-              <div className="flex items-end gap-2">
+            <footer className="border-t border-slate-200 bg-white p-2.5 sm:p-3">
+              <div className="mx-auto flex max-w-2xl items-end gap-2">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -485,10 +563,11 @@ export default function MessagesApp() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={sending}
-                  className="shrink-0 rounded-xl border border-slate-200 p-2.5 text-lg hover:bg-slate-50 disabled:opacity-50"
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
                   title={t("sendImage")}
+                  aria-label={t("sendImage")}
                 >
-                  📷
+                  <ImageIcon />
                 </button>
                 <textarea
                   value={text}
@@ -505,7 +584,7 @@ export default function MessagesApp() {
                   }}
                   rows={1}
                   placeholder={t("typeMessage")}
-                  className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  className="max-h-32 min-h-[44px] flex-1 resize-none rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
                 />
                 <button
                   type="button"
@@ -517,7 +596,7 @@ export default function MessagesApp() {
                       sendText();
                     }
                   }}
-                  className="shrink-0 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                  className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 px-3.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-40"
                 >
                   {sending ? "…" : t("send")}
                 </button>
@@ -527,13 +606,12 @@ export default function MessagesApp() {
         )}
       </section>
 
-      <NewChatModal open={showNew} onClose={() => setShowNew(false)} onSelect={startWithUser} />
-
       {lightbox ? (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-[10070] flex items-center justify-center bg-black/85 p-4"
           onClick={() => setLightbox(null)}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={lightbox} alt="" className="max-h-full max-w-full rounded-lg object-contain" />
         </div>
       ) : null}

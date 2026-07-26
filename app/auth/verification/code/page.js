@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../config/api";
-import AuthShell, { authPrimaryBtnClass, authGhostBtnClass } from "../../../components/auth/AuthShell";
+import AuthShell, { authGhostBtnClass } from "../../../components/auth/AuthShell";
 import SmsCountdown from "../../../components/auth/SmsCountdown";
 
 function VerificationForm() {
@@ -17,14 +17,17 @@ function VerificationForm() {
   const [smsActive, setSmsActive] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [identifier, setIdentifier] = useState("");
-  const [action, setAction] = useState("register");
+  const [channel, setChannel] = useState("phone");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isEmail = channel === "email" || String(identifier).includes("@");
 
   useEffect(() => {
     setIdentifier(searchParams.get("identifier") || "");
-    setAction(searchParams.get("action") || "register");
+    const ch = searchParams.get("channel");
+    if (ch === "email" || ch === "phone") setChannel(ch);
+    else if (String(searchParams.get("identifier") || "").includes("@")) setChannel("email");
   }, [searchParams]);
 
   useEffect(() => {
@@ -42,7 +45,7 @@ function VerificationForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ mobile: identifier }),
+        body: JSON.stringify({ identifier }),
       });
       const data = await response.json();
       if (!data.success) {
@@ -62,10 +65,8 @@ function VerificationForm() {
   }, [identifier, t]);
 
   useEffect(() => {
-    if (identifier && action === "register") {
-      sendCode();
-    }
-  }, [identifier, action, sendCode]);
+    if (identifier) sendCode();
+  }, [identifier, sendCode]);
 
   const submitCode = async (codeStr) => {
     setLoading(true);
@@ -110,19 +111,27 @@ function VerificationForm() {
     }
   };
 
+  const title = isEmail ? "تأیید کد ایمیل" : t("verifyCodeTitle");
+
   if (authLoading) {
     return (
-      <AuthShell title={t("verifyCodeTitle")}>
+      <AuthShell title={title}>
         <p className="text-center text-sm text-slate-500">{t("loading")}</p>
       </AuthShell>
     );
   }
 
   return (
-    <AuthShell title={t("verifyCodeTitle")}>
+    <AuthShell title={title}>
       <p className="mb-5 text-center text-sm leading-6 text-slate-600">
         {t("codeSentTo", { identifier })}
       </p>
+
+      {isEmail ? (
+        <p className="mb-4 rounded-xl bg-amber-50 px-3 py-2.5 text-center text-[11px] leading-5 text-amber-900 ring-1 ring-amber-100">
+          ممکن است ایمیل چند دقیقه طول بکشد. Inbox و پوشهٔ <strong>Spam / هرزنامه</strong> را بررسی کنید.
+        </p>
+      ) : null}
 
       <div className="mb-2 flex justify-center gap-2 dir-ltr" dir="ltr">
         {digits.map((d, i) => (
@@ -169,10 +178,14 @@ function VerificationForm() {
         onClick={() => router.push("/auth/login")}
         className="mt-3 w-full text-center text-sm font-semibold text-slate-500 hover:text-emerald-700"
       >
-        {t("changeMobile")}
+        {isEmail ? "تغییر ایمیل" : t("changeMobile")}
       </button>
 
-      <p className="mt-4 text-center text-[11px] leading-5 text-slate-400">{t("blacklistHint")}</p>
+      <p className="mt-4 text-center text-[11px] leading-5 text-slate-400">
+        {isEmail
+          ? "اگر کد را ندیدید، پوشه اسپم را چک کنید یا چند دقیقه صبر کنید و دوباره درخواست دهید."
+          : t("blacklistHint")}
+      </p>
     </AuthShell>
   );
 }

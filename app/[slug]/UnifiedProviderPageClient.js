@@ -6,13 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useAuth } from "@/app/context/AuthContext";
+import { useLanguage } from "@/app/context/LanguageContext";
 import { authFetch } from "@/app/utils/authHeaders";
 import { mapApiProviderRow } from "@/app/utils/tradeProviderMapper";
-import { useLanguage } from "@/app/context/LanguageContext";
 import { formatLocalizedDigits } from "@/app/utils/persianNumberUtils";
 import SupplierProfileClient from "@/app/tamin/[slug]/SupplierProfileClient";
 import TradeProviderProfileView from "@/app/components/TradeProviderProfileView";
 import ProfileHeaderMetrics from "@/app/components/ProfileHeaderMetrics";
+import OpenChatButton from "@/app/components/messaging/OpenChatButton";
 
 function IconShop({ className }) {
   return (
@@ -344,16 +345,11 @@ export default function UnifiedProviderPageClient({ slug }) {
                   {shopData?.isFollowing ? "دنبال می‌کنید" : "دنبال کردن"}
                 </button>
                 {profile?.id ? (
-                  <Link
-                    href={
-                      auth?.user
-                        ? `/dashboard/messages?u=${profile.id}`
-                        : `/auth/login?next=${encodeURIComponent(`/dashboard/messages?u=${profile.id}`)}`
-                    }
-                    className="flex min-h-11 min-w-[7.5rem] flex-1 items-center justify-center rounded-xl bg-white text-sm font-bold text-emerald-900"
-                  >
-                    ارسال پیام
-                  </Link>
+                  <OpenChatButton
+                    userId={profile.id}
+                    label={hasShop ? t("chatWithShop") || "گفتگو با این فروشگاه" : t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                    className="flex min-h-11 min-w-[7.5rem] flex-1 items-center justify-center gap-2 rounded-xl bg-white text-sm font-bold text-emerald-900"
+                  />
                 ) : null}
                 {phone ? (
                   <a
@@ -422,16 +418,11 @@ export default function UnifiedProviderPageClient({ slug }) {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
           <div className="flex gap-2">
             {profile?.id ? (
-              <Link
-                href={
-                  auth?.user
-                    ? `/dashboard/messages?u=${profile.id}`
-                    : `/auth/login?next=${encodeURIComponent(`/dashboard/messages?u=${profile.id}`)}`
-                }
-                className="flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-600/25"
-              >
-                ارسال پیام
-              </Link>
+              <OpenChatButton
+                userId={profile.id}
+                label={hasShop ? t("chatWithShop") || "گفتگو با این فروشگاه" : t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-600/25"
+              />
             ) : null}
             {phone ? (
               <a

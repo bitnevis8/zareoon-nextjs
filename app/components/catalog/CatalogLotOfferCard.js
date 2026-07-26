@@ -20,9 +20,8 @@ import { getLotSupplierDisplay, getLotSupplierProfileUrl, getLotSupplierProfileS
 import { resolveMediaUrl } from "../../utils/mediaUrl";
 import { getAllowedMeasurementUnits } from "../../utils/productCatalogSchema";
 import { buildHashtagSearchHref } from "../../utils/mobileSearchUtils";
-import { buildDirectMessageHref } from "../../utils/safeAuthRedirect";
 import { API_ENDPOINTS } from "../../config/api";
-import { useAuth } from "../../context/AuthContext";
+import OpenChatButton from "@/app/components/messaging/OpenChatButton";
 import CatalogPdfDownload from "./CatalogPdfDownload";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { GradeMediaBadge } from "./CatalogGradeMediaPanel";
@@ -62,18 +61,6 @@ function StoreIcon({ className = "h-4 w-4" }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3 9l1-4h16l1 4M4 9v10a1 1 0 001 1h4V13h6v7h4a1 1 0 001-1V9"
-      />
-    </svg>
-  );
-}
-
-function ChatIcon({ className = "h-4 w-4" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
       />
     </svg>
   );
@@ -130,7 +117,6 @@ export default function CatalogLotOfferCard({
   embedded = false,
 }) {
   const t = useTranslations("catalog");
-  const auth = useAuth();
   const preview = lotMediaPreview.get(lot.id) || [];
   const coverUrl = resolveMediaUrl(lot.coverImageUrl);
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
@@ -146,7 +132,6 @@ export default function CatalogLotOfferCard({
   const supplierSlug = getLotSupplierProfileSlug(lot);
   const supplierPageImage = getLotSupplierPageImage(lot);
   const canRevealPhone = lotSupplierHasPhone(lot);
-  const messageHref = buildDirectMessageHref(supplierUser?.id, { isLoggedIn: Boolean(auth?.user) });
   const commercialDisplayUrl = supplierSlug ? providerPublicDisplayUrl(supplierSlug) : null;
 
   const unitOptions = useMemo(() => {
@@ -215,11 +200,11 @@ export default function CatalogLotOfferCard({
   };
 
   const supplierBlock =
-    supplierUser && (supplier.name || messageHref || canRevealPhone || supplierProfileUrl) ? (
+    supplierUser && (supplier.name || supplierUser?.id || canRevealPhone || supplierProfileUrl) ? (
       <SectionCard title={t("supplier")}>
         <div className="flex items-start gap-3">
           {supplierProfileUrl ? (
-            <Link href={supplierProfileUrl} className="shrink-0" aria-label={t("viewCommercialPage")}>
+            <Link href={supplierProfileUrl} className="shrink-0" aria-label={t("viewSellerPage")}>
               <SupplierAvatar imageSrc={supplierPageImage} label={supplier.label} />
             </Link>
           ) : (
@@ -232,7 +217,7 @@ export default function CatalogLotOfferCard({
                 href={supplierProfileUrl}
                 className="mt-1 inline-flex max-w-full items-center gap-1.5 text-[12px] font-semibold text-emerald-800 hover:underline"
                 dir="ltr"
-                title={t("viewCommercialPage")}
+                title={t("viewSellerPage")}
               >
                 <StoreIcon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{commercialDisplayUrl}</span>
@@ -244,14 +229,12 @@ export default function CatalogLotOfferCard({
         </div>
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {messageHref ? (
-            <Link
-              href={messageHref}
+          {supplierUser?.id ? (
+            <OpenChatButton
+              userId={supplierUser.id}
+              label={t("chatWithSeller")}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-[13px] font-bold text-emerald-900 transition hover:bg-emerald-100"
-            >
-              <ChatIcon className="h-4 w-4" />
-              {t("sendMessage")}
-            </Link>
+            />
           ) : null}
           {canRevealPhone ? (
             <button
@@ -271,7 +254,7 @@ export default function CatalogLotOfferCard({
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-800 transition hover:bg-slate-50"
             >
               <StoreIcon className="h-4 w-4" />
-              {t("viewCommercialPage")}
+              {t("viewSellerPage")}
             </Link>
           ) : null}
         </div>

@@ -39,23 +39,6 @@ if (!API_BASE_URL) {
   }
 }
 
-// Log the API URL for debugging
-if (typeof window !== 'undefined') {
-  console.log('🔍 API Configuration:');
-  console.log('  - API_BASE_URL:', API_BASE_URL);
-  console.log('  - isProduction:', isProduction);
-  console.log('  - isRealProduction:', isRealProduction);
-  console.log('  - hostname:', window.location.hostname);
-  console.log('  - port:', window.location.port);
-  console.log('  - NODE_ENV:', process.env.NODE_ENV);
-} else {
-  // SSR logging
-  console.log('🔍 API Configuration (SSR):');
-  console.log('  - API_BASE_URL:', API_BASE_URL);
-  console.log('  - isProduction:', isProduction);
-  console.log('  - NODE_ENV:', process.env.NODE_ENV);
-}
-
 export const API_ENDPOINTS = {
   // تمام بخش‌های مربوط به aryafoulad حذف شود (unit-locations, mission-orders, rate-settings, warehouse-module و ...)
   // ... existing code ...
@@ -362,7 +345,13 @@ export const API_ENDPOINTS = {
     agreements: `${API_BASE_URL}/escrow/agreements`,
     agreement: (id) => `${API_BASE_URL}/escrow/agreements/${id}`,
     activate: (id) => `${API_BASE_URL}/escrow/agreements/${id}/activate`,
+    contract: (id) => `${API_BASE_URL}/escrow/agreements/${id}/contract`,
+    signRequestOtp: (id) => `${API_BASE_URL}/escrow/agreements/${id}/sign/request-otp`,
+    signVerify: (id) => `${API_BASE_URL}/escrow/agreements/${id}/sign/verify`,
     paymentIntents: (id) => `${API_BASE_URL}/escrow/agreements/${id}/payment-intents`,
+    zibalStart: (id) => `${API_BASE_URL}/escrow/agreements/${id}/payments/zibal/start`,
+    zibalVerify: `${API_BASE_URL}/escrow/payments/zibal/verify`,
+    zibalVerifyPublic: `${API_BASE_URL}/escrow/payments/zibal/verify-public`,
     confirmPayment: (id) => `${API_BASE_URL}/escrow/agreements/${id}/confirm-payment`,
     confirmMilestone: (id, milestoneId) =>
       `${API_BASE_URL}/escrow/agreements/${id}/milestones/${milestoneId}/confirm`,
@@ -399,6 +388,9 @@ export const API_ENDPOINTS = {
     getLanguages: `${API_BASE_URL}/site-setting/languages`,
     updateLanguages: `${API_BASE_URL}/site-setting/languages`,
     getLanguagesPublic: `${API_BASE_URL}/site-setting/languages/public`,
+    getAuthSignup: `${API_BASE_URL}/site-setting/auth-signup`,
+    updateAuthSignup: `${API_BASE_URL}/site-setting/auth-signup`,
+    getAuthSignupPublic: `${API_BASE_URL}/site-setting/auth-signup/public`,
     getCache: `${API_BASE_URL}/site-setting/cache`,
     updateCache: `${API_BASE_URL}/site-setting/cache`,
     flushCache: `${API_BASE_URL}/site-setting/cache/flush`,
@@ -442,6 +434,29 @@ export const API_ENDPOINTS = {
     checkout: `${API_BASE_URL}/subscription/checkout`,
     verify: `${API_BASE_URL}/subscription/verify`,
     verifyPublic: `${API_BASE_URL}/subscription/verify-public`,
+  },
+  workspace: {
+    /** آدرس مستقیم بک‌اند (فقط برای پروکسی Next) */
+    backendBase: `${API_BASE_URL}/workspace`,
+    /** مسیرهای فرانت از همین‌منشأ می‌روند تا Failed to fetch کمتر شود */
+    catalog: `/api/workspace/catalog`,
+    mine: `/api/workspace/mine`,
+    create: `/api/workspace`,
+    me: `/api/workspace/me`,
+    switch: `/api/workspace/me/switch`,
+    members: `/api/workspace/me/members`,
+    inviteMember: `/api/workspace/me/members`,
+    member: (id) => `/api/workspace/me/members/${id}`,
+    acceptInvite: (id) => `/api/workspace/me/members/${id}/accept`,
+    activities: `/api/workspace/me/activities`,
+    verificationPerson: `/api/workspace/me/verification/person`,
+    verificationBusiness: `/api/workspace/me/verification/business`,
+    verificationRepresentation: `/api/workspace/me/verification/representation`,
+    verificationMe: `/api/workspace/me/verification`,
+    adminPending: `/api/workspace/admin/verification/pending`,
+    adminReviewPerson: (userId) => `/api/workspace/admin/verification/person/${userId}`,
+    adminReviewBusiness: (workspaceId) => `/api/workspace/admin/verification/business/${workspaceId}`,
+    adminReviewRepresentation: (id) => `/api/workspace/admin/verification/representation/${id}`,
   },
   tamin: {
     base: `${API_BASE_URL}/tamin`,
