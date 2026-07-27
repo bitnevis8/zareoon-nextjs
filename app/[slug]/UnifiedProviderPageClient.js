@@ -126,7 +126,6 @@ export default function UnifiedProviderPageClient({ slug }) {
   const { t, language } = useLanguage();
   const [shopData, setShopData] = useState(null);
   const [serviceRaw, setServiceRaw] = useState(null);
-  const [posts, setPosts] = useState([]);
   const [postCount, setPostCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("shop");
@@ -134,55 +133,35 @@ export default function UnifiedProviderPageClient({ slug }) {
 
   useEffect(() => {
     let cancelled = false;
-    const timeout = (ms) => AbortSignal.timeout(ms);
-
     (async () => {
       setLoading(true);
       try {
-        // مسیر بحرانی: فقط فروشگاه + خدمات — اسپرینر را روی posts نگه ندار
-        const [shopRes, svcRes] = await Promise.all([
-          authFetch(API_ENDPOINTS.tamin.public(encodeURIComponent(slug)), {
-            cache: "no-store",
-            signal: timeout(15_000),
-          }),
+        const [shopRes, svcRes, postsRes] = await Promise.all([
+          authFetch(API_ENDPOINTS.tamin.public(encodeURIComponent(slug)), { cache: "no-store" }),
           fetch(API_ENDPOINTS.tradeServiceProviders.getPublicById(encodeURIComponent(slug)), {
             cache: "no-store",
             credentials: "include",
-            signal: timeout(15_000),
           }),
+          fetch(`/api/tamin/public/${encodeURIComponent(slug)}/posts`, { cache: "no-store" }),
         ]);
-        const [shopJson, svcJson] = await Promise.all([
-          shopRes.json().catch(() => ({})),
-          svcRes.json().catch(() => ({})),
+        const [shopJson, svcJson, postsJson] = await Promise.all([
+          shopRes.json(),
+          svcRes.json(),
+          postsRes.json(),
         ]);
         if (cancelled) return;
 
         setShopData(shopRes.ok && shopJson.success ? shopJson.data : null);
         setServiceRaw(svcRes.ok && svcJson.success && svcJson.data ? svcJson.data : null);
+        setPostCount(postsRes.ok && postsJson.success ? (postsJson.data || []).length : 0);
       } catch {
         if (!cancelled) {
           setShopData(null);
           setServiceRaw(null);
+          setPostCount(0);
         }
       } finally {
         if (!cancelled) setLoading(false);
-      }
-
-      // پست‌ها: مستقیم به API (نه پروکسی /api که intermittent 504 می‌دهد) — غیرمسدودکننده
-      try {
-        const postsRes = await fetch(API_ENDPOINTS.tamin.posts(encodeURIComponent(slug)), {
-          cache: "no-store",
-          signal: timeout(12_000),
-        });
-        const postsJson = await postsRes.json().catch(() => ({}));
-        if (cancelled) return;
-        if (postsRes.ok && postsJson.success) {
-          const list = Array.isArray(postsJson.data) ? postsJson.data : [];
-          setPosts(list);
-          setPostCount(list.length);
-        }
-      } catch {
-        /* count stays 0 / prior */
       }
     })();
     return () => {
@@ -419,36 +398,20 @@ export default function UnifiedProviderPageClient({ slug }) {
       </div>
 
       <div className="mx-auto max-w-5xl">
-        {tab === "shop" ? (
-          <div role="tabpanel">
-            <SupplierProfileClient
-              slug={slug}
-              panelOnly
-              panelSection="shop"
-              initialData={shopData}
-            />
-          </div>
-        ) : null}
-        {tab === "services" && hasServices ? (
-          <div role="tabpanel">
+        <div className={tab === "shop" ? "block" : "hidden"} role="tabpanel">
+          <SupplierProfileClient slug={slug} panelOnly panelSection="shop" />
+        </div>
+        {hasServices ? (
+          <div className={tab === "services" ? "block" : "hidden"} role="tabpanel">
             <TradeProviderProfileView
               providerId={String(serviceRaw.profileSlug || serviceRaw.id || slug)}
               panelOnly
-              initialRaw={serviceRaw}
             />
           </div>
         ) : null}
-        {tab === "posts" ? (
-          <div role="tabpanel">
-            <SupplierProfileClient
-              slug={slug}
-              panelOnly
-              panelSection="posts"
-              initialData={shopData}
-              initialPosts={posts}
-            />
-          </div>
-        ) : null}
+        <div className={tab === "posts" ? "block" : "hidden"} role="tabpanel">
+          <SupplierProfileClient slug={slug} panelOnly panelSection="posts" />
+        </div>
       </div>
 
       {!shopData?.isOwner && (profile?.id || phone) ? (

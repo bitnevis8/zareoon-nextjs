@@ -12,24 +12,13 @@ import {
   getLatestAvailableProducts,
   groupAvailableProducts,
 } from "../utils/availableProducts";
-import { useInventoryLots, HOMEPAGE_LOTS_PARAMS } from "../hooks/useCatalogProducts";
-import { STATIC_ROOT_CATEGORIES } from "../data/staticRootCategories";
+import { useFullCatalog, useInventoryLots, HOMEPAGE_LOTS_PARAMS } from "../hooks/useCatalogProducts";
 import { ProductScrollSkeleton } from "./ui/Skeleton";
 import { useProductLandingLinks } from "@/app/hooks/useProductLandingLinks";
 import { productPublicHref } from "@/app/utils/productPublicHref";
 
 const CARD_CLASS =
   "shrink-0 w-[9.75rem] min-[380px]:w-[10.5rem] sm:w-[11.5rem] md:w-[12.25rem] lg:w-[12.75rem] snap-start";
-
-/** Product map from lot.product embeds (+ static roots). Avoids the full-catalog dump on homepage. */
-function productMapFromLots(inventoryLots) {
-  const map = buildProductByIdMap(STATIC_ROOT_CATEGORIES);
-  for (const lot of inventoryLots || []) {
-    const p = lot?.product;
-    if (p?.id != null) map.set(p.id, p);
-  }
-  return map;
-}
 
 export default function LatestAvailableProductsSection({
   inventoryLots: inventoryLotsProp,
@@ -46,26 +35,20 @@ export default function LatestAvailableProductsSection({
   const { language, t, isRTL } = useLanguage();
   const [groupByCategory, setGroupByCategory] = useState(false);
 
-  // Homepage autoFetch: only bounded public lots — product rows come on lot.product (lite).
+  const { products: fetchedProducts, loading: productsLoading } = useFullCatalog({
+    // Homepage: wait until section is shown; do not compete with root tiles.
+    enabled: autoFetch && !allProductsProp,
+  });
   const { lots: fetchedLots, loading: lotsLoading } = useInventoryLots({
     enabled: autoFetch && !inventoryLotsProp,
     params: autoFetch ? HOMEPAGE_LOTS_PARAMS : undefined,
   });
 
   const inventoryLots = autoFetch ? fetchedLots : inventoryLotsProp || [];
-  const allProducts = allProductsProp || [];
-  const loading = autoFetch ? lotsLoading : loadingProp;
+  const allProducts = autoFetch ? fetchedProducts : allProductsProp || [];
+  const loading = autoFetch ? productsLoading || lotsLoading : loadingProp;
 
-  const productById = useMemo(() => {
-    if (allProducts.length) {
-      const map = buildProductByIdMap(allProducts);
-      for (const root of STATIC_ROOT_CATEGORIES) map.set(root.id, root);
-      return map;
-    }
-    return productMapFromLots(inventoryLots);
-  }, [allProducts, inventoryLots]);
-
-  const canGroupByCategory = Boolean(showGroupToggle && allProducts.length > 0);
+  const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
 
   const sellerVerificationMap = useMemo(
     () => buildSellerVerificationMap(inventoryLots),
@@ -115,7 +98,7 @@ export default function LatestAvailableProductsSection({
         <h2 className="max-w-full text-start text-base font-bold leading-snug tracking-tight text-slate-900 sm:text-lg">
           {sectionTitle}
         </h2>
-        {canGroupByCategory ? (
+        {showGroupToggle ? (
           <label className="inline-flex w-full cursor-pointer items-center justify-between gap-3 select-none sm:w-auto sm:justify-start">
             <span className="text-xs text-slate-600 sm:text-sm">{t("groupByCategory")}</span>
             <span className="relative inline-flex h-6 w-11 shrink-0 items-center">
@@ -137,7 +120,7 @@ export default function LatestAvailableProductsSection({
           <ProductScrollSkeleton count={6} />
         </div>
       ) : availableProducts.length > 0 ? (
-        groupByCategory && canGroupByCategory ? (
+        groupByCategory && showGroupToggle ? (
           <div className="space-y-4 lg:space-y-5">
             {availableProductsByCategory.map((group) => (
               <section key={group.id}>

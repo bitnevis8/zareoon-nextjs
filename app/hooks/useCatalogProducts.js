@@ -1,36 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import useSWR, { preload, mutate } from "swr";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { STATIC_ROOT_CATEGORIES, getStaticRootById } from "@/app/data/staticRootCategories";
 
 const DEDUPE_MS = 60_000;
-
-/**
- * Evidence (prod probe 2026-07-27):
- * - GET ?parentId=1057&lite=1 alone ≈ 0.8–2s / tiny body → not MySQL-bound for that key
- * - GET ?lite=1 (full tree) ≈ 10.6MB / multi-second → saturates browser connections to api.zareoon.ir
- * - Old warmup: mount-immediate, concurrency 5–6, all L2, full lite + 2 lot feeds
- *   → provisional-header hangs (~60s) on unrelated requests (e.g. near «آخرین فروشگاه‌ها»)
- *
- * Policy: keep warmup, never remove; make it idle/post-paint, tiny, concurrency-capped.
- * Kill-switch: set enabled=false if RUM still shows contention after this.
- */
-export const CATALOG_WARMUP_CONFIG = {
-  enabled: true,
-  /** Max parallel API prefetches (browser + origin friendly) */
-  concurrency: 2,
-  /** requestIdleCallback / fallback timeout after first paint */
-  idleTimeoutMs: 3500,
-  /** Extra settle after window load before idle wait */
-  postLoadDelayMs: 400,
-  /** Prefetch /catalog/{id} shells for roots (queued, same concurrency) */
-  prefetchRouteShells: true,
-  /** Network: skip warmup on Save-Data / 2g */
-  skipOnSlowNetwork: true,
-};
 
 function catalogUrl({ parentId, isOrderable, lite = true } = {}) {
   const params = new URLSearchParams();
@@ -93,6 +69,8 @@ const DEFAULT_PUBLIC_LOTS_PARAMS = {
   withSupplier: "1",
 };
 
+const LOTS_KEY = inventoryLotsUrl(DEFAULT_PUBLIC_LOTS_PARAMS);
+
 /** فید صفحه اصلی — کم‌حجم و مرتب‌شده */
 export const HOMEPAGE_LOTS_PARAMS = {
   public: "1",
@@ -117,7 +95,7 @@ export function useRootCategories() {
   };
 }
 
-/** Direct children of a category (optionally warmed after idle). */
+/** Direct children of a category (warmed on site entry). */
 export function useCatalogChildren(parentId, { enabled = true, ...options } = {}) {
   const key = enabled && parentId != null && parentId !== "" ? childrenKey(parentId) : null;
   const { data, error, isLoading, isValidating, mutate: revalidate } = useSWR(key, jsonFetcher, {
@@ -186,6 +164,10 @@ export function useInventoryLots({ enabled = true, params, ...options } = {}) {
   };
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function prefetchCatalogChildren(parentId) {
   if (parentId == null || parentId === "") return Promise.resolve([]);
   return preload(childrenKey(parentId), jsonFetcher);
@@ -196,7 +178,6 @@ export function prefetchCatalogProduct(id) {
   return preload(productByIdUrl(id), productFetcher);
 }
 
-/** @deprecated Prefer on-demand useFullCatalog (mega menu / catalog page). Never call from warmup. */
 export function prefetchFullCatalogLite() {
   return preload(FULL_LITE_KEY, jsonFetcher);
 }
@@ -210,10 +191,9 @@ export async function seedProductCache(product) {
   await mutate(productByIdUrl(product.id), product, { revalidate: false });
 }
 
-async function prefetchPool(ids, worker, concurrency = CATALOG_WARMUP_CONFIG.concurrency) {
+async function prefetchPool(ids, worker, concurrency = 4) {
   const queue = [...ids];
-  const limit = Math.max(1, Math.min(concurrency, 3, queue.length || 1));
-  const runners = Array.from({ length: Math.min(limit, queue.length) }, async () => {
+  const runners = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
     while (queue.length) {
       const id = queue.shift();
       try {
@@ -226,221 +206,110 @@ async function prefetchPool(ids, worker, concurrency = CATALOG_WARMUP_CONFIG.con
   await Promise.all(runners);
 }
 
-function isSlowNetwork() {
-  if (typeof navigator === "undefined") return false;
-  if (navigator.connection?.saveData) return true;
-  const type = String(navigator.connection?.effectiveType || "").toLowerCase();
-  return type === "slow-2g" || type === "2g";
-}
-
-function waitForWindowLoad() {
-  if (typeof window === "undefined") return Promise.resolve();
-  if (document.readyState === "complete") return Promise.resolve();
-  return new Promise((resolve) => {
-    window.addEventListener("load", () => resolve(), { once: true });
-  });
-}
-
-/** First paint (double rAF) → optional load → requestIdleCallback. */
-function whenBrowserIdle({ timeoutMs = CATALOG_WARMUP_CONFIG.idleTimeoutMs, cancelled } = {}) {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined") {
-      resolve();
-      return;
-    }
-
-    let idleId = null;
-    let timerId = null;
-    let finished = false;
-
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      if (idleId != null && typeof cancelIdleCallback === "function") {
-        try {
-          cancelIdleCallback(idleId);
-        } catch {
-          /* ignore */
-        }
-      }
-      if (timerId != null) clearTimeout(timerId);
-      resolve();
-    };
-
-    const armIdle = () => {
-      if (cancelled?.current) {
-        finish();
-        return;
-      }
-      if (typeof requestIdleCallback === "function") {
-        idleId = requestIdleCallback(() => finish(), { timeout: timeoutMs });
-      } else {
-        timerId = setTimeout(finish, Math.min(timeoutMs, 2000));
-      }
-    };
-
-    // After first paint
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        waitForWindowLoad().then(() => {
-          if (cancelled?.current) {
-            finish();
-            return;
-          }
-          const delay = CATALOG_WARMUP_CONFIG.postLoadDelayMs || 0;
-          if (delay > 0) {
-            timerId = setTimeout(armIdle, delay);
-          } else {
-            armIdle();
-          }
-        });
-      });
-    });
-  });
-}
-
+/**
+ * Site-wide warmup: starts as soon as the app mounts.
+ * 1) All root children + root product rows (parallel)
+ * 2) Grandchildren of those children (so میوه etc. are ready)
+ * 3) Full lite catalog + inventory lots
+ */
 let siteWarmupStarted = false;
 
-/**
- * Light site warmup — essential root children only.
- * Does NOT fetch full catalog (~10MB), L2 trees, or inventory feeds (those stay lazy).
- */
 export async function runSiteCatalogWarmup({ cancelled } = {}) {
-  const cfg = CATALOG_WARMUP_CONFIG;
-  if (!cfg.enabled) {
-    return { skipped: true, reason: "CATALOG_WARMUP_CONFIG.enabled=false" };
-  }
-  if (cfg.skipOnSlowNetwork && isSlowNetwork()) {
-    return { skipped: true, reason: "slow-network-or-save-data" };
-  }
+  const isCancelled = () => Boolean(cancelled?.current);
 
-  await whenBrowserIdle({ timeoutMs: cfg.idleTimeoutMs, cancelled });
-  if (cancelled?.current) return { skipped: true, reason: "cancelled" };
-
-  // Local only — no network
+  // Seed static roots into product cache immediately
   await Promise.all(STATIC_ROOT_CATEGORIES.map((root) => seedProductCache(root)));
-  if (cancelled?.current) return { skipped: true, reason: "cancelled" };
+  if (isCancelled()) return;
 
   const rootIds = STATIC_ROOT_CATEGORIES.map((r) => r.id);
-  // Agriculture first for homepage intent, then remaining roots
+
+  // Priority: agriculture first, then the rest in parallel batches
   const prioritized = [10000, ...rootIds.filter((id) => id !== 10000)];
 
   await prefetchPool(
     prioritized,
     async (id) => {
-      if (cancelled?.current) return;
-      // Children only — root product rows are already seeded from static JSON
-      const kids = await prefetchCatalogChildren(id);
-      for (const kid of kids || []) {
-        if (kid?.id != null) seedProductCache(kid);
-      }
+      if (isCancelled()) return;
+      await Promise.all([prefetchCatalogChildren(id), prefetchCatalogProduct(id)]);
     },
-    cfg.concurrency
+    6
   );
+  if (isCancelled()) return;
 
-  return { skipped: false, warmedRoots: prioritized.length };
+  // Grandchildren: for each root, take its children and prefetch their children
+  const allL2Ids = [];
+  for (const rootId of prioritized) {
+    if (isCancelled()) return;
+    try {
+      const kids = await prefetchCatalogChildren(rootId);
+      for (const kid of kids || []) {
+        if (kid?.id != null && !kid.isOrderable) {
+          allL2Ids.push(kid.id);
+          seedProductCache(kid);
+        } else if (kid?.id != null) {
+          seedProductCache(kid);
+        }
+      }
+    } catch {
+      // continue
+    }
+  }
+  if (isCancelled()) return;
+
+  // Agriculture L2 first (میوه و …), then others
+  const uniqueL2 = [...new Set(allL2Ids)];
+  await prefetchPool(
+    uniqueL2,
+    async (id) => {
+      if (isCancelled()) return;
+      await Promise.all([prefetchCatalogChildren(id), prefetchCatalogProduct(id)]);
+    },
+    5
+  );
+  if (isCancelled()) return;
+
+  await Promise.allSettled([
+    prefetchFullCatalogLite(),
+    prefetchInventoryLots(HOMEPAGE_LOTS_PARAMS),
+    prefetchInventoryLots(DEFAULT_PUBLIC_LOTS_PARAMS),
+  ]);
 }
 
-/**
- * Boot hook: after first render + idle. Skipped on dashboard via SiteChrome.
- */
-export function useSiteCatalogWarmup({ enabled = true } = {}) {
+export function useSiteCatalogWarmup() {
   const cancelled = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
     cancelled.current = false;
-    if (!enabled || !CATALOG_WARMUP_CONFIG.enabled) return undefined;
     if (siteWarmupStarted) return undefined;
     siteWarmupStarted = true;
 
-    let alive = true;
-
-    (async () => {
-      const result = await runSiteCatalogWarmup({ cancelled });
-      if (!alive || cancelled.current || result?.skipped) return;
-
-      if (!CATALOG_WARMUP_CONFIG.prefetchRouteShells) return;
-
-      // Route shells after API warm — same low concurrency, idle-yielded
-      await whenBrowserIdle({ timeoutMs: 2000, cancelled });
-      if (cancelled.current) return;
-
-      const routes = STATIC_ROOT_CATEGORIES.map((r) => `/catalog/${r.id}`);
-      await prefetchPool(
-        routes,
-        async (href) => {
-          if (cancelled.current) return;
-          try {
-            router.prefetch(href);
-          } catch {
-            /* ignore */
-          }
-          // tiny yield so we don't burst the Next router
-          await new Promise((r) => setTimeout(r, 50));
-        },
-        CATALOG_WARMUP_CONFIG.concurrency
-      );
-    })().catch(() => {});
-
-    return () => {
-      alive = false;
-      cancelled.current = true;
-    };
-  }, [enabled, router]);
-}
-
-/**
- * Page-local lazy warm: only children of the nodes currently on screen.
- * Must NOT start the global site warmup (that was a previous bug).
- */
-export function useBackgroundCatalogWarmup(nodes = []) {
-  const idsKey = useMemo(() => {
-    const ids = (nodes || [])
-      .filter((n) => n?.id != null && !n.isOrderable)
-      .map((n) => Number(n.id))
-      .filter((n) => Number.isFinite(n))
-      .slice(0, 12);
-    return ids.join(",");
-  }, [nodes]);
-
-  useEffect(() => {
-    if (!idsKey || !CATALOG_WARMUP_CONFIG.enabled) return undefined;
-    if (CATALOG_WARMUP_CONFIG.skipOnSlowNetwork && isSlowNetwork()) return undefined;
-
-    const cancelled = { current: false };
-    const ids = idsKey.split(",").map(Number);
-
-    (async () => {
-      for (const item of nodes || []) {
-        if (item?.id) seedProductCache(item);
+    // Prefetch Next.js route shells for root catalog pages
+    for (const root of STATIC_ROOT_CATEGORIES) {
+      try {
+        router.prefetch(`/catalog/${root.id}`);
+      } catch {
+        // ignore
       }
-      await whenBrowserIdle({ timeoutMs: 2000, cancelled });
-      if (cancelled.current) return;
-      await prefetchPool(
-        ids,
-        async (id) => {
-          if (cancelled.current) return;
-          await prefetchCatalogChildren(id);
-        },
-        CATALOG_WARMUP_CONFIG.concurrency
-      );
-    })().catch(() => {});
+    }
+
+    runSiteCatalogWarmup({ cancelled }).catch(() => {});
 
     return () => {
       cancelled.current = true;
     };
-    // nodes content is summarized by idsKey; seed uses latest nodes from closure
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idsKey]);
+  }, [router]);
 }
 
-export {
-  catalogUrl,
-  childrenKey,
-  FULL_LITE_KEY,
-  inventoryLotsUrl,
-  jsonFetcher,
-  productFetcher,
-  STATIC_ROOT_CATEGORIES,
-};
+/** @deprecated use useSiteCatalogWarmup — kept for callers that pass a list */
+export function useBackgroundCatalogWarmup(roots = []) {
+  useSiteCatalogWarmup();
+  // Still seed any extra nodes passed in
+  useEffect(() => {
+    for (const item of roots || []) {
+      if (item?.id) seedProductCache(item);
+    }
+  }, [roots]);
+}
+
+export { catalogUrl, childrenKey, FULL_LITE_KEY, inventoryLotsUrl, jsonFetcher, productFetcher, STATIC_ROOT_CATEGORIES };

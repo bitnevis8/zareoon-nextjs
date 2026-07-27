@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/context/AuthContext";
-import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import SupplierPostComposer from "./SupplierPostComposer";
 import SupplierPostItem from "./SupplierPostItem";
@@ -72,79 +71,39 @@ function ProfileFieldsSection({ profile }) {
   );
 }
 
-export default function SupplierProfileClient({
-  slug,
-  embedded = false,
-  panelOnly = false,
-  panelSection = "shop",
-  /** دادهٔ از قبل لودشده از صفحهٔ یکپارچه — از refetch اجباری جلوگیری می‌کند */
-  initialData = null,
-  initialPosts = null,
-  initialReviews = null,
-}) {
+export default function SupplierProfileClient({ slug, embedded = false, panelOnly = false, panelSection = "shop" }) {
   const t = useTranslations("supplier");
   const { t: tSite } = useLanguage();
   const auth = useAuth();
   const router = useRouter();
-  const [data, setData] = useState(initialData);
-  const [posts, setPosts] = useState(() => (Array.isArray(initialPosts) ? initialPosts : []));
-  const [reviews, setReviews] = useState(() => (Array.isArray(initialReviews) ? initialReviews : []));
-  const [loading, setLoading] = useState(!initialData);
+  const [data, setData] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const load = useCallback(async ({ soft = false } = {}) => {
-    // مستقیم به API — پروکسی /api/tamin گاهی تا ۶۰s → 504 می‌دهد و صفحه را بلوکه می‌کند
-    const timeout = (ms) => AbortSignal.timeout(ms);
-    try {
-      const [profRes, postsRes, revRes] = await Promise.all([
-        authFetch(API_ENDPOINTS.tamin.public(encodeURIComponent(slug)), {
-          cache: "no-store",
-          signal: timeout(15_000),
-        }),
-        fetch(API_ENDPOINTS.tamin.posts(encodeURIComponent(slug)), {
-          cache: "no-store",
-          signal: timeout(12_000),
-        }),
-        fetch(API_ENDPOINTS.tamin.reviews(encodeURIComponent(slug)), {
-          cache: "no-store",
-          signal: timeout(12_000),
-        }),
-      ]);
-      const [prof, postsJson, revJson] = await Promise.all([
-        profRes.json().catch(() => ({})),
-        postsRes.json().catch(() => ({})),
-        revRes.json().catch(() => ({})),
-      ]);
-      if (prof.success) setData(prof.data);
-      if (postsJson.success) setPosts(postsJson.data || []);
-      if (revJson.success) setReviews(revJson.data || []);
-    } catch {
-      if (!soft) {
-        /* keep prior data if any */
-      }
-    } finally {
-      setLoading(false);
-    }
+  const load = useCallback(async () => {
+    const [profRes, postsRes, revRes] = await Promise.all([
+      authFetch(`/api/tamin/public/${encodeURIComponent(slug)}`),
+      fetch(`/api/tamin/public/${encodeURIComponent(slug)}/posts`),
+      fetch(`/api/tamin/public/${encodeURIComponent(slug)}/reviews`),
+    ]);
+    const prof = await profRes.json();
+    const postsJson = await postsRes.json();
+    const revJson = await revRes.json();
+    if (prof.success) setData(prof.data);
+    if (postsJson.success) setPosts(postsJson.data || []);
+    if (revJson.success) setReviews(revJson.data || []);
+    setLoading(false);
   }, [slug]);
 
   useEffect(() => {
-    if (initialData) {
-      setData(initialData);
-      setLoading(false);
-      if (Array.isArray(initialPosts)) setPosts(initialPosts);
-      if (Array.isArray(initialReviews)) setReviews(initialReviews);
-      // soft refresh in background — never block UI
-      load({ soft: true });
-      return undefined;
-    }
-    setLoading(true);
     load();
-    return undefined;
-  }, [load, initialData, initialPosts, initialReviews]);
+  }, [load]);
 
   const toggleFollow = async () => {
     if (!auth?.user) {
