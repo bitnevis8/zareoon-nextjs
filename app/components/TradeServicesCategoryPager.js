@@ -167,9 +167,13 @@ export default function TradeServicesCategoryPager({
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="relative overflow-visible">
+      {/*
+        فلش‌ها absolute هستند و فضای لایه‌بندی نمی‌گیرند.
+        با -mx به حاشیهٔ موجود باکس می‌رسند (بدون پدینگ اضافه / بدون جمع‌شدن کارت‌ها).
+      */}
+      <div className="relative -mx-3 sm:-mx-5 lg:-mx-6">
         <div
-          className="select-none"
+          className="select-none px-3 sm:px-5 lg:px-6"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -202,7 +206,7 @@ export default function TradeServicesCategoryPager({
         </div>
 
         {pageCount > 1 ? (
-          <>
+          <div className="pointer-events-none absolute inset-0 z-30">
             <button
               type="button"
               onClick={onLeftArrow}
@@ -223,7 +227,7 @@ export default function TradeServicesCategoryPager({
             >
               <ChevronRight className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
             </button>
-          </>
+          </div>
         ) : null}
       </div>
 
