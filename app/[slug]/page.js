@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import UnifiedProviderPageClient from "./UnifiedProviderPageClient";
-import { API_ENDPOINTS } from "@/app/config/api";
+import { getServerApiBaseUrl, fetchWithTimeout } from "@/app/config/serverApiBase";
 
 /** مسیرهای سطح‌اول که نباید به‌عنوان نام فروشگاه تفسیر شوند (هم‌تراز RESERVED در API) */
 const STATIC_ROOT_SEGMENTS = new Set([
@@ -40,9 +40,8 @@ const STATIC_ROOT_SEGMENTS = new Set([
 
 async function resolvePublicSlug(slug) {
   try {
-    const res = await fetch(API_ENDPOINTS.publicSlug.resolve(slug), {
-      cache: "no-store",
-    });
+    const url = `${getServerApiBaseUrl()}/public-slug/resolve/${encodeURIComponent(slug)}`;
+    const res = await fetchWithTimeout(url, { cache: "no-store" }, 10000);
     const json = await res.json();
     if (json.success) return json.data;
   } catch {

@@ -133,27 +133,65 @@ export default function UnifiedProviderPageClient({ slug }) {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+
     (async () => {
       setLoading(true);
       try {
-        const [shopRes, svcRes, postsRes] = await Promise.all([
-          authFetch(API_ENDPOINTS.tamin.public(encodeURIComponent(slug)), { cache: "no-store" }),
+        // همه از مرورگر مستقیم به API — نه پروکسی Next (که با CF Proxy ممکن است هنگ کند)
+        const [shopSettled, svcSettled, postsSettled] = await Promise.allSettled([
+          authFetch(API_ENDPOINTS.tamin.public(encodeURIComponent(slug)), {
+            cache: "no-store",
+            signal: controller.signal,
+          }),
           fetch(API_ENDPOINTS.tradeServiceProviders.getPublicById(encodeURIComponent(slug)), {
             cache: "no-store",
             credentials: "include",
+            signal: controller.signal,
           }),
-          fetch(`/api/tamin/public/${encodeURIComponent(slug)}/posts`, { cache: "no-store" }),
+          fetch(API_ENDPOINTS.tamin.posts(encodeURIComponent(slug)), {
+            cache: "no-store",
+            signal: controller.signal,
+          }),
         ]);
-        const [shopJson, svcJson, postsJson] = await Promise.all([
-          shopRes.json(),
-          svcRes.json(),
-          postsRes.json(),
-        ]);
+
         if (cancelled) return;
 
-        setShopData(shopRes.ok && shopJson.success ? shopJson.data : null);
-        setServiceRaw(svcRes.ok && svcJson.success && svcJson.data ? svcJson.data : null);
-        setPostCount(postsRes.ok && postsJson.success ? (postsJson.data || []).length : 0);
+        let shopDataNext = null;
+        let serviceRawNext = null;
+        let postCountNext = 0;
+
+        if (shopSettled.status === "fulfilled") {
+          try {
+            const shopJson = await shopSettled.value.json();
+            if (shopSettled.value.ok && shopJson.success) shopDataNext = shopJson.data;
+          } catch {
+            /* ignore */
+          }
+        }
+        if (svcSettled.status === "fulfilled") {
+          try {
+            const svcJson = await svcSettled.value.json();
+            if (svcSettled.value.ok && svcJson.success && svcJson.data) serviceRawNext = svcJson.data;
+          } catch {
+            /* ignore */
+          }
+        }
+        if (postsSettled.status === "fulfilled") {
+          try {
+            const postsJson = await postsSettled.value.json();
+            if (postsSettled.value.ok && postsJson.success) {
+              postCountNext = (postsJson.data || []).length;
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+
+        setShopData(shopDataNext);
+        setServiceRaw(serviceRawNext);
+        setPostCount(postCountNext);
       } catch {
         if (!cancelled) {
           setShopData(null);
@@ -161,11 +199,14 @@ export default function UnifiedProviderPageClient({ slug }) {
           setPostCount(0);
         }
       } finally {
+        clearTimeout(timer);
         if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, [slug]);
 

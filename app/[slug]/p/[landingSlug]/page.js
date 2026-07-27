@@ -1,12 +1,14 @@
 import { getLocale } from "next-intl/server";
 import ProductLandingPublicClient from "./ProductLandingPublicClient";
+import { getServerApiBaseUrl, fetchWithTimeout } from "@/app/config/serverApiBase";
 
 async function fetchPublicLanding(shopSlug, landingSlug) {
-  const base = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "https://api.zareoon.ir" : "http://localhost:3000");
   try {
-    const res = await fetch(`${base}/product-landing/public/${encodeURIComponent(shopSlug)}/${encodeURIComponent(landingSlug)}`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetchWithTimeout(
+      `${getServerApiBaseUrl()}/product-landing/public/${encodeURIComponent(shopSlug)}/${encodeURIComponent(landingSlug)}`,
+      { next: { revalidate: 60 } },
+      15000
+    );
     const json = await res.json();
     if (!json?.success || !json.data?.landing) return null;
     return json.data;

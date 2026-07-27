@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "@/app/config/api";
+import { getServerApiBaseUrl, fetchWithTimeout } from "@/app/config/serverApiBase";
 
 export async function proxyTamin(request, backendPath, { method } = {}) {
   const cookies = request.headers.get("cookie");
@@ -21,10 +21,10 @@ export async function proxyTamin(request, backendPath, { method } = {}) {
     init.body = await request.text();
   }
 
-  const url = `${API_ENDPOINTS.tamin.base}${backendPath}${request.nextUrl.search || ""}`;
+  const url = `${getServerApiBaseUrl()}/tamin${backendPath}${request.nextUrl.search || ""}`;
 
   try {
-    const backendResponse = await fetch(url, init);
+    const backendResponse = await fetchWithTimeout(url, init, 15000);
     const responseContentType = backendResponse.headers.get("content-type") || "application/json";
     const body = await backendResponse.text();
 
@@ -33,11 +33,16 @@ export async function proxyTamin(request, backendPath, { method } = {}) {
       headers: { "Content-Type": responseContentType },
     });
   } catch (error) {
-    const refused = error?.cause?.code === "ECONNREFUSED" || error?.message?.includes("fetch failed");
+    const refused =
+      error?.name === "AbortError" ||
+      error?.cause?.code === "ECONNREFUSED" ||
+      error?.message?.includes("fetch failed");
     return Response.json(
       {
         success: false,
-        message: refused ? "سرور API در دسترس نیست (پورت 3000)" : "خطا در ارتباط با سرور تأمین",
+        message: refused
+          ? "ارتباط با API برقرار نشد یا زمان‌پر شد"
+          : "خطا در ارتباط با سرور تأمین",
       },
       { status: 503 }
     );
