@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "@/app/config/api";
+import { getServerApiBaseUrl, fetchWithTimeout } from "@/app/config/serverApiBase";
 
 function pickMeta(product, lang = "fa") {
   const tr = product?.translations?.[lang] || {};
@@ -27,8 +27,8 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zareoon.ir";
   try {
-    const url = API_ENDPOINTS.supplier.products.getById(id);
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const url = `${getServerApiBaseUrl()}/supplier/product/${encodeURIComponent(id)}`;
+    const res = await fetchWithTimeout(url, { next: { revalidate: 300 } }, 10000);
     const json = await res.json();
     const product = json?.data;
     if (!product) {

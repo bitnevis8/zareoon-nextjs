@@ -99,6 +99,8 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
     (async () => {
       setLoading(true);
       setMissing(false);
@@ -106,6 +108,7 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
         const res = await fetch(API_ENDPOINTS.tradeServiceProviders.getPublicById(encodeURIComponent(providerId)), {
           cache: "no-store",
           credentials: "include",
+          signal: controller.signal,
         });
         const json = await res.json();
         if (cancelled) return;
@@ -123,11 +126,14 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
       } catch {
         if (!cancelled) setMissing(true);
       } finally {
+        clearTimeout(timer);
         if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, [providerId, t, language]);
 

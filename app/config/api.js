@@ -14,29 +14,44 @@ const isRealProduction = (() => {
          false;
 })();
 
-let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_BASE_URL) {
-  if (isProduction) {
-    // در production همیشه از api.zareoon.ir استفاده کن
-    API_BASE_URL = 'https://api.zareoon.ir';
-  } else {
-    // توسعه: از آدرس فرانت استفاده کن و پورت را به 3000 (بک‌اند) نگاشت بده
-    try {
-      if (typeof window !== 'undefined' && window.location) {
-        const loc = window.location;
-        const host = loc.hostname; // آی‌پی یا دامنه لوکال
-        // اگر پورتی وجود دارد روی فرانت، API را روی 3000 هدف بگیر
-        const protocol = loc.protocol || 'http:';
-        API_BASE_URL = `${protocol}//${host}:3000`;
-      } else {
-        // SSR توسعه
-        API_BASE_URL = 'http://localhost:3000';
-      }
-    } catch {
-      API_BASE_URL = 'http://localhost:3000';
-    }
+/**
+ * مرورگر → دامنهٔ عمومی (می‌تواند پشت Cloudflare باشد)
+ * سرور Next (SSR / Route Handler) → origin داخلی تا از لبه CF رد نشود
+ */
+function resolveApiBaseUrl() {
+  if (typeof window === "undefined") {
+    const internal = String(process.env.INTERNAL_API_URL || process.env.API_INTERNAL_URL || "").trim();
+    if (internal) return internal.replace(/\/$/, "");
+    if (isProduction) return "http://127.0.0.1:3060";
+    return "http://localhost:3000";
   }
+
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return String(process.env.NEXT_PUBLIC_API_URL).replace(/\/$/, "");
+  }
+
+  if (isProduction) {
+    return "https://api.zareoon.ir";
+  }
+
+  try {
+    if (typeof window !== "undefined" && window.location) {
+      const loc = window.location;
+      const host = loc.hostname;
+      const protocol = loc.protocol || "http:";
+      return `${protocol}//${host}:3000`;
+    }
+  } catch {
+    /* ignore */
+  }
+  return "http://localhost:3000";
+}
+
+let API_BASE_URL = resolveApiBaseUrl();
+
+/** برای کد سمت‌سرور که هنوز مستقیم از این ثابت استفاده می‌کند */
+export function getApiBaseUrl() {
+  return resolveApiBaseUrl();
 }
 
 export const API_ENDPOINTS = {

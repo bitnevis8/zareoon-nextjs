@@ -1,22 +1,18 @@
-import { NextResponse } from 'next/server';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { NextResponse } from "next/server";
+import { getServerApiBaseUrl, fetchWithTimeout } from "@/app/config/serverApiBase";
 
 export async function GET() {
   try {
-    const response = await fetch(`${API_URL}/user/user/getAll`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const response = await fetchWithTimeout(`${getServerApiBaseUrl()}/user/user/getAll`, {
+      headers: { "Content-Type": "application/json" },
     });
-
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
     return NextResponse.json(
-      { success: false, message: 'خطا در دریافت اطلاعات کاربران' },
+      { success: false, message: "خطا در دریافت اطلاعات کاربران" },
       { status: 500 }
     );
   }
-} 
+}

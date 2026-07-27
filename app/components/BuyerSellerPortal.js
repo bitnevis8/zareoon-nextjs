@@ -197,14 +197,38 @@ export default function BuyerSellerPortal({ className = "" }) {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
     (async () => {
       setLoadingList(true);
       try {
-        const [shopsRes, svcRes] = await Promise.all([
-          fetch(`${API_ENDPOINTS.tamin.recentShops}?limit=10`, { cache: "no-store" }),
-          fetch(`${API_ENDPOINTS.tradeServiceProviders.getPublic}?limit=10`, { cache: "no-store" }),
+        const [shopsSettled, svcSettled] = await Promise.allSettled([
+          fetch(`${API_ENDPOINTS.tamin.recentShops}?limit=10`, {
+            cache: "no-store",
+            signal: controller.signal,
+          }),
+          fetch(`${API_ENDPOINTS.tradeServiceProviders.getPublic}?limit=10`, {
+            cache: "no-store",
+            signal: controller.signal,
+          }),
         ]);
-        const [shopsJson, svcJson] = await Promise.all([shopsRes.json(), svcRes.json()]);
+
+        let shopsJson = {};
+        let svcJson = {};
+        if (shopsSettled.status === "fulfilled") {
+          try {
+            shopsJson = await shopsSettled.value.json();
+          } catch {
+            /* ignore */
+          }
+        }
+        if (svcSettled.status === "fulfilled") {
+          try {
+            svcJson = await svcSettled.value.json();
+          } catch {
+            /* ignore */
+          }
+        }
         if (cancelled) return;
 
         const shopRows = Array.isArray(shopsJson?.data) ? shopsJson.data : [];
@@ -253,11 +277,14 @@ export default function BuyerSellerPortal({ className = "" }) {
           setServices([]);
         }
       } finally {
+        clearTimeout(timer);
         if (!cancelled) setLoadingList(false);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, []);
 

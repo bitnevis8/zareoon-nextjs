@@ -7,6 +7,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { STATIC_ROOT_CATEGORIES, getStaticRootById } from "@/app/data/staticRootCategories";
 
 const DEDUPE_MS = 60_000;
+const FETCH_TIMEOUT_MS = 12_000;
 
 function catalogUrl({ parentId, isOrderable, lite = true } = {}) {
   const params = new URLSearchParams();
@@ -25,17 +26,25 @@ function productByIdUrl(id) {
   return API_ENDPOINTS.supplier.products.getById(id);
 }
 
+async function fetchJson(url, timeoutMs = FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function jsonFetcher(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
+  const json = await fetchJson(url);
   return Array.isArray(json?.data) ? json.data : [];
 }
 
 async function productFetcher(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
+  const json = await fetchJson(url);
   return json?.data || null;
 }
 
@@ -207,12 +216,22 @@ async function prefetchPool(ids, worker, concurrency = 4) {
 }
 
 /**
- * Site-wide warmup: starts as soon as the app mounts.
- * 1) All root children + root product rows (parallel)
- * 2) Grandchildren of those children (so میوه etc. are ready)
- * 3) Full lite catalog + inventory lots
+ * Site-wide warmup: starts after first paint / idle so critical UI stays fast.
+ * 1) Root categories + product rows
+ * 2) One level of grandchildren (standard browse depth)
+ * 3) Lite catalog + public inventory feeds
  */
 let siteWarmupStarted = false;
+
+function scheduleIdle(fn, timeout = 2000) {
+  if (typeof window === "undefined") return () => {};
+  if (typeof window.requestIdleCallback === "function") {
+    const id = window.requestIdleCallback(() => fn(), { timeout });
+    return () => window.cancelIdleCallback?.(id);
+  }
+  const id = window.setTimeout(fn, Math.min(800, timeout));
+  return () => window.clearTimeout(id);
+}
 
 export async function runSiteCatalogWarmup({ cancelled } = {}) {
   const isCancelled = () => Boolean(cancelled?.current);
@@ -232,7 +251,7 @@ export async function runSiteCatalogWarmup({ cancelled } = {}) {
       if (isCancelled()) return;
       await Promise.all([prefetchCatalogChildren(id), prefetchCatalogProduct(id)]);
     },
-    6
+    4
   );
   if (isCancelled()) return;
 
@@ -256,15 +275,15 @@ export async function runSiteCatalogWarmup({ cancelled } = {}) {
   }
   if (isCancelled()) return;
 
-  // Agriculture L2 first (میوه و …), then others
-  const uniqueL2 = [...new Set(allL2Ids)];
+  // Cap L2 warmup for speed — first 24 nodes (agriculture-heavy list already prioritized)
+  const uniqueL2 = [...new Set(allL2Ids)].slice(0, 24);
   await prefetchPool(
     uniqueL2,
     async (id) => {
       if (isCancelled()) return;
       await Promise.all([prefetchCatalogChildren(id), prefetchCatalogProduct(id)]);
     },
-    5
+    3
   );
   if (isCancelled()) return;
 
@@ -284,7 +303,7 @@ export function useSiteCatalogWarmup() {
     if (siteWarmupStarted) return undefined;
     siteWarmupStarted = true;
 
-    // Prefetch Next.js route shells for root catalog pages
+    // Prefetch Next.js route shells for root catalog pages (cheap)
     for (const root of STATIC_ROOT_CATEGORIES) {
       try {
         router.prefetch(`/catalog/${root.id}`);
@@ -293,10 +312,13 @@ export function useSiteCatalogWarmup() {
       }
     }
 
-    runSiteCatalogWarmup({ cancelled }).catch(() => {});
+    const cancelIdle = scheduleIdle(() => {
+      runSiteCatalogWarmup({ cancelled }).catch(() => {});
+    }, 2200);
 
     return () => {
       cancelled.current = true;
+      cancelIdle();
     };
   }, [router]);
 }

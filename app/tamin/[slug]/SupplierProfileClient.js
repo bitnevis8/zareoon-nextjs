@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/context/AuthContext";
 import { authFetch } from "@/app/utils/authHeaders";
+import { API_ENDPOINTS } from "@/app/config/api";
 import SupplierPostComposer from "./SupplierPostComposer";
 import SupplierPostItem from "./SupplierPostItem";
 import SupplierActiveProductsRail from "./SupplierActiveProductsRail";
@@ -87,18 +88,43 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
   const [msg, setMsg] = useState("");
 
   const load = useCallback(async () => {
-    const [profRes, postsRes, revRes] = await Promise.all([
-      authFetch(`/api/tamin/public/${encodeURIComponent(slug)}`),
-      fetch(`/api/tamin/public/${encodeURIComponent(slug)}/posts`),
-      fetch(`/api/tamin/public/${encodeURIComponent(slug)}/reviews`),
-    ]);
-    const prof = await profRes.json();
-    const postsJson = await postsRes.json();
-    const revJson = await revRes.json();
-    if (prof.success) setData(prof.data);
-    if (postsJson.success) setPosts(postsJson.data || []);
-    if (revJson.success) setReviews(revJson.data || []);
-    setLoading(false);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const [profSettled, postsSettled, revSettled] = await Promise.allSettled([
+        authFetch(API_ENDPOINTS.tamin.public(encodeURIComponent(slug)), { signal: controller.signal }),
+        fetch(API_ENDPOINTS.tamin.posts(encodeURIComponent(slug)), { signal: controller.signal }),
+        fetch(API_ENDPOINTS.tamin.reviews(encodeURIComponent(slug)), { signal: controller.signal }),
+      ]);
+
+      if (profSettled.status === "fulfilled") {
+        try {
+          const prof = await profSettled.value.json();
+          if (prof.success) setData(prof.data);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (postsSettled.status === "fulfilled") {
+        try {
+          const postsJson = await postsSettled.value.json();
+          if (postsJson.success) setPosts(postsJson.data || []);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (revSettled.status === "fulfilled") {
+        try {
+          const revJson = await revSettled.value.json();
+          if (revJson.success) setReviews(revJson.data || []);
+        } catch {
+          /* ignore */
+        }
+      }
+    } finally {
+      clearTimeout(timer);
+      setLoading(false);
+    }
   }, [slug]);
 
   useEffect(() => {

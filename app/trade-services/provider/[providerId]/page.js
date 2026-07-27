@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { API_ENDPOINTS } from "@/app/config/api";
+import { getServerApiBaseUrl, fetchWithTimeout } from "@/app/config/serverApiBase";
 import { providerPublicPath } from "@/app/utils/providerPublicPath";
 
 /** آدرس قدیمی خدمات → هدایت به صفحه یکپارچه /{slug} */
@@ -9,8 +9,8 @@ export default async function TradeProviderProfilePage({ params }) {
 
   let slug = key;
   try {
-    const url = API_ENDPOINTS.tradeServiceProviders.getPublicById(encodeURIComponent(key));
-    const res = await fetch(url, { cache: "no-store" });
+    const url = `${getServerApiBaseUrl()}/trade-service-provider/public/${encodeURIComponent(key)}`;
+    const res = await fetchWithTimeout(url, { cache: "no-store" }, 10000);
     const json = await res.json();
     if (json?.success && json.data) {
       slug = json.data.profileSlug || json.data.id || key;

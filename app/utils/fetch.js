@@ -1,16 +1,22 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+/**
+ * Client-side helper — always uses the public API URL (browser → Cloudflare OK).
+ * Server code should use getServerApiBaseUrl / serverBackendFetch instead.
+ */
+const API_BASE_URL =
+  (typeof window !== "undefined"
+    ? process.env.NEXT_PUBLIC_API_URL
+    : process.env.INTERNAL_API_URL || process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL) ||
+  (process.env.NODE_ENV === "production" ? "https://api.zareoon.ir" : "http://localhost:3000");
 
 export const fetchWithCredentials = async (endpoint, options = {}) => {
   const defaultOptions = {
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   };
 
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
-  console.log('Making API request to:', fullUrl);
-  console.log('Request options:', { ...defaultOptions, ...options });
+  const fullUrl = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL.replace(/\/$/, "")}${endpoint}`;
 
   const response = await fetch(fullUrl, {
     ...defaultOptions,
@@ -22,14 +28,14 @@ export const fetchWithCredentials = async (endpoint, options = {}) => {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    console.error('API request failed:', {
-      url: fullUrl,
-      status: response.status,
-      error
-    });
-    throw new Error(error.message || 'خطا در ارتباط با سرور');
+    let error = {};
+    try {
+      error = await response.json();
+    } catch {
+      /* ignore */
+    }
+    throw new Error(error.message || "خطا در ارتباط با سرور");
   }
 
   return response.json();
-}; 
+};

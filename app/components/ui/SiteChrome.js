@@ -9,9 +9,11 @@ import ClientSideWrapper from "./ClientSideWrapper";
 import { useIsDashboardRoute } from "@/app/hooks/useIsDashboardRoute";
 import { NavigationLoadingProvider } from "@/app/context/NavigationLoadingContext";
 import { useSiteCatalogWarmup } from "@/app/hooks/useCatalogProducts";
+import { useSiteHomeWarmup } from "@/app/hooks/useSiteHomeWarmup";
 
 function CatalogWarmupBoot() {
   useSiteCatalogWarmup();
+  useSiteHomeWarmup();
   return null;
 }
 

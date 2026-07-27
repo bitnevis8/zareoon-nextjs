@@ -214,26 +214,51 @@ export default function ZareoonExclusiveServices({ className = "" }) {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
     (async () => {
       try {
-        const [providersRes, vipRes] = await Promise.all([
-          fetch(API_ENDPOINTS.tradeServiceProviders.getPublic, { cache: "no-store" }),
-          fetch(API_ENDPOINTS.siteSettings.getVipPublic, { cache: "no-store" }),
+        const [providersSettled, vipSettled] = await Promise.allSettled([
+          fetch(API_ENDPOINTS.tradeServiceProviders.getPublic, {
+            cache: "no-store",
+            signal: controller.signal,
+          }),
+          fetch(API_ENDPOINTS.siteSettings.getVipPublic, {
+            cache: "no-store",
+            signal: controller.signal,
+          }),
         ]);
-        const [providersData, vipData] = await Promise.all([providersRes.json(), vipRes.json()]);
-        if (!cancelled && providersData.success) {
-          setProviders(providersData.data || []);
-          setMemberCounts(countProvidersByCategory(providersData.data || []));
+        if (providersSettled.status === "fulfilled") {
+          try {
+            const providersData = await providersSettled.value.json();
+            if (!cancelled && providersData.success) {
+              setProviders(providersData.data || []);
+              setMemberCounts(countProvidersByCategory(providersData.data || []));
+            }
+          } catch {
+            /* ignore */
+          }
         }
-        if (!cancelled && vipData.success) {
-          setVipCategories(vipData.data?.categories || {});
+        if (vipSettled.status === "fulfilled") {
+          try {
+            const vipData = await vipSettled.value.json();
+            if (!cancelled && vipData.success) {
+              setVipCategories(vipData.data?.categories || {});
+            }
+          } catch {
+            /* ignore */
+          }
         }
       } catch {
         // fallback to sample counts
+      } finally {
+        clearTimeout(timer);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, []);
 
