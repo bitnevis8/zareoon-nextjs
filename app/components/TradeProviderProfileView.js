@@ -80,12 +80,20 @@ function ContactButton({ href, label, variant = "primary", external }) {
   );
 }
 
-export default function TradeProviderProfileView({ providerId, embedded = false, panelOnly = false }) {
+export default function TradeProviderProfileView({
+  providerId,
+  embedded = false,
+  panelOnly = false,
+  /** ردیف خام از قبل لودشده — از دوباره‌fetch در تب یکپارچه جلوگیری می‌کند */
+  initialRaw = null,
+}) {
   const ts = useTranslations("supplier.tradeProvider");
   const { language, isRTL, t } = useLanguage();
   const section = getTradeServicesContent(language);
-  const [provider, setProvider] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [provider, setProvider] = useState(() =>
+    initialRaw ? mapApiProviderRow(initialRaw, t, language) : null
+  );
+  const [loading, setLoading] = useState(!initialRaw);
   const [missing, setMissing] = useState(false);
   const [isOwnerPreview, setIsOwnerPreview] = useState(false);
   const [canReview, setCanReview] = useState(false);
@@ -94,18 +102,30 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState(null);
-  const [canOrder, setCanOrder] = useState(true);
+  const [statusMessage, setStatusMessage] = useState(initialRaw?.statusMessage || null);
+  const [canOrder, setCanOrder] = useState(initialRaw?.canOrder !== false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
+      if (initialRaw) {
+        try {
+          setProvider(mapApiProviderRow(initialRaw, t, language));
+          setStatusMessage(initialRaw.statusMessage || null);
+          setCanOrder(initialRaw.canOrder !== false);
+          setLoading(false);
+        } catch {
+          /* fall through to network */
+        }
+      } else {
+        setLoading(true);
+      }
       setMissing(false);
       try {
         const res = await fetch(API_ENDPOINTS.tradeServiceProviders.getPublicById(encodeURIComponent(providerId)), {
           cache: "no-store",
           credentials: "include",
+          signal: AbortSignal.timeout(15_000),
         });
         const json = await res.json();
         if (cancelled) return;
@@ -119,9 +139,9 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
           setCanOrder(json.data.canOrder !== false);
           return;
         }
-        setMissing(true);
+        if (!initialRaw) setMissing(true);
       } catch {
-        if (!cancelled) setMissing(true);
+        if (!cancelled && !initialRaw) setMissing(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -129,7 +149,7 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
     return () => {
       cancelled = true;
     };
-  }, [providerId, t, language]);
+  }, [providerId, t, language, initialRaw]);
 
   const submitReview = async () => {
     if (!provider?.id) return;

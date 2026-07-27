@@ -1,5 +1,7 @@
 import { API_ENDPOINTS } from "@/app/config/api";
 
+const PROXY_TIMEOUT_MS = 12_000;
+
 export async function proxyTamin(request, backendPath, { method } = {}) {
   const cookies = request.headers.get("cookie");
   const authorization = request.headers.get("authorization");
@@ -15,6 +17,7 @@ export async function proxyTamin(request, backendPath, { method } = {}) {
   const init = {
     method: method || request.method,
     headers,
+    signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
   };
 
   if (init.method !== "GET" && init.method !== "HEAD" && contentType?.includes("application/json")) {
@@ -33,6 +36,16 @@ export async function proxyTamin(request, backendPath, { method } = {}) {
       headers: { "Content-Type": responseContentType },
     });
   } catch (error) {
+    const timedOut =
+      error?.name === "TimeoutError" ||
+      error?.name === "AbortError" ||
+      /aborted|timeout/i.test(String(error?.message || ""));
+    if (timedOut) {
+      return Response.json(
+        { success: false, message: "پاسخ سرور تأمین بیش از حد طول کشید" },
+        { status: 504 }
+      );
+    }
     const refused = error?.cause?.code === "ECONNREFUSED" || error?.message?.includes("fetch failed");
     return Response.json(
       {
