@@ -51,7 +51,7 @@ export default function CatalogItemPage({ params }) {
   const user = auth?.user;
   const admin = isAdmin(user);
 
-  // Homepage warms these SWR keys — open category without waiting for the full tree.
+  // Root children may already be in SWR from idle site warmup; open without waiting for full tree.
   const { product: item } = useCatalogProduct(id);
   const productIdNum = item?.id != null
     ? Number(item.id)

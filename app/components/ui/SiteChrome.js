@@ -11,7 +11,8 @@ import { NavigationLoadingProvider } from "@/app/context/NavigationLoadingContex
 import { useSiteCatalogWarmup } from "@/app/hooks/useCatalogProducts";
 
 function CatalogWarmupBoot() {
-  useSiteCatalogWarmup();
+  const isDashboard = useIsDashboardRoute();
+  useSiteCatalogWarmup({ enabled: !isDashboard });
   return null;
 }
 

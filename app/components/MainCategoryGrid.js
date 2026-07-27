@@ -8,7 +8,7 @@ import CategoryTile from "./CategoryTile";
 
 /**
  * Homepage root grid — static data only (no API / no skeleton).
- * Children are warmed in the background by useSiteCatalogWarmup in SiteChrome.
+ * Children are warmed after idle by useSiteCatalogWarmup in SiteChrome (no full-catalog dump).
  */
 export default function MainCategoryGrid({
   categories: categoriesProp,
