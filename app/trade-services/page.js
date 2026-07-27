@@ -12,8 +12,7 @@ import TradeServicesSectionHeader from "@/app/components/TradeServicesSectionHea
 import ZareoonEscrowFeature from "@/app/components/ZareoonEscrowFeature";
 import TradeServicesCategoryPager from "@/app/components/TradeServicesCategoryPager";
 import AuthRequiredButton from "@/app/components/ui/AuthRequiredButton";
-import ZareoonPackagingAd from "@/app/components/ZareoonPackagingAd";
-import { isPlatformExclusiveCategory, isZareoonOperatedCategory } from "@/app/utils/platformExclusiveCategories";
+import { isPlatformExclusiveCategory } from "@/app/utils/platformExclusiveCategories";
 
 const ICON_PATHS = {
   "import-export": "M3 7h18M5 7V5a2 2 0 012-2h10a2 2 0 012 2v2M7 11h10M9 15h6M12 7v12",
@@ -77,9 +76,6 @@ function HubCategoryIcon({ category, wide = false, tone = "amber" }) {
 
 function HubCategoryCard({ category, isVip, vipMessage, t, className = "" }) {
   const exclusive = isPlatformExclusiveCategory(category.id) || isVip;
-  const isInspection = category.id === "inspection-standards";
-  const isPackaging = isZareoonOperatedCategory(category.id);
-  const brandedExclusive = isInspection || isPackaging;
   const joinHref = `/trade-services/register?category=${encodeURIComponent(category.id)}`;
   const providersBtn =
     "inline-flex min-h-8 w-full items-center justify-center rounded-lg border border-emerald-200 bg-white px-1.5 py-1.5 text-[10px] font-bold leading-tight text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-50 sm:min-h-10 sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm";
@@ -90,34 +86,23 @@ function HubCategoryCard({ category, isVip, vipMessage, t, className = "" }) {
     <article
       className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border bg-white p-2.5 shadow-[0_4px_20px_-12px_rgba(6,78,59,0.18)] transition md:hover:-translate-y-0.5 md:hover:shadow-[0_14px_36px_-16px_rgba(6,95,70,0.22)] sm:rounded-2xl sm:p-5 ${
         exclusive
-          ? isPackaging
-            ? "border-emerald-200/90 md:hover:border-emerald-400"
-            : "border-amber-200/80 md:hover:border-amber-300"
+          ? "border-amber-200/80 md:hover:border-amber-300"
           : "border-emerald-100/90 md:hover:border-emerald-300"
       } ${className}`}
     >
       <div className="mb-2 flex items-start justify-between gap-1.5 sm:mb-3 sm:gap-2">
-        <HubCategoryIcon
-          category={category}
-          wide={brandedExclusive}
-          tone={isPackaging ? "emerald" : "amber"}
-        />
-        {!brandedExclusive && isVip ? (
+        <HubCategoryIcon category={category} tone="emerald" />
+        {isVip ? (
           <span className="rounded-full bg-amber-200/90 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-950">VIP</span>
         ) : null}
       </div>
-      {isPackaging ? (
-        <p className="mb-0.5 line-clamp-2 text-start text-[11px] font-bold tracking-wide text-emerald-800 sm:mb-1 sm:text-xs">
-          {t("packagingAdBrandName")}
-        </p>
-      ) : null}
       <h2 className="mb-1.5 line-clamp-2 min-h-[2.5rem] text-start text-[11px] font-bold leading-snug text-slate-900 sm:min-h-0 sm:text-[15px] sm:leading-6">
         {category.title}
       </h2>
       <p className="mb-3 hidden flex-1 text-start text-xs leading-6 text-slate-600 sm:line-clamp-3 sm:block sm:text-[13px]">
         {category.description}
       </p>
-      {vipMessage && !brandedExclusive ? (
+      {vipMessage && isVip ? (
         <p className="mb-2 hidden rounded-xl border border-amber-200/70 bg-amber-50 px-2.5 py-2 text-[11px] leading-5 text-amber-950 sm:mb-3 sm:block">
           {vipMessage}
         </p>
@@ -172,7 +157,6 @@ export default function TradeServicesHubPage() {
 
         <div className="space-y-3 px-9 py-2.5 text-start sm:space-y-5 sm:px-11 sm:py-5">
           <ZareoonEscrowFeature />
-          <ZareoonPackagingAd />
           <TradeServicesCategoryPager
             items={content.categories}
             renderItem={(category) => {

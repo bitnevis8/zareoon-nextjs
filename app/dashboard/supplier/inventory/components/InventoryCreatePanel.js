@@ -18,6 +18,7 @@ import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/Persi
 import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
 import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
+import BarterOfferEditor from "./BarterOfferEditor";
 import {
   canSellerListProduct,
   getAllowedMeasurementUnits,
@@ -421,6 +422,9 @@ export default function InventoryCreatePanel({
                 onUpdate={onUpdateTier}
               />
             )}
+          </div>
+          <div className="mt-3">
+            <BarterOfferEditor form={form} setForm={setForm} />
           </div>
         </StepBlock>
 

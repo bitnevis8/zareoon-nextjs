@@ -60,7 +60,6 @@ const TABS = [
     blurb: TRADE_TOOLS.exchange.taglineFa,
     hint: "تبدیل و نرخ‌های به‌روز",
     href: TRADE_TOOLS.exchange.href,
-    emphasize: true,
   },
 ];
 
@@ -319,6 +318,26 @@ function ClearIcon({ className = "h-3.5 w-3.5" }) {
   );
 }
 
+function NavChevron({ direction = "left", className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      {direction === "left" ? (
+        <path
+          fillRule="evenodd"
+          d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+          clipRule="evenodd"
+        />
+      ) : (
+        <path
+          fillRule="evenodd"
+          d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+          clipRule="evenodd"
+        />
+      )}
+    </svg>
+  );
+}
+
 /**
  * ابزارهای آنلاین بازرگانی — پیش‌فرض بسته؛ با انتخاب تب باز می‌شود
  */
@@ -326,6 +345,10 @@ export default function TradeToolsPanel({ className = "" }) {
   const titleId = useId();
   const [tab, setTab] = useState(null);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [canScrollBack, setCanScrollBack] = useState(false);
+  const [canScrollForward, setCanScrollForward] = useState(false);
+  const tabsScrollRef = useRef(null);
+  const panelRef = useRef(null);
   const cbmRef = useRef(null);
   const hsRef = useRef(null);
   const incotermsRef = useRef(null);
@@ -334,8 +357,47 @@ export default function TradeToolsPanel({ className = "" }) {
   const active = TABS.find((t) => t.id === tab) || null;
   const isOpen = !!active;
 
+  const updateTabsScrollState = () => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const left = Math.abs(el.scrollLeft);
+    setCanScrollBack(left > 4);
+    setCanScrollForward(max - left > 4);
+  };
+
+  useEffect(() => {
+    const el = tabsScrollRef.current;
+    if (!el) return undefined;
+    updateTabsScrollState();
+    el.addEventListener("scroll", updateTabsScrollState, { passive: true });
+    window.addEventListener("resize", updateTabsScrollState);
+    return () => {
+      el.removeEventListener("scroll", updateTabsScrollState);
+      window.removeEventListener("resize", updateTabsScrollState);
+    };
+  }, []);
+
+  const scrollTabs = (forward) => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    const delta = Math.min(220, el.clientWidth * 0.7);
+    const isRtl = getComputedStyle(el).direction === "rtl";
+    const sign = forward ? 1 : -1;
+    const left = isRtl ? -sign * delta : sign * delta;
+    el.scrollBy({ left, behavior: "smooth" });
+  };
+
   const selectTab = (id) => {
-    setTab((prev) => (prev === id ? null : id));
+    setTab((prev) => {
+      const next = prev === id ? null : id;
+      if (next) {
+        requestAnimationFrame(() => {
+          panelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+      }
+      return next;
+    });
   };
 
   const closePanel = () => setTab(null);
@@ -356,6 +418,60 @@ export default function TradeToolsPanel({ className = "" }) {
     return ConvertIcon;
   };
 
+  const renderTabButton = (t, { compact = false } = {}) => {
+    const selected = tab === t.id;
+    const Icon = tabIcon(t.id);
+    return (
+      <button
+        key={t.id}
+        type="button"
+        role="tab"
+        id={`${titleId}-tab-${t.id}`}
+        aria-selected={selected}
+        aria-expanded={selected}
+        aria-controls={selected ? `${titleId}-panel` : undefined}
+        onClick={() => selectTab(t.id)}
+        className={`${
+          compact
+            ? "w-[9.25rem] shrink-0 snap-start sm:w-[10rem]"
+            : "min-w-0 w-full"
+        } flex min-h-[5.25rem] flex-col items-stretch gap-2 rounded-2xl border px-3 py-3 text-start transition sm:min-h-[5.5rem] sm:px-3.5 sm:py-3.5 ${
+          selected
+            ? "border-teal-300 bg-white text-slate-900 shadow-md ring-2 ring-teal-100"
+            : "border-slate-200/90 bg-white/90 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white hover:shadow-md"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition sm:h-10 sm:w-10 ${
+              selected
+                ? "bg-teal-700 text-white shadow-sm"
+                : "bg-slate-100 text-slate-600 ring-1 ring-slate-200/80"
+            }`}
+          >
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+          </span>
+          <span
+            dir="ltr"
+            className={`rounded-lg px-2 py-0.5 font-mono text-[10px] font-bold tracking-wide sm:text-[11px] ${
+              selected ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
+            }`}
+          >
+            {t.short}
+          </span>
+        </div>
+        <span className="min-w-0">
+          <span className="block text-[12px] font-extrabold leading-snug text-slate-900 sm:text-[13px]">
+            {t.title}
+          </span>
+          <span className="mt-0.5 block text-[10px] font-medium leading-4 text-slate-500 sm:mt-1 sm:text-[11px] sm:leading-5">
+            {selected ? "باز است · دوباره بزنید" : t.hint}
+          </span>
+        </span>
+      </button>
+    );
+  };
+
   return (
     <section className={`scroll-mt-20 ${className}`} aria-labelledby={titleId}>
       <div className="relative overflow-hidden rounded-[1.4rem] border border-slate-200/80 bg-gradient-to-b from-white via-white to-slate-50/90 shadow-[0_16px_48px_-24px_rgba(15,23,42,0.28)]">
@@ -368,8 +484,8 @@ export default function TradeToolsPanel({ className = "" }) {
           aria-hidden
         />
 
-        <div className="relative px-4 py-4 sm:px-5 sm:py-5">
-          <div className="flex items-center gap-2.5">
+        <div className="relative px-3 py-4 sm:px-5 sm:py-5">
+          <div className="flex items-center gap-2.5 px-1 sm:px-0">
             <Image
               src="/images/logo.png"
               alt="زارعون"
@@ -389,75 +505,49 @@ export default function TradeToolsPanel({ className = "" }) {
             </div>
           </div>
 
+          {/* موبایل: اسکرول افقی + دکمه‌های پیمایش */}
+          <div className="relative mt-4 md:hidden" role="tablist" aria-label="انتخاب ابزار">
+            <button
+              type="button"
+              onClick={() => scrollTabs(false)}
+              disabled={!canScrollBack}
+              aria-label="قبلی"
+              className="absolute start-0 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md disabled:pointer-events-none disabled:opacity-30"
+            >
+              <NavChevron direction="right" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTabs(true)}
+              disabled={!canScrollForward}
+              aria-label="بعدی"
+              className="absolute end-0 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md disabled:pointer-events-none disabled:opacity-30"
+            >
+              <NavChevron direction="left" />
+            </button>
+            <div
+              ref={tabsScrollRef}
+              className="flex gap-2.5 overflow-x-auto px-10 pb-1 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {TABS.map((t) => renderTabButton(t, { compact: true }))}
+            </div>
+          </div>
+
+          {/* دسکتاپ: دو سطر × سه ستون */}
           <div
             role="tablist"
             aria-label="انتخاب ابزار"
-            className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5"
+            className="mt-4 hidden grid-cols-3 gap-3 md:grid"
           >
-            {TABS.map((t) => {
-              const selected = tab === t.id;
-              const Icon = tabIcon(t.id);
-              const bold = !!t.emphasize;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  id={`${titleId}-tab-${t.id}`}
-                  aria-selected={selected}
-                  aria-expanded={selected}
-                  aria-controls={selected ? `${titleId}-panel` : undefined}
-                  onClick={() => selectTab(t.id)}
-                  className={`flex min-h-[5.25rem] flex-col items-stretch gap-2 rounded-2xl border px-3 py-3 text-start transition sm:min-h-[5.5rem] sm:px-3.5 sm:py-3.5 ${
-                    selected
-                      ? "border-teal-300 bg-white text-slate-900 shadow-md ring-2 ring-teal-100"
-                      : bold
-                        ? "border-teal-300/90 bg-gradient-to-br from-teal-50 via-white to-white text-slate-900 shadow-md ring-1 ring-teal-100 hover:border-teal-400 hover:shadow-lg"
-                        : "border-slate-200/90 bg-white/90 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-white hover:shadow-md"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition sm:h-10 sm:w-10 ${
-                        selected || bold
-                          ? "bg-teal-700 text-white shadow-sm"
-                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200/80"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </span>
-                    <span
-                      dir="ltr"
-                      className={`rounded-lg px-2 py-0.5 font-mono text-[10px] font-bold tracking-wide sm:text-[11px] ${
-                        selected || bold ? "bg-teal-50 text-teal-800" : "bg-slate-50 text-slate-500"
-                      }`}
-                    >
-                      {t.short}
-                    </span>
-                  </div>
-                  <span className="min-w-0">
-                    <span
-                      className={`block leading-snug text-slate-900 ${
-                        bold ? "text-[12px] font-black sm:text-[13px]" : "text-[12px] font-extrabold sm:text-[13px]"
-                      }`}
-                    >
-                      {t.title}
-                    </span>
-                    <span className="mt-0.5 block text-[10px] font-medium leading-4 text-slate-500 sm:mt-1 sm:text-[11px] sm:leading-5">
-                      {selected ? "باز است · دوباره بزنید" : t.hint}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+            {TABS.map((t) => renderTabButton(t))}
           </div>
 
           {isOpen ? (
-            <div className="mt-4">
-              <div className="flex items-start justify-between gap-3">
+            <div ref={panelRef} className="mt-4 min-w-0">
+              <div className="flex items-start justify-between gap-2 sm:gap-3">
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <h3 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">{active.panelTitle}</h3>
+                    <h3 className="text-base font-bold leading-snug text-slate-900 sm:text-xl">{active.panelTitle}</h3>
                     <button
                       type="button"
                       onClick={() => setGuideOpen(true)}
@@ -473,7 +563,7 @@ export default function TradeToolsPanel({ className = "" }) {
                       صفحه کامل
                     </Link>
                   </div>
-                  <p className="max-w-2xl text-[13px] leading-6 text-slate-600 sm:text-sm sm:leading-7">{active.blurb}</p>
+                  <p className="max-w-2xl text-[12px] leading-6 text-slate-600 sm:text-sm sm:leading-7">{active.blurb}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button
@@ -497,22 +587,24 @@ export default function TradeToolsPanel({ className = "" }) {
               </div>
 
               <div
-                className="relative mt-4 border-t border-slate-100 pt-4"
+                className="relative mt-4 min-w-0 overflow-x-auto border-t border-slate-100 pt-4 [-webkit-overflow-scrolling:touch]"
                 id={`${titleId}-panel`}
                 role="tabpanel"
                 aria-labelledby={`${titleId}-tab-${tab}`}
               >
-                {tab === "cbm" ? (
-                  <CbmFreightCalculator ref={cbmRef} embedded />
-                ) : tab === "hs" ? (
-                  <HsCodeTariffPanel ref={hsRef} embedded />
-                ) : tab === "incoterms" ? (
-                  <IncotermsGuide ref={incotermsRef} embedded />
-                ) : tab === "exchange" ? (
-                  <ExchangeRateConverter ref={exchangeRef} embedded />
-                ) : (
-                  <TradeUnitConverter ref={unitsRef} embedded />
-                )}
+                <div className="min-w-0 max-w-full">
+                  {tab === "cbm" ? (
+                    <CbmFreightCalculator ref={cbmRef} embedded />
+                  ) : tab === "hs" ? (
+                    <HsCodeTariffPanel ref={hsRef} embedded />
+                  ) : tab === "incoterms" ? (
+                    <IncotermsGuide ref={incotermsRef} embedded />
+                  ) : tab === "exchange" ? (
+                    <ExchangeRateConverter ref={exchangeRef} embedded />
+                  ) : (
+                    <TradeUnitConverter ref={unitsRef} embedded />
+                  )}
+                </div>
               </div>
             </div>
           ) : null}

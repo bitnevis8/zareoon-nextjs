@@ -169,7 +169,7 @@ export const translations = {
     escrowCta: "درخواست تضمین معاملات در زارعون",
     lcBlockHint: "خدمات ویژه زارعون",
     lcSectionIntro:
-      "برای معاملات بین‌المللی، امکانات مرتبط با اعتبار اسنادی (LC) صرفاً برای تسهیل ارتباط و فرآیند میان کاربران ارائه می‌شود و مسئولیت نهایی با طرفین است، شامل:",
+      "برای معاملات داخلی و بین‌المللی، امکانات مرتبط با اعتبار اسنادی (LC) صرفاً برای تسهیل ارتباط و فرآیند میان کاربران ارائه می‌شود.",
     zareoonServicesLiabilityNote:
       "مسئولیت کامل معامله، پرداخت و تعهدات همیشه با خریدار و فروشنده است؛ زارعون هیچ مسئولیتی ندارد.",
     lcFormTitle: "فرم درخواست اعتبار اسنادی (LC)",
@@ -584,7 +584,7 @@ export const translations = {
     sendMessage: "گفتگو در زارعون",
     chatWithSeller: "گفتگو با این فروشنده",
     chatWithProvider: "گفتگو با خدمات‌دهنده این سرویس",
-    chatWithShop: "گفتگو با این فروشگاه",
+    chatWithShop: "گفتگو",
     chatHistory: "تاریخچه گفتگوها",
     close: "بستن",
     back: "بازگشت",
@@ -777,7 +777,7 @@ export const translations = {
     escrowCta: "Request deal guarantee on Zareoon",
     lcBlockHint: "Zareoon special services",
     lcSectionIntro:
-      "For international deals, LC-related features only help parties coordinate; final responsibility remains with them, including:",
+      "For domestic and international deals, LC-related features only help users coordinate.",
     zareoonServicesLiabilityNote:
       "Full responsibility for the deal, payment, and obligations always stays with buyer and seller; Zareoon has no liability.",
     lcFormTitle: "Letter of Credit (LC) Request Form",
@@ -1193,7 +1193,7 @@ export const translations = {
     sendMessage: "Chat on Zareoon",
     chatWithSeller: "Chat with this seller",
     chatWithProvider: "Chat with this service provider",
-    chatWithShop: "Chat with this shop",
+    chatWithShop: "Chat",
     chatHistory: "Conversation history",
     close: "Close",
     back: "Back",

@@ -20,6 +20,7 @@ import {
 } from "@/app/utils/productCatalogSchema";
 import { localizeUnit } from "@/app/utils/localize";
 import { useLanguage } from "@/app/context/LanguageContext";
+import BarterOfferEditor from "./BarterOfferEditor";
 
 export default function InventoryEditModal({
   lot,
@@ -186,6 +187,8 @@ export default function InventoryEditModal({
                 />
               </div>
             ) : null}
+
+            <BarterOfferEditor form={form} setForm={setForm} />
 
             <div>
               <h3 className="mb-3 text-sm font-bold text-slate-800">{t("editModal.displayDetails")}</h3>

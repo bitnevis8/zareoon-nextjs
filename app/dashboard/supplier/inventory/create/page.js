@@ -10,6 +10,7 @@ import { isAdmin, isSupplier } from "@/app/utils/roles";
 import InventoryCreatePanel from "../components/InventoryCreatePanel";
 import { inv } from "../inventoryTheme";
 import { INITIAL_FORM, EMPTY_TIER } from "../inventoryConstants";
+import { barterPayloadFromForm } from "../components/BarterOfferEditor";
 import { useInventoryLots } from "../hooks/useInventoryLots";
 import { useProductCatalog } from "../hooks/useProductCatalog";
 import { loadAttributeDefsForProduct } from "../inventoryUtils";
@@ -128,6 +129,7 @@ export default function InventoryCreatePage() {
           locationLabel: form.locationLabel?.trim() || null,
           latitude: form.latitude !== "" && form.latitude != null ? Number(form.latitude) : null,
           longitude: form.longitude !== "" && form.longitude != null ? Number(form.longitude) : null,
+          ...barterPayloadFromForm(form),
           ...displayFields,
         }),
       });
@@ -137,6 +139,13 @@ export default function InventoryCreatePage() {
         return;
       }
       const lotId = lotData?.data?.id;
+      if (lotData?.barterNotifiedCount > 0) {
+        setSuccessMsg(
+          `${t("page.successCreated")} — ${lotData.barterNotifiedCount} فروشنده از پیشنهاد معاوضه مطلع شدند.`
+        );
+      } else {
+        setSuccessMsg(t("page.successCreated"));
+      }
       if (lotId && attributeDefs.length > 0) {
         const entries = Object.entries(attributeValues).filter(([, v]) => v !== undefined && v != null && String(v).trim() !== "");
         for (const [defId, val] of entries) {
@@ -154,7 +163,6 @@ export default function InventoryCreatePage() {
       if (lotId && (pendingImages.length > 0 || pendingVideos.length > 0)) {
         await uploadMediaFiles([...pendingImages, ...pendingVideos], lotId);
       }
-      setSuccessMsg(t("page.successCreated"));
       setForm(INITIAL_FORM);
       setAttributeDefs([]);
       setAttributeValues({});

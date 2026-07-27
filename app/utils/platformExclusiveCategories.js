@@ -1,13 +1,11 @@
-/** دسته‌هایی که زارعون/شریک اختصاصی ارائه می‌دهد — عضویت آزاد ندارد */
-export const PLATFORM_EXCLUSIVE_CATEGORY_IDS = new Set([
-  "inspection-standards",
-  "packaging-prep",
-]);
+/** دسته‌های انحصاری پلتفرم — دیگر استفاده نمی‌شود؛ عضویت آزاد برای همه دسته‌ها */
+export const PLATFORM_EXCLUSIVE_CATEGORY_IDS = new Set();
 
 export function isPlatformExclusiveCategory(categoryId) {
   return PLATFORM_EXCLUSIVE_CATEGORY_IDS.has(categoryId);
 }
 
-export function isZareoonOperatedCategory(categoryId) {
-  return categoryId === "packaging-prep";
+/** @deprecated بسته‌بندی دیگر اختصاصی زارعون نیست */
+export function isZareoonOperatedCategory() {
+  return false;
 }

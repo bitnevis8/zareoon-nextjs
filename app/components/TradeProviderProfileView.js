@@ -17,6 +17,7 @@ import { mergeBusinessHours } from "@/app/utils/businessHours";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
 import OpenChatButton from "@/app/components/messaging/OpenChatButton";
+import ShopPageQrCode from "@/app/components/ui/ShopPageQrCode";
 
 function ReviewStars({ value, onChange, readonly }) {
   return (
@@ -219,19 +220,30 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
           ) : null}
 
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="mb-4 text-sm font-bold text-slate-900">{t("tradeProviderProfileCapabilities")}</h2>
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11.48 3.5a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+                  />
+                </svg>
+              </span>
+              {t("tradeProviderProfileCapabilities")}
+            </h2>
             <div className="space-y-4">
               {groupedServices.length === 0 ? (
                 <p className="text-sm text-slate-500">خدمتی ثبت نشده است.</p>
               ) : (
                 groupedServices.map((group) => (
                   <div key={group.title}>
-                    <p className="mb-2 text-xs font-semibold text-emerald-700">{group.title}</p>
+                    <p className="mb-2 text-xs font-semibold text-slate-600">{group.title}</p>
                     <div className="flex flex-wrap gap-2">
                       {group.items.map((item) => (
                         <span
                           key={item}
-                          className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-900"
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-800"
                         >
                           {item}
                         </span>
@@ -307,6 +319,14 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
         </div>
 
         <aside className="space-y-4 sm:space-y-6">
+          {provider.profileSlug || provider.slug ? (
+            <ShopPageQrCode
+              profileSlug={provider.profileSlug || provider.slug}
+              displayName={provider.name}
+              title="QR کد صفحه"
+            />
+          ) : null}
+
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="mb-4 text-sm font-bold text-slate-900">{t("tradeProviderProfileContactBox")}</h2>
             <dl className="space-y-3 text-sm">
@@ -341,17 +361,10 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
                 </div>
               ) : null}
             </dl>
-            {provider.userId && !isOwnerPreview ? (
-              <OpenChatButton
-                userId={provider.userId}
-                label={t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
-                className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-700"
-              />
-            ) : null}
             {!panelOnly && provider.phone ? (
               <a
                 href={`tel:${provider.phone}`}
-                className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-sm font-bold text-emerald-900 hover:bg-emerald-100"
+                className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-sm font-bold text-emerald-900 hover:bg-emerald-100"
               >
                 {t("tradeProviderCall")}
               </a>

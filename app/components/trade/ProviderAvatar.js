@@ -3,9 +3,9 @@ import { getProviderInitials } from "@/app/utils/tradeProviderMapper";
 import { resolveProviderLogoUrl } from "@/app/data/tradeProviderBranding";
 
 const SIZE_CLASSES = {
-  sm: "h-12 w-12 text-sm sm:h-14 sm:w-14 sm:text-base",
-  md: "h-20 w-20 text-xl sm:h-24 sm:w-24 sm:text-2xl",
-  lg: "h-24 w-24 text-3xl",
+  sm: "h-12 w-[4.5rem] text-sm sm:h-14 sm:w-[5.25rem] sm:text-base",
+  md: "h-20 w-[7.5rem] text-xl sm:h-24 sm:w-36 sm:text-2xl",
+  lg: "h-24 w-36 text-3xl",
 };
 
 export default function ProviderAvatar({ provider, name, size = "md", className = "" }) {
@@ -23,7 +23,7 @@ export default function ProviderAvatar({ provider, name, size = "md", className 
           alt={displayName}
           fill
           className="object-contain p-1.5"
-          sizes="(max-width: 768px) 96px, 120px"
+          sizes="(max-width: 768px) 120px, 144px"
         />
       </div>
     );

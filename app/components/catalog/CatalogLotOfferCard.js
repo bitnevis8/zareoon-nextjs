@@ -293,6 +293,29 @@ export default function CatalogLotOfferCard({
             {t("minimumOrder")}: {formatQuantityWithUnit(lot.minimumOrderQuantity, language, unitLabel)}
           </p>
         ) : null}
+        {lot.acceptBarter ? (
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5">
+            <p className="text-[11px] font-bold text-amber-900">
+              {lot.barterDesiredKind === "service" ? "معاوضه کالا به خدمات" : "معاوضه کالا به کالا"}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-amber-900/90">
+              آماده معاوضه با{" "}
+              <strong>
+                {lot.barterDesiredName ||
+                  lot.barterDesiredCategoryLabel ||
+                  (lot.barterDesiredKind === "service" ? "خدمت توافقی" : "کالای توافقی")}
+              </strong>
+              {lot.barterDesiredKind !== "service" && lot.barterDesiredQuantity
+                ? ` (حدود ${lot.barterDesiredQuantity} ${lot.barterDesiredUnit || ""})`
+                : lot.barterDesiredKind !== "service"
+                  ? " — مقدار منعطف"
+                  : ""}
+            </p>
+            <Link href="/barter" className="mt-1.5 inline-flex text-[11px] font-bold text-amber-800 hover:underline">
+              مشاهده بازار معاوضه
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {lotDescription ? (
@@ -338,8 +361,10 @@ export default function CatalogLotOfferCard({
                   key={k}
                   label={(() => {
                     try {
-                      const tr = t(`filterKeys.${k}`);
-                      return tr && tr !== `filterKeys.${k}` ? tr : k;
+                      const key = `filterKeys.${k}`;
+                      if (typeof t.has === "function" && !t.has(key)) return k;
+                      const tr = t(key);
+                      return tr && tr !== key ? tr : k;
                     } catch {
                       return k;
                     }

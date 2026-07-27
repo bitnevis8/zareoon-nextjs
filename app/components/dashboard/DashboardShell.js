@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useSidebar, DESKTOP_SIDEBAR_MODES } from "@/app/context/SidebarContext";
 import { useTranslations } from "next-intl";
 import Sidebar from "@/app/components/ui/Sidebar";
@@ -105,6 +106,10 @@ function SidebarEdgeControls({
 
 export default function DashboardShell({ breadcrumb, alert, children }) {
   const t = useTranslations("dashboard");
+  const pathname = usePathname() || "";
+  const fullBleed =
+    /\/dashboard\/supplier\/landings\/\d+/.test(pathname) ||
+    pathname.includes("/dashboard/site-settings/landing-templates");
   const {
     openSidebar,
     desktopSidebarMode,
@@ -120,7 +125,7 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
   const iconsOnly = mode === DESKTOP_SIDEBAR_MODES.ICONS;
 
   return (
-    <div className="dashboard-scroll relative flex h-full min-h-0 flex-1 overflow-hidden bg-slate-100">
+    <div className="dashboard-scroll relative flex h-full min-h-0 max-h-full flex-1 overflow-hidden bg-slate-100">
       <aside
         className={`relative z-40 hidden h-full min-h-0 shrink-0 self-stretch border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:flex md:flex-col ${MODE_WIDTH[mode]} ${
           collapsed ? "border-l-0" : ""
@@ -156,17 +161,26 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
           </button>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-6xl px-4 pt-2.5 pb-5 md:px-6 md:py-6">
-            {breadcrumb}
-            {alert}
-            {children}
-          </div>
+        <main className={`min-h-0 flex-1 ${fullBleed ? "overflow-hidden" : "overflow-y-auto"}`}>
+          {fullBleed ? (
+            <div className="flex h-full min-h-0 flex-col">
+              {alert ? <div className="shrink-0 px-2 pt-2">{alert}</div> : null}
+              <div className="min-h-0 flex-1 overflow-hidden p-1.5 md:p-2">{children}</div>
+            </div>
+          ) : (
+            <div className="mx-auto w-full max-w-6xl px-4 pt-2.5 pb-5 md:px-6 md:py-6">
+              {breadcrumb}
+              {alert}
+              {children}
+            </div>
+          )}
         </main>
 
-        <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-500 md:px-6">
-          {t("shell.footer", { year: new Date().getFullYear() })}
-        </footer>
+        {!fullBleed ? (
+          <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-500 md:px-6">
+            {t("shell.footer", { year: new Date().getFullYear() })}
+          </footer>
+        ) : null}
       </div>
     </div>
   );

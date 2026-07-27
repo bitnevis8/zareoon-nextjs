@@ -6,7 +6,7 @@ import Modal from "@/app/components/ui/Modal/Modal";
 import { providerPublicAbsoluteUrl, providerPublicDisplayUrl } from "@/app/utils/providerPublicPath";
 import { SHOP_QR_PRINT_SIZES, downloadShopQrPrint } from "@/app/utils/shopPageQrPrint";
 
-export default function ShopPageQrCode({ profileSlug, displayName = "" }) {
+export default function ShopPageQrCode({ profileSlug, displayName = "", title = "QR کد صفحه" }) {
   const [open, setOpen] = useState(false);
   const [busyId, setBusyId] = useState("");
   const [error, setError] = useState("");
@@ -40,7 +40,7 @@ export default function ShopPageQrCode({ profileSlug, displayName = "" }) {
   return (
     <>
       <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
-        <p className="mb-2 text-[11px] font-semibold text-slate-600">QR کد صفحه فروشگاه</p>
+        <p className="mb-2 text-[11px] font-semibold text-slate-600">{title}</p>
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -60,7 +60,6 @@ export default function ShopPageQrCode({ profileSlug, displayName = "" }) {
           </span>
           <span className="text-center text-[11px] leading-snug text-slate-500">
             برای دانلود نسخه چاپ کلیک کنید
-            <span className="mt-0.5 block font-medium text-emerald-700">A4 · A5 · A6 و …</span>
           </span>
         </button>
         <p className="mt-2 truncate text-center text-[10px] text-slate-400" dir="ltr" title={pageUrl}>

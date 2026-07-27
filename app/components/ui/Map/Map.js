@@ -115,7 +115,7 @@ export default function Map({
         keyboard
       >
         <ChangeView center={center} zoom={zoom} preserveZoom={preserveZoomOnPan} />
-        <MapEvents onMapClick={handleMapClick} />
+        {onMapClick ? <MapEvents onMapClick={handleMapClick} /> : null}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -123,7 +123,7 @@ export default function Map({
 
         {markers.map((marker, index) => (
           <Marker
-            key={index}
+            key={`${marker.latitude}-${marker.longitude}-${index}`}
             position={[marker.latitude, marker.longitude]}
             eventHandlers={{
               click: () => onMarkerClick?.(marker),
@@ -133,7 +133,7 @@ export default function Map({
           </Marker>
         ))}
 
-        {selectedPosition ? (
+        {onMapClick && selectedPosition ? (
           <Marker position={selectedPosition}>
             <Popup>{t("map.selectedPosition")}</Popup>
           </Marker>

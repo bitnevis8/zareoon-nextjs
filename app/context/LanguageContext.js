@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "../config/api";
-import { SITE_LANGUAGES, SITE_LANGUAGE_CODES, isRtlLanguage } from "../config/siteLanguages";
+import { SITE_LANGUAGES, SITE_LANGUAGE_CODES, DEFAULT_ENABLED_LANGUAGE_CODES, isRtlLanguage } from "../config/siteLanguages";
 import { LOCALE_COOKIE } from "../../i18n/routing";
 import faSite from "../../messages/fa/site.json";
 import enSite from "../../messages/en/site.json";
@@ -17,7 +17,7 @@ import fiSite from "../../messages/fi/site.json";
 import trSite from "../../messages/tr/site.json";
 
 const STORAGE_KEY = "site-language";
-const DEFAULT_ENABLED = [...SITE_LANGUAGE_CODES];
+const DEFAULT_ENABLED = [...DEFAULT_ENABLED_LANGUAGE_CODES];
 
 const siteIntroSources = {
   fa: faSite,

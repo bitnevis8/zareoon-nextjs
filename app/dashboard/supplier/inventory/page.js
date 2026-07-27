@@ -2,8 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { authFetch } from "@/app/utils/authHeaders";
 import { useTranslations } from "next-intl";
 import InventoryStats from "./components/InventoryStats";
 import InventoryLotCard from "./components/InventoryLotCard";
@@ -19,12 +20,15 @@ import { isAdmin } from "@/app/utils/roles";
 import { Section } from "./components/Field";
 import { inv } from "./inventoryTheme";
 import { INITIAL_FORM, EMPTY_TIER } from "./inventoryConstants";
+import { barterPayloadFromForm } from "./components/BarterOfferEditor";
 import { useInventoryLots } from "./hooks/useInventoryLots";
 import { filterAndSortLots, countActiveFilters, loadAttributeDefsForProduct, saveLotAttributeValues } from "./inventoryUtils";
 import { hydrateDisplayContent, displayContentToApiPayload } from "./utils/inventoryDisplayLocales";
+import LandingTemplatePickModal from "@/app/components/productLanding/builder/LandingTemplatePickModal";
 
 export default function InventoryListPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const scope = searchParams.get("scope");
   const { user, allowed, isOwnScope, loading: authLoading } = useRequireSupplierArea(scope);
   const t = useTranslations("inventory");
@@ -42,6 +46,10 @@ export default function InventoryListPage() {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [landingBusyId, setLandingBusyId] = useState(null);
+  const [landingModalLot, setLandingModalLot] = useState(null);
+  const [landingTemplates, setLandingTemplates] = useState([]);
+  const [landingTemplatesLoading, setLandingTemplatesLoading] = useState(false);
 
   const productName = useCallback(
     (productId) => products.find((p) => p.id === productId)?.name || "—",
@@ -61,6 +69,59 @@ export default function InventoryListPage() {
     if (!window.confirm(t("page.deleteConfirm"))) return;
     await fetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
     reload();
+  };
+
+  const openLandingTemplateModal = async (lot) => {
+    if (!lot?.id) return;
+    setLandingModalLot(lot);
+    setLandingTemplatesLoading(true);
+    try {
+      const res = await authFetch(API_ENDPOINTS.productLanding.templates, { cache: "no-store" });
+      const json = await res.json();
+      setLandingTemplates(Array.isArray(json?.data?.items) ? json.data.items : []);
+    } catch {
+      setLandingTemplates([]);
+    } finally {
+      setLandingTemplatesLoading(false);
+    }
+  };
+
+  const createLanding = async (pick) => {
+    const lot = landingModalLot;
+    if (!lot?.id) return;
+    setLandingBusyId(lot.id);
+    try {
+      const body = {
+        inventoryLotId: lot.id,
+        themeId: pick?.themeId || "atelier",
+      };
+      if (pick?.blank) {
+        body.blank = true;
+      } else if (pick?.templateId) {
+        body.templateId = pick.templateId;
+      } else if (pick?.templateSlug) {
+        body.templateSlug = pick.templateSlug;
+      } else {
+        // اگر چیزی انتخاب نشد، خالی شروع کن — نه قالب اجباری
+        body.blank = true;
+      }
+      const res = await authFetch(API_ENDPOINTS.productLanding.create, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!json?.success) {
+        window.alert(json?.message || "ساخت لندینگ ممکن نشد");
+        return;
+      }
+      setLandingModalLot(null);
+      router.push(`/dashboard/supplier/landings/${json.data.id}?scope=own`);
+    } catch (e) {
+      window.alert(e.message || "خطا در ساخت لندینگ");
+    } finally {
+      setLandingBusyId(null);
+    }
   };
 
   const openView = (lot) => {
@@ -83,6 +144,18 @@ export default function InventoryListPage() {
       priceCurrency: lot.priceCurrency || lot.price_currency || "TOMAN",
       minimumOrderQuantity: lot.minimumOrderQuantity ? String(lot.minimumOrderQuantity) : "",
       tieredPricing: lot.tieredPricing || [],
+      acceptCash: lot.acceptCash !== false,
+      acceptBarter: Boolean(lot.acceptBarter),
+      barterDesiredKind: lot.barterDesiredKind === "service" ? "service" : "product",
+      barterDesiredCategoryId: lot.barterDesiredCategoryId ? String(lot.barterDesiredCategoryId) : "",
+      barterDesiredCategoryLabel: lot.barterDesiredCategoryLabel || "",
+      barterDesiredServiceCategoryId: lot.barterDesiredServiceCategoryId || "",
+      barterDesiredServiceSubcategoryId: lot.barterDesiredServiceSubcategoryId || "",
+      barterDesiredName: lot.barterDesiredName || "",
+      barterDesiredQuantity: lot.barterDesiredQuantity != null ? String(lot.barterDesiredQuantity) : "",
+      barterDesiredUnit: lot.barterDesiredUnit || "kg",
+      barterAnnounceMode: lot.barterAnnounceMode === "announce" ? "announce" : "silent",
+      barterNotes: lot.barterNotes || "",
       status: lot.status || "harvested",
       locationLabel: lot.locationLabel || "",
       latitude: lot.latitude != null ? String(lot.latitude) : "",
@@ -119,6 +192,7 @@ export default function InventoryListPage() {
         locationLabel: editForm.locationLabel?.trim() || null,
         latitude: editForm.latitude !== "" && editForm.latitude != null ? Number(editForm.latitude) : null,
         longitude: editForm.longitude !== "" && editForm.longitude != null ? Number(editForm.longitude) : null,
+        ...barterPayloadFromForm(editForm),
         ...displayFields,
       };
       await fetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
@@ -257,6 +331,8 @@ export default function InventoryListPage() {
                 onEdit={openEdit}
                 onMedia={openMedia}
                 onDelete={remove}
+                onCreateLanding={isOwnScope ? openLandingTemplateModal : undefined}
+                landingBusy={landingBusyId === x.id}
               />
             ))}
           </div>
@@ -269,6 +345,8 @@ export default function InventoryListPage() {
             onEdit={openEdit}
             onMedia={openMedia}
             onDelete={remove}
+            onCreateLanding={isOwnScope ? openLandingTemplateModal : undefined}
+            landingBusyId={landingBusyId}
           />
         )}
       </Section>
@@ -306,6 +384,20 @@ export default function InventoryListPage() {
       {mediaOpen && selectedLot ? (
         <InventoryMediaModal lot={selectedLot} productName={lotProductName} onClose={closeModals} />
       ) : null}
+
+      <LandingTemplatePickModal
+        open={Boolean(landingModalLot)}
+        templates={landingTemplates}
+        loading={landingTemplatesLoading}
+        busy={landingBusyId != null}
+        title="شروع لندینگ محصول"
+        subtitle="اولویت با صفحه خالی است؛ اگر بخواهید می‌توانید قالب آماده هم انتخاب کنید."
+        onClose={() => {
+          if (landingBusyId != null) return;
+          setLandingModalLot(null);
+        }}
+        onPick={createLanding}
+      />
     </div>
   );
 }

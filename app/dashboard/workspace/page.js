@@ -529,6 +529,11 @@ export default function WorkspaceHubPage() {
                   used={usage.usage?.postsThisMonth}
                   limit={usage.limits?.postsPerMonth}
                 />
+                <UsageMeter
+                  label="لندینگ محصول"
+                  used={usage.usage?.landingPages}
+                  limit={usage.limits?.landingPages}
+                />
               </div>
             </section>
           ) : null}

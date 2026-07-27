@@ -24,7 +24,7 @@ function ChevronRight({ className = "h-5 w-5" }) {
 }
 
 /**
- * اسلایدر کارت — فلش مستطیل عمودی بیرون از شبکه (absolute، بدون گرفتن فضای کارت)
+ * اسلایدر کارت — فلش مستطیل عمودی روی کارت‌ها (absolute، بدون گرفتن پدینگ)
  */
 export default function TradeServicesCategoryPager({
   items,
@@ -148,9 +148,9 @@ export default function TradeServicesCategoryPager({
     suppressClick.current = false;
   };
 
-  // مستطیل عمودی خاکستری شفاف — absolute بیرون از شبکه تا فضای کارت‌ها را نگیرد
+  // مستطیل عمودی شفاف — روی کارت‌ها (بدون گرفتن فضای پدینگ)
   const arrowBtn =
-    "pointer-events-auto absolute top-1/2 z-30 flex h-14 w-7 -translate-y-1/2 items-center justify-center rounded-md border border-slate-400/20 bg-slate-600/30 text-slate-800 shadow-none backdrop-blur-[1.5px] transition hover:bg-slate-600/45 hover:text-slate-950 disabled:cursor-default disabled:opacity-20 sm:h-[4.25rem] sm:w-8";
+    "pointer-events-auto absolute top-1/2 z-30 flex h-28 w-7 -translate-y-1/2 items-center justify-center rounded-md border border-slate-300/25 bg-slate-700/20 text-slate-800 shadow-none backdrop-blur-[2px] transition hover:bg-slate-700/35 hover:text-slate-950 disabled:cursor-default disabled:opacity-15 sm:h-32 sm:w-8";
 
   if (!items?.length) return null;
 
@@ -207,7 +207,7 @@ export default function TradeServicesCategoryPager({
               type="button"
               onClick={onLeftArrow}
               disabled={leftDisabled}
-              className={`${arrowBtn} left-0 -translate-x-[calc(100%+0.35rem)]`}
+              className={`${arrowBtn} left-1 sm:left-1.5`}
               aria-label={leftLabel}
               aria-disabled={leftDisabled}
             >
@@ -217,7 +217,7 @@ export default function TradeServicesCategoryPager({
               type="button"
               onClick={onRightArrow}
               disabled={rightDisabled}
-              className={`${arrowBtn} right-0 translate-x-[calc(100%+0.35rem)]`}
+              className={`${arrowBtn} right-1 sm:right-1.5`}
               aria-label={rightLabel}
               aria-disabled={rightDisabled}
             >

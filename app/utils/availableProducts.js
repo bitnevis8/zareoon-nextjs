@@ -1,5 +1,37 @@
 import { compareCatalogItems, getRootCategory } from "./productSort";
 import i18nData from "./i18nFaData";
+import { LEVEL_ORDER } from "./verification";
+
+function normalizeLotVerificationLevel(raw, listed = false) {
+  const lv = String(raw || "none").toLowerCase();
+  if (LEVEL_ORDER.includes(lv)) return lv;
+  return listed ? "basic" : "none";
+}
+
+/** بالاترین سطح احراز هر فروشنده — یکسان در همه کارت‌های همان فروشگاه */
+export function buildSellerVerificationMap(inventoryLots) {
+  const map = new Map();
+  for (const lot of inventoryLots || []) {
+    const sellerId = lot.farmerId ?? lot.supplier?.id ?? lot.farmer?.id;
+    if (sellerId == null) continue;
+    const fv = lot.filterValues && typeof lot.filterValues === "object" ? lot.filterValues : {};
+    const listed = Boolean(fv.listingVerified || lot.listingVerified);
+    const lv = normalizeLotVerificationLevel(
+      lot.verificationLevel ||
+        fv.verificationLevel ||
+        fv.businessVerificationLevel ||
+        fv.verifiedLevel,
+      listed
+    );
+    if (lv === "none") continue;
+    const key = Number(sellerId);
+    const prev = map.get(key);
+    if (!prev || LEVEL_ORDER.indexOf(lv) > LEVEL_ORDER.indexOf(prev.level)) {
+      map.set(key, { kind: "business", level: lv, status: "verified" });
+    }
+  }
+  return map;
+}
 
 export function buildProductByIdMap(allProducts) {
   const map = new Map();

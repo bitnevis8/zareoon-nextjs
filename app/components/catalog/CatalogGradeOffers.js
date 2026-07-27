@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import CatalogGradeMediaPanel from "./CatalogGradeMediaPanel";
 import CatalogGradeLocationPanel from "./CatalogGradeLocationPanel";
-import CatalogProductDescription from "./CatalogProductDescription";
 import CatalogInventoryOverview from "./CatalogInventoryOverview";
 import CatalogLotOfferCard from "./CatalogLotOfferCard";
 import { getGradeDisplayLabel, getGradeTabLabel, groupLotsByGrade } from "../../utils/catalogGrades";
@@ -247,7 +246,6 @@ export default function CatalogGradeOffers({
   inventorySummary = null,
   orderMsg = "",
   orderMsgType = "info",
-  productDescription = "",
   productMedia = [],
 }) {
   const t = useTranslations("catalog");
@@ -333,17 +331,12 @@ export default function CatalogGradeOffers({
       }
     : null;
   const mediaPanelKey = `${activeGroup?.grade ?? "grade"}-${activeLot?.id ?? "lot"}-media`;
-  const hasDescription = Boolean((productDescription || "").trim());
   const hasLocation = (() => {
     if (!activeLot) return false;
     const lat = parseFloat(activeLot.latitude);
     const lng = parseFloat(activeLot.longitude);
     return Number.isFinite(lat) && Number.isFinite(lng);
   })();
-
-  const descriptionBlock = hasDescription ? (
-    <CatalogProductDescription description={productDescription} embedded />
-  ) : null;
 
   const locationBlockMobile = activeLot ? (
     <CatalogGradeLocationPanel
@@ -450,8 +443,6 @@ export default function CatalogGradeOffers({
           {renderActiveLotCard(true)}
         </div>
 
-        {hasDescription ? <div className="border-t border-slate-200 bg-white px-3 py-3">{descriptionBlock}</div> : null}
-
         {hasLocation ? <div className="border-t border-slate-200 bg-white">{locationBlockMobile}</div> : null}
       </div>
 
@@ -517,8 +508,6 @@ export default function CatalogGradeOffers({
             {renderActiveLotCard(true)}
           </div>
         </div>
-
-        {hasDescription ? <div className="w-full">{descriptionBlock}</div> : null}
 
         {hasLocation ? <div className="w-full">{locationBlockDesktop}</div> : null}
       </div>

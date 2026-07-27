@@ -60,6 +60,17 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
         : [{ labelKey: "supplyManagement" }, { labelKey: "inventoryList" }],
     },
     {
+      match: /^\/dashboard\/supplier\/landings\/\d+/,
+      trail: [
+        { href: "/dashboard/supplier/landings?scope=own", labelFallback: "لندینگ محصول" },
+        { labelFallback: "ویرایش" },
+      ],
+    },
+    {
+      match: "/dashboard/supplier/landings",
+      trail: [{ labelKey: "supplierPanel" }, { labelFallback: "لندینگ محصول" }],
+    },
+    {
       match: "/dashboard/supplier/orders",
       trail: scopeOwn
         ? [{ labelKey: "supplierPanel" }, { labelKey: "customerOrders" }]
@@ -108,6 +119,10 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
     {
       match: "/dashboard/account",
       trail: [{ labelKey: "editProfile" }],
+    },
+    {
+      match: "/dashboard/site-settings/landing-templates",
+      trail: [{ labelFallback: "تنظیمات سایت" }, { labelFallback: "قالب‌های لندینگ" }],
     },
     {
       match: "/dashboard/dedicated-page",

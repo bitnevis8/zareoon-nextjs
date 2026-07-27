@@ -8,6 +8,8 @@ import CardsPerRowSelect from "./ui/CardsPerRowSelect";
 import AvailableProductCompactCard, {
   resolveSellerDisplayName,
 } from "./AvailableProductCompactCard";
+import { useProductLandingLinks } from "@/app/hooks/useProductLandingLinks";
+import { productPublicHref } from "@/app/utils/productPublicHref";
 import { useLanguage } from "../context/LanguageContext";
 import { sortCatalogItems } from "../utils/productSort";
 import { getLocalizedText } from "../utils/localize";
@@ -24,6 +26,7 @@ import { catalogProductPath } from "../utils/catalogProductPath";
 import {
   buildAvailableProducts,
   buildProductByIdMap,
+  buildSellerVerificationMap,
 } from "../utils/availableProducts";
 import { resolveMediaUrl } from "../utils/mediaUrl";
 
@@ -103,12 +106,12 @@ function sortLeafItems(items, sort, language, allProducts, inventoryLots) {
   return sortCatalogItems(list, language);
 }
 
-function LeafProductListRow({ item, language, stock, stockClass }) {
+function LeafProductListRow({ item, language, stock, stockClass, href }) {
   const label = getLocalizedText(item, language);
   return (
     <li className={`border-b border-slate-100 last:border-0 ${stockClass}`}>
       <Link
-        href={catalogProductPath(item)}
+        href={href || catalogProductPath(item)}
         className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-emerald-50/50 active:bg-emerald-50"
       >
         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
@@ -171,6 +174,11 @@ function LeafVarietiesSection({
 
   const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
 
+  const sellerVerificationMap = useMemo(
+    () => buildSellerVerificationMap(inventoryLots),
+    [inventoryLots]
+  );
+
   const offerByProductId = useMemo(() => {
     const entries = buildAvailableProducts(inventoryLots, productById, {
       scopeCategoryId: parentItem?.id ?? null,
@@ -193,6 +201,8 @@ function LeafVarietiesSection({
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const landingIds = useMemo(() => pageItems.map((p) => p.id), [pageItems]);
+  const landingLinks = useProductLandingLinks(landingIds);
 
   const title = parentName
     ? t("varietiesOfParent", { name: parentName }) || `انواع ${parentName}`
@@ -269,8 +279,11 @@ function LeafVarietiesSection({
                 totalAvailable={totalAvailable}
                 language={language}
                 isRTL={isRTL}
+                productById={productById}
+                href={productPublicHref(offer?.product || item, landingLinks[String(item.id)] || landingLinks[item.id])}
                 sellerName={resolveSellerDisplayName(seller, "زارعون")}
                 sellerAvatar={resolveMediaUrl(seller?.avatar || seller?.account?.coverImage)}
+                sellerVerificationMap={sellerVerificationMap}
                 showSellerHeader
                 className="h-full w-full min-w-0"
               />
@@ -286,6 +299,7 @@ function LeafVarietiesSection({
               language={language}
               stock={calculateAvailableStock(item, allProducts, inventoryLots)}
               stockClass={getProductStockClass(item, allProducts, inventoryLots)}
+              href={productPublicHref(item, landingLinks[String(item.id)] || landingLinks[item.id])}
             />
           ))}
         </ul>

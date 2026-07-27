@@ -57,6 +57,7 @@ function useSidebarMenus() {
             { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'block' },
             { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'link' },
             { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'pages' },
+            { title: 'قالب‌های لندینگ', path: '/dashboard/site-settings/landing-templates', icon: 'layout' },
             { title: t('admin.backupRestore'), path: '/dashboard/site-settings/backup', icon: 'backup' },
             { title: 'مدیریت احراز', path: '/dashboard/workspace/verification-admin', icon: 'shield' },
           ],
@@ -84,12 +85,15 @@ function useSidebarMenus() {
       sellerMenuLinksPrimary: [
         { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own', icon: 'inventory' },
         { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own', icon: 'plus' },
+        { title: 'لندینگ محصول', path: '/dashboard/supplier/landings?scope=own', icon: 'layout' },
         { title: t('customerOrders'), path: '/dashboard/supplier/orders?scope=own', icon: 'orders' },
         { title: t('shopSettings'), path: '/dashboard/supplier-profile', icon: 'store' },
         { title: 'مدیریت کسب‌وکار', path: '/dashboard/workspace', icon: 'users' },
       ],
       sellerMenuLinksSecondary: [
         { title: t('incomingToMyProducts'), path: '/dashboard/incoming-requests', icon: 'inbox' },
+        { title: 'صندوق معاوضه', path: '/dashboard/barter-inbox', icon: 'inbox' },
+        { title: 'بازار معاوضه', path: '/barter', icon: 'layout' },
       ],
       primaryLinks: [{ title: t('dashboard'), path: '/dashboard', icon: 'home' }],
       sectionAdmin: t('sections.admin'),

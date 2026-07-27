@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRequireAdmin } from "@/app/hooks/useDashboardRole";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 import { API_ENDPOINTS } from "@/app/config/api";
-import { SITE_LANGUAGES } from "@/app/config/siteLanguages";
+import { SITE_LANGUAGES, DEFAULT_ENABLED_LANGUAGE_CODES } from "@/app/config/siteLanguages";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
 import LanguageFlag from "@/app/components/ui/LanguageFlag";
@@ -13,7 +13,7 @@ export default function SiteLanguagesSettingsPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [selected, setSelected] = useState(() => SITE_LANGUAGES.map((l) => l.code));
+  const [selected, setSelected] = useState(() => [...DEFAULT_ENABLED_LANGUAGE_CODES]);
 
   useEffect(() => {
     if (!allowed) return;

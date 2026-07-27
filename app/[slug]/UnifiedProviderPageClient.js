@@ -288,13 +288,13 @@ export default function UnifiedProviderPageClient({ slug }) {
                 <Image
                   src={avatar}
                   alt=""
-                  width={88}
-                  height={88}
+                  width={144}
+                  height={96}
                   unoptimized
-                  className="h-[4.5rem] w-[4.5rem] shrink-0 rounded-2xl border-2 border-white/30 object-cover shadow-lg sm:h-24 sm:w-24"
+                  className="h-[4.5rem] w-[6.75rem] shrink-0 rounded-2xl border-2 border-white/30 bg-white/95 object-contain p-1.5 shadow-lg sm:h-24 sm:w-36"
                 />
               ) : (
-                <span className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-2xl border-2 border-white/20 bg-white/15 text-2xl font-black shadow-lg sm:h-24 sm:w-24 sm:text-3xl">
+                <span className="flex h-[4.5rem] w-[6.75rem] shrink-0 items-center justify-center rounded-2xl border-2 border-white/20 bg-white/15 text-2xl font-black shadow-lg sm:h-24 sm:w-36 sm:text-3xl">
                   {initial}
                 </span>
               )}
@@ -347,7 +347,7 @@ export default function UnifiedProviderPageClient({ slug }) {
                 {profile?.id ? (
                   <OpenChatButton
                     userId={profile.id}
-                    label={hasShop ? t("chatWithShop") || "گفتگو با این فروشگاه" : t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                    label={hasShop ? t("chatWithShop") || "گفتگو" : t("chatWithProvider") || "گفتگو"}
                     className="flex min-h-11 min-w-[7.5rem] flex-1 items-center justify-center gap-2 rounded-xl bg-white text-sm font-bold text-emerald-900"
                   />
                 ) : null}
@@ -420,7 +420,7 @@ export default function UnifiedProviderPageClient({ slug }) {
             {profile?.id ? (
               <OpenChatButton
                 userId={profile.id}
-                label={hasShop ? t("chatWithShop") || "گفتگو با این فروشگاه" : t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                label={hasShop ? t("chatWithShop") || "گفتگو" : t("chatWithProvider") || "گفتگو"}
                 className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-600/25"
               />
             ) : null}

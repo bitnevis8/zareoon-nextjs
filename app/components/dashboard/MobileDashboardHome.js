@@ -40,9 +40,11 @@ const BUYER_ACTIONS = [
 const SELLER_ACTIONS = [
   { id: "products", href: "/dashboard/supplier/inventory?scope=own", icon: "products", labelKey: "actions.myProducts" },
   { id: "newLot", href: "/dashboard/supplier/inventory/create?scope=own", icon: "plus", labelKey: "actions.newInventory" },
+  { id: "landings", href: "/dashboard/supplier/landings?scope=own", icon: "layout", label: "لندینگ محصول" },
   { id: "orders", href: "/dashboard/supplier/orders?scope=own", icon: "orders", labelKey: "actions.customerOrders" },
   { id: "settings", href: "/dashboard/supplier-profile", icon: "settings", labelKey: "actions.shopSettings" },
   { id: "incoming", href: "/dashboard/incoming-requests", icon: "inbox", labelKey: "actions.incoming" },
+  { id: "barter", href: "/dashboard/barter-inbox", icon: "inbox", label: "معاوضه" },
 ];
 
 const PROVIDER_ACTIONS = [
@@ -64,7 +66,7 @@ function ActionIconGrid({ items, t }) {
             <SidebarIcon name={item.icon} className="h-5 w-5" />
           </span>
           <span className="line-clamp-2 text-[10px] font-semibold leading-tight text-slate-700">
-            {t(item.labelKey)}
+            {item.label || t(item.labelKey)}
           </span>
         </Link>
       ))}
@@ -89,7 +91,7 @@ function HorizontalMenu({ items, activeId, onSelect, t }) {
             }`}
           >
             <SidebarIcon name={item.icon} className="h-3.5 w-3.5" />
-            {t(item.labelKey)}
+            {item.label || t(item.labelKey)}
           </button>
         );
       })}

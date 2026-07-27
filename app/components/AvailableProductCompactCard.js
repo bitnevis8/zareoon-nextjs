@@ -2,14 +2,41 @@
 
 import Link from "next/link";
 import ProductCardMedia from "./ui/ProductCardMedia";
-import { VerificationLevelBadge } from "./verification/VerificationLevelIcon";
 import { formatLocalizedNumber, getLocalizedText, localizeUnit } from "../utils/localize";
 import { catalogProductPath } from "../utils/catalogProductPath";
 import { resolveMediaUrl } from "../utils/mediaUrl";
 import { LEVEL_ORDER } from "../utils/verification";
+import { VerificationLevelBadge } from "./verification/VerificationLevelIcon";
+import { formatCatalogAncestorBreadcrumb } from "../utils/mobileSearchUtils";
+import { countryCodeToFlag, countryCodeToFlagUrl } from "../utils/supplySource";
+import { useState } from "react";
 
 /** ارتفاع ثابت ردیف‌های متا — همه کارت‌ها یکسان */
 const META_ROW_H = "h-5";
+
+function CompactFlag({ countryCode = "IR" }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const flagUrl = countryCodeToFlagUrl(countryCode, 40);
+  return (
+    <span className="inline-flex h-3.5 w-5 shrink-0 overflow-hidden rounded-[3px] border border-white/40 bg-white/90">
+      {flagUrl && !imgFailed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={flagUrl}
+          alt=""
+          className="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center text-[9px] leading-none">
+          {countryCodeToFlag(countryCode)}
+        </span>
+      )}
+    </span>
+  );
+}
 
 function MetaRow({ label, children, valueClassName = "text-slate-800" }) {
   return (
@@ -93,9 +120,35 @@ function normalizeLevel(raw) {
   return "none";
 }
 
+function pickHighestLevel(rawLevels) {
+  let best = "none";
+  let bestIdx = -1;
+  for (const raw of rawLevels) {
+    const lv = normalizeLevel(raw);
+    const idx = LEVEL_ORDER.indexOf(lv);
+    if (idx > bestIdx) {
+      bestIdx = idx;
+      best = lv;
+    }
+  }
+  return best;
+}
+
+function levelFromLot(lot) {
+  if (!lot) return "none";
+  const fv = lot.filterValues && typeof lot.filterValues === "object" ? lot.filterValues : {};
+  const listed = Boolean(fv.listingVerified || lot.listingVerified);
+  return normalizeLevel(
+    lot.verificationLevel ||
+      fv.verificationLevel ||
+      fv.businessVerificationLevel ||
+      fv.verifiedLevel ||
+      (listed ? "basic" : "none")
+  );
+}
+
 /**
  * سطح احراز فروشنده/کسب‌وکار از دادهٔ لات یا آبجکت فروشنده
- * آیکون‌های سطح از VerificationLevelIcon (سپر/تیک/ستاره و …) استفاده می‌شود
  */
 export function resolveSellerVerification(lots, seller, overrides = {}) {
   if (overrides.level != null || overrides.status != null) {
@@ -107,6 +160,14 @@ export function resolveSellerVerification(lots, seller, overrides = {}) {
       status,
     };
   }
+
+  const sellerId = seller?.id ?? lots?.[0]?.supplier?.id ?? lots?.[0]?.farmerId ?? null;
+  const fromMap =
+    sellerId != null && overrides.sellerVerificationMap
+      ? overrides.sellerVerificationMap.get?.(Number(sellerId)) ??
+        overrides.sellerVerificationMap[Number(sellerId)]
+      : null;
+  if (fromMap) return fromMap;
 
   const fromSeller =
     seller?.verification ||
@@ -123,17 +184,9 @@ export function resolveSellerVerification(lots, seller, overrides = {}) {
     };
   }
 
-  const lot = lots?.[0];
-  const fv = lot?.filterValues && typeof lot.filterValues === "object" ? lot.filterValues : {};
-  const listed = Boolean(fv.listingVerified || lot?.listingVerified);
-  const level = normalizeLevel(
-    lot?.verificationLevel ||
-      fv.verificationLevel ||
-      fv.businessVerificationLevel ||
-      fv.verifiedLevel ||
-      (listed ? "basic" : "none")
-  );
-  const status = listed || level !== "none" ? "verified" : "none";
+  const lotLevels = (lots || []).map(levelFromLot).filter((lv) => lv !== "none");
+  const level = pickHighestLevel(lotLevels.length ? lotLevels : ["none"]);
+  const status = level !== "none" ? "verified" : "none";
 
   return {
     kind: "business",
@@ -154,7 +207,7 @@ export function resolveSellerDisplayName(seller, fallback = "فروشنده") {
 
 /**
  * کارت فشردهٔ محصول موجود —
- * احراز کنار نام فروشنده؛ متا: محل / موجودی / قیمت (کلید یک سمت، مقدار سمت دیگر)
+ * نشان احراز کنار نام فروشگاه؛ محل کنار پرچم؛ بردکرامب روی گرادیانت تصویر
  */
 export default function AvailableProductCompactCard({
   product,
@@ -163,12 +216,16 @@ export default function AvailableProductCompactCard({
   language,
   className = "",
   isRTL = true,
+  href = null,
   sellerName: sellerNameProp = null,
   sellerAvatar: sellerAvatarProp = null,
   showSellerHeader = true,
   verificationLevel: verificationLevelProp = null,
   verificationStatus: verificationStatusProp = null,
   verificationKind: verificationKindProp = null,
+  sellerVerificationMap = null,
+  productById = null,
+  hideCategory = false,
 }) {
   const title = resolveOfferTitle(product, lots, language);
   const unit = lots?.[0]?.unit || product?.unit || "kg";
@@ -195,34 +252,44 @@ export default function AvailableProductCompactCard({
     level: verificationLevelProp,
     status: verificationStatusProp,
     kind: verificationKindProp,
+    sellerVerificationMap,
   });
+
+  const categoryBreadcrumb =
+    !hideCategory && productById
+      ? formatCatalogAncestorBreadcrumb(product, productById, language, {
+          separator: " / ",
+          maxLevels: 3,
+        })
+      : "";
 
   return (
     <Link
-      href={catalogProductPath(product)}
+      href={href || catalogProductPath(product)}
       className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_12px_28px_-14px_rgba(16,185,129,0.45)] ${className}`}
     >
       {showSellerHeader ? (
-        <div className="flex h-11 shrink-0 items-center gap-2 border-b border-emerald-100/80 bg-gradient-to-l from-emerald-50/90 via-white to-slate-50/80 px-2.5">
-          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-200/80">
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-emerald-100/80 bg-gradient-to-l from-emerald-50/90 via-white to-slate-50/80 px-2.5">
+          <span className="relative flex h-[2.15rem] w-[3.35rem] shrink-0 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200/90 sm:h-9 sm:w-[3.6rem]">
             {sellerAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={sellerAvatar} alt="" className="h-full w-full object-cover" />
+              <img src={sellerAvatar} alt="" className="h-full w-full object-contain p-0.5" />
             ) : (
-              sellerInitial
+              <span className="text-[11px] font-bold text-emerald-800">{sellerInitial}</span>
             )}
           </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[10px] font-medium leading-none text-slate-400">فروشنده</p>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <p className="truncate text-[8px] font-normal leading-none tracking-wide text-slate-400">فروشگاه</p>
             <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-              <p className="min-w-0 truncate text-[12px] font-bold leading-tight text-emerald-950">
+              <p className="min-w-0 flex-1 truncate text-[12px] font-bold leading-tight text-emerald-950">
                 {sellerName}
               </p>
               <VerificationLevelBadge
-                kind={verification.kind}
+                kind={verification.kind || "business"}
                 level={verification.level}
                 status={verification.status}
                 size="sm"
+                variant="plain"
                 className="shrink-0"
               />
             </div>
@@ -237,12 +304,38 @@ export default function AvailableProductCompactCard({
           width={200}
           height={160}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-          showFlag
+          showFlag={false}
         />
+
+        <div className="absolute start-1.5 top-1.5 z-[2] end-1.5 flex items-start justify-between gap-1.5">
+          <span className="inline-flex max-w-full items-center gap-1">
+            <CompactFlag countryCode={countryCode} />
+            <span
+              className="min-w-0 truncate text-[9px] font-semibold leading-tight text-black sm:text-[10px]"
+              style={{
+                textShadow:
+                  "0 0 2px #fff, 0 0 2px #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 1px 1px 0 #fff, -1px -1px 0 #fff",
+              }}
+              title={location || undefined}
+            >
+              {location || "—"}
+            </span>
+          </span>
+        </div>
+
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-slate-900/35 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[55%] bg-gradient-to-t from-black/75 via-black/35 to-transparent"
           aria-hidden
         />
+
+        <div className="absolute inset-x-0 bottom-0 z-[2] px-2 pb-1.5 pt-6">
+          <p
+            className="line-clamp-2 min-h-[1.75rem] text-[9px] font-medium leading-[0.875rem] text-white/90 sm:min-h-[1.875rem] sm:text-[10px] sm:leading-[0.95rem]"
+            title={categoryBreadcrumb || undefined}
+          >
+            {categoryBreadcrumb || "\u00A0"}
+          </p>
+        </div>
       </figure>
 
       <div
@@ -255,10 +348,6 @@ export default function AvailableProductCompactCard({
         </h3>
 
         <div className="mt-auto flex flex-col gap-0.5 border-t border-slate-100 pt-1.5">
-          <MetaRow label="محل" valueClassName={location ? "text-slate-700" : "text-slate-300"}>
-            {location || "—"}
-          </MetaRow>
-
           <MetaRow label="موجودی" valueClassName="text-emerald-700">
             {qtyLabel}
           </MetaRow>
@@ -266,10 +355,10 @@ export default function AvailableProductCompactCard({
           <MetaRow label="قیمت" valueClassName={priceLine ? "text-slate-900" : "text-amber-700"}>
             {priceLine ? (
               <span className="inline-flex max-w-full items-baseline justify-end gap-1">
-                <span className="truncate font-bold">{priceLine}</span>
                 <span className="shrink-0 text-[9px] font-medium text-slate-400 sm:text-[10px]">
                   {perUnitHint}
                 </span>
+                <span className="truncate font-bold">{priceLine}</span>
               </span>
             ) : (
               "استعلام قیمت"

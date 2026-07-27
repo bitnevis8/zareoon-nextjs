@@ -10,7 +10,6 @@ import MarketplaceDisclaimer from './components/MarketplaceDisclaimer';
 import QuickSearchBox from './components/QuickSearchBox';
 import HomeLanguageLogo from './components/HomeLanguageLogo';
 import HomeIntroLines from './components/HomeIntroLines';
-import WhatIsZareoonSection from './components/WhatIsZareoonSection';
 import LazyWhenVisible from './components/ui/LazyWhenVisible';
 import SectionSkeleton from './components/ui/SectionSkeleton';
 import { SITE_INTRO_ORDER } from './config/siteLanguages';
@@ -84,11 +83,18 @@ function HomeContent() {
           </div>
         </div>
 
-        <WhatIsZareoonSection className="mt-1" />
-
         <MainCategoryGrid className="w-full scroll-mt-20" id="product-categories" />
 
-        <MarketplaceDisclaimer className="mt-2" />
+        <MarketplaceDisclaimer className="mt-1" />
+
+        <LazyWhenVisible
+          id="buyer-seller-wrap"
+          className="w-full"
+          minHeight="16rem"
+          fallback={<SectionSkeleton minHeight="16rem" className="mt-2" variant="portal" />}
+        >
+          <BuyerSellerPortal className="mt-1" />
+        </LazyWhenVisible>
 
         <LazyWhenVisible
           id="latest-available"
@@ -108,15 +114,6 @@ function HomeContent() {
           <BuyerRequestPortal />
         </LazyWhenVisible>
       </section>
-
-      <LazyWhenVisible
-        id="buyer-seller"
-        className="mt-5 w-full scroll-mt-20 sm:mt-6 lg:mt-8"
-        minHeight="16rem"
-        fallback={<SectionSkeleton minHeight="16rem" className="page-shell mt-2" variant="portal" />}
-      >
-        <BuyerSellerPortal />
-      </LazyWhenVisible>
 
       <section className="page-shell section-stack mt-5 text-start sm:mt-6 lg:mt-8">
         <LazyWhenVisible

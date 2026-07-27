@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -20,6 +21,45 @@ function DocIcon({ className = "h-6 w-6" }) {
       <path strokeLinecap="round" strokeLinejoin="round" d="M8 4h6l4 4v10a2 2 0 01-2 2H8a2 2 0 01-2-2V6a2 2 0 012-2z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M14 4v4h4M9 13h6M9 17h4" />
     </svg>
+  );
+}
+
+const BRAND_MARK_FRAME =
+  "rounded-lg bg-white/85 px-1.5 py-1 ring-1 ring-slate-200 border border-slate-200 sm:rounded-xl sm:px-2 sm:py-1.5";
+
+/** لوگوی شفاف LC — نسبت تقریبی ۲.۲۴:۱ (۳۰۰×۱۳۴) */
+function LcBrandMark({ className = "" }) {
+  return (
+    <span
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden ${BRAND_MARK_FRAME} ${className}`}
+      aria-hidden
+    >
+      <Image
+        src="/images/lc.png"
+        alt=""
+        width={300}
+        height={134}
+        className="h-full w-auto max-w-full object-contain object-center drop-shadow-sm"
+      />
+    </span>
+  );
+}
+
+/** لوگوی تضمین معاملات — مشابه LC */
+function EscrowBrandMark({ className = "" }) {
+  return (
+    <span
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden ${BRAND_MARK_FRAME} ${className}`}
+      aria-hidden
+    >
+      <Image
+        src="/images/Escrow.png"
+        alt=""
+        width={300}
+        height={134}
+        className="h-full w-auto max-w-full object-contain object-center drop-shadow-sm"
+      />
+    </span>
   );
 }
 
@@ -174,6 +214,7 @@ function EscrowGuideModal({ open, onClose, t, isRTL }) {
 function ServicePanel({
   tone,
   icon,
+  brandMark = null,
   ctaIcon,
   title,
   hint,
@@ -203,9 +244,13 @@ function ServicePanel({
     >
       <SoftFieldPattern patternId={patternId} className="opacity-80" />
       <div className="relative flex items-start gap-2.5 sm:gap-3">
-        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm sm:h-11 sm:w-11 sm:rounded-xl ${iconWrap}`}>
-          {icon}
-        </span>
+        {brandMark ? (
+          brandMark
+        ) : (
+          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm sm:h-11 sm:w-11 sm:rounded-xl ${iconWrap}`}>
+            {icon}
+          </span>
+        )}
         <div className="min-w-0 flex-1 pt-0.5">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h4 className="text-sm font-bold tracking-tight text-slate-900 sm:text-base">{title}</h4>
@@ -224,7 +269,15 @@ function ServicePanel({
         </div>
       </div>
 
-      {intro ? <p className="relative mt-3 hidden text-xs leading-6 text-slate-600 sm:block sm:text-sm sm:leading-7">{intro}</p> : null}
+      {intro ? (
+        <div className="relative mt-3 hidden space-y-1.5 sm:block">
+          {(Array.isArray(intro) ? intro : [intro]).map((line) => (
+            <p key={line} className="text-xs leading-6 text-slate-600 sm:text-sm sm:leading-7">
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
 
       <div className="hidden sm:block">
         <FeatureList items={items} tone={tone} />
@@ -259,10 +312,13 @@ export default function ZareoonEscrowFeature({ className = "" }) {
     >
       <ServicePanel
         tone="emerald"
-        icon={<ShieldIcon className="h-5 w-5" />}
+        brandMark={
+          <EscrowBrandMark className="h-9 w-[5.1rem] sm:h-11 sm:w-[6.75rem]" />
+        }
         ctaIcon={<ShieldIcon className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" />}
         title={t("escrowBlockTitle")}
         hint={t("escrowBlockHint")}
+        intro={t("escrowSectionIntro1")}
         items={escrowItems}
         guideLabel={t("escrowGuideLink")}
         onOpenGuide={() => setGuideOpen(true)}
@@ -273,6 +329,7 @@ export default function ZareoonEscrowFeature({ className = "" }) {
       <ServicePanel
         tone="teal"
         icon={<DocIcon className="h-5 w-5" />}
+        brandMark={<LcBrandMark className="h-9 w-[5.1rem] sm:h-11 sm:w-[6.75rem]" />}
         ctaIcon={<DocIcon className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" />}
         title={t("lcTitle")}
         hint={t("lcBlockHint")}

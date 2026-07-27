@@ -168,6 +168,18 @@ export default function SupplierDashboardHome({ user }) {
             desc={t("actions.incomingDesc")}
             tone="violet"
           />
+          <DashAction
+            href="/dashboard/barter-inbox"
+            title="صندوق معاوضه"
+            desc="پیشنهادهای کالا به کالا و کالا به خدمات که به شما اعلام شده"
+            tone="amber"
+          />
+          <DashAction
+            href="/barter"
+            title="بازار معاوضه"
+            desc="مشاهده آگهی‌های معاوضه در زارعون"
+            tone="emerald"
+          />
         </DashActionGrid>
       </DashSection>
 

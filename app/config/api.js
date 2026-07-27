@@ -336,6 +336,15 @@ export const API_ENDPOINTS = {
     markRead: (id) => `${API_BASE_URL}/applicant-request/notifications/${id}/read`,
     markAllRead: `${API_BASE_URL}/applicant-request/notifications/read-all`,
   },
+  barter: {
+    offers: `${API_BASE_URL}/barter/offers`,
+    offer: (id) => `${API_BASE_URL}/barter/offers/${id}`,
+    inbox: `${API_BASE_URL}/barter/inbox`,
+    notifications: `${API_BASE_URL}/barter/notifications`,
+    unreadCount: `${API_BASE_URL}/barter/notifications/unread-count`,
+    markRead: (id) => `${API_BASE_URL}/barter/notifications/${id}/read`,
+    markAllRead: `${API_BASE_URL}/barter/notifications/read-all`,
+  },
   escrow: {
     rules: `${API_BASE_URL}/escrow/rules`,
     settings: `${API_BASE_URL}/escrow/settings`,
@@ -457,6 +466,24 @@ export const API_ENDPOINTS = {
     adminReviewPerson: (userId) => `/api/workspace/admin/verification/person/${userId}`,
     adminReviewBusiness: (workspaceId) => `/api/workspace/admin/verification/business/${workspaceId}`,
     adminReviewRepresentation: (id) => `/api/workspace/admin/verification/representation/${id}`,
+  },
+  productLanding: {
+    themes: `${API_BASE_URL}/product-landing/themes`,
+    public: (shopSlug, landingSlug) =>
+      `${API_BASE_URL}/product-landing/public/${encodeURIComponent(shopSlug)}/${encodeURIComponent(landingSlug)}`,
+    resolveProducts: (ids) =>
+      `${API_BASE_URL}/product-landing/resolve-products?ids=${encodeURIComponent(Array.isArray(ids) ? ids.join(",") : ids || "")}`,
+    resolveProduct: (productId) => `${API_BASE_URL}/product-landing/resolve-products/${encodeURIComponent(productId)}`,
+    mine: `${API_BASE_URL}/product-landing/mine`,
+    getMine: (id) => `${API_BASE_URL}/product-landing/mine/${id}`,
+    create: `${API_BASE_URL}/product-landing/mine`,
+    update: (id) => `${API_BASE_URL}/product-landing/mine/${id}`,
+    delete: (id) => `${API_BASE_URL}/product-landing/mine/${id}`,
+    templates: `${API_BASE_URL}/product-landing/templates`,
+    getTemplate: (id) => `${API_BASE_URL}/product-landing/templates/${id}`,
+    saveMyTemplate: `${API_BASE_URL}/product-landing/templates/mine`,
+    adminTemplates: `${API_BASE_URL}/product-landing/admin/templates`,
+    adminTemplate: (id) => `${API_BASE_URL}/product-landing/admin/templates/${id}`,
   },
   tamin: {
     base: `${API_BASE_URL}/tamin`,

@@ -7,16 +7,18 @@ import OpenChatButton from "@/app/components/messaging/OpenChatButton";
 import { useLanguage } from "@/app/context/LanguageContext";
 
 /**
- * نمایش عمومی تماس فروشگاه + چت داخلی زارعون + QR صفحه
+ * نمایش عمومی تماس فروشگاه/خدمات + QR صفحه
+ * دکمه گفتگو در هدر صفحه است؛ اینجا تکرار نمی‌شود.
  */
 export default function ShopPublicContacts({
   shopContacts,
   legacy = {},
   chatUserId = null,
-  showInternalChat = true,
+  showInternalChat = false,
   profileSlug = null,
   displayName = "",
   chatLabel,
+  qrLabel = "QR کد صفحه",
 }) {
   const { t } = useLanguage();
   const phones = Array.isArray(shopContacts?.phones)
@@ -37,12 +39,16 @@ export default function ShopPublicContacts({
 
   const canShowChat = showInternalChat && chatUserId;
   const canShowQr = Boolean(profileSlug);
-  const label = chatLabel || t("chatWithShop") || "گفتگو با این فروشگاه";
+  const label = chatLabel || t("chatWithShop") || "گفتگو";
 
   if (!phones.length && !emails.length && !messengerEntries.length && !canShowChat && !canShowQr) return null;
 
   return (
     <div className="space-y-3 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm sm:p-4">
+      {canShowQr ? (
+        <ShopPageQrCode profileSlug={profileSlug} displayName={displayName} title={qrLabel} />
+      ) : null}
+
       <p className="text-sm font-semibold text-slate-800">راه‌های ارتباطی</p>
 
       {canShowChat ? (
@@ -125,8 +131,6 @@ export default function ShopPublicContacts({
           })}
         </div>
       ) : null}
-
-      {canShowQr ? <ShopPageQrCode profileSlug={profileSlug} displayName={displayName} /> : null}
     </div>
   );
 }

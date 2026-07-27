@@ -17,10 +17,9 @@ import {
   resolveVipCategoryMessage,
   shouldUseFeaturedProviderCard,
 } from "@/app/utils/vipCategoryHelpers";
-import { isPlatformExclusiveCategory, isZareoonOperatedCategory } from "@/app/utils/platformExclusiveCategories";
+import { isPlatformExclusiveCategory } from "@/app/utils/platformExclusiveCategories";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { getSubcategoryIconPath } from "@/app/utils/tradeServiceIcons";
-import ZareoonPackagingAd from "./ZareoonPackagingAd";
 
 function SubserviceIcon({ subcategoryId, className = "h-5 w-5" }) {
   const d = getSubcategoryIconPath(subcategoryId);
@@ -158,8 +157,8 @@ function VipFeaturedProviderCard({ provider, t, locale, vipMessage }) {
             <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-amber-300 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-amber-950">
               {t("tradeProviderVipBadge")}
             </span>
-            <div className="mb-4 flex h-24 w-24 items-center justify-center">
-              <ProviderAvatar provider={provider} size="lg" className="h-24 w-24 border-white/20 bg-white/10" />
+            <div className="mb-4 flex h-24 w-36 items-center justify-center">
+              <ProviderAvatar provider={provider} size="lg" className="border-white/20 bg-white/10" />
             </div>
             <h3 className="text-2xl font-black leading-tight">{provider.name}</h3>
             <p className="mt-1 text-sm text-emerald-100/90">{provider.entityType}</p>
@@ -267,11 +266,9 @@ export default function TradeServicesCategoryView({ categoryId }) {
 
   const isVipCategory = !!vipCategories[categoryId]?.enabled;
   const isPlatformExclusive = isPlatformExclusiveCategory(categoryId);
-  const isPackagingExclusive = isZareoonOperatedCategory(categoryId);
   const membershipClosed = isVipCategory || isPlatformExclusive;
   const vipMessage = resolveVipCategoryMessage(vipCategories, categoryId, language, t);
-  // بازرسی و بسته‌بندی: بدون پیام «عضویت فعال نیست» — تبلیغ/برند کافی است
-  const exclusiveMessage = isPlatformExclusive ? null : vipMessage;
+  const exclusiveMessage = vipMessage;
   const vipBannerImage = resolveVipBannerImage(vipCategories, categoryId);
 
   const providers = useMemo(() => {
@@ -338,14 +335,8 @@ export default function TradeServicesCategoryView({ categoryId }) {
                   {t("tradeServicesSectionLabel")}
                 </span>
                 {membershipClosed ? (
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                      isPackagingExclusive
-                        ? "bg-emerald-300 text-emerald-950"
-                        : "bg-amber-300 text-amber-950"
-                    }`}
-                  >
-                    {isPackagingExclusive ? t("packagingAdBadge") : t("tradeProviderVipBadge")}
+                  <span className="rounded-full bg-amber-300 px-2.5 py-0.5 text-[10px] font-bold text-amber-950">
+                    {t("tradeProviderVipBadge")}
                   </span>
                 ) : null}
               </div>
@@ -370,13 +361,7 @@ export default function TradeServicesCategoryView({ categoryId }) {
           </div>
 
           {membershipClosed && exclusiveMessage ? (
-            <p
-              className={`mt-4 max-w-3xl rounded-xl border px-4 py-3 text-sm leading-7 ${
-                isPackagingExclusive
-                  ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-50"
-                  : "border-amber-300/40 bg-amber-400/15 text-amber-50"
-              }`}
-            >
+            <p className="mt-4 max-w-3xl rounded-xl border border-amber-300/40 bg-amber-400/15 px-4 py-3 text-sm leading-7 text-amber-50">
               {exclusiveMessage}
             </p>
           ) : null}
@@ -395,8 +380,6 @@ export default function TradeServicesCategoryView({ categoryId }) {
       </div>
 
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
-        {isPackagingExclusive ? <ZareoonPackagingAd /> : null}
-
         {/* Subcategory filters */}
         {children.length > 0 ? (
           <section

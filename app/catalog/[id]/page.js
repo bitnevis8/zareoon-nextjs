@@ -27,6 +27,10 @@ import { authFetch } from "@/app/utils/authHeaders";
 import { isAdmin } from "@/app/utils/roles";
 import { useNavigationLoading } from "@/app/context/NavigationLoadingContext";
 import { catalogProductPath, isNumericCatalogParam } from "@/app/utils/catalogProductPath";
+import { shouldShowProLandingBanner } from "@/app/utils/productPublicHref";
+import { useProductLandingLinks } from "@/app/hooks/useProductLandingLinks";
+import Link from "next/link";
+import ProductPageQrCode from "@/app/components/ui/ProductPageQrCode";
 import {
   useCatalogChildren,
   useCatalogProduct,
@@ -338,6 +342,12 @@ export default function CatalogItemPage({ params }) {
     [lotQtyById, productIdNum, userPhone, t, fetchCart, auth?.user]
   );
 
+  const landingMap = useProductLandingLinks(
+    !loading && item?.isOrderable && productIdNum ? [productIdNum] : []
+  );
+  const landingLink = landingMap[String(productIdNum)] || landingMap[productIdNum] || null;
+  const showProBanner = Boolean(item?.isOrderable && shouldShowProLandingBanner(landingLink));
+
   if (loading || !item) {
     return <CatalogPageSkeleton variant="category" />;
   }
@@ -348,6 +358,17 @@ export default function CatalogItemPage({ params }) {
   return (
     <main className="mx-auto w-full max-w-5xl space-y-5 overflow-x-hidden px-3 py-4 pb-24 sm:space-y-6 sm:px-6 sm:py-6 sm:pb-8">
       <CartStatusBanner />
+      {showProBanner ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-950">
+          <span className="font-semibold">صفحهٔ حرفه‌ای محصول</span>
+          <Link
+            href={landingLink.path}
+            className="btn btn-primary btn-sm"
+          >
+            رفتن به صفحه حرفه‌ای
+          </Link>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CatalogBreadcrumb path={breadcrumbPath} language={language} homeLabel={t("mainPage")} />
         {item ? (
@@ -385,6 +406,18 @@ export default function CatalogItemPage({ params }) {
 
       {primarySellerLot ? <CatalogProductSellerActions lot={primarySellerLot} /> : null}
 
+      {item?.isOrderable ? (
+        <div className="mx-auto w-full max-w-xs sm:ms-auto sm:me-0 sm:max-w-[15rem]">
+          <ProductPageQrCode
+            pathOrUrl={productSharePath}
+            title={getLocalizedText(item, language) || t("product")}
+            heading="QR کد محصول"
+            scanHint="اسکن کنید تا صفحه محصول در زارعون باز شود"
+            slugHint={item.slug || item.id || "product"}
+          />
+        </div>
+      ) : null}
+
       {productLots.length > 0 && (
         <CatalogGradeOffers
           item={item}
@@ -405,15 +438,14 @@ export default function CatalogItemPage({ params }) {
           inventorySummary={summary}
           orderMsg={orderMsg}
           orderMsgType={orderMsgType}
-          productDescription={item?.description}
           productMedia={productMedia}
         />
       )}
 
       {item?.isOrderable ? <CatalogTradeCompliance product={item} /> : null}
 
-      {item?.description && productLots.length === 0 ? (
-        <CatalogProductDescription description={item.description} />
+      {item?.isOrderable || item?.description || item?.translations ? (
+        <CatalogProductDescription product={item} language={language} />
       ) : null}
 
       {/* Category stock summary (for non-orderable items) */}

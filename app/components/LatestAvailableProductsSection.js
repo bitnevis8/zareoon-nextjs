@@ -8,11 +8,14 @@ import { getLocalizedText } from "../utils/localize";
 import {
   buildAvailableProducts,
   buildProductByIdMap,
+  buildSellerVerificationMap,
   getLatestAvailableProducts,
   groupAvailableProducts,
 } from "../utils/availableProducts";
 import { useFullCatalog, useInventoryLots, HOMEPAGE_LOTS_PARAMS } from "../hooks/useCatalogProducts";
 import { ProductScrollSkeleton } from "./ui/Skeleton";
+import { useProductLandingLinks } from "@/app/hooks/useProductLandingLinks";
+import { productPublicHref } from "@/app/utils/productPublicHref";
 
 const CARD_CLASS =
   "shrink-0 w-[9.75rem] min-[380px]:w-[10.5rem] sm:w-[11.5rem] md:w-[12.25rem] lg:w-[12.75rem] snap-start";
@@ -47,6 +50,11 @@ export default function LatestAvailableProductsSection({
 
   const productById = useMemo(() => buildProductByIdMap(allProducts), [allProducts]);
 
+  const sellerVerificationMap = useMemo(
+    () => buildSellerVerificationMap(inventoryLots),
+    [inventoryLots]
+  );
+
   const availableProducts = useMemo(
     () => buildAvailableProducts(inventoryLots, productById, { scopeCategoryId }),
     [inventoryLots, productById, scopeCategoryId]
@@ -65,6 +73,12 @@ export default function LatestAvailableProductsSection({
     [availableProducts]
   );
 
+  const landingProductIds = useMemo(
+    () => availableProducts.map((e) => e.product?.id).filter(Boolean),
+    [availableProducts]
+  );
+  const landingLinks = useProductLandingLinks(landingProductIds);
+
   const sectionTitle =
     title ||
     (scopeCategoryName
@@ -77,37 +91,11 @@ export default function LatestAvailableProductsSection({
     arrowPlacement: scopeCategoryId != null ? "bottom" : "center",
   };
 
-  const isGlassVariant = variant === "homepage" || variant === "catalog";
-  const sectionShellClass = isGlassVariant
-    ? "relative overflow-hidden rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50/55 via-white/40 to-slate-50/35 p-3 shadow-[0_8px_30px_rgba(16,185,129,0.08)] backdrop-blur-md sm:rounded-2xl sm:p-5"
-    : "";
-
   return (
-    <section className={`${sectionShellClass} ${className}`.trim()} dir={isRTL ? "rtl" : "ltr"}>
-      {isGlassVariant ? (
-        <div
-          className="pointer-events-none absolute -start-8 -top-10 h-28 w-28 rounded-full bg-emerald-300/20 blur-2xl"
-          aria-hidden
-        />
-      ) : null}
-      {isGlassVariant ? (
-        <div
-          className="pointer-events-none absolute -bottom-10 -end-6 h-32 w-32 rounded-full bg-green-200/25 blur-2xl"
-          aria-hidden
-        />
-      ) : null}
-
+    <section className={`${className}`.trim()} dir={isRTL ? "rtl" : "ltr"}>
       <div className="relative">
       <div className="mb-3 flex flex-col gap-3 px-0.5 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <h2
-          className="text-start text-base font-normal leading-snug tracking-tight sm:text-lg"
-          style={{
-            color: "#ffffff",
-            WebkitTextStroke: "0.85px #2a2a2a",
-            paintOrder: "stroke fill",
-            textShadow: "0 0 1px rgba(42,42,42,0.35)",
-          }}
-        >
+        <h2 className="max-w-full text-start text-base font-bold leading-snug tracking-tight text-slate-900 sm:text-lg">
           {sectionTitle}
         </h2>
         {showGroupToggle ? (
@@ -149,6 +137,11 @@ export default function LatestAvailableProductsSection({
                       className={CARD_CLASS}
                       hideCategory
                       isRTL={isRTL}
+                      sellerVerificationMap={sellerVerificationMap}
+                      href={productPublicHref(
+                        entry.product,
+                        landingLinks[String(entry.product.id)] || landingLinks[entry.product.id]
+                      )}
                     />
                   ))}
                 </HorizontalScrollRow>
@@ -163,9 +156,14 @@ export default function LatestAvailableProductsSection({
                 {...entry}
                 language={language}
                 productById={productById}
+                sellerVerificationMap={sellerVerificationMap}
                 className={CARD_CLASS}
                 hideCategory={false}
                 isRTL={isRTL}
+                href={productPublicHref(
+                  entry.product,
+                  landingLinks[String(entry.product.id)] || landingLinks[entry.product.id]
+                )}
               />
             ))}
           </HorizontalScrollRow>

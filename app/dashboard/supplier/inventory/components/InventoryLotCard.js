@@ -17,6 +17,8 @@ export default function InventoryLotCard({
   onEdit,
   onMedia,
   onDelete,
+  onCreateLanding,
+  landingBusy = false,
 }) {
   const t = useTranslations("inventory");
   const tShared = useTranslations("shared");
@@ -55,6 +57,12 @@ export default function InventoryLotCard({
           </div>
           <h3 className="line-clamp-2 text-sm font-bold leading-snug text-slate-900 sm:text-base">{productName}</h3>
           {farmerName ? <p className="mt-0.5 truncate text-[11px] text-slate-500">{farmerName}</p> : null}
+          {lot.acceptBarter ? (
+            <p className="mt-1 text-[10px] font-bold text-amber-800">
+              {lot.barterDesiredKind === "service" ? "معاوضه با خدمت" : "معاوضه با"}{" "}
+              {lot.barterDesiredName || lot.barterDesiredCategoryLabel || (lot.barterDesiredKind === "service" ? "خدمت توافقی" : "کالای توافقی")}
+            </p>
+          ) : null}
           <p className="mt-1.5 text-xs font-semibold text-emerald-700">
             {available.toLocaleString("fa-IR")} {lot.unit}
             <span className="mx-1 font-normal text-slate-300">·</span>
@@ -108,6 +116,16 @@ export default function InventoryLotCard({
           deleteLabel={t("lot.delete")}
           compact
         />
+        {onCreateLanding ? (
+          <button
+            type="button"
+            disabled={landingBusy}
+            onClick={() => onCreateLanding(lot)}
+            className="mt-2 flex h-9 w-full items-center justify-center rounded-lg border border-emerald-200 bg-white text-xs font-bold text-emerald-800 transition hover:bg-emerald-50 disabled:opacity-60"
+          >
+            {landingBusy ? "…" : "ساخت لندینگ محصول"}
+          </button>
+        ) : null}
       </div>
     </article>
   );

@@ -6,33 +6,33 @@ import { useLanguage } from "@/app/context/LanguageContext";
 
 const LABELS = {
   fa: {
-    whatIsZareoon: "زارعون چیست؟",
     productCategories: "دسته‌بندی",
+    buyerSeller: "ارتباط مستقیم",
+    createPage: "ایجاد صفحه",
     latestAvailable: "محصولات موجود",
     buyerRequest: "درخواست خرید",
-    buyerSeller: "ایجاد صفحه",
     tradeServices: "خدمات بازرگانی",
     tradeTools: "ابزارهای بازرگانی",
     help: "راهنما",
     aria: "پرشی به بخش‌های صفحه اصلی",
   },
   en: {
-    whatIsZareoon: "What is Zareoon?",
     productCategories: "Categories",
+    buyerSeller: "Direct link",
+    createPage: "Create page",
     latestAvailable: "Latest products",
     buyerRequest: "Buyer request",
-    buyerSeller: "Create page",
     tradeServices: "Trade services",
     tradeTools: "Trade tools",
     help: "Help",
     aria: "Jump to homepage sections",
   },
   ar: {
-    whatIsZareoon: "ما هو زارعون؟",
     productCategories: "التصنيفات",
+    buyerSeller: "تواصل مباشر",
+    createPage: "إنشاء صفحة",
     latestAvailable: "أحدث المنتجات",
     buyerRequest: "طلب شراء",
-    buyerSeller: "إنشاء صفحة",
     tradeServices: "خدمات تجارية",
     tradeTools: "أدوات تجارية",
     help: "دليل",
@@ -126,24 +126,12 @@ function HelpIcon({ active }) {
   );
 }
 
-function InfoIcon({ active }) {
-  return (
-    <svg className={iconClass(active)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-      />
-    </svg>
-  );
-}
-
 const SECTIONS = [
-  { id: "what-is-zareoon", labelKey: "whatIsZareoon", Icon: InfoIcon },
   { id: "product-categories", labelKey: "productCategories", Icon: CategoriesIcon },
+  { id: "marketplace-direct", labelKey: "buyerSeller", Icon: PageIcon },
+  { id: "buyer-seller", labelKey: "createPage", Icon: PageIcon },
   { id: "latest-available", labelKey: "latestAvailable", Icon: ProductsIcon },
   { id: "buyer-request", labelKey: "buyerRequest", Icon: RequestIcon },
-  { id: "buyer-seller", labelKey: "buyerSeller", Icon: PageIcon },
   { id: "trade-services", labelKey: "tradeServices", Icon: ServicesIcon },
   { id: "trade-tools", labelKey: "tradeTools", Icon: ToolsIcon },
 ];

@@ -50,11 +50,18 @@ function ProfileFieldsSection({ profile }) {
   if (!entries.length) return null;
 
   return (
-    <section className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
-      <h2 className="mb-3 text-sm font-bold text-emerald-900">{t("expertInfo")}</h2>
-      <dl className="space-y-2 text-sm">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6M8 4h8l1 3H7l1-3zM6 7h12v13a1 1 0 01-1 1H7a1 1 0 01-1-1V7z" />
+          </svg>
+        </span>
+        {t("expertInfo")}
+      </h2>
+      <dl className="space-y-2.5 text-sm">
         {entries.map(({ label, value }) => (
-          <div key={label}>
+          <div key={label} className="rounded-lg bg-slate-50 px-3 py-2">
             <dt className="text-xs font-semibold text-slate-500">{label}</dt>
             <dd className="mt-0.5 whitespace-pre-wrap text-slate-800">{value}</dd>
           </div>
@@ -326,11 +333,8 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
                 publicLandline: profile.publicLandline,
                 publicEmail: profile.publicEmail,
               }}
-              chatUserId={profile.id}
-              showInternalChat={!isOwner}
               profileSlug={profile.profileSlug}
               displayName={profile.displayName}
-              chatLabel={tSite("chatWithShop") || "گفتگو با این فروشگاه"}
             />
             {panelOnly && String(profile.bio || "").trim() ? (
               <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -368,13 +372,13 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
                 <Image
                   src={profile.avatar}
                   alt=""
-                  width={96}
+                  width={144}
                   height={96}
                   unoptimized
-                  className="h-20 w-20 rounded-xl border border-slate-100 object-cover sm:h-24 sm:w-24"
+                  className="h-20 w-[7.5rem] rounded-xl border border-slate-100 bg-white object-contain p-1.5 sm:h-24 sm:w-36"
                 />
               ) : (
-                <span className="flex h-20 w-20 items-center justify-center rounded-xl bg-emerald-600 text-3xl font-bold text-white sm:h-24 sm:w-24">
+                <span className="flex h-20 w-[7.5rem] items-center justify-center rounded-xl bg-emerald-600 text-3xl font-bold text-white sm:h-24 sm:w-36">
                   {initial}
                 </span>
               )}

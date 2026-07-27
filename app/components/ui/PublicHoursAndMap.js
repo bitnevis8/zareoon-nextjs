@@ -50,7 +50,14 @@ export default function PublicHoursAndMap({
     <div className="space-y-3">
       {hasHours ? (
         <section className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm sm:p-4">
-          <h2 className="mb-3 text-sm font-semibold text-slate-800">{title}</h2>
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            {title}
+          </h2>
           <HoursTable hours={businessHours} />
         </section>
       ) : null}
@@ -58,7 +65,15 @@ export default function PublicHoursAndMap({
       {point ? (
         <section className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-3.5 py-2.5 sm:px-4">
-            <h2 className="text-sm font-semibold text-slate-800">موقعیت روی نقشه</h2>
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+              </span>
+              موقعیت روی نقشه
+            </h2>
           </div>
           <Map
             center={[point.latitude, point.longitude]}
@@ -82,7 +97,15 @@ export default function PublicHoursAndMap({
         </section>
       ) : address ? (
         <section className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm sm:p-4">
-          <h2 className="mb-1.5 text-sm font-semibold text-slate-800">آدرس</h2>
+          <h2 className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+            </span>
+            آدرس
+          </h2>
           <p className="text-[11px] leading-5 text-slate-500">{address}</p>
         </section>
       ) : null}

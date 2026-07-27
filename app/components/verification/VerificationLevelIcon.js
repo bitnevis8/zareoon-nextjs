@@ -111,6 +111,7 @@ const LABEL = {
 
 /**
  * نشان سطح روی آواتار — آیکون + عدد؛ نام در تولتیپ / فضای کافی
+ * variant: "badge" (پیش‌فرض رنگی) | "plain" (بدون پس‌زمینه؛ عدد سپس آیکون)
  */
 export function VerificationLevelBadge({
   kind = "person",
@@ -118,6 +119,7 @@ export function VerificationLevelBadge({
   status = "none",
   size = "md",
   showLabel = false,
+  variant = "badge",
   className = "",
 }) {
   const lv = String(level || "none").toLowerCase();
@@ -130,6 +132,39 @@ export function VerificationLevelBadge({
       : verified
         ? `${kind === "business" ? "کسب‌وکار" : "هویت"} ${label} (سطح ${step})`
         : `${kind === "business" ? "کسب‌وکار" : "هویت"} — احراز نشده`;
+
+  const plain = variant === "plain";
+
+  if (plain) {
+    const iconSize =
+      size === "lg" ? "h-[1.125rem] w-[1.125rem]" : "h-4 w-4";
+    const textSize = size === "lg" ? "text-[12px]" : "text-[11px]";
+    const tone =
+      status === "pending"
+        ? "text-amber-600"
+        : verified
+          ? "text-slate-700"
+          : "text-slate-400";
+
+    return (
+      <span
+        title={tip}
+        className={`inline-flex items-center justify-center gap-0.5 leading-none ${tone} ${className}`}
+      >
+        {verified && step ? (
+          <span className={`inline-flex h-[1em] items-center font-bold tabular-nums ${textSize}`}>{step}</span>
+        ) : null}
+        <VerificationLevelIcon
+          kind={kind}
+          level={verified ? lv : "none"}
+          className={`${iconSize} shrink-0`}
+        />
+        {showLabel && verified ? (
+          <span className="hidden max-w-[4.5rem] truncate sm:inline text-[10px] font-semibold">{label}</span>
+        ) : null}
+      </span>
+    );
+  }
 
   const sizeCls =
     size === "sm"

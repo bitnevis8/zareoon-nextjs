@@ -28,9 +28,7 @@ export default function SiteChrome({ children }) {
             {children}
           </div>
         ) : (
-          <main className="flex flex-1 flex-col">
-            {children}
-          </main>
+          <main className="flex flex-1 flex-col">{children}</main>
         )}
         {!isDashboard ? <Footer /> : null}
         <ClientSideWrapper>

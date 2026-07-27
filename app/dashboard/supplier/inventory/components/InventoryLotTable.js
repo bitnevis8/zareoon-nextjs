@@ -8,7 +8,19 @@ import { DashboardItemActions } from "@/app/components/dashboard/DashboardListTo
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
 
 /** ردیف لیستی موبایل‌اول */
-function LotListRow({ lot, productName, farmerName, onView, onEdit, onMedia, onDelete, t, tShared }) {
+function LotListRow({
+  lot,
+  productName,
+  farmerName,
+  onView,
+  onEdit,
+  onMedia,
+  onDelete,
+  onCreateLanding,
+  landingBusy,
+  t,
+  tShared,
+}) {
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
 
   return (
@@ -32,24 +44,46 @@ function LotListRow({ lot, productName, farmerName, onView, onEdit, onMedia, onD
                 : "—"}
           </p>
         </div>
-        <DashboardItemActions
-          onView={() => onView(lot)}
-          onEdit={() => onEdit(lot)}
-          onMedia={() => onMedia(lot)}
-          onDelete={() => onDelete(lot.id)}
-          viewLabel={t("lot.view")}
-          editLabel={t("lot.edit")}
-          mediaLabel={t("lot.media")}
-          deleteLabel={t("lot.delete")}
-          compact
-          className="shrink-0 sm:justify-end"
-        />
+        <div className="flex shrink-0 flex-col gap-1.5 sm:items-end">
+          <DashboardItemActions
+            onView={() => onView(lot)}
+            onEdit={() => onEdit(lot)}
+            onMedia={() => onMedia(lot)}
+            onDelete={() => onDelete(lot.id)}
+            viewLabel={t("lot.view")}
+            editLabel={t("lot.edit")}
+            mediaLabel={t("lot.media")}
+            deleteLabel={t("lot.delete")}
+            compact
+            className="sm:justify-end"
+          />
+          {onCreateLanding ? (
+            <button
+              type="button"
+              disabled={landingBusy}
+              onClick={() => onCreateLanding(lot)}
+              className="h-8 rounded-lg border border-emerald-200 bg-white px-2.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50 disabled:opacity-60"
+            >
+              {landingBusy ? "…" : "لندینگ"}
+            </button>
+          ) : null}
+        </div>
       </div>
     </li>
   );
 }
 
-export default function InventoryLotTable({ items, products, farmerNameMap, onView, onEdit, onMedia, onDelete }) {
+export default function InventoryLotTable({
+  items,
+  products,
+  farmerNameMap,
+  onView,
+  onEdit,
+  onMedia,
+  onDelete,
+  onCreateLanding,
+  landingBusyId,
+}) {
   const t = useTranslations("inventory");
   const tShared = useTranslations("shared");
   const productName = (id) => products.find((p) => p.id === id)?.name || "—";
@@ -68,6 +102,8 @@ export default function InventoryLotTable({ items, products, farmerNameMap, onVi
             onEdit={onEdit}
             onMedia={onMedia}
             onDelete={onDelete}
+            onCreateLanding={onCreateLanding}
+            landingBusy={landingBusyId === x.id}
             t={t}
             tShared={tShared}
           />
@@ -123,17 +159,29 @@ export default function InventoryLotTable({ items, products, farmerNameMap, onVi
                     <span className={statusBadgeClass(x.status)}>{localizeStatus(x.status, t)}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <DashboardItemActions
-                      onView={() => onView(x)}
-                      onEdit={() => onEdit(x)}
-                      onMedia={() => onMedia(x)}
-                      onDelete={() => onDelete(x.id)}
-                      viewLabel={t("lot.view")}
-                      editLabel={t("lot.edit")}
-                      mediaLabel={t("lot.media")}
-                      deleteLabel={t("lot.delete")}
-                      compact
-                    />
+                    <div className="flex flex-col items-end gap-1.5">
+                      <DashboardItemActions
+                        onView={() => onView(x)}
+                        onEdit={() => onEdit(x)}
+                        onMedia={() => onMedia(x)}
+                        onDelete={() => onDelete(x.id)}
+                        viewLabel={t("lot.view")}
+                        editLabel={t("lot.edit")}
+                        mediaLabel={t("lot.media")}
+                        deleteLabel={t("lot.delete")}
+                        compact
+                      />
+                      {onCreateLanding ? (
+                        <button
+                          type="button"
+                          disabled={landingBusyId === x.id}
+                          onClick={() => onCreateLanding(x)}
+                          className="h-8 rounded-lg border border-emerald-200 bg-white px-2.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50 disabled:opacity-60"
+                        >
+                          {landingBusyId === x.id ? "…" : "لندینگ"}
+                        </button>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}

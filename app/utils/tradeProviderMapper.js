@@ -34,6 +34,7 @@ export function mapApiProviderRow(row, t, language) {
     apiId: row.id,
     userId: row.userId != null ? Number(row.userId) : null,
     profilePath: providerPublicPath(row.profileSlug),
+    profileSlug: row.profileSlug || null,
     name: row.displayName,
     contactName: row.contactName,
     phone: row.phone,

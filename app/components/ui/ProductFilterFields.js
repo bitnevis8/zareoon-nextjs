@@ -30,8 +30,10 @@ export default function ProductFilterFields({
 
   const labelFor = (key) => {
     try {
-      const translated = t(`filterKeys.${key}`);
-      if (translated && translated !== `filterKeys.${key}`) return translated;
+      const path = `filterKeys.${key}`;
+      if (typeof t.has === "function" && !t.has(path)) return humanizeFilterKey(key);
+      const translated = t(path);
+      if (translated && translated !== path) return translated;
     } catch {
       /* missing key */
     }

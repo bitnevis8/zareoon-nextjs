@@ -17,13 +17,13 @@ function LcMainContent({ t }) {
           </h2>
           <p className="text-sm sm:text-base leading-7 text-slate-700">{t("lcDescription")}</p>
         </div>
-        <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 border border-emerald-200/80 shadow-md overflow-hidden self-start">
+        <div className="flex h-14 w-[7.75rem] sm:h-16 sm:w-[9rem] shrink-0 items-center justify-center self-start rounded-2xl border border-emerald-200/80 bg-white/90 px-2 py-1.5 shadow-md">
           <Image
-            src="/images/logo.png"
-            alt={t("siteName")}
-            width={80}
-            height={80}
-            className="object-contain w-full h-full"
+            src="/images/lc.png"
+            alt={t("lcTitle")}
+            width={300}
+            height={134}
+            className="h-full w-auto max-w-full object-contain drop-shadow-sm"
           />
         </div>
       </div>
@@ -118,13 +118,13 @@ export default function ZareoonLcAd() {
         aria-label={`${t("openLcDetails")}: ${t("lcTitle")}`}
       >
         <div className="flex items-start gap-2.5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-1 border border-emerald-200/80 shadow-sm overflow-hidden">
+          <div className="flex h-10 w-[5.6rem] shrink-0 items-center justify-center rounded-xl border border-emerald-200/80 bg-white px-1.5 py-1 shadow-sm overflow-hidden">
             <Image
-              src="/images/logo.png"
+              src="/images/lc.png"
               alt=""
-              width={40}
-              height={40}
-              className="object-contain w-full h-full"
+              width={300}
+              height={134}
+              className="h-full w-auto max-w-full object-contain"
               aria-hidden
             />
           </div>

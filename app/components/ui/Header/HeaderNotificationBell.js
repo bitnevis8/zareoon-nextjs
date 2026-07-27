@@ -66,11 +66,15 @@ export default function HeaderNotificationBell({ buttonClass = "" }) {
   const fetchCount = useCallback(async () => {
     if (!showBell) return;
     try {
-      const res = await authFetch(API_ENDPOINTS.applicantRequests.unreadCount, {
-        cache: "no-store",
-      });
-      const json = await res.json();
-      if (res.ok) setCount(Number(json?.data?.count) || 0);
+      const [aRes, bRes] = await Promise.all([
+        authFetch(API_ENDPOINTS.applicantRequests.unreadCount, { cache: "no-store" }),
+        authFetch(API_ENDPOINTS.barter.unreadCount, { cache: "no-store" }),
+      ]);
+      const aJson = await aRes.json().catch(() => ({}));
+      const bJson = await bRes.json().catch(() => ({}));
+      const a = aRes.ok ? Number(aJson?.data?.count) || 0 : 0;
+      const b = bRes.ok ? Number(bJson?.data?.count) || 0 : 0;
+      setCount(a + b);
     } catch {
       /* ignore */
     }
@@ -80,11 +84,28 @@ export default function HeaderNotificationBell({ buttonClass = "" }) {
     if (!showBell) return;
     setLoading(true);
     try {
-      const res = await authFetch(`${API_ENDPOINTS.applicantRequests.notifications}?limit=12`, {
-        cache: "no-store",
+      const [aRes, bRes] = await Promise.all([
+        authFetch(`${API_ENDPOINTS.applicantRequests.notifications}?limit=10`, { cache: "no-store" }),
+        authFetch(`${API_ENDPOINTS.barter.notifications}?limit=10`, { cache: "no-store" }),
+      ]);
+      const aJson = await aRes.json().catch(() => ({}));
+      const bJson = await bRes.json().catch(() => ({}));
+      const applicantItems = (Array.isArray(aJson?.data) ? aJson.data : []).map((n) => ({
+        ...n,
+        kind: "applicant",
+        sortAt: n.createdAt || n.updatedAt || "",
+      }));
+      const barterItems = (Array.isArray(bJson?.data) ? bJson.data : []).map((n) => ({
+        ...n,
+        kind: "barter",
+        sortAt: n.createdAt || n.updatedAt || "",
+      }));
+      const merged = [...barterItems, ...applicantItems].sort((x, y) => {
+        const tx = new Date(x.sortAt || 0).getTime();
+        const ty = new Date(y.sortAt || 0).getTime();
+        return ty - tx;
       });
-      const json = await res.json();
-      setItems(Array.isArray(json?.data) ? json.data : []);
+      setItems(merged.slice(0, 14));
     } catch {
       setItems([]);
     } finally {
@@ -173,13 +194,17 @@ export default function HeaderNotificationBell({ buttonClass = "" }) {
   const handleItemClick = async (notification) => {
     if (!notification.readAt) {
       try {
-        await authFetch(API_ENDPOINTS.applicantRequests.markRead(notification.id), {
-          method: "PATCH",
-        });
+        const url =
+          notification.kind === "barter"
+            ? API_ENDPOINTS.barter.markRead(notification.id)
+            : API_ENDPOINTS.applicantRequests.markRead(notification.id);
+        await authFetch(url, { method: "PATCH" });
         setCount((c) => Math.max(0, c - 1));
         setItems((prev) =>
           prev.map((n) =>
-            n.id === notification.id ? { ...n, readAt: n.readAt || new Date().toISOString() } : n
+            n.kind === notification.kind && n.id === notification.id
+              ? { ...n, readAt: n.readAt || new Date().toISOString() }
+              : n
           )
         );
       } catch {
@@ -217,14 +242,23 @@ export default function HeaderNotificationBell({ buttonClass = "" }) {
       }}
     >
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-        <p className="min-w-0 text-sm font-bold text-slate-900">{t("applicantNotificationsTitle")}</p>
-        <Link
-          href="/dashboard/incoming-requests"
-          className="shrink-0 text-xs font-semibold text-emerald-700 hover:underline"
-          onClick={() => setOpen(false)}
-        >
-          {t("applicantNotificationsViewAll")}
-        </Link>
+        <p className="min-w-0 text-sm font-bold text-slate-900">اعلان‌ها</p>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/dashboard/barter-inbox"
+            className="text-xs font-semibold text-amber-700 hover:underline"
+            onClick={() => setOpen(false)}
+          >
+            معاوضه
+          </Link>
+          <Link
+            href="/dashboard/incoming-requests"
+            className="text-xs font-semibold text-emerald-700 hover:underline"
+            onClick={() => setOpen(false)}
+          >
+            {t("applicantNotificationsViewAll")}
+          </Link>
+        </div>
       </div>
 
       <div className="max-h-[min(24rem,60vh)] overflow-y-auto overscroll-contain">
@@ -235,10 +269,52 @@ export default function HeaderNotificationBell({ buttonClass = "" }) {
         ) : (
           <ul className="divide-y divide-slate-100">
             {items.map((n) => {
-              const req = n.request;
               const unread = !n.readAt;
+              if (n.kind === "barter") {
+                const lot = n.inventoryLot || {};
+                const productName = lot.product?.name || lot.englishName || "محصول";
+                const want =
+                  lot.barterDesiredName ||
+                  lot.barterDesiredCategoryLabel ||
+                  (lot.barterDesiredKind === "service" ? "خدمت دیگر" : "کالای دیگر");
+                return (
+                  <li key={`barter-${n.id}`}>
+                    <Link
+                      href={`/dashboard/barter-inbox/${lot.id || n.inventoryLotId}`}
+                      onClick={() => handleItemClick(n)}
+                      className={`flex items-start gap-3 px-4 py-3 transition hover:bg-slate-50 ${
+                        unread ? "bg-amber-50/60" : ""
+                      }`}
+                    >
+                      <span
+                        className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-amber-500" : "bg-transparent"}`}
+                        aria-hidden
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block text-sm leading-6 break-words ${
+                            unread ? "font-bold text-slate-900" : "font-medium text-slate-700"
+                          }`}
+                        >
+                          پیشنهاد معاوضه: {productName} ↔ {want}
+                        </span>
+                        <span className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                          {lot.barterDesiredKind === "service" ? "کالا به خدمات" : "کالا به کالا"}
+                        </span>
+                      </span>
+                      {unread ? (
+                        <span className="shrink-0 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          جدید
+                        </span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              }
+
+              const req = n.request;
               return (
-                <li key={n.id}>
+                <li key={`applicant-${n.id}`}>
                   <Link
                     href={`/dashboard/incoming-requests/${req?.id || n.requestId}`}
                     onClick={() => handleItemClick(n)}

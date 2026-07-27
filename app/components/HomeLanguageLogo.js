@@ -5,12 +5,12 @@ import { useMemo } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import LanguageFlag from "@/app/components/ui/LanguageFlag";
 
-/** از چپ → بالا (Es | Fa | Ar) → راست پایین (En) · بقیه در بین */
+/** از چپ → بالا (Es | Ar | Fa) → راست پایین (En) · بقیه در بین */
 const ARC_SIDE_LEFT = ["ru", "ur", "nl"];
 const ARC_SIDE_RIGHT = ["tr", "fi"];
 const ARC_PIN_LEFT = "es";
-const ARC_PIN_TOP = "fa";
-const ARC_PIN_RIGHT = "ar";
+const ARC_PIN_TOP = "ar";
+const ARC_PIN_RIGHT = "fa";
 const ARC_PIN_END = "en";
 
 function buildArcOrder(availableCodes) {

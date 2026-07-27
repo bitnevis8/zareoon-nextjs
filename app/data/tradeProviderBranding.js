@@ -17,9 +17,7 @@ export function resolveProviderLogoUrl(provider) {
   return null;
 }
 
-/** لوگو روی کارت دسته: بازرسی → آریا فولاد · بسته‌بندی → زارعون */
-export function resolveCategoryBrandLogo(categoryId) {
-  if (categoryId === "inspection-standards") return AFG_INSPECTION_LOGO;
-  if (categoryId === "packaging-prep") return ZAREOON_LOGO;
+/** لوگو روی کارت دسته — دیگر برند اجباری نیست؛ مثل سایر دسته‌ها آیکن می‌ماند */
+export function resolveCategoryBrandLogo() {
   return null;
 }
