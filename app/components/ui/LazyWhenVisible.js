@@ -21,7 +21,12 @@ export default function LazyWhenVisible({
     const el = ref.current;
     if (!el) return;
 
-    if (typeof IntersectionObserver === "undefined") {
+    // WebView اندروید گاهی IntersectionObserver را غلط می‌دهد → اسکلتون دائمی
+    const forceShow =
+      typeof IntersectionObserver === "undefined" ||
+      document.documentElement.classList.contains("capacitor-native") ||
+      Boolean(window.Capacitor?.isNativePlatform?.());
+    if (forceShow) {
       setVisible(true);
       return;
     }
@@ -37,8 +42,13 @@ export default function LazyWhenVisible({
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+    // اگر IO گیر کرد (بعضی WebViewها)، بعد از کمی صبر محتوا را نشان بده
+    const fallback = window.setTimeout(() => setVisible(true), 1200);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
+  }, [rootMargin]);
 
   return (
     <div

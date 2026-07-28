@@ -587,4 +587,54 @@ html, body {
   }
 }
 
+/* Capacitor Android shell — feel less like a browser */
+html.capacitor-native,
+body.capacitor-native {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.capacitor-native {
+  --capacitor-safe-top: 0px;
+  --capacitor-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body.capacitor-native {
+  padding-bottom: max(var(--capacitor-safe-bottom), env(safe-area-inset-bottom, 0px));
+}
+
+/* فاصلهٔ بالا را MainActivity (native insets) می‌دهد — اینجا padding اضافه نکن */
+
+/* باتم‌بار در اپ اندروید همیشه دیده شود (حتی اگر WebView عرض lg بدهد) */
+html.capacitor-native .mobile-bottom-bar {
+  display: block !important;
+}
+
+/* پیش‌نمایش موکاپ: صفحه قفل — بدون اسکرول و تعامل (مثل تصویر) */
+html.phone-preview,
+html.phone-preview body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  height: 100% !important;
+  max-height: 100% !important;
+  touch-action: none;
+  pointer-events: none !important;
+  user-select: none !important;
+  cursor: inherit !important;
+}
+
+html.phone-preview * {
+  pointer-events: none !important;
+  animation: none !important;
+  transition: none !important;
+  cursor: inherit !important;
+}
+
+/* خود قاب موکاپ روی صفحه اصلی: موس تغییر نکند */
+.android-phone-mockup,
+.android-phone-mockup * {
+  cursor: inherit !important;
+}
+
 

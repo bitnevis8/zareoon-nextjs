@@ -13,6 +13,7 @@ import StructuredData from "./components/StructuredData";
 import AppToaster from "./components/ui/AppToaster";
 import SiteChrome from "./components/ui/SiteChrome";
 import MessagingModalHost from "./components/messaging/MessagingModalHost";
+import CapacitorNativeBoot from "./components/CapacitorNativeBoot";
 
 export async function generateMetadata() {
   const t = await getTranslations("layout.metadata");
@@ -79,7 +80,10 @@ export async function generateMetadata() {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff",
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#064e3b",
 };
 
 export default async function RootLayout({ children }) {
@@ -91,6 +95,7 @@ export default async function RootLayout({ children }) {
     <html lang={locale} dir={dir} data-theme="taganeh" suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col bg-slate-50 antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <CapacitorNativeBoot />
           <IntlHtmlAttributes locale={locale} dir={dir} />
           <StructuredData />
           <LanguageProvider>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -22,7 +22,7 @@ function UserAvatar({ user, t, avatarFallbackInitial }) {
         alt={user.firstName || t("profile")}
         width={24}
         height={24}
-        className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+        className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-emerald-200"
         unoptimized
       />
     );
@@ -46,6 +46,39 @@ export default function MobileBottomBar() {
   const user = auth?.user;
   const [requestPickerOpen, setRequestPickerOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  /** در WebView اپ گاهی عرض ≥ lg گزارش می‌شود و lg:hidden نوار را مخفی می‌کند */
+  const [isNativeApp, setIsNativeApp] = useState(false);
+
+  useLayoutEffect(() => {
+    const native =
+      document.documentElement.classList.contains("capacitor-native") ||
+      Boolean(window.Capacitor?.isNativePlatform?.()) ||
+      (window.Capacitor?.getPlatform?.() && window.Capacitor.getPlatform() !== "web");
+    if (native) setIsNativeApp(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const mark = () => {
+      if (!cancelled) setIsNativeApp(true);
+    };
+    if (document.documentElement.classList.contains("capacitor-native")) mark();
+    if (window.Capacitor?.isNativePlatform?.()) mark();
+    import("@capacitor/core")
+      .then(({ Capacitor }) => {
+        if (Capacitor.isNativePlatform()) mark();
+        else {
+          const p = Capacitor.getPlatform?.();
+          if (p && p !== "web") mark();
+        }
+      })
+      .catch(() => {
+        if (window.Capacitor?.isNativePlatform?.()) mark();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleRequestClick = () => {
     setCategoryMenuOpen(false);
@@ -64,7 +97,6 @@ export default function MobileBottomBar() {
 
   const handleAccountClick = () => {
     closeOverlays();
-    // اینستاگرام‌مانند: رفتن به پروفایل داشبورد، بدون باز کردن پیش‌فرض سایدبار
     if (pathname === "/dashboard" || pathname === "/dashboard/") {
       window.scrollTo?.({ top: 0, behavior: "smooth" });
       return;
@@ -185,19 +217,14 @@ export default function MobileBottomBar() {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 002 2z"
             />
           </svg>
         );
       case "request":
         return (
           <svg {...iconProps}>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         );
       case "search":
@@ -228,8 +255,8 @@ export default function MobileBottomBar() {
   };
 
   const itemClass = (active) =>
-    `flex flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 min-h-11 min-w-0 transition-colors ${
-      active ? "text-green-600" : "text-gray-600 hover:text-blue-600"
+    `flex flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 min-h-12 min-w-0 rounded-xl transition-colors ${
+      active ? "text-emerald-700 bg-emerald-50/90" : "text-slate-600 active:bg-slate-50"
     }`;
 
   const renderContent = (button) => {
@@ -237,7 +264,7 @@ export default function MobileBottomBar() {
       return (
         <>
           <UserAvatar user={user} t={t} avatarFallbackInitial={tLayout("avatarFallbackInitial")} />
-          <span className="max-w-[4.25rem] truncate text-center text-[9px] leading-tight sm:text-[10px]">
+          <span className="max-w-[4.5rem] truncate text-center text-[10px] font-medium leading-tight">
             {button.label}
           </span>
         </>
@@ -254,7 +281,7 @@ export default function MobileBottomBar() {
             </span>
           ) : null}
         </span>
-        <span className="max-w-[4.25rem] text-center text-[9px] leading-tight line-clamp-2 sm:text-[10px]">
+        <span className="max-w-[4.5rem] text-center text-[10px] font-medium leading-tight line-clamp-2">
           {button.label}
         </span>
       </>
@@ -270,8 +297,17 @@ export default function MobileBottomBar() {
       />
       <MobileRequestSheet open={requestPickerOpen} onClose={() => setRequestPickerOpen(false)} />
 
-      <div className="fixed bottom-0 left-0 right-0 z-[9998] border-t border-gray-200 bg-white shadow-lg pb-[env(safe-area-inset-bottom)] lg:hidden">
-        <div className={`flex min-h-[3.75rem] items-stretch justify-between px-0.5 py-0.5 ${isRTL ? "" : "flex-row-reverse"}`}>
+      <nav
+        aria-label="Mobile bottom navigation"
+        className={`mobile-bottom-bar fixed bottom-0 inset-x-0 z-[9998] border-t border-emerald-100/90 bg-white/95 shadow-[0_-10px_28px_-16px_rgba(15,23,42,0.22)] backdrop-blur-md ${
+          isNativeApp ? "" : "lg:hidden"
+        }`}
+      >
+        <div
+          className={`mx-auto flex min-h-[3.85rem] max-w-lg items-stretch justify-between gap-0.5 px-1.5 py-1 ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
+        >
           {buttons.map((button) => {
             const content = renderContent(button);
 
@@ -296,7 +332,7 @@ export default function MobileBottomBar() {
             );
           })}
         </div>
-      </div>
+      </nav>
     </>
   );
 }

@@ -17,41 +17,47 @@ const isRealProduction = (() => {
 /**
  * مرورگر → دامنهٔ عمومی (می‌تواند پشت Cloudflare باشد)
  * سرور Next (SSR / Route Handler) → origin داخلی تا از لبه CF رد نشود
+ *
+ * مهم برای اپ Dev روی LAN: از hostname صفحه (مثلاً 10.x.x.x) با پورت 3000 استفاده کن،
+ * نه localhost — وگرنه گوشی به خودش درخواست می‌زند.
  */
 function resolveApiBaseUrl() {
   if (typeof window === "undefined") {
     const internal = String(process.env.INTERNAL_API_URL || process.env.API_INTERNAL_URL || "").trim();
     if (internal) return internal.replace(/\/$/, "");
     if (isProduction) return "http://127.0.0.1:3060";
-    return "http://localhost:3000";
+    return "http://127.0.0.1:3000";
   }
 
   if (process.env.NEXT_PUBLIC_API_URL) {
     return String(process.env.NEXT_PUBLIC_API_URL).replace(/\/$/, "");
   }
 
-  if (isProduction) {
+  if (isRealProduction) {
     return "https://api.zareoon.ir";
   }
 
   try {
-    if (typeof window !== "undefined" && window.location) {
-      const loc = window.location;
-      const host = loc.hostname;
-      const protocol = loc.protocol || "http:";
-      return `${protocol}//${host}:3000`;
+    const loc = window.location;
+    const host = loc.hostname;
+    const protocol = loc.protocol || "http:";
+    if (host === "zareoon.ir" || host === "www.zareoon.ir") {
+      return "https://api.zareoon.ir";
     }
+    return `${protocol}//${host}:3000`;
   } catch {
     /* ignore */
   }
-  return "http://localhost:3000";
+  return "http://127.0.0.1:3000";
 }
 
 let API_BASE_URL = resolveApiBaseUrl();
 
 /** برای کد سمت‌سرور که هنوز مستقیم از این ثابت استفاده می‌کند */
 export function getApiBaseUrl() {
-  return resolveApiBaseUrl();
+  // هر بار resolve کن تا روی کلاینت LAN درست باشد
+  API_BASE_URL = resolveApiBaseUrl();
+  return API_BASE_URL;
 }
 
 export const API_ENDPOINTS = {
@@ -524,3 +530,41 @@ export const API_ENDPOINTS = {
 
 /** @deprecated alias — از API_ENDPOINTS.supplier استفاده کنید */
 API_ENDPOINTS.farmer = API_ENDPOINTS.supplier;
+
+/**
+ * روی کلاینت اگر base در زمان ساخت ماژول اشتباه بوده (مثلاً localhost)،
+ * رشته‌های استاتیک endpoint را با host فعلی صفحه هم‌تراز کن.
+ */
+function rewriteEndpointTree(node, fromBase, toBase) {
+  if (!node || fromBase === toBase) return node;
+  if (typeof node === "string") {
+    return node.startsWith(fromBase) ? `${toBase}${node.slice(fromBase.length)}` : node;
+  }
+  if (typeof node === "function") {
+    return (...args) => rewriteEndpointTree(node(...args), fromBase, toBase);
+  }
+  if (Array.isArray(node)) {
+    return node.map((item) => rewriteEndpointTree(item, fromBase, toBase));
+  }
+  if (typeof node === "object") {
+    const out = {};
+    for (const [k, v] of Object.entries(node)) {
+      out[k] = rewriteEndpointTree(v, fromBase, toBase);
+    }
+    return out;
+  }
+  return node;
+}
+
+if (typeof window !== "undefined") {
+  const liveBase = resolveApiBaseUrl();
+  if (liveBase && liveBase !== API_BASE_URL) {
+    const rewritten = rewriteEndpointTree(API_ENDPOINTS, API_BASE_URL, liveBase);
+    Object.keys(API_ENDPOINTS).forEach((k) => {
+      delete API_ENDPOINTS[k];
+    });
+    Object.assign(API_ENDPOINTS, rewritten);
+    API_BASE_URL = liveBase;
+    API_ENDPOINTS.farmer = API_ENDPOINTS.supplier;
+  }
+}

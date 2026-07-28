@@ -1,8 +1,10 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
+import AndroidAppPromo, { PHONE_PREVIEW_PARAM } from "../AndroidAppPromo";
 import GlobalSidebar from "./GlobalSidebar";
 import MobileBottomBar from "../MobileBottomBar";
 import ClientSideWrapper from "./ClientSideWrapper";
@@ -17,31 +19,61 @@ function CatalogWarmupBoot() {
   return null;
 }
 
-export default function SiteChrome({ children }) {
+function useIsPhonePreview() {
+  const searchParams = useSearchParams();
+  return searchParams.get(PHONE_PREVIEW_PARAM) === "1";
+}
+
+function PhonePreviewHtmlFlag({ enabled }) {
+  useEffect(() => {
+    const root = document.documentElement;
+    if (enabled) root.classList.add("phone-preview");
+    else root.classList.remove("phone-preview");
+    return () => root.classList.remove("phone-preview");
+  }, [enabled]);
+  return null;
+}
+
+function SiteChromeInner({ children }) {
   const isDashboard = useIsDashboardRoute();
+  const isPhonePreview = useIsPhonePreview();
 
   return (
-    <Suspense fallback={null}>
-      <NavigationLoadingProvider>
-        <CatalogWarmupBoot />
-        <Header />
-        {isDashboard ? (
-          <div className="flex h-[calc(100dvh-var(--site-top-chrome,0px))] min-h-0 flex-1 flex-col overflow-hidden max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
-            {children}
-          </div>
-        ) : (
-          <main className="flex flex-1 flex-col">{children}</main>
-        )}
-        {!isDashboard ? <Footer /> : null}
+    <NavigationLoadingProvider>
+      <PhonePreviewHtmlFlag enabled={isPhonePreview} />
+      {!isPhonePreview ? <CatalogWarmupBoot /> : null}
+      <Header />
+      {isDashboard ? (
+        <div className="flex h-[calc(100dvh-var(--site-top-chrome,0px))] min-h-0 flex-1 flex-col overflow-hidden max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
+          {children}
+        </div>
+      ) : (
+        <main className="flex flex-1 flex-col">{children}</main>
+      )}
+      {!isDashboard && !isPhonePreview ? (
+        <>
+          <AndroidAppPromo />
+          <Footer />
+        </>
+      ) : null}
+      {!isPhonePreview ? (
         <ClientSideWrapper>
           <GlobalSidebar />
         </ClientSideWrapper>
-        <ClientSideWrapper>
-          <Suspense fallback={null}>
-            <MobileBottomBar />
-          </Suspense>
-        </ClientSideWrapper>
-      </NavigationLoadingProvider>
+      ) : null}
+      <ClientSideWrapper>
+        <Suspense fallback={null}>
+          <MobileBottomBar />
+        </Suspense>
+      </ClientSideWrapper>
+    </NavigationLoadingProvider>
+  );
+}
+
+export default function SiteChrome({ children }) {
+  return (
+    <Suspense fallback={null}>
+      <SiteChromeInner>{children}</SiteChromeInner>
     </Suspense>
   );
 }
