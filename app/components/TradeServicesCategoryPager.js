@@ -148,9 +148,9 @@ export default function TradeServicesCategoryPager({
     suppressClick.current = false;
   };
 
-  // مستطیل عمودی شفاف — روی کارت‌ها (بدون گرفتن فضای پدینگ)
+  // مستطیل عمودی طلایی گرادیانی — شفاف‌تر از قبل (~۵٪)
   const arrowBtn =
-    "pointer-events-auto absolute top-1/2 z-30 flex h-28 w-7 -translate-y-1/2 items-center justify-center rounded-md border border-slate-300/25 bg-slate-700/20 text-slate-800 shadow-none backdrop-blur-[2px] transition hover:bg-slate-700/35 hover:text-slate-950 disabled:cursor-default disabled:opacity-15 sm:h-32 sm:w-8";
+    "pointer-events-auto absolute top-1/2 z-30 flex h-28 w-7 -translate-y-1/2 items-center justify-center rounded-md border border-amber-400/30 bg-gradient-to-b from-amber-400/15 via-yellow-500/12 to-amber-600/15 text-amber-900/85 shadow-none backdrop-blur-[2px] transition hover:from-amber-400/25 hover:via-yellow-500/20 hover:to-amber-600/25 hover:text-amber-950 disabled:cursor-default disabled:opacity-15 sm:h-32 sm:w-8";
 
   if (!items?.length) return null;
 

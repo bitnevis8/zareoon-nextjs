@@ -51,23 +51,23 @@ export default function HomeLanguageLogo() {
       .filter(Boolean);
   }, [availableLanguages]);
   const count = arcItems.length;
-  // شعاع قوس زبان — متناسب با لوگو
-  const radius = "clamp(6.16rem, 33.5vw, 12.3rem)";
+  // شعاع قوس زبان — کمی جمع‌وجورتر از لوگو
+  const radius = "clamp(6.5rem, 36vw, 13rem)";
 
   return (
     <div
-      className="home-language-logo relative mx-auto mt-16 flex w-full max-w-2xl justify-center overflow-visible px-2 pb-0 pt-[4.5rem] sm:mt-20 sm:pt-16 md:mt-24 lg:mt-28"
+      className="home-language-logo relative mx-auto mt-6 flex w-full max-w-2xl justify-center overflow-visible px-2 pb-0 pt-16 sm:mt-8 sm:pt-[4.5rem] md:mt-10"
       style={{ ["--arc-r"]: radius }}
     >
-      <div className="home-language-logo-inner relative mb-6 inline-block translate-y-6 overflow-visible sm:mb-8 sm:translate-y-8 md:mb-10 md:translate-y-10">
+      <div className="home-language-logo-inner relative mb-1 inline-block overflow-visible sm:mb-2">
         <Image
           src="/images/logo.png"
           alt={t("siteName")}
-          width={208}
-          height={208}
-          className="home-language-logo-img relative z-[1] mx-auto !h-[7.78rem] !w-[7.78rem] object-contain sm:!h-[9.07rem] sm:!w-[9.07rem] md:!h-[10.37rem] md:!w-[10.37rem]"
+          width={275}
+          height={275}
+          className="home-language-logo-img relative z-[1] mx-auto !h-[10.27rem] !w-[10.27rem] object-contain sm:!h-[11.97rem] sm:!w-[11.97rem] md:!h-[13.68rem] md:!w-[13.68rem]"
           priority
-          sizes="166px"
+          sizes="220px"
         />
 
         <div

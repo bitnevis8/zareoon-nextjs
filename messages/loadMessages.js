@@ -61,7 +61,8 @@ function deepMerge(target, source) {
 function readJsonFile(filePath) {
   if (!fs.existsSync(filePath)) return null;
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const raw = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
+    return JSON.parse(raw);
   } catch {
     return null;
   }

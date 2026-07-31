@@ -15,7 +15,6 @@ import HeaderMessagesIcon from './HeaderMessagesIcon';
 import HeaderSupportContact from './HeaderSupportContact';
 import SlugChangePendingBanner from './SlugChangePendingBanner';
 import QuickSearchBox from '../../QuickSearchBox';
-import BreakpointBadge from '../../BreakpointBadge';
 
 const headerIconBtnClass =
   'inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-emerald-700 hover:bg-gray-50 transition-colors';
@@ -121,7 +120,7 @@ export default function Header() {
       alt={brandName}
       width={64}
       height={64}
-      className="h-10 w-10 shrink-0 rounded object-contain sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-[3.25rem] lg:w-[3.25rem] xl:h-14 xl:w-14 2xl:h-[3.75rem] 2xl:w-[3.75rem] 3xl:h-16 3xl:w-16"
+      className="h-[2.875rem] w-[2.875rem] shrink-0 rounded object-contain sm:h-[3.1625rem] sm:w-[3.1625rem] md:h-[3.45rem] md:w-[3.45rem] lg:h-[3.74rem] lg:w-[3.74rem] xl:h-[4.025rem] xl:w-[4.025rem] 2xl:h-[4.31rem] 2xl:w-[4.31rem] 3xl:h-[4.6rem] 3xl:w-[4.6rem]"
       priority
     />
   );
@@ -138,13 +137,12 @@ export default function Header() {
             layoutRtl ? 'flex-row-reverse justify-start' : 'flex-row'
           }`}
         >
-          <h1 className="shrink-0 whitespace-nowrap text-base font-bold tracking-tight text-slate-800 transition-colors group-hover/brand:text-emerald-800 sm:text-lg md:text-xl lg:text-2xl xl:text-[1.65rem] 2xl:text-3xl 3xl:text-[2rem]">
+          <h1 className="shrink-0 whitespace-nowrap text-[15px] font-bold tracking-tight text-slate-800 transition-colors group-hover/brand:text-emerald-800 sm:text-base md:text-lg lg:text-xl xl:text-[1.5rem] 2xl:text-[1.65rem] 3xl:text-[1.85rem]">
             {brandName}
           </h1>
-          <BreakpointBadge className="text-[9px] leading-none sm:text-[10px] md:text-xs" />
         </div>
         <div className="mt-0.5 hidden min-w-0 sm:mt-1 sm:block md:mt-1.5">
-          <p className="max-w-[11rem] truncate text-[10px] font-medium leading-snug text-slate-600 sm:max-w-[14rem] sm:text-[11px] md:max-w-none md:whitespace-nowrap md:text-xs lg:text-[13px] xl:text-sm 2xl:text-[15px] 3xl:text-base">
+          <p className="max-w-[11rem] truncate text-[8px] font-medium leading-snug text-slate-600 sm:max-w-[14rem] sm:text-[9px] md:max-w-none md:whitespace-nowrap md:text-[10px] lg:text-[11px] xl:text-xs 2xl:text-[13px] 3xl:text-sm">
             {t('siteTagline')}
           </p>
         </div>
@@ -154,7 +152,7 @@ export default function Header() {
 
   // فاصلهٔ ثابت و مقیاس‌پذیر بین لوگو و عنوان/زیرعنوان در همه بریک‌پوینت‌ها
   const brandBlock = (
-    <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5 md:gap-3 lg:gap-3.5 xl:gap-4 2xl:gap-5 3xl:gap-6">
+    <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5 md:gap-1.5 lg:gap-[0.4375rem] xl:gap-2 2xl:gap-2.5 3xl:gap-3">
       {layoutRtl ? (
         <>
           {titleBlock}

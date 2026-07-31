@@ -103,7 +103,7 @@ function isCapacitorNative() {
   return document.documentElement.classList.contains("capacitor-native");
 }
 
-/** صفحه داخل موکاپ: لوگو + آیه چندزبانه */
+/** صفحه داخل موکاپ: واترمارک لوگو + آیه چندزبانه */
 function MockupAyahScreen({ compact }) {
   return (
     <div
@@ -125,25 +125,28 @@ function MockupAyahScreen({ compact }) {
         aria-hidden
       />
 
-      <div className={["relative z-[1] flex flex-col items-center", compact ? "gap-0.5" : "gap-1.5"].join(" ")}>
-        <div
+      {/* واترمارک بزرگ و کم‌رنگ در پس‌زمینه */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+        aria-hidden
+      >
+        <Image
+          src="/images/logo.png"
+          alt=""
+          width={compact ? 160 : 420}
+          height={compact ? 160 : 420}
           className={[
-            "flex items-center justify-center rounded-2xl bg-white/80 shadow-sm ring-1 ring-emerald-100/80",
-            compact ? "h-7 w-7 p-0.5" : "h-14 w-14 p-1.5",
+            "select-none object-contain opacity-[0.09]",
+            compact ? "h-[72%] w-[72%] max-w-none" : "h-[78%] w-[78%] max-w-none",
           ].join(" ")}
-        >
-          <Image
-            src="/images/logo.png"
-            alt="Zareoon"
-            width={compact ? 28 : 56}
-            height={compact ? 28 : 56}
-            className="h-full w-full object-contain"
-          />
-        </div>
+        />
+      </div>
+
+      <div className={["relative z-[1] flex flex-col items-center", compact ? "gap-0.5" : "gap-1"].join(" ")}>
         <p
           className={[
-            "font-black tracking-tight text-emerald-950",
-            compact ? "text-[7px] leading-none" : "text-[13px] leading-none",
+            "font-black tracking-tight text-[#022c22]",
+            compact ? "text-[8.4px] leading-none" : "text-[15.6px] leading-none",
           ].join(" ")}
         >
           زارعون
@@ -151,7 +154,7 @@ function MockupAyahScreen({ compact }) {
         <div
           className={[
             "rounded-full bg-emerald-600/10 font-semibold text-emerald-800",
-            compact ? "px-1 py-px text-[4px]" : "px-2 py-0.5 text-[9px]",
+            compact ? "mt-0.5 px-1 py-px text-[4px]" : "mt-1 px-2 py-0.5 text-[9px]",
           ].join(" ")}
         >
           {MOCKUP_AYAH_REF}
@@ -171,9 +174,9 @@ function MockupAyahScreen({ compact }) {
             <div
               key={line.lang}
               className={[
-                "rounded-xl border border-emerald-100/70 bg-white/70 backdrop-blur-[2px]",
+                "rounded-xl border border-emerald-100/40 bg-white/30 backdrop-blur-[1px]",
                 compact ? "px-1 py-0.5" : "px-2.5 py-2",
-                isPrimary ? "ring-1 ring-emerald-200/60" : "",
+                isPrimary ? "ring-1 ring-emerald-200/35" : "",
               ].join(" ")}
             >
               <p
@@ -363,36 +366,60 @@ function useAppInstall() {
 }
 
 const BTN_BASE =
-  "inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-extrabold transition active:scale-[0.99] sm:min-h-12 sm:gap-2.5 sm:rounded-2xl sm:px-4 sm:text-sm";
+  "inline-flex min-h-11 w-full flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-extrabold transition active:scale-[0.99] sm:min-h-12 sm:gap-2.5 sm:rounded-2xl sm:px-4 sm:text-sm";
 
-function AndroidApkButton({ href, label, tone = "light" }) {
-  const isLight = tone === "light";
+function InstallTip({ tip, children, place = "top" }) {
+  if (!tip) return children;
   return (
-    <a
-      href={href}
-      download
-      className={[
-        BTN_BASE,
-        isLight
-          ? "border border-emerald-200 bg-white text-emerald-950 shadow-sm hover:border-emerald-300 hover:bg-emerald-50"
-          : "border border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/16",
-      ].join(" ")}
-    >
-      <span
-        className={
-          isLight
-            ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#3DDC84]/15 text-[#1B8A4A] sm:h-9 sm:w-9 sm:rounded-xl"
-            : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#3DDC84]/20 text-[#3DDC84] sm:h-9 sm:w-9 sm:rounded-xl"
-        }
-      >
-        <AndroidIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-      </span>
-      <span className="min-w-0 text-center leading-snug">{label}</span>
-    </a>
+    <div className={`tooltip tooltip-${place} app-install-tooltip w-full flex-1`}>
+      <div className="tooltip-content z-50 max-w-[16rem] px-3 py-2 text-start text-[11px] font-medium leading-5 sm:max-w-[18rem] sm:text-xs sm:leading-6">
+        {tip}
+      </div>
+      {children}
+    </div>
   );
 }
 
-function PwaActionButton({ isInstalled, busy, onInstall, installLabel, installedLabel, runLabel, busyLabel, tone = "light" }) {
+function AndroidApkButton({ href, label, hint, tone = "light" }) {
+  const isLight = tone === "light";
+  return (
+    <InstallTip tip={hint}>
+      <a
+        href={href}
+        download
+        className={[
+          BTN_BASE,
+          isLight
+            ? "border border-emerald-200 bg-white text-emerald-950 shadow-sm hover:border-emerald-300 hover:bg-emerald-50"
+            : "border border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/16",
+        ].join(" ")}
+      >
+        <span
+          className={
+            isLight
+              ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#3DDC84]/15 text-[#1B8A4A] sm:h-9 sm:w-9 sm:rounded-xl"
+              : "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#3DDC84]/20 text-[#3DDC84] sm:h-9 sm:w-9 sm:rounded-xl"
+          }
+        >
+          <AndroidIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+        </span>
+        <span className="min-w-0 text-center leading-snug">{label}</span>
+      </a>
+    </InstallTip>
+  );
+}
+
+function PwaActionButton({
+  isInstalled,
+  busy,
+  onInstall,
+  installLabel,
+  installHint,
+  installedLabel,
+  runLabel,
+  busyLabel,
+  tone = "light",
+}) {
   const isLight = tone === "light";
 
   if (isInstalled) {
@@ -419,21 +446,23 @@ function PwaActionButton({ isInstalled, busy, onInstall, installLabel, installed
   }
 
   return (
-    <button
-      type="button"
-      onClick={onInstall}
-      disabled={busy}
-      className={[
-        BTN_BASE,
-        "disabled:cursor-wait disabled:opacity-80",
-        isLight
-          ? "bg-emerald-700 text-white shadow-sm hover:bg-emerald-800"
-          : "bg-white text-emerald-950 shadow-[0_14px_36px_-12px_rgba(255,255,255,0.45)] hover:bg-emerald-50",
-      ].join(" ")}
-    >
-      <DeviceInstallIcon className="h-5 w-5 shrink-0 sm:h-6 sm:w-6" />
-      <span className="min-w-0 text-center leading-snug">{busy ? busyLabel : installLabel}</span>
-    </button>
+    <InstallTip tip={installHint}>
+      <button
+        type="button"
+        onClick={onInstall}
+        disabled={busy}
+        className={[
+          BTN_BASE,
+          "disabled:cursor-wait disabled:opacity-80",
+          isLight
+            ? "bg-emerald-700 text-white shadow-sm hover:bg-emerald-800"
+            : "bg-white text-emerald-950 shadow-[0_14px_36px_-12px_rgba(255,255,255,0.45)] hover:bg-emerald-50",
+        ].join(" ")}
+      >
+        <DeviceInstallIcon className="h-5 w-5 shrink-0 sm:h-6 sm:w-6" />
+        <span className="min-w-0 text-center leading-snug">{busy ? busyLabel : installLabel}</span>
+      </button>
+    </InstallTip>
   );
 }
 
@@ -474,6 +503,7 @@ export default function AndroidAppPromo({ className = "" }) {
     busy,
     onInstall: installPwa,
     installLabel: t("pwaInstallCta"),
+    installHint: t("pwaInstallHint"),
     installedLabel: t("pwaInstalledLabel"),
     runLabel: t("pwaInstalledRun"),
     busyLabel: t("pwaInstallBusy"),
@@ -481,7 +511,12 @@ export default function AndroidAppPromo({ className = "" }) {
 
   const installButtons = (tone) => (
     <div className="mt-3 flex w-full flex-col gap-2 min-[400px]:flex-row min-[400px]:items-stretch sm:mt-4 sm:gap-2.5">
-      <AndroidApkButton href={ANDROID_APK_HREF} label={t("androidAppDownload")} tone={tone} />
+      <AndroidApkButton
+        href={ANDROID_APK_HREF}
+        label={t("androidAppDownload")}
+        hint={t("androidAppDownloadHint")}
+        tone={tone}
+      />
       <PwaActionButton {...pwaProps} tone={tone} />
     </div>
   );

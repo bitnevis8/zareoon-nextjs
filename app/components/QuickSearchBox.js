@@ -107,12 +107,12 @@ export default function QuickSearchBox({
     ? inputClassName
     : isHeader
       ? [
-          "w-full cursor-pointer appearance-none rounded-full border border-slate-200 bg-slate-50",
-          "text-sm text-slate-800 placeholder:text-slate-400",
+          "w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-slate-50",
+          "h-10 text-sm text-slate-800 placeholder:text-slate-400",
           "transition-[border-color,box-shadow,background-color] duration-200",
           "hover:border-emerald-200 hover:bg-white",
           "focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20",
-          "min-h-10 px-4 py-2",
+          "px-4",
           textAlignClass,
           iconOnLeft ? "ps-10 pe-4" : "pe-10 ps-4",
         ].join(" ")

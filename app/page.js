@@ -69,7 +69,7 @@ function HomeContent() {
     <main className="pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4" dir={isRTL ? "rtl" : "ltr"}>
       <HomeSectionNav />
       <section className="page-shell section-stack space-y-4 text-start sm:space-y-6 lg:space-y-8">
-        <div className="home-hero mt-10 text-center sm:mt-12 lg:mt-14">
+        <div className="home-hero mt-5 text-center sm:mt-6 lg:mt-7">
           <div className="space-y-0 sm:space-y-1">
             <HomeLanguageLogo />
             <QuickSearchBox variant="homepage" />

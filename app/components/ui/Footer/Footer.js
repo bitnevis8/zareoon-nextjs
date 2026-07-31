@@ -114,8 +114,8 @@ export default function Footer({ className = "" }) {
         </nav>
 
         <div className="mt-2.5 flex items-center justify-center gap-3 border-t border-slate-100 pt-2.5">
-          <EnamadSeal className="shrink-0 [&_img]:h-9 [&_img]:w-auto [&_img]:max-w-[2.25rem]" />
-          <ZibalBadge className="shrink-0" height={22} />
+          <EnamadSeal className="shrink-0 [&_img]:h-[4.5rem] [&_img]:w-auto [&_img]:max-w-[4.5rem]" />
+          <ZibalBadge className="shrink-0" height={44} />
         </div>
 
         <button

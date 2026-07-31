@@ -16,8 +16,6 @@ import { CALENDAR_MODES } from "@/app/utils/calendars";
 const EXCHANGE_HREF = "/exchange-rates#converter";
 const FETCH_TIMEOUT_MS = 10_000;
 const REFRESH_MS = 5 * 60 * 1000;
-/** هر گاه‌شماری حدود ۱۰ ثانیه نمایش داده می‌شود */
-const CALENDAR_ROTATE_MS = 10_000;
 
 function scheduleDeferredTask(task) {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
@@ -98,39 +96,32 @@ function TickerStrip({ rates, rialLabel, zeroPercentLabel }) {
 const edgePanelClass =
   "z-10 flex h-full shrink-0 items-center bg-emerald-50/90 px-2 transition hover:bg-emerald-100/90 sm:px-3";
 
-/** چرخش تاریخ‌ها — فقط بعد از mount تاریخ واقعی تا hydration خطا ندهد */
+/** چرخش تاریخ با daisyUI text-rotate — هر تاریخ ≈۱۰ثانیه (۳ مورد → ۳۰ثانیه کل) */
 function CalendarRotator({ equivalents, ready }) {
-  const [index, setIndex] = useState(0);
   const items = Array.isArray(equivalents) ? equivalents : [];
-  const count = items.length;
-
-  useEffect(() => {
-    if (!ready || count <= 1) return undefined;
-    const id = setInterval(() => setIndex((i) => (i + 1) % count), CALENDAR_ROTATE_MS);
-    return () => clearInterval(id);
-  }, [ready, count]);
-
-  useEffect(() => {
-    if (count > 0 && index >= count) setIndex(0);
-  }, [count, index]);
-
-  const item = items[index] || items[0] || null;
-  const label = item?.label || "—";
-  const short = ready && item?.short ? item.short : "…";
 
   return (
     <span
-      className="flex min-h-[2rem] min-w-[7.5rem] flex-col items-stretch justify-center gap-0.5 text-start sm:min-w-[8.5rem]"
+      className="calendar-text-rotate text-rotate duration-[30s] min-w-[7.5rem] text-center sm:min-w-[8.5rem]"
       aria-live="polite"
     >
-      <span className="block text-[9px] font-bold leading-none text-amber-700 sm:text-[10px]" suppressHydrationWarning>
-        {label}
-      </span>
-      <span
-        className="block whitespace-nowrap text-[11px] font-bold leading-tight tabular-nums text-slate-800 sm:text-xs"
-        suppressHydrationWarning
-      >
-        {short}
+      <span className="justify-items-center text-center">
+        {items.map((item) => (
+          <span
+            key={item.mode}
+            className="flex flex-col items-center justify-center gap-0.5 text-center leading-tight"
+          >
+            <span className="block text-[9px] font-bold leading-none text-amber-700 sm:text-[10px]">
+              {item.label || "—"}
+            </span>
+            <span
+              className="block whitespace-nowrap text-[11px] font-bold leading-tight tabular-nums text-slate-800 sm:text-xs"
+              suppressHydrationWarning
+            >
+              {ready && item.short ? item.short : "…"}
+            </span>
+          </span>
+        ))}
       </span>
     </span>
   );
@@ -256,7 +247,7 @@ function CalendarBadge({ t, language, isRTL }) {
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className={`${edgePanelClass} gap-1.5 border-s border-emerald-200/80 sm:gap-2 sm:px-3`}
+        className={`${edgePanelClass} justify-center gap-1.5 border-s border-emerald-200/80 sm:gap-2 sm:px-3`}
         title={t("currencyTicker.calendarClickHintAll")}
         aria-expanded={open}
         aria-haspopup="dialog"
