@@ -293,8 +293,8 @@ export default function DashboardPersonaSwitcher({ onLinkClick, compact = false 
       role="tablist"
       aria-label={t("dashboardPersonaSectionTitle")}
     >
-      {TABS.map((tab) => {
-        const selected = activePersona === tab.id;
+        {TABS.map((tab) => {
+          const selected = activePersona === tab.id;
         const TabIcon = tab.Icon;
         const label = t(tab.labelKey);
         const tone = tab.tone;
@@ -317,16 +317,16 @@ export default function DashboardPersonaSwitcher({ onLinkClick, compact = false 
 
         return (
           <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={selected}
             title={label}
-            onClick={() => {
-              setPersona(tab.id);
+              onClick={() => {
+                setPersona(tab.id);
               router.push("/dashboard");
-              onLinkClick?.();
-            }}
+                onLinkClick?.();
+              }}
             className={`flex min-w-0 items-center justify-center rounded-lg transition ${
               compact
                 ? "h-9 w-full px-1"
@@ -335,9 +335,9 @@ export default function DashboardPersonaSwitcher({ onLinkClick, compact = false 
           >
             <TabIcon className={`h-4 w-4 shrink-0 ${selected ? tone.iconSelected : tone.iconIdle}`} />
             {!compact ? <span className="w-full truncate text-center">{label}</span> : null}
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
     </div>
   );
 }

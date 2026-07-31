@@ -452,8 +452,8 @@ export default function CategoryMegaMenu() {
                 <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-y-contain p-2" aria-busy="true">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="flex items-center gap-2 rounded-lg p-1.5">
-                      <div className="skeleton-bone h-8 w-8 shrink-0 rounded-lg" />
-                      <div className="skeleton-bone h-3 flex-1 rounded-md" />
+                      <div className="skeleton h-8 w-8 shrink-0 rounded-lg" />
+                      <div className="skeleton h-3 flex-1 rounded-md" />
                     </div>
                   ))}
                 </div>
@@ -500,14 +500,14 @@ export default function CategoryMegaMenu() {
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               {loading ? (
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-3" aria-busy="true">
-                  <div className="mb-3 skeleton-bone h-5 w-40 rounded-lg" />
+                  <div className="mb-3 skeleton h-5 w-40 rounded-lg" />
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     {Array.from({ length: 10 }).map((_, i) => (
                       <div key={i} className="space-y-2">
-                        <div className="skeleton-bone h-3.5 w-20 rounded-md" />
-                        <div className="skeleton-bone h-2.5 w-full rounded-md" />
-                        <div className="skeleton-bone h-2.5 w-4/5 rounded-md opacity-70" />
-                        <div className="skeleton-bone h-2.5 w-3/5 rounded-md opacity-50" />
+                        <div className="skeleton h-3.5 w-20 rounded-md" />
+                        <div className="skeleton h-2.5 w-full rounded-md" />
+                        <div className="skeleton h-2.5 w-4/5 rounded-md opacity-70" />
+                        <div className="skeleton h-2.5 w-3/5 rounded-md opacity-50" />
                       </div>
                     ))}
                   </div>
@@ -602,15 +602,15 @@ export default function CategoryMegaMenu() {
           aria-expanded={open}
           aria-haspopup="dialog"
           className={[
-            "flex h-full min-h-10 shrink-0 items-center gap-1.5 border-l border-emerald-200/90 bg-white px-2.5 text-[11px] font-semibold text-slate-800 transition sm:px-3 sm:text-xs",
+            "flex h-full min-h-10 items-center justify-center gap-1.5 border-l border-emerald-200/90 bg-white px-3 text-[11px] font-semibold text-slate-800 transition sm:gap-2 sm:px-4 sm:text-xs",
             "hover:bg-emerald-50 hover:text-emerald-900",
             open
               ? "bg-emerald-50 text-emerald-900 ring-1 ring-inset ring-emerald-200"
               : "",
           ].join(" ")}
         >
-          <MenuIcon className="h-3.5 w-3.5 text-emerald-700" />
-          <span className="whitespace-nowrap">{t("categoriesShort")}</span>
+          <MenuIcon className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
+          <span className="whitespace-nowrap">{t("mobileProductsTab") || t("navProducts") || "محصولات"}</span>
           <ChevronDown open={open} />
         </button>
       </div>

@@ -10,6 +10,7 @@ import { canActAsSeller } from "@/app/utils/dashboardPersona";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { providerPublicPath } from "@/app/utils/providerPublicPath";
+import ExpandableText from "@/app/components/ui/ExpandableText";
 
 const SAMPLE_SLUG = "your-page";
 
@@ -390,9 +391,13 @@ export default function BuyerSellerPortal({ className = "" }) {
               >
                 {t("buyerSellerPortalSectionTitle")}
               </h2>
-              <p className="mt-1.5 text-xs leading-6 text-emerald-50/90 sm:mt-2 sm:text-sm sm:leading-7">
+              <ExpandableText
+                className="mt-1.5 text-xs leading-5 text-emerald-50/90 sm:mt-2 sm:text-sm sm:leading-7"
+                clampClass="line-clamp-3"
+                tone="light"
+              >
                 {t("buyerSellerPortalSectionDesc")}
-              </p>
+              </ExpandableText>
               <p
                 className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-white/15 bg-black/20 px-2 py-1.5 font-mono text-[10px] text-emerald-50 sm:gap-2 sm:px-2.5 sm:text-xs"
                 dir="ltr"
@@ -468,7 +473,7 @@ export default function BuyerSellerPortal({ className = "" }) {
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-[11.5rem] w-[9.75rem] shrink-0 animate-pulse rounded-2xl bg-white/10 sm:h-[13.5rem] sm:w-[12.5rem]"
+                    className="skeleton h-[11.5rem] w-[9.75rem] shrink-0 rounded-2xl sm:h-[13.5rem] sm:w-[12.5rem]"
                   />
                 ))}
               </div>

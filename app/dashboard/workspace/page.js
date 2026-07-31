@@ -297,10 +297,10 @@ export default function WorkspaceHubPage() {
   if (loading && !data) {
     return (
       <div className="space-y-4" dir="rtl">
-        <div className="h-40 animate-pulse rounded-3xl bg-slate-200/70" />
+        <div className="h-40 skeleton rounded-3xl" />
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="h-64 animate-pulse rounded-2xl bg-slate-200/60 lg:col-span-2" />
-          <div className="h-64 animate-pulse rounded-2xl bg-slate-200/60" />
+          <div className="h-64 skeleton rounded-2xl lg:col-span-2" />
+          <div className="h-64 skeleton rounded-2xl" />
         </div>
       </div>
     );

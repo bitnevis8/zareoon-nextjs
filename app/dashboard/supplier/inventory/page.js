@@ -25,6 +25,7 @@ import { useInventoryLots } from "./hooks/useInventoryLots";
 import { filterAndSortLots, countActiveFilters, loadAttributeDefsForProduct, saveLotAttributeValues } from "./inventoryUtils";
 import { hydrateDisplayContent, displayContentToApiPayload } from "./utils/inventoryDisplayLocales";
 import LandingTemplatePickModal from "@/app/components/productLanding/builder/LandingTemplatePickModal";
+import { normalizeFxFieldsForCurrency } from "@/app/utils/fxRate";
 
 export default function InventoryListPage() {
   const searchParams = useSearchParams();
@@ -142,8 +143,19 @@ export default function InventoryListPage() {
       totalQuantity: String(lot.totalQuantity ?? ""),
       price: lot.price == null ? "" : String(lot.price),
       priceCurrency: lot.priceCurrency || lot.price_currency || "TOMAN",
+      fxRateSource: lot.fxRateSource || lot.fx_rate_source || null,
+      fxRateManual:
+        lot.fxRateManual != null || lot.fx_rate_manual != null
+          ? String(lot.fxRateManual ?? lot.fx_rate_manual)
+          : "",
       minimumOrderQuantity: lot.minimumOrderQuantity ? String(lot.minimumOrderQuantity) : "",
       tieredPricing: lot.tieredPricing || [],
+      dailyPrices: Array.isArray(lot.dailyPrices)
+        ? lot.dailyPrices.map((r) => ({
+            priceDate: r.priceDate,
+            price: r.price != null ? Number(r.price) : "",
+          }))
+        : [],
       acceptCash: lot.acceptCash !== false,
       acceptBarter: Boolean(lot.acceptBarter),
       barterDesiredKind: lot.barterDesiredKind === "service" ? "service" : "product",
@@ -177,6 +189,11 @@ export default function InventoryListPage() {
     setEditSaving(true);
     try {
       const displayFields = displayContentToApiPayload(editForm.displayContent);
+      const fx = normalizeFxFieldsForCurrency(
+        editForm.priceCurrency,
+        editForm.fxRateSource,
+        editForm.fxRateManual
+      );
       const payload = {
         unit: editForm.unit || null,
         packagingType: editForm.packagingType || null,
@@ -186,8 +203,15 @@ export default function InventoryListPage() {
         totalQuantity: editForm.totalQuantity !== "" ? Number(editForm.totalQuantity) : null,
         price: editForm.price !== "" ? Number(editForm.price) : null,
         priceCurrency: editForm.priceCurrency || "TOMAN",
+        fxRateSource: fx.fxRateSource,
+        fxRateManual: fx.fxRateManual,
         minimumOrderQuantity: editForm.minimumOrderQuantity ? Number(editForm.minimumOrderQuantity) : null,
         tieredPricing: editForm.tieredPricing.length > 0 ? editForm.tieredPricing : null,
+        dailyPrices: Array.isArray(editForm.dailyPrices)
+          ? editForm.dailyPrices
+              .filter((r) => r?.priceDate && r.price !== "" && r.price != null)
+              .map((r) => ({ priceDate: r.priceDate, price: Number(r.price) }))
+          : [],
         status: editForm.status || null,
         locationLabel: editForm.locationLabel?.trim() || null,
         latitude: editForm.latitude !== "" && editForm.latitude != null ? Number(editForm.latitude) : null,

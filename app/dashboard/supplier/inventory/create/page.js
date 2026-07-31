@@ -17,6 +17,7 @@ import { loadAttributeDefsForProduct } from "../inventoryUtils";
 import { displayContentToApiPayload } from "../utils/inventoryDisplayLocales";
 import { uploadMediaFiles } from "@/app/utils/mediaUploadClient";
 import { canSellerListProduct } from "@/app/utils/productCatalogSchema";
+import { normalizeFxFieldsForCurrency } from "@/app/utils/fxRate";
 
 export default function InventoryCreatePage() {
   const router = useRouter();
@@ -108,6 +109,7 @@ export default function InventoryCreatePage() {
     try {
       const ownFarmer = isOwnScope || isSupplier(user);
       const displayFields = displayContentToApiPayload(form.displayContent);
+      const fx = normalizeFxFieldsForCurrency(form.priceCurrency, form.fxRateSource, form.fxRateManual);
       const lotRes = await fetch(API_ENDPOINTS.supplier.inventoryLots.create, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,8 +124,15 @@ export default function InventoryCreatePage() {
           totalQuantity: Number(form.totalQuantity),
           price: form.price ? Number(form.price) : null,
           priceCurrency: form.priceCurrency || "TOMAN",
+          fxRateSource: fx.fxRateSource,
+          fxRateManual: fx.fxRateManual,
           minimumOrderQuantity: form.minimumOrderQuantity ? Number(form.minimumOrderQuantity) : null,
           tieredPricing: form.tieredPricing.length > 0 ? form.tieredPricing : null,
+          dailyPrices: Array.isArray(form.dailyPrices)
+            ? form.dailyPrices
+                .filter((r) => r?.priceDate && r.price !== "" && r.price != null)
+                .map((r) => ({ priceDate: r.priceDate, price: Number(r.price) }))
+            : [],
           reservedQuantity: 0,
           status: form.status || "harvested",
           locationLabel: form.locationLabel?.trim() || null,

@@ -47,6 +47,7 @@ export default function HeaderSupportContact({
   className = "",
   buttonClassName = "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-emerald-700 transition-colors hover:bg-gray-50 hover:text-emerald-800",
   menuPlacement = "down",
+  label = null,
 }) {
   const { t, isRTL, language } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -193,11 +194,12 @@ export default function HeaderSupportContact({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label={t("supportContact")}
-        title={t("supportContact")}
+        aria-label={label || t("supportContact")}
+        title={label || t("supportContact")}
         className={buttonClassName}
       >
-        <PhoneIcon className="h-5 w-5" />
+        <PhoneIcon className="h-5 w-5 shrink-0" />
+        {label ? <span className="whitespace-nowrap text-xs font-bold">{label}</span> : null}
       </button>
 
       {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}

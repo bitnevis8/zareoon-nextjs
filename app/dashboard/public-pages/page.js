@@ -7,6 +7,7 @@ import { dash } from "@/app/components/dashboard/dashboardTheme";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
+import { Bone } from "@/app/components/ui/Skeleton";
 
 export default function AdminPublicPagesPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
@@ -155,8 +156,8 @@ export default function AdminPublicPagesPage() {
 
   if (authLoading || !allowed) {
     return (
-      <div className={`${dash.page} animate-pulse`}>
-        <div className="h-8 w-48 rounded bg-slate-200" />
+      <div className={dash.page}>
+        <Bone className="h-8 w-48" rounded="rounded-lg" />
       </div>
     );
   }
@@ -190,9 +191,9 @@ export default function AdminPublicPagesPage() {
       </div>
 
       {loading ? (
-        <div className="animate-pulse space-y-2 pt-4">
+        <div className="flex flex-col gap-2 pt-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-xl bg-slate-100" />
+            <Bone key={i} className="h-14 w-full" rounded="rounded-xl" />
           ))}
         </div>
       ) : tab === "shops" ? (

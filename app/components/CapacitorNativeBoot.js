@@ -5,7 +5,6 @@ import { useLayoutEffect } from "react";
 function isCapacitorNative() {
   if (typeof window === "undefined") return false;
   try {
-    // Bridge نیتیو (قابل اعتمادتر از import پکیج روی remote URL)
     if (window.Capacitor?.isNativePlatform?.()) return true;
     const p = window.Capacitor?.getPlatform?.();
     if (p && p !== "web") return true;
@@ -15,15 +14,33 @@ function isCapacitorNative() {
   return false;
 }
 
+function unlockDocumentScroll() {
+  const root = document.documentElement;
+  const body = document.body;
+  root.classList.remove("phone-preview");
+  root.style.removeProperty("overflow");
+  root.style.removeProperty("height");
+  root.style.removeProperty("max-height");
+  root.style.removeProperty("touch-action");
+  root.style.removeProperty("pointer-events");
+  if (body) {
+    body.style.removeProperty("overflow");
+    body.style.removeProperty("height");
+    body.style.removeProperty("max-height");
+    body.style.removeProperty("touch-action");
+    body.style.removeProperty("pointer-events");
+  }
+}
+
 function markNative() {
   document.documentElement.classList.add("capacitor-native");
   document.body?.classList.add("capacitor-native");
   document.documentElement.style.setProperty("--capacitor-safe-top", "0px");
+  unlockDocumentScroll();
 }
 
 /**
- * اپ Capacitor: Status Bar را نشان بده.
- * فاصلهٔ بالای صفحه در MainActivity با WindowInsets داده می‌شود.
+ * اپ Capacitor: Status Bar + باز کردن قفل اسکرول روی همه WebViewها
  */
 export default function CapacitorNativeBoot() {
   useLayoutEffect(() => {
@@ -50,7 +67,8 @@ export default function CapacitorNativeBoot() {
         ]);
 
         try {
-          await StatusBar.setOverlaysWebView({ overlay: true });
+          // overlay=false با decorFitsSystemWindows نیتیو هم‌خوان است و لمس را خراب نمی‌کند
+          await StatusBar.setOverlaysWebView({ overlay: false });
           await StatusBar.show();
           await StatusBar.setStyle({ style: Style.Dark });
           await StatusBar.setBackgroundColor({ color: "#064e3b" });
@@ -63,8 +81,9 @@ export default function CapacitorNativeBoot() {
         } catch {
           /* ignore */
         }
+
+        unlockDocumentScroll();
       } catch {
-        /* مرورگر — یا اگر bridge نیتیو بود کلاس را نگه دار */
         if (!cancelled && isCapacitorNative()) markNative();
       }
     })();

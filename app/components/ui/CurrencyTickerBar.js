@@ -6,16 +6,18 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   formatAllCalendars,
-  formatCalendar,
-  getDefaultCalendarMode,
 } from "@/app/utils/calendars";
 import CategoryMegaMenu from "@/app/components/CategoryMegaMenu";
+import ServicesMegaMenu from "@/app/components/ServicesMegaMenu";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { CALENDAR_MODES } from "@/app/utils/calendars";
 
 const EXCHANGE_HREF = "/exchange-rates#converter";
 const FETCH_TIMEOUT_MS = 10_000;
 const REFRESH_MS = 5 * 60 * 1000;
+/** هر گاه‌شماری حدود ۱۰ ثانیه نمایش داده می‌شود */
+const CALENDAR_ROTATE_MS = 10_000;
 
 function scheduleDeferredTask(task) {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
@@ -96,36 +98,48 @@ function TickerStrip({ rates, rialLabel, zeroPercentLabel }) {
 const edgePanelClass =
   "z-10 flex h-full shrink-0 items-center bg-emerald-50/90 px-2 transition hover:bg-emerald-100/90 sm:px-3";
 
-function MobileRatesLead({ ariaLabel, label }) {
-  return (
-    <Link
-      href={EXCHANGE_HREF}
-      className={`${edgePanelClass} border-l border-emerald-200/80 lg:hidden`}
-      aria-label={ariaLabel}
-    >
-      <span className="whitespace-nowrap text-[10px] font-bold text-emerald-900 sm:text-xs">{label}</span>
-    </Link>
-  );
-}
+/** چرخش تاریخ‌ها — فقط بعد از mount تاریخ واقعی تا hydration خطا ندهد */
+function CalendarRotator({ equivalents, ready }) {
+  const [index, setIndex] = useState(0);
+  const items = Array.isArray(equivalents) ? equivalents : [];
+  const count = items.length;
 
-function ExchangeRatesButton({ ariaLabel, label }) {
+  useEffect(() => {
+    if (!ready || count <= 1) return undefined;
+    const id = setInterval(() => setIndex((i) => (i + 1) % count), CALENDAR_ROTATE_MS);
+    return () => clearInterval(id);
+  }, [ready, count]);
+
+  useEffect(() => {
+    if (count > 0 && index >= count) setIndex(0);
+  }, [count, index]);
+
+  const item = items[index] || items[0] || null;
+  const label = item?.label || "—";
+  const short = ready && item?.short ? item.short : "…";
+
   return (
-    <Link
-      href={EXCHANGE_HREF}
-      className={`${edgePanelClass} hidden gap-1.5 border-r border-emerald-200/80 lg:flex sm:gap-2`}
-      aria-label={ariaLabel}
+    <span
+      className="flex min-h-[2rem] min-w-[7.5rem] flex-col items-stretch justify-center gap-0.5 text-start sm:min-w-[8.5rem]"
+      aria-live="polite"
     >
-      <span className="text-sm sm:text-base" aria-hidden>
-        💱
+      <span className="block text-[9px] font-bold leading-none text-amber-700 sm:text-[10px]" suppressHydrationWarning>
+        {label}
       </span>
-      <span className="whitespace-nowrap text-[10px] font-bold text-emerald-900 sm:text-xs">{label}</span>
-    </Link>
+      <span
+        className="block whitespace-nowrap text-[11px] font-bold leading-tight tabular-nums text-slate-800 sm:text-xs"
+        suppressHydrationWarning
+      >
+        {short}
+      </span>
+    </span>
   );
 }
 
 function CalendarBadge({ t, language, isRTL }) {
   const [open, setOpen] = useState(false);
   const [now, setNow] = useState(null);
+  const [ready, setReady] = useState(false);
   const [menuStyle, setMenuStyle] = useState(null);
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
@@ -133,6 +147,7 @@ function CalendarBadge({ t, language, isRTL }) {
 
   useEffect(() => {
     setNow(new Date());
+    setReady(true);
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
@@ -163,7 +178,7 @@ function CalendarBadge({ t, language, isRTL }) {
       const button = buttonRef.current;
       if (!button) return;
       const rect = button.getBoundingClientRect();
-      const menuWidth = Math.min(280, window.innerWidth - 16);
+      const menuWidth = Math.min(300, window.innerWidth - 16);
       const gap = 6;
       const pad = 8;
       let left = isRTL ? rect.right - menuWidth : rect.left;
@@ -181,22 +196,26 @@ function CalendarBadge({ t, language, isRTL }) {
     };
   }, [open, isRTL]);
 
-  const primaryMode = getDefaultCalendarMode(language);
-  const primary = now ? formatCalendar(primaryMode, now, language) : null;
-  const primaryLabel =
-    primaryMode === "gregorian"
-      ? t("currencyTicker.calendarGregorian")
-      : primaryMode === "hijri"
-        ? t("currencyTicker.calendarHijri")
-        : t("currencyTicker.calendarShamsi");
+  const calendarLabels = useMemo(
+    () => ({
+      gregorian: t("currencyTicker.calendarGregorian"),
+      hijri: t("currencyTicker.calendarHijri"),
+      shamsi: t("currencyTicker.calendarShamsi"),
+    }),
+    [t]
+  );
 
-  const equivalents = now
-    ? formatAllCalendars(now, language, {
-        gregorian: t("currencyTicker.calendarGregorian"),
-        hijri: t("currencyTicker.calendarHijri"),
-        shamsi: t("currencyTicker.calendarShamsi"),
-      })
-    : [];
+  const equivalents = useMemo(() => {
+    if (!ready || !now) {
+      return CALENDAR_MODES.map((mode) => ({
+        mode,
+        label: calendarLabels[mode],
+        short: "…",
+        full: "",
+      }));
+    }
+    return formatAllCalendars(now, language, calendarLabels);
+  }, [ready, now, language, calendarLabels]);
 
   const menu =
     open && menuStyle ? (
@@ -215,8 +234,12 @@ function CalendarBadge({ t, language, isRTL }) {
           {equivalents.map((item) => (
             <li key={item.mode} className="px-3.5 py-2.5">
               <p className="text-[10px] font-bold tracking-wide text-amber-700">{item.label}</p>
-              <p className="mt-0.5 text-sm font-bold tabular-nums text-slate-900">{item.short}</p>
-              <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{item.full}</p>
+              <p className="mt-0.5 text-sm font-bold tabular-nums text-slate-900" suppressHydrationWarning>
+                {item.short}
+              </p>
+              <p className="mt-0.5 text-[11px] leading-5 text-slate-500" suppressHydrationWarning>
+                {item.full}
+              </p>
             </li>
           ))}
         </ul>
@@ -233,36 +256,19 @@ function CalendarBadge({ t, language, isRTL }) {
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className={`${edgePanelClass} gap-1 border-l border-emerald-200/80 lg:border-r lg:border-l-0 sm:gap-1.5`}
-        title={
-          primary
-            ? t("currencyTicker.calendarClickHint", { full: primary.full })
-            : t("currencyTicker.calendarAria", { label: "" })
-        }
+        className={`${edgePanelClass} gap-1.5 border-s border-emerald-200/80 sm:gap-2 sm:px-3`}
+        title={t("currencyTicker.calendarClickHintAll")}
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-label={
-          primary
-            ? t("currencyTicker.calendarAria", { label: primaryLabel })
-            : t("currencyTicker.calendarAria", { label: "" })
-        }
-        suppressHydrationWarning
+        aria-label={t("currencyTicker.calendarAriaAll")}
       >
-        <span className="hidden text-sm sm:inline sm:text-base" aria-hidden>
+        <span
+          className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[13px] shadow-sm ring-1 ring-emerald-200/80 sm:inline-flex"
+          aria-hidden
+        >
           📅
         </span>
-        <span className="hidden min-w-0 flex-col text-start leading-tight lg:flex" suppressHydrationWarning>
-          <span className="text-[9px] font-bold text-amber-700">{primaryLabel || "\u00a0"}</span>
-          <span className="max-w-[8.5rem] truncate text-[11px] font-bold tabular-nums text-slate-800">
-            {primary?.short || "…"}
-          </span>
-        </span>
-        <span
-          className="max-w-[5.25rem] truncate text-[10px] font-bold tabular-nums text-slate-800 lg:hidden sm:max-w-[6rem]"
-          suppressHydrationWarning
-        >
-          {primary?.short || "…"}
-        </span>
+        <CalendarRotator equivalents={equivalents} ready={ready} />
       </button>
       {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
     </div>
@@ -277,13 +283,14 @@ function TickerBarShell({ children, t, dir, language, isRTL }) {
       role="region"
       aria-label={t("currencyTicker.regionAria")}
     >
-      <div className="hidden h-full shrink-0 self-stretch lg:block">
-        <CategoryMegaMenu />
+      <div className="hidden h-full w-auto shrink-0 self-stretch lg:flex">
+        <div className="flex h-full divide-x divide-emerald-200/80 border-e border-emerald-200/80">
+          <CategoryMegaMenu />
+          <ServicesMegaMenu />
+        </div>
       </div>
 
-      <MobileRatesLead ariaLabel={t("currencyTicker.ratesAria")} label={t("currencyTicker.ratesLabel")} />
       {children}
-      <ExchangeRatesButton ariaLabel={t("currencyTicker.ratesAria")} label={t("currencyTicker.ratesLabel")} />
       <CalendarBadge t={t} language={language} isRTL={isRTL} />
     </div>
   );

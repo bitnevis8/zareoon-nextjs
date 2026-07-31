@@ -6,6 +6,7 @@ import { dash } from "@/app/components/dashboard/dashboardTheme";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
+import { Bone } from "@/app/components/ui/Skeleton";
 
 export default function SlugAliasesAdminPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
@@ -70,8 +71,8 @@ export default function SlugAliasesAdminPage() {
 
   if (authLoading || !allowed) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+      <div className={dash.page}>
+        <Bone className="h-8 w-48" rounded="rounded-lg" />
       </div>
     );
   }
@@ -106,9 +107,9 @@ export default function SlugAliasesAdminPage() {
       </div>
 
       {loading ? (
-        <div className="animate-pulse space-y-2">
+        <div className="flex flex-col gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-lg bg-slate-100" />
+            <Bone key={i} className="h-14 w-full" rounded="rounded-lg" />
           ))}
         </div>
       ) : items.length === 0 ? (

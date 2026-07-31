@@ -10,7 +10,12 @@
     "farmer": "فروشنده",
     "loader": "فروشنده",
     "employee": "کارمند",
-    "administrator": "مدیر"
+    "administrator": "مدیر",
+    "support": "پشتیبانی",
+    "content_moderator": "ناظر محتوا",
+    "verification_officer": "کارشناس احراز",
+    "finance_officer": "کارشناس مالی",
+    "subscription_officer": "کارشناس اشتراک"
   },
   "accountNav": {
     "individual": "کاربر",
@@ -266,9 +271,11 @@
     "calendarHijri": "قمری",
     "calendarShamsi": "شمسی",
     "calendarClickHint": "{full} — برای دیدن معادل‌ها کلیک کنید",
+    "calendarClickHintAll": "برای دیدن همه گاه‌شماری‌ها کلیک کنید",
     "calendarAria": "تقویم {label}",
+    "calendarAriaAll": "تاریخ در گاه‌شماری‌های مختلف",
     "calendarEquivalentsTitle": "معادل تاریخ در گاه‌شماری‌ها",
-    "regionAria": "نرخ ارز روز",
+    "regionAria": "نوار نرخ ارز و منوی محصولات و خدمات",
     "loadingRates": "در حال دریافت نرخ…",
     "ratesUnavailable": "نرخ ارز در دسترس نیست",
     "viewRates": "مشاهده نرخ ارز",

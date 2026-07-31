@@ -3,7 +3,7 @@ import languageLabels from "../../messages/fa/languages.json";
 
 /** ترتیب نمایش: فارسی بالا، سپس زبان‌های فعال پیش‌فرض، بعد بقیه */
 export const SITE_LANGUAGES = [
-  { code: "fa", label: languageLabels.fa, shortLabel: "Fa", countryCode: "IR", flagOnly: true },
+  { code: "fa", label: languageLabels.fa, shortLabel: "Fa", countryCode: "IR" },
   { code: "ar", label: languageLabels.ar, shortLabel: "Ar", countryCode: "IQ" },
   { code: "en", label: languageLabels.en, shortLabel: "En", countryCode: "GB" },
   { code: "ru", label: languageLabels.ru, shortLabel: "Ru", countryCode: "RU" },

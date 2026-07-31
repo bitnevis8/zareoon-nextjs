@@ -141,12 +141,19 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
       trail: [{ labelKey: "applicant" }, { labelKey: "myOrders" }],
     },
     {
+      match: "/dashboard/trade-assurance",
+      trail: [{ labelKey: "escrow" }],
+    },
+    {
       match: "/dashboard/applicant-requests",
       trail: [{ labelKey: "applicant" }, { labelKey: "myRequests" }],
     },
     {
       match: "/dashboard/escrow",
-      trail: [{ labelKey: "escrow" }, { labelKey: "escrowContracts" }],
+      trail: [
+        { href: "/dashboard/trade-assurance", labelKey: "escrow" },
+        { labelKey: "escrowContracts" },
+      ],
     },
     {
       match: "/dashboard/escrow-settings",

@@ -23,6 +23,7 @@ import BusinessHoursEditor from "@/app/components/ui/BusinessHoursEditor";
 import LocationPickerMap from "@/app/components/ui/LocationPickerMap";
 import { DEFAULT_BUSINESS_HOURS } from "@/app/utils/businessHours";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
+import DaisyBreadcrumbs from "@/app/components/ui/DaisyBreadcrumbs";
 
 const STEPS = [
   { id: 1, title: "آدرس" },
@@ -312,6 +313,14 @@ export default function TradeProviderRegisterForm() {
       dir={isRTL ? "rtl" : "ltr"}
     >
       <header className="mb-5 sm:mb-6">
+        <DaisyBreadcrumbs
+          className="mb-3"
+          items={[
+            { href: "/", label: t("mainPage") || "خانه" },
+            { href: "/trade-services", label: t("tradeServices") || "خدمات بازرگانی" },
+            { label: "ثبت خدمات" },
+          ]}
+        />
         <p className="text-xs font-medium text-emerald-700">ایجاد خدمات</p>
         <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
           صفحه تجاری خدمات خود را بسازید
@@ -358,7 +367,7 @@ export default function TradeProviderRegisterForm() {
               </span>
             </label>
             {slugLoading ? (
-              <div className="h-20 animate-pulse rounded-xl bg-slate-100" />
+              <div className="h-20 skeleton rounded-xl" />
             ) : hasSlug ? (
               <ExistingPublicPageNotice slug={existingSlug} />
             ) : (

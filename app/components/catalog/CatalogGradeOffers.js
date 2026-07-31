@@ -188,8 +188,8 @@ function SupplierCompareModal({ open, lots, language, productUnit, t, activeLotI
                   <tr key={lot.id} className={`border-t border-slate-100 ${active ? "bg-emerald-50/60" : ""}`}>
                     <td className="px-3 py-3 font-bold text-slate-900">{supplier.label}</td>
                     <td className="px-3 py-3 tabular-nums text-slate-800">
-                      {lot.price
-                        ? formatLocalizedNumber(lot.price, language, { maximumFractionDigits: 0 })
+                      {(lot.effectivePrice ?? lot.price) != null && (lot.effectivePrice ?? lot.price) !== ""
+                        ? formatLocalizedNumber(lot.effectivePrice ?? lot.price, language, { maximumFractionDigits: 0 })
                         : t("priceNotSet")}
                     </td>
                     <td className="px-3 py-3 tabular-nums text-slate-800">

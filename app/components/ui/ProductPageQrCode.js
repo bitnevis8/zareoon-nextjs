@@ -12,7 +12,7 @@ import { PRODUCT_QR_PRINT_SIZES, downloadProductQrPrint } from "@/app/utils/prod
 export default function ProductPageQrCode({
   pathOrUrl,
   title = "",
-  heading = "QR کد محصول",
+  heading = "کیو آر کد",
   scanHint = "اسکن کنید تا صفحه محصول باز شود",
   slugHint = "product",
   className = "",
@@ -70,8 +70,7 @@ export default function ProductPageQrCode({
             />
           </span>
           <span className="text-center text-[11px] leading-snug text-slate-500">
-            برای دانلود نسخه چاپ کلیک کنید
-            <span className="mt-0.5 block font-medium text-emerald-700">A4 · A5 · A6 و …</span>
+            برای دانلود کلیک کنید
           </span>
         </button>
         <p className="mt-2 truncate text-center text-[10px] text-slate-400" dir="ltr" title={pageUrl}>

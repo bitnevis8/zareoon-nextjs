@@ -86,7 +86,7 @@ export default function LandingMinimalHeader() {
           <CartIcon />
         </Link>
       ) : (
-        <LoginRequiredMessage>
+        <LoginRequiredMessage returnUrl="/cart" intent="cart">
           <button type="button" className={iconBtn} aria-label={t("cart")} title={t("cart")}>
             <CartIcon />
           </button>

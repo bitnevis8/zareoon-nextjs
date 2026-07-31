@@ -9,8 +9,7 @@ import {
 } from "./ui/Skeleton";
 
 /**
- * Full-page loading shell for /catalog/[id] (category or product).
- * Mirrors the real layout so the transition feels stable.
+ * اسکلتون کامل صفحه /catalog/[id] — daisyUI
  */
 export default function CatalogPageSkeleton({ variant = "category" }) {
   const isProduct = variant === "product";
@@ -29,12 +28,12 @@ export default function CatalogPageSkeleton({ variant = "category" }) {
       <CatalogHeroSkeleton />
 
       {!isProduct ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-base-200 bg-base-100 p-4 shadow-sm sm:p-5">
           <Bone className="mb-3 h-5 w-36 sm:mb-4 sm:h-6 sm:w-44" rounded="rounded-lg" />
           <StatCardsSkeleton />
         </section>
       ) : (
-        <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="space-y-3 rounded-2xl border border-base-200 bg-base-100 p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <Bone key={i} className="h-9 w-20 sm:w-24" rounded="rounded-xl" />
@@ -44,11 +43,11 @@ export default function CatalogPageSkeleton({ variant = "category" }) {
             {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className="flex flex-col gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-xl border border-base-200 bg-base-200/30 p-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <Bone className="h-14 w-14 shrink-0" rounded="rounded-xl" />
-                  <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <Bone className="h-4 w-2/3" rounded="rounded-md" />
                     <Bone className="h-3 w-1/3" rounded="rounded-md" />
                   </div>

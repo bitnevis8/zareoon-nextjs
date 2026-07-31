@@ -40,29 +40,36 @@ const SORT_OPTIONS = [
   { value: "stock_asc", labelKey: "catalogSortStockAsc" },
 ];
 
-function AvailabilitySwitch({ value, onChange, allLabel, availableLabel }) {
+function AvailabilitySwitch({ value, onChange, filterLabel, allLabel, availableLabel }) {
   return (
-    <div className="inline-flex h-9 overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm">
-      <button
-        type="button"
-        onClick={() => onChange("all")}
-        aria-pressed={value === "all"}
-        className={`rounded-lg px-2.5 text-[11px] font-bold transition sm:px-3 sm:text-xs ${
-          value === "all" ? "bg-slate-700 text-white" : "text-slate-600 hover:bg-slate-50"
-        }`}
+    <div className="flex items-center gap-2">
+      <span className="shrink-0 text-[11px] font-bold text-slate-600 sm:text-xs">{filterLabel}</span>
+      <div
+        className="inline-grid h-9 w-[13.5rem] grid-cols-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm sm:w-[15rem]"
+        role="group"
+        aria-label={filterLabel}
       >
-        {allLabel}
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("available")}
-        aria-pressed={value === "available"}
-        className={`rounded-lg px-2.5 text-[11px] font-bold transition sm:px-3 sm:text-xs ${
-          value === "available" ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-50"
-        }`}
-      >
-        {availableLabel}
-      </button>
+        <button
+          type="button"
+          onClick={() => onChange("all")}
+          aria-pressed={value === "all"}
+          className={`rounded-lg px-1 text-[11px] font-bold transition sm:text-xs ${
+            value === "all" ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          {allLabel}
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange("available")}
+          aria-pressed={value === "available"}
+          className={`rounded-lg px-1 text-[11px] font-bold transition sm:text-xs ${
+            value === "available" ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          {availableLabel}
+        </button>
+      </div>
     </div>
   );
 }
@@ -154,7 +161,7 @@ function LeafVarietiesSection({
   isRTL,
 }) {
   const parentName = parentItem ? getLocalizedText(parentItem, language) : "";
-  const [availability, setAvailability] = useState("available");
+  const [availability, setAvailability] = useState("all");
   const [viewMode, setViewMode] = useState("cards");
   const [sort, setSort] = useState("default");
   const [page, setPage] = useState(1);
@@ -211,16 +218,8 @@ function LeafVarietiesSection({
   return (
     <section className="space-y-3">
       <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <h2 className="text-base font-semibold text-slate-800 sm:text-lg">{title}</h2>
-          <AvailabilitySwitch
-            value={availability}
-            onChange={setAvailability}
-            allLabel={t("catalogShowAll") || "نمایش همه"}
-            availableLabel={t("catalogShowAvailable") || "نمایش کالاهای موجود"}
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <h2 className="min-w-0 text-base font-semibold text-slate-800 sm:text-lg">{title}</h2>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -246,6 +245,15 @@ function LeafVarietiesSection({
               label={t("cardsPerRowLabel") || "در هر سطر"}
             />
           ) : null}
+          <div className="ms-auto shrink-0">
+            <AvailabilitySwitch
+              value={availability}
+              onChange={setAvailability}
+              filterLabel={t("catalogFilterLabel") || "فیلتر"}
+              allLabel={t("catalogShowAll") || "همه"}
+              availableLabel={t("catalogShowAvailable") || "محصولات موجود"}
+            />
+          </div>
         </div>
       </div>
 
@@ -341,7 +349,7 @@ function SubcategoriesSection({
   t,
   isRTL,
 }) {
-  const [availability, setAvailability] = useState("available");
+  const [availability, setAvailability] = useState("all");
   const [cardsPerRow, setCardsPerRow] = useState(DEFAULT_CARDS_PER_ROW);
 
   useEffect(() => {
@@ -365,21 +373,24 @@ function SubcategoriesSection({
 
   return (
     <section>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <h2 className={`text-base font-semibold text-slate-800 sm:text-lg ${isRTL ? "order-1" : "order-2"}`}>
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <h2 className="min-w-0 flex-1 text-base font-semibold text-slate-800 sm:text-lg">
           {title}
         </h2>
-        <div className={`flex flex-wrap items-center gap-2 ${isRTL ? "order-2" : "order-1"}`}>
-          <AvailabilitySwitch
-            value={availability}
-            onChange={setAvailability}
-            allLabel={t("catalogShowAll") || "نمایش همه"}
-            availableLabel={t("catalogShowAvailable") || "نمایش کالاهای موجود"}
-          />
+        <div className="flex flex-wrap items-center gap-2">
           <CardsPerRowSelect
             value={cardsPerRow}
             onChange={handleCardsPerRowChange}
             label={t("cardsPerRowLabel") || "در هر سطر"}
+          />
+        </div>
+        <div className="ms-auto shrink-0">
+          <AvailabilitySwitch
+            value={availability}
+            onChange={setAvailability}
+            filterLabel={t("catalogFilterLabel") || "فیلتر"}
+            allLabel={t("catalogShowAll") || "همه"}
+            availableLabel={t("catalogShowAvailable") || "محصولات موجود"}
           />
         </div>
       </div>

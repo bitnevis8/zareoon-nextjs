@@ -27,7 +27,11 @@ function useIsPhonePreview() {
 function PhonePreviewHtmlFlag({ enabled }) {
   useEffect(() => {
     const root = document.documentElement;
-    if (enabled) root.classList.add("phone-preview");
+    // در اپ نیتیو هرگز اسکرول را قفل نکن (حتی اگر ?phonePreview=1 باشد)
+    const native =
+      root.classList.contains("capacitor-native") ||
+      (typeof window !== "undefined" && window.Capacitor?.isNativePlatform?.());
+    if (enabled && !native) root.classList.add("phone-preview");
     else root.classList.remove("phone-preview");
     return () => root.classList.remove("phone-preview");
   }, [enabled]);
@@ -42,7 +46,7 @@ function SiteChromeInner({ children }) {
     <NavigationLoadingProvider>
       <PhonePreviewHtmlFlag enabled={isPhonePreview} />
       {!isPhonePreview ? <CatalogWarmupBoot /> : null}
-      <Header />
+      {!isPhonePreview ? <Header /> : null}
       {isDashboard ? (
         <div className="flex h-[calc(100dvh-var(--site-top-chrome,0px))] min-h-0 flex-1 flex-col overflow-hidden max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
           {children}
@@ -61,11 +65,13 @@ function SiteChromeInner({ children }) {
           <GlobalSidebar />
         </ClientSideWrapper>
       ) : null}
-      <ClientSideWrapper>
-        <Suspense fallback={null}>
-          <MobileBottomBar />
-        </Suspense>
-      </ClientSideWrapper>
+      {!isPhonePreview ? (
+        <ClientSideWrapper>
+          <Suspense fallback={null}>
+            <MobileBottomBar />
+          </Suspense>
+        </ClientSideWrapper>
+      ) : null}
     </NavigationLoadingProvider>
   );
 }

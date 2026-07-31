@@ -1,6 +1,33 @@
 @import "tailwindcss";
+/* فقط تم روشن — بدون dark/--prefersdark تا روی ویندوز/کروم دارک متن محو نشود */
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, cupcake, bumblebee, emerald, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset, caramellatte, abyss, silk;
+  themes: false;
+}
+@plugin "daisyui/theme" {
+  name: "taganeh";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #f8fafc;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0f172a;
+  --color-primary: #16a34a;
+  --color-primary-content: #ffffff;
+  --color-secondary: #06b6d4;
+  --color-secondary-content: #083344;
+  --color-accent: #84cc16;
+  --color-accent-content: #1a2e05;
+  --color-neutral: #1f2937;
+  --color-neutral-content: #f8fafc;
+  --color-info: #0ea5e9;
+  --color-info-content: #082f49;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #451a03;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
 }
 @import "@fontsource-variable/vazirmatn/wght.css";
 @import "@fontsource/amiri/400.css";
@@ -47,37 +74,47 @@
 }
 
 :root {
+  color-scheme: light;
   --background: #ffffff;
-  --foreground: #171717;
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --foreground: #0f172a;
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 248, 250, 252;
   --background-end-rgb: 255, 255, 255;
-  --font-vazirmatn: 'Vazirmatn Variable', system-ui, sans-serif;
+  --font-vazirmatn: 'Vazirmatn Variable', Tahoma, 'Segoe UI', sans-serif;
   --font-quran: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'IRANSans', Tahoma, sans-serif;
+  --font-sans: 'IRANSans', Tahoma, 'Segoe UI', sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* سایت همیشه روشن است — تم تیرهٔ سیستم را نادیده بگیر */
+html {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'IRANSans', Tahoma, sans-serif;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  font-family: 'IRANSans', Tahoma, 'Segoe UI', Arial, sans-serif;
   direction: rtl;
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-end-rgb));
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: clip;
+  /* روی مانیتورهای قدیمی وزن خیلی نازک محو می‌شود */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* اگر فونت وبو لود نشد، متن همچنان خوانا بماند */
+@supports not (font-variation-settings: normal) {
+  body {
+    font-family: Tahoma, 'Segoe UI', Arial, sans-serif;
+  }
 }
 
 @tailwind base;
@@ -101,7 +138,8 @@ body {
 
 @layer base {
   html {
-    font-family: 'IRANSans', Tahoma, sans-serif;
+    font-family: 'IRANSans', Tahoma, 'Segoe UI', Arial, sans-serif;
+    color-scheme: light;
   }
 }
 
@@ -227,6 +265,8 @@ html {
 
 .product-scroll-row {
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -242,10 +282,14 @@ html {
   text-align: right;
 }
 
-/* Prevent horizontal scroll */
-html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
+/* Prevent horizontal scroll — overflow-x:hidden روی html+body در WebView سامسونگ اسکرول عمودی را می‌کشد */
+html {
+  overflow-x: clip;
+  max-width: 100%;
+}
+body {
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* Ensure all containers respect viewport width */
@@ -464,44 +508,9 @@ html, body {
   }
 }
 
-/* Skeleton shimmer — shared loading placeholders */
-@keyframes skeleton-shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
+/* Alias قدیمی — ترجیحاً از کلاس daisyUI `skeleton` استفاده کنید */
 .skeleton-bone {
-  position: relative;
-  overflow: hidden;
-  background-color: #e8eef5;
-  isolation: isolate;
-}
-
-.skeleton-bone::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.55) 45%,
-    rgba(255, 255, 255, 0.7) 50%,
-    rgba(255, 255, 255, 0.55) 55%,
-    transparent 100%
-  );
-  animation: skeleton-shimmer 1.4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton-bone::after {
-    animation: none;
-    opacity: 0;
-  }
+  @apply skeleton;
 }
 
 /* Global navigation progress */
@@ -549,26 +558,26 @@ html, body {
 
 /* Homepage language semicircle — thin green glass + loading-style sweep */
 .home-lang-arc-glass {
-  stroke: rgb(236 253 245 / 0.45);
+  stroke: rgb(167 243 208 / 0.22);
 }
 
 .home-lang-arc-base {
-  stroke: rgb(209 250 229 / 0.72);
+  stroke: rgb(52 211 153 / 0.38);
 }
 
 .home-lang-arc-flow {
-  stroke: rgb(255 255 255 / 0.98);
+  stroke: rgb(255 255 255 / 0.55);
   stroke-dasharray: 48 266;
   stroke-dashoffset: 0;
-  filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.85)) drop-shadow(0 0 6px rgb(209 250 229 / 0.65));
+  filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.4)) drop-shadow(0 0 6px rgb(52 211 153 / 0.36));
   animation: home-lang-arc-flow 3.6s linear infinite;
 }
 
 .home-lang-arc-flash {
-  stroke: rgb(255 255 255 / 1);
+  stroke: rgb(255 255 255 / 0.5);
   stroke-dasharray: 12 302;
   stroke-dashoffset: 18;
-  filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.9));
+  filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.45));
   animation: home-lang-arc-flow 3.6s linear infinite;
 }
 
@@ -587,28 +596,71 @@ html, body {
   }
 }
 
-/* Capacitor Android shell — feel less like a browser */
-html.capacitor-native,
-body.capacitor-native {
-  overscroll-behavior: none;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-text-size-adjust: 100%;
-}
-
+/* Capacitor Android shell — اسکرول باید روی همه دستگاه‌ها (از جمله Samsung) کار کند */
 html.capacitor-native {
   --capacitor-safe-top: 0px;
   --capacitor-safe-bottom: env(safe-area-inset-bottom, 0px);
+  height: auto !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 body.capacitor-native {
-  padding-bottom: max(var(--capacitor-safe-bottom), env(safe-area-inset-bottom, 0px));
+  height: auto !important;
+  max-height: none !important;
+  min-height: 100% !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  overscroll-behavior-y: auto;
+  /* فضای باتم‌بار ثابت + safe area */
+  padding-bottom: calc(4.25rem + max(var(--capacitor-safe-bottom), env(safe-area-inset-bottom, 0px)));
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* فاصلهٔ بالا را MainActivity (native insets) می‌دهد — اینجا padding اضافه نکن */
 
 /* باتم‌بار در اپ اندروید همیشه دیده شود (حتی اگر WebView عرض lg بدهد) */
 html.capacitor-native .mobile-bottom-bar {
+  display: flex !important;
+}
+
+/* daisyUI Dock: متن همیشه دیده شود (حتی در سایز کوچک) */
+.mobile-bottom-bar.dock .dock-label {
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  line-height: 1.15;
+}
+
+/* FAB نقش روی گوشه آواتار — daisyUI fab به‌صورت پیش‌فرض fixed است */
+.avatar-role-fab.fab {
+  position: absolute !important;
+  inset-inline-end: -0.4rem !important;
+  bottom: -0.4rem !important;
+  inset-inline-start: auto !important;
+  z-index: 20;
+  gap: 0.35rem;
+}
+html.capacitor-native .app-install-promo,
+html.capacitor-native .android-app-promo-desktop,
+html.capacitor-native .android-app-promo-mobile {
+  display: none !important;
+}
+
+/* قفل اسکرول فقط برای iframe پیش‌نمایش موکاپ — هرگز روی خود اپ */
+html.capacitor-native.phone-preview,
+html.capacitor-native.phone-preview body {
+  overflow: auto !important;
+  max-height: none !important;
+  height: auto !important;
+  touch-action: pan-x pan-y !important;
+  pointer-events: auto !important;
 }
 
 /* پیش‌نمایش موکاپ: صفحه قفل — بدون اسکرول و تعامل (مثل تصویر) */
@@ -624,6 +676,31 @@ html.phone-preview body {
   cursor: inherit !important;
 }
 
+/* فاصله از ناچ/هدر قاب موکاپ تا لوگو و پرچم‌ها دیده شوند */
+html.phone-preview body {
+  padding-top: 2.85rem !important;
+}
+
+html.phone-preview .home-hero {
+  margin-top: 0.35rem !important;
+}
+
+html.phone-preview .home-language-logo {
+  margin-top: 0.5rem !important;
+  padding-top: 3.4rem !important;
+  --arc-r: clamp(3.1rem, 34vw, 4.6rem) !important;
+}
+
+html.phone-preview .home-language-logo-inner {
+  margin-bottom: 0.15rem !important;
+  transform: none !important;
+}
+
+html.phone-preview .home-language-logo-img {
+  height: 4.35rem !important;
+  width: 4.35rem !important;
+}
+
 html.phone-preview * {
   pointer-events: none !important;
   animation: none !important;
@@ -635,6 +712,11 @@ html.phone-preview * {
 .android-phone-mockup,
 .android-phone-mockup * {
   cursor: inherit !important;
+}
+
+/* ارتفاع موکاپ ۳۰٪ کوتاه‌تر از نسبت پیش‌فرض daisyUI (462/978) */
+.android-phone-mockup .mockup-phone {
+  aspect-ratio: 462 / 685;
 }
 
 

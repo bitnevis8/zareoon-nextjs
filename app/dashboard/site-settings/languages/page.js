@@ -8,6 +8,7 @@ import { SITE_LANGUAGES, DEFAULT_ENABLED_LANGUAGE_CODES } from "@/app/config/sit
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
 import LanguageFlag from "@/app/components/ui/LanguageFlag";
+import { Bone } from "@/app/components/ui/Skeleton";
 
 export default function SiteLanguagesSettingsPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
@@ -69,8 +70,8 @@ export default function SiteLanguagesSettingsPage() {
 
   if (authLoading || !allowed) {
     return (
-      <div className={`${dash.page} animate-pulse`}>
-        <div className="h-8 w-48 rounded bg-slate-200" />
+      <div className={dash.page}>
+        <Bone className="h-8 w-48" rounded="rounded-lg" />
       </div>
     );
   }
@@ -85,9 +86,9 @@ export default function SiteLanguagesSettingsPage() {
       </div>
 
       {loading ? (
-        <div className="animate-pulse space-y-3">
+        <div className="flex flex-col gap-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-xl bg-slate-100" />
+            <Bone key={i} className="h-14 w-full" rounded="rounded-xl" />
           ))}
         </div>
       ) : (

@@ -34,7 +34,7 @@ const HomeSectionNav = dynamic(() => import('./components/HomeSectionNav'), { ss
 
 export default function Home() {
   return (
-    <Suspense fallback={<main className="page-shell py-8 animate-pulse min-h-[40vh]" />}>
+    <Suspense fallback={<main className="page-shell flex min-h-[40vh] flex-col gap-4 py-8" aria-busy="true"><div className="skeleton h-8 w-48 rounded-lg" /><div className="skeleton h-40 w-full rounded-2xl" /><div className="skeleton h-24 w-full rounded-2xl" /></main>}>
       <HomeContent />
     </Suspense>
   );
@@ -69,8 +69,8 @@ function HomeContent() {
     <main className="pb-6 sm:pt-4 sm:pb-8 lg:pb-10 lg:pt-4" dir={isRTL ? "rtl" : "ltr"}>
       <HomeSectionNav />
       <section className="page-shell section-stack space-y-4 text-start sm:space-y-6 lg:space-y-8">
-        <div className="mt-3 text-center sm:mt-4 lg:mt-5">
-          <div className="space-y-2 sm:space-y-2.5">
+        <div className="home-hero mt-10 text-center sm:mt-12 lg:mt-14">
+          <div className="space-y-0 sm:space-y-1">
             <HomeLanguageLogo />
             <QuickSearchBox variant="homepage" />
           </div>

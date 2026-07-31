@@ -14,6 +14,7 @@ import AppToaster from "./components/ui/AppToaster";
 import SiteChrome from "./components/ui/SiteChrome";
 import MessagingModalHost from "./components/messaging/MessagingModalHost";
 import CapacitorNativeBoot from "./components/CapacitorNativeBoot";
+import PwaRegister from "./components/PwaRegister";
 
 export async function generateMetadata() {
   const t = await getTranslations("layout.metadata");
@@ -29,6 +30,12 @@ export async function generateMetadata() {
     authors: [{ name: t("creator") }],
     creator: t("creator"),
     publisher: t("creator"),
+    applicationName: "زارعون",
+    appleWebApp: {
+      capable: true,
+      title: "زارعون",
+      statusBarStyle: "default",
+    },
     formatDetection: {
       email: false,
       address: false,
@@ -71,8 +78,16 @@ export async function generateMetadata() {
         "max-snippet": -1,
       },
     },
+    icons: {
+      icon: [
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    },
     other: {
       enamad: "759645",
+      "mobile-web-app-capable": "yes",
     },
   };
 }
@@ -80,8 +95,7 @@ export async function generateMetadata() {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // maximumScale/userScalable=false روی بعضی WebViewهای Samsung اسکرول را قفل می‌کند
   viewportFit: "cover",
   themeColor: "#064e3b",
 };
@@ -92,10 +106,17 @@ export default async function RootLayout({ children }) {
   const dir = isRtlLanguage(locale) ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} data-theme="taganeh" suppressHydrationWarning>
-      <body className="min-h-dvh flex flex-col bg-slate-50 antialiased">
+    <html
+      lang={locale}
+      dir={dir}
+      data-theme="taganeh"
+      style={{ colorScheme: "light" }}
+      suppressHydrationWarning
+    >
+      <body className="min-h-dvh flex flex-col bg-slate-50 text-slate-900 antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CapacitorNativeBoot />
+          <PwaRegister />
           <IntlHtmlAttributes locale={locale} dir={dir} />
           <StructuredData />
           <LanguageProvider>

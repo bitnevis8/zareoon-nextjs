@@ -93,7 +93,8 @@ export default function Footer({ className = "" }) {
           </Link>
           <HeaderSupportContact
             menuPlacement="up"
-            buttonClassName="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800"
+            label={t("contactUs") || "تماس با ما"}
+            buttonClassName="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-800"
           />
         </div>
 

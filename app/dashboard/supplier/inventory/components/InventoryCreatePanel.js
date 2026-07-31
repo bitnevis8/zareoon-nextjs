@@ -18,7 +18,10 @@ import { PersianPriceInput, PersianNumberInput } from "@/app/components/ui/Persi
 import PriceCurrencySelect from "@/app/components/ui/PriceCurrencySelect";
 import { useExchangeRatesMap } from "@/app/hooks/useExchangeRatesMap";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
+import { isDomesticCurrency } from "@/app/utils/fxRate";
 import BarterOfferEditor from "./BarterOfferEditor";
+import DailyPriceEditor from "./DailyPriceEditor";
+import FxRatePanel from "./FxRatePanel";
 import {
   canSellerListProduct,
   getAllowedMeasurementUnits,
@@ -168,8 +171,17 @@ export default function InventoryCreatePanel({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (pricingMode === "simple" && !String(form.price || "").trim()) {
+    const hasDaily = Array.isArray(form.dailyPrices) && form.dailyPrices.some((r) => r?.priceDate && r.price !== "" && r.price != null);
+    if (pricingMode === "simple" && !String(form.price || "").trim() && !hasDaily) {
       alert(t("create.alertUnitPrice"));
+      return;
+    }
+    if (
+      !isDomesticCurrency(form.priceCurrency) &&
+      form.fxRateSource === "manual" &&
+      !String(form.fxRateManual || "").trim()
+    ) {
+      alert("برای نرخ دستی، مقدار نرخ هر واحد ارز به تومان را وارد کنید.");
       return;
     }
     if (pricingMode === "tiered") {
@@ -399,14 +411,30 @@ export default function InventoryCreatePanel({
                       value={form.price}
                       onChange={(v) => setForm({ ...form, price: v })}
                       currency={form.priceCurrency}
-                      exchangeRates={exchangeRates}
+                      exchangeRates={
+                        form.fxRateSource === "manual" && form.fxRateManual
+                          ? {
+                              ...exchangeRates,
+                              [form.priceCurrency]: Number(form.fxRateManual) * 10,
+                            }
+                          : exchangeRates
+                      }
                       placeholder={t("create.unitPricePlaceholder")}
                     />
                   </div>
                   <PriceCurrencySelect
                     className="w-full sm:w-[8.5rem]"
                     value={form.priceCurrency}
-                    onChange={(priceCurrency) => setForm({ ...form, priceCurrency })}
+                    onChange={(priceCurrency) =>
+                      setForm({
+                        ...form,
+                        priceCurrency,
+                        fxRateSource: isDomesticCurrency(priceCurrency)
+                          ? null
+                          : form.fxRateSource || "zareoon",
+                        fxRateManual: isDomesticCurrency(priceCurrency) ? "" : form.fxRateManual,
+                      })
+                    }
                   />
                 </div>
               </Field>
@@ -416,12 +444,44 @@ export default function InventoryCreatePanel({
                 unit={form.unit}
                 priceCurrency={form.priceCurrency}
                 exchangeRates={exchangeRates}
-                onPriceCurrencyChange={(priceCurrency) => setForm({ ...form, priceCurrency })}
+                onPriceCurrencyChange={(priceCurrency) =>
+                  setForm({
+                    ...form,
+                    priceCurrency,
+                    fxRateSource: isDomesticCurrency(priceCurrency)
+                      ? null
+                      : form.fxRateSource || "zareoon",
+                    fxRateManual: isDomesticCurrency(priceCurrency) ? "" : form.fxRateManual,
+                  })
+                }
                 onAdd={onAddTier}
                 onRemove={onRemoveTier}
                 onUpdate={onUpdateTier}
               />
             )}
+
+            <FxRatePanel
+              currency={form.priceCurrency}
+              fxRateSource={form.fxRateSource}
+              fxRateManual={form.fxRateManual}
+              exchangeRates={exchangeRates}
+              priceAmount={form.price}
+              tShared={tShared}
+              onChange={({ fxRateSource, fxRateManual }) =>
+                setForm({
+                  ...form,
+                  fxRateSource,
+                  fxRateManual: fxRateManual ?? form.fxRateManual,
+                })
+              }
+            />
+
+            <DailyPriceEditor
+              rows={form.dailyPrices || []}
+              onChange={(dailyPrices) => setForm({ ...form, dailyPrices })}
+              currency={form.priceCurrency}
+              exchangeRates={exchangeRates}
+            />
           </div>
           <div className="mt-3">
             <BarterOfferEditor form={form} setForm={setForm} />

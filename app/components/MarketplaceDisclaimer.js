@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/app/context/LanguageContext";
+import ExpandableText from "@/app/components/ui/ExpandableText";
 
 function DirectLinkIcon({ className = "" }) {
   return (
@@ -80,14 +81,16 @@ function ServicesIcon({ className = "" }) {
 
 function RoleCard({ icon: Icon, title, body }) {
   return (
-    <article className="rounded-2xl border border-emerald-200/90 bg-gradient-to-b from-emerald-50/90 to-white px-3.5 py-3.5 transition duration-200 hover:border-emerald-300 sm:px-4 sm:py-4">
-      <div className="flex items-start gap-3">
+    <article className="h-full min-w-[78%] shrink-0 snap-start rounded-2xl border border-emerald-200/90 bg-gradient-to-b from-emerald-50/90 to-white px-3.5 py-3.5 transition duration-200 sm:min-w-0 sm:px-4 sm:py-4">
+      <div className="flex h-full items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-bold leading-snug text-emerald-950 sm:text-[15px]">{title}</h3>
-          <p className="mt-1.5 text-[11px] leading-6 text-slate-600 sm:text-xs sm:leading-6">{body}</p>
+          <p className="mt-1.5 line-clamp-4 text-[11px] leading-5 text-slate-600 sm:line-clamp-none sm:text-xs sm:leading-6">
+            {body}
+          </p>
         </div>
       </div>
     </article>
@@ -95,14 +98,14 @@ function RoleCard({ icon: Icon, title, body }) {
 }
 
 /**
- * ارتباط مستقیم — زیر دسته‌بندی‌ها؛ جدا از باکس فروشندگان
+ * ارتباط مستقیم — زیر دسته‌بندی‌ها؛ روی موبایل فشرده و قابل باز شدن
  */
 export default function MarketplaceDisclaimer({ className = "" }) {
   const { t, isRTL } = useLanguage();
   const title = t("marketplaceDirectTitle") || "ارتباط مستقیم و بی‌واسطه";
   const body =
     t("marketplaceDirectBody") ||
-    "زارعون بستری برای معرفی کسب‌وکارها و برقراری ارتباط مستقیم میان خریداران، فروشندگان و ارائه‌دهندگان خدمات در ایران و بازارهای بین‌المللی است. معاملات و توافق‌ها مستقیماً توسط طرفین انجام می‌شود و زارعون در معاملات عادی طرف قرارداد یا واسطه معامله نیست. علاوه بر خرید و فروش نقدی، قابلیت معاوضه کالا به کالا و کالا به خدمات نیز در دسترس است. پیش از هرگونه توافق یا پرداخت، اطلاعات و شرایط معامله را به‌دقت بررسی کنید.";
+    "زارعون بستری برای معرفی کسب‌وکارها و برقراری ارتباط مستقیم میان خریداران، فروشندگان و ارائه‌دهندگان خدمات در ایران و بازارهای بین‌المللی است.";
 
   const roles = [
     {
@@ -111,7 +114,7 @@ export default function MarketplaceDisclaimer({ className = "" }) {
       title: t("marketplaceDirectBuyersTitle") || "برای خریداران",
       body:
         t("marketplaceDirectBuyersBody") ||
-        "به فروشندگان عمده در ایران و خارج دسترسی داشته باشید، بدون واسطه مذاکره کنید و در صورت نیاز از معاوضه کالا به کالا یا کالا به خدمات بهره ببرید.",
+        "به فروشندگان عمده در ایران و خارج دسترسی داشته باشید، بدون واسطه مذاکره کنید.",
     },
     {
       key: "sellers",
@@ -119,7 +122,7 @@ export default function MarketplaceDisclaimer({ className = "" }) {
       title: t("marketplaceDirectSellersTitle") || "برای فروشندگان",
       body:
         t("marketplaceDirectSellersBody") ||
-        "محصولات خود را برای خریداران داخلی و بین‌المللی نمایش دهید و در کنار فروش نقدی، معاوضه کالا به کالا یا کالا به خدمات را هم فعال کنید.",
+        "محصولات خود را برای خریداران داخلی و بین‌المللی نمایش دهید.",
     },
     {
       key: "services",
@@ -127,7 +130,7 @@ export default function MarketplaceDisclaimer({ className = "" }) {
       title: t("marketplaceDirectServicesTitle") || "برای ارائه‌دهندگان خدمات",
       body:
         t("marketplaceDirectServicesBody") ||
-        "خدمات بازرگانی خود را به خریداران و فروشندگان در ایران و بازارهای جهانی معرفی کنید؛ همکاری مستقیم و در صورت توافق، معاوضه کالا به خدمات هم ممکن است.",
+        "خدمات بازرگانی خود را به خریداران و فروشندگان معرفی کنید.",
     },
   ];
 
@@ -140,7 +143,7 @@ export default function MarketplaceDisclaimer({ className = "" }) {
       aria-labelledby="marketplace-direct-title"
     >
       <div className="overflow-hidden rounded-[1.35rem] border border-emerald-200/90 bg-white shadow-[0_14px_40px_-28px_rgba(6,95,70,0.4)] sm:rounded-[1.6rem]">
-        <div className="relative border-b border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 px-3.5 py-4 sm:px-5 sm:py-5">
+        <div className="relative border-b border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 px-3.5 py-3.5 sm:px-5 sm:py-5">
           <div
             className="pointer-events-none absolute inset-0 opacity-40"
             style={{
@@ -150,21 +153,34 @@ export default function MarketplaceDisclaimer({ className = "" }) {
             aria-hidden
           />
           <div className="relative flex items-start gap-3 sm:gap-4">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25 sm:h-12 sm:w-12">
+            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25 sm:h-12 sm:w-12">
               <DirectLinkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 id="marketplace-direct-title" className="text-sm font-extrabold leading-snug text-slate-900 sm:text-base">
+              <h2
+                id="marketplace-direct-title"
+                className="text-balance text-sm font-extrabold leading-snug text-slate-900 sm:text-base"
+              >
                 {title}
               </h2>
-              <p className="mt-1.5 text-[11px] leading-6 text-slate-600 sm:text-xs sm:leading-7">{body}</p>
+              <ExpandableText
+                className="mt-1.5 text-[11px] leading-5 text-slate-600 sm:text-xs sm:leading-7"
+                clampClass="line-clamp-3"
+              >
+                {body}
+              </ExpandableText>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-2.5 p-3 sm:grid-cols-3 sm:gap-3 sm:p-4">
+        <div
+          className="-mx-0 flex gap-2.5 overflow-x-auto overscroll-x-contain touch-pan-x px-3 py-3 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:px-4 sm:py-4 sm:touch-auto [&::-webkit-scrollbar]:hidden"
+          role="list"
+        >
           {roles.map((r) => (
-            <RoleCard key={r.key} icon={r.Icon} title={r.title} body={r.body} />
+            <div key={r.key} role="listitem" className="contents sm:contents">
+              <RoleCard icon={r.Icon} title={r.title} body={r.body} />
+            </div>
           ))}
         </div>
       </div>

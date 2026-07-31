@@ -266,16 +266,21 @@ export default function AvailableProductCompactCard({
   return (
     <Link
       href={href || catalogProductPath(product)}
-      className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_12px_28px_-14px_rgba(16,185,129,0.45)] ${className}`}
+      className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_18px_-10px_rgba(15,23,42,0.28)] transition-[border-color,box-shadow] duration-200 hover:border-emerald-300 hover:shadow-[0_12px_28px_-14px_rgba(16,185,129,0.45)] ${className}`}
     >
       {showSellerHeader ? (
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-emerald-100/80 bg-gradient-to-l from-emerald-50/90 via-white to-slate-50/80 px-2.5">
-          <span className="relative flex h-[2.15rem] w-[3.35rem] shrink-0 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200/90 sm:h-9 sm:w-[3.6rem]">
+          <span className="relative flex h-[1.95rem] w-[3rem] shrink-0 items-center justify-center overflow-hidden sm:h-8 sm:w-[3.25rem]">
             {sellerAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={sellerAvatar} alt="" className="h-full w-full object-contain p-0.5" />
+              <img
+                src={sellerAvatar}
+                alt=""
+                className="h-full w-full object-contain"
+                draggable={false}
+              />
             ) : (
-              <span className="text-[11px] font-bold text-emerald-800">{sellerInitial}</span>
+              <span className="text-[10px] font-bold text-emerald-800">{sellerInitial}</span>
             )}
           </span>
           <div className="min-w-0 flex-1 overflow-hidden">
@@ -300,14 +305,15 @@ export default function AvailableProductCompactCard({
       <figure className="relative aspect-[5/4] w-full shrink-0 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
         <ProductCardMedia
           product={{ ...product, supplyCountry: countryCode }}
+          lots={lots}
           alt={title}
           width={200}
           height={160}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+          className="h-full w-full object-cover"
           showFlag={false}
         />
 
-        <div className="absolute start-1.5 top-1.5 z-[2] end-1.5 flex items-start justify-between gap-1.5">
+        <div className="pointer-events-none absolute inset-x-0 start-1.5 top-1.5 z-[2] end-1.5 flex items-start justify-between gap-1.5">
           <span className="inline-flex max-w-full items-center gap-1">
             <CompactFlag countryCode={countryCode} />
             <span
@@ -328,7 +334,7 @@ export default function AvailableProductCompactCard({
           aria-hidden
         />
 
-        <div className="absolute inset-x-0 bottom-0 z-[2] px-2 pb-1.5 pt-6">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 pb-1.5 pt-6">
           <p
             className="line-clamp-2 min-h-[1.75rem] text-[9px] font-medium leading-[0.875rem] text-white/90 sm:min-h-[1.875rem] sm:text-[10px] sm:leading-[0.95rem]"
             title={categoryBreadcrumb || undefined}

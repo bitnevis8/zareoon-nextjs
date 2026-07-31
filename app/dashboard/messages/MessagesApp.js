@@ -60,7 +60,7 @@ function PaperPlaneIcon({ className = "h-5 w-5" }) {
 function ReadChecks({ read }) {
   return (
     <span className="inline-flex items-center" aria-label={read ? "خوانده شد" : "ارسال شد"} title={read ? "خوانده شد" : "ارسال شد"}>
-      <svg className={`h-3.5 w-3.5 ${read ? "text-sky-300" : "text-white/70"}`} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg className={`h-3.5 w-3.5 ${read ? "text-sky-500" : "opacity-60"}`} viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
           d="M1.5 12.5l4 4L14.5 7"
           stroke="currentColor"
@@ -79,6 +79,70 @@ function ReadChecks({ read }) {
         ) : null}
       </svg>
     </span>
+  );
+}
+
+/** @see https://daisyui.com/components/chat/ */
+function ChatMessageRow({ message, mine, peer, me, onOpenImage }) {
+  const author = mine ? me : peer;
+  const displayName = author?.displayName || author?.firstName || author?.username || "";
+  const initial = (displayName?.[0] || "?").toUpperCase();
+
+  return (
+    <div className={`chat ${mine ? "chat-start" : "chat-end"}`}>
+      <div className="chat-image avatar">
+        <div className="w-10 rounded-full ring ring-base-100 ring-offset-1 ring-offset-base-100">
+          {author?.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={author.avatar} alt={displayName} />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-700 text-sm font-semibold text-white">
+              {initial}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="chat-header opacity-80">
+        {displayName}
+        <time className="text-xs opacity-50">{formatTime(message.createdAt)}</time>
+      </div>
+
+      <div
+        className={`chat-bubble max-w-[min(100%,28rem)] ${
+          mine ? "chat-bubble-success" : "chat-bubble-neutral"
+        }`}
+      >
+        {message.messageType === "image" && message.attachment?.downloadUrl ? (
+          <button
+            type="button"
+            onClick={() => onOpenImage?.(message.attachment.downloadUrl)}
+            className="mb-1.5 block overflow-hidden rounded-lg"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={message.attachment.downloadUrl}
+              alt=""
+              className="max-h-72 w-full object-cover"
+            />
+          </button>
+        ) : null}
+        {message.body ? (
+          <p className="whitespace-pre-wrap break-words text-[14px] leading-6">{message.body}</p>
+        ) : null}
+      </div>
+
+      <div className="chat-footer opacity-50">
+        {mine ? (
+          <span className="inline-flex items-center gap-1">
+            {message.readAt ? "خوانده شد" : "ارسال شد"}
+            <ReadChecks read={Boolean(message.readAt)} />
+          </span>
+        ) : (
+          <span>{formatTime(message.createdAt)}</span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -384,7 +448,7 @@ export default function MessagesApp({
           {loadingList ? (
             <div className="space-y-2 p-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+                <div key={i} className="h-16 skeleton rounded-2xl" />
               ))}
             </div>
           ) : conversations.length === 0 ? (
@@ -481,51 +545,28 @@ export default function MessagesApp({
               {t("chatImmutableBanner")}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-5">
+            <div className="flex-1 overflow-y-auto bg-base-200/40 px-3 py-4 sm:px-5">
               {loadingChat ? (
                 <div className="text-center text-sm text-slate-500">{t("loading")}</div>
               ) : (
-                <div className="mx-auto flex max-w-2xl flex-col gap-2">
-                  {messages.map((m) => {
-                    const mine = m.senderId === myId;
-                    return (
-                      <div key={m.id} className={`flex ${mine ? "justify-start" : "justify-end"}`}>
-                        <div
-                          className={`max-w-[88%] rounded-2xl px-3.5 py-2 shadow-sm sm:max-w-[72%] ${
-                            mine
-                              ? "rounded-ee-md bg-gradient-to-br from-emerald-600 to-teal-700 text-white"
-                              : "rounded-es-md bg-white text-slate-800 ring-1 ring-black/5"
-                          }`}
-                        >
-                          {m.messageType === "image" && m.attachment?.downloadUrl ? (
-                            <button
-                              type="button"
-                              onClick={() => setLightbox(m.attachment.downloadUrl)}
-                              className="mb-1.5 block overflow-hidden rounded-xl"
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={m.attachment.downloadUrl}
-                                alt=""
-                                className="max-h-72 w-full object-cover"
-                              />
-                            </button>
-                          ) : null}
-                          {m.body ? (
-                            <p className="whitespace-pre-wrap break-words text-[14px] leading-6">{m.body}</p>
-                          ) : null}
-                          <div
-                            className={`mt-1 flex items-center gap-1.5 text-[10px] ${
-                              mine ? "justify-start text-emerald-50/90" : "justify-end text-slate-400"
-                            }`}
-                          >
-                            <span>{formatTime(m.createdAt)}</span>
-                            {mine ? <ReadChecks read={Boolean(m.readAt)} /> : null}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="mx-auto max-w-2xl">
+                  {messages.map((m) => (
+                    <ChatMessageRow
+                      key={m.id}
+                      message={m}
+                      mine={m.senderId === myId}
+                      peer={peer}
+                      me={{
+                        ...(auth?.user || {}),
+                        displayName:
+                          [auth?.user?.firstName, auth?.user?.lastName].filter(Boolean).join(" ") ||
+                          auth?.user?.username ||
+                          "",
+                        avatar: auth?.user?.avatar,
+                      }}
+                      onOpenImage={setLightbox}
+                    />
+                  ))}
                   <div ref={messagesEndRef} />
                 </div>
               )}

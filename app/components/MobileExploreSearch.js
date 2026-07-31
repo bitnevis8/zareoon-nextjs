@@ -8,7 +8,6 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getLocalizedText, formatLocalizedNumber, localizeUnit } from "@/app/utils/localize";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
-import { sortCatalogItems } from "@/app/utils/productSort";
 import { getLotSupplierDisplayName } from "@/app/utils/catalogLotSupplier";
 import { catalogProductPath } from "@/app/utils/catalogProductPath";
 import {
@@ -23,6 +22,8 @@ import { buildProductByIdMap } from "@/app/utils/availableProducts";
 import { useTradeServicesContent } from "@/app/hooks/useTradeServicesContent";
 import { providerPublicPath } from "@/app/utils/providerPublicPath";
 import CardsPerRowSelect from "@/app/components/ui/CardsPerRowSelect";
+import ProductCardMedia from "@/app/components/ui/ProductCardMedia";
+import { ListRowSkeleton } from "@/app/components/ui/Skeleton";
 import {
   DEFAULT_CARDS_PER_ROW,
   getCardsPerRowGridClass,
@@ -32,6 +33,7 @@ import {
 
 const RECENT_KEY = "recentSearches";
 const EXPLORE_LIMIT = 48;
+const EXPLORE_PAGE_SIZE = 6;
 /** تأخیر قبل از فیلتر/درخواست سرور — تایپ روان می‌ماند بدون فشار بی‌مورد */
 const SEARCH_DEBOUNCE_MS = 420;
 
@@ -48,35 +50,32 @@ function ListingExploreTile({ row, language, t, productById }) {
   if (!product?.id) return null;
   const title = getListingDisplayTitle(lot, product, language, t);
   const categoryPath = formatCatalogAncestorBreadcrumb(product, productById, language);
-  const image =
-    resolveMediaUrl(lot.coverImageUrl) ||
-    resolveMediaUrl(product?.imageUrl) ||
-    "/images/product-placeholder.svg";
   const supplier = getLotSupplierDisplayName(lot);
   const unit = lot.unit || product?.unit || "kg";
 
   return (
     <Link
       href={catalogProductPath(product)}
-      className="group relative block aspect-[4/5] overflow-hidden rounded-xl bg-slate-200 sm:aspect-square"
+      className="group relative block aspect-[4/3] overflow-hidden rounded-xl bg-slate-200 sm:aspect-[5/4]"
     >
-      <Image
-        src={image}
+      <ProductCardMedia
+        product={product}
+        lots={[lot]}
         alt={title || ""}
-        fill
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-        className="object-cover transition-transform duration-300 group-hover:scale-105"
+        className="h-full w-full object-cover"
+        figureClassName="absolute inset-0"
+        showFlag={false}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/35" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/35" />
       {categoryPath ? (
         <p
-          className="absolute inset-x-0 top-0 line-clamp-3 bg-gradient-to-b from-black/55 to-transparent px-2 pb-5 pt-2 text-[9px] font-medium leading-snug text-white/95 sm:text-[10px]"
+          className="pointer-events-none absolute inset-x-0 top-0 line-clamp-3 bg-gradient-to-b from-black/55 to-transparent px-2 pb-5 pt-2 text-[9px] font-medium leading-snug text-white/95 sm:text-[10px]"
           title={categoryPath}
         >
           {categoryPath}
         </p>
       ) : null}
-      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2.5">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 space-y-0.5 p-2">
         <p className="line-clamp-2 text-[11px] font-bold leading-snug text-white sm:text-xs">{title}</p>
         <p className="truncate text-[10px] font-medium text-emerald-200">
           {formatLocalizedNumber(availableQty, language)} {localizeUnit(unit, language)}
@@ -126,10 +125,6 @@ function ListingResultCard({ row, language, t, onNavigate, productById }) {
   if (!product?.id) return null;
   const title = getListingDisplayTitle(lot, product, language, t);
   const categoryPath = formatCatalogAncestorBreadcrumb(product, productById, language);
-  const image =
-    resolveMediaUrl(lot.coverImageUrl) ||
-    resolveMediaUrl(product?.imageUrl) ||
-    "/images/product-placeholder.svg";
   const supplier = getLotSupplierDisplayName(lot);
   const unit = lot.unit || product?.unit || "kg";
 
@@ -139,10 +134,17 @@ function ListingResultCard({ row, language, t, onNavigate, productById }) {
       onClick={() => onNavigate(catalogProductPath(product), title)}
       className="overflow-hidden rounded-xl border border-slate-100 bg-white text-start shadow-sm transition active:scale-[0.99] hover:border-emerald-200"
     >
-      <div className="relative aspect-[4/3] bg-slate-100">
-        <Image src={image} alt={title || ""} fill sizes="50vw" className="object-cover" />
+      <div className="relative aspect-[3/2] bg-slate-100">
+        <ProductCardMedia
+          product={product}
+          lots={[lot]}
+          alt={title || ""}
+          className="h-full w-full object-cover"
+          figureClassName="absolute inset-0"
+          showFlag={false}
+        />
       </div>
-      <div className="space-y-1 p-2.5">
+      <div className="space-y-0.5 p-2">
         {categoryPath ? (
           <p className="line-clamp-3 text-[10px] leading-snug text-slate-400" title={categoryPath}>
             {categoryPath}
@@ -250,12 +252,12 @@ export default function MobileExploreSearch({
   );
   const [allProducts, setAllProducts] = useState([]);
   const [inventoryLots, setInventoryLots] = useState([]);
-  const [rootCategories, setRootCategories] = useState([]);
   const [serviceProviders, setServiceProviders] = useState([]);
   const [publicPosts, setPublicPosts] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [recentSearches, setRecentSearches] = useState([]);
   const [cardsPerRow, setCardsPerRow] = useState(DEFAULT_CARDS_PER_ROW);
+  const [exploreVisible, setExploreVisible] = useState(EXPLORE_PAGE_SIZE);
 
   const parsed = useMemo(() => parseSearchQuery(debouncedQuery), [debouncedQuery]);
   const isFiltering = query.trim() !== debouncedQuery.trim();
@@ -279,29 +281,24 @@ export default function MobileExploreSearch({
     let cancelled = false;
     (async () => {
       try {
-        const [productsRes, inventoryRes, catsRes, providersRes, postsRes] = await Promise.all([
+        const [productsRes, inventoryRes, providersRes, postsRes] = await Promise.all([
           fetch(`${API_ENDPOINTS.supplier.products.getAll}?lite=1`, { cache: "no-store" }),
           fetch(
             `${API_ENDPOINTS.supplier.inventoryLots.getAll}?status=harvested,reserved&lite=1`,
             { cache: "no-store" }
           ),
-          fetch(`${API_ENDPOINTS.supplier.products.getAll}?isOrderable=false&parentId=&lite=1`, {
-            cache: "no-store",
-          }),
           fetch(`${API_ENDPOINTS.tradeServiceProviders.getPublic}?limit=200`, { cache: "no-store" }).catch(() => null),
           fetch(`${API_ENDPOINTS.tamin.publicPosts}?limit=40`, { cache: "no-store" }).catch(() => null),
         ]);
-        const [productsJson, inventoryJson, catsJson, providersJson, postsJson] = await Promise.all([
+        const [productsJson, inventoryJson, providersJson, postsJson] = await Promise.all([
           productsRes.json(),
           inventoryRes.json(),
-          catsRes.json(),
           providersRes?.ok ? providersRes.json() : Promise.resolve(null),
           postsRes?.ok ? postsRes.json() : Promise.resolve(null),
         ]);
         if (!cancelled) {
           setAllProducts(Array.isArray(productsJson?.data) ? productsJson.data : []);
           setInventoryLots(Array.isArray(inventoryJson?.data) ? inventoryJson.data : []);
-          setRootCategories(sortCatalogItems(Array.isArray(catsJson?.data) ? catsJson.data : [], language));
           setServiceProviders(Array.isArray(providersJson?.data) ? providersJson.data : []);
           setPublicPosts(Array.isArray(postsJson?.data) ? postsJson.data : []);
         }
@@ -456,10 +453,9 @@ export default function MobileExploreSearch({
 
   const activeFilterChip = filterChips.find((chip) => chip.id === filter) || filterChips[0];
 
-  const popularTags = useMemo(
-    () => rootCategories.slice(0, 10).map((c) => ({ id: c.id, label: `#${getLocalizedText(c, language)}` })),
-    [rootCategories, language]
-  );
+  useEffect(() => {
+    setExploreVisible(EXPLORE_PAGE_SIZE);
+  }, [filter, debouncedQuery]);
 
   const showProducts = filter === "all" || filter === "products" || filter === "hashtag";
   const showServices = filter === "all" || filter === "services";
@@ -467,12 +463,27 @@ export default function MobileExploreSearch({
   const hasSearch = Boolean(parsed.term);
   const { types, listings, hashtagTags, services, serviceCategories, posts } = searchResult;
 
+  const renderShowMore = (total) => {
+    if (exploreVisible >= total) return null;
+    return (
+      <div className="mt-3 flex justify-center">
+        <button
+          type="button"
+          onClick={() => setExploreVisible((n) => Math.min(n + EXPLORE_PAGE_SIZE, total))}
+          className="min-h-10 w-full max-w-xs rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 active:scale-[0.99]"
+        >
+          {t("showMore") || "نمایش بیشتر"}
+        </button>
+      </div>
+    );
+  };
+
   const renderExplore = () => {
     if (loadingData) {
       return (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 lg:gap-2.5">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[4/5] animate-pulse rounded-xl bg-slate-200 sm:aspect-square" />
+          {Array.from({ length: EXPLORE_PAGE_SIZE }).map((_, i) => (
+            <div key={i} className="skeleton aspect-[4/3] rounded-xl sm:aspect-[5/4]" />
           ))}
         </div>
       );
@@ -482,19 +493,23 @@ export default function MobileExploreSearch({
       if (!exploreTypes.length) {
         return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
       }
+      const visible = exploreTypes.slice(0, exploreVisible);
       return (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-          {exploreTypes.map((row) => (
-            <TypeResultCard
-              key={row.product.id}
-              row={row}
-              language={language}
-              t={t}
-              onNavigate={handleResultNavigate}
-              productById={productById}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            {visible.map((row) => (
+              <TypeResultCard
+                key={row.product.id}
+                row={row}
+                language={language}
+                t={t}
+                onNavigate={handleResultNavigate}
+                productById={productById}
+              />
+            ))}
+          </div>
+          {renderShowMore(exploreTypes.length)}
+        </>
       );
     }
 
@@ -503,11 +518,14 @@ export default function MobileExploreSearch({
       if (!cats.length && !serviceProviders.length) {
         return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
       }
+      const visibleCats = cats.slice(0, exploreVisible);
+      const visibleProviders = serviceProviders.slice(0, exploreVisible);
+      const total = Math.max(cats.length, serviceProviders.length);
       return (
         <div className="space-y-4">
           {cats.length ? (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {cats.slice(0, 12).map((category) => (
+              {visibleCats.map((category) => (
                 <ServiceCategoryCard
                   key={category.id}
                   category={category}
@@ -519,7 +537,7 @@ export default function MobileExploreSearch({
           ) : null}
           {serviceProviders.length ? (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {serviceProviders.slice(0, 12).map((provider) => (
+              {visibleProviders.map((provider) => (
                 <ServiceProviderCard
                   key={provider.id || provider.profileSlug}
                   provider={provider}
@@ -528,6 +546,7 @@ export default function MobileExploreSearch({
               ))}
             </div>
           ) : null}
+          {renderShowMore(total)}
         </div>
       );
     }
@@ -536,12 +555,17 @@ export default function MobileExploreSearch({
       if (!publicPosts.length) {
         return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
       }
+      const postsList = publicPosts.slice(0, EXPLORE_LIMIT);
+      const visible = postsList.slice(0, exploreVisible);
       return (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {publicPosts.slice(0, EXPLORE_LIMIT).map((post) => (
-            <PostResultCard key={post.id} post={post} onNavigate={handleResultNavigate} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {visible.map((post) => (
+              <PostResultCard key={post.id} post={post} onNavigate={handleResultNavigate} />
+            ))}
+          </div>
+          {renderShowMore(postsList.length)}
+        </>
       );
     }
 
@@ -549,18 +573,22 @@ export default function MobileExploreSearch({
       return <p className="py-8 text-center text-sm text-slate-500">{t("mobileSearchNoExplore")}</p>;
     }
 
+    const visibleListings = exploreListings.slice(0, exploreVisible);
     return (
-      <div className={`${getCardsPerRowGridClass(cardsPerRow, { gapClass: "gap-2 lg:gap-2.5" })} auto-rows-fr`}>
-        {exploreListings.map((row) => (
-          <ListingExploreTile
-            key={row.lot.id}
-            row={row}
-            language={language}
-            t={t}
-            productById={productById}
-          />
-        ))}
-      </div>
+      <>
+        <div className={`${getCardsPerRowGridClass(cardsPerRow, { gapClass: "gap-2 lg:gap-2.5" })} auto-rows-fr`}>
+          {visibleListings.map((row) => (
+            <ListingExploreTile
+              key={row.lot.id}
+              row={row}
+              language={language}
+              t={t}
+              productById={productById}
+            />
+          ))}
+        </div>
+        {renderShowMore(exploreListings.length)}
+      </>
     );
   };
 
@@ -694,30 +722,6 @@ export default function MobileExploreSearch({
               </section>
             ) : null}
 
-            {(filter === "all" || filter === "hashtag") && popularTags.length > 0 ? (
-              <section>
-                <h2 className="mb-2 text-xs font-bold text-slate-700">{t("mobileSearchPopularTags")}</h2>
-                <div className="product-scroll-row flex gap-2 overflow-x-auto pb-1">
-                  {popularTags.map((tag) => (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      onClick={() => {
-                        setQuery(tag.label);
-                        setDebouncedQuery(tag.label);
-                        setFilter("hashtag");
-                        saveRecent(tag.label);
-                        syncUrl(tag.label, "hashtag");
-                      }}
-                      className="shrink-0 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 ring-1 ring-emerald-100"
-                    >
-                      {tag.label}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
             <section>
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-xs font-bold text-slate-700">
@@ -743,13 +747,7 @@ export default function MobileExploreSearch({
         ) : loadingData ? (
           <div className="space-y-2 py-2">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex animate-pulse items-center gap-3 rounded-xl bg-slate-50 p-3">
-                <div className="h-12 w-12 rounded-lg bg-slate-200" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-2/3 rounded bg-slate-200" />
-                  <div className="h-2.5 w-1/3 rounded bg-slate-200" />
-                </div>
-              </div>
+              <ListRowSkeleton key={i} className="rounded-xl bg-base-200/40 px-3" />
             ))}
           </div>
         ) : (
@@ -811,7 +809,7 @@ export default function MobileExploreSearch({
                   />
                 </div>
                 <div className={getCardsPerRowGridClass(cardsPerRow, { gapClass: "gap-2" })}>
-                  {listings.map((row) => (
+                  {listings.slice(0, exploreVisible).map((row) => (
                     <ListingResultCard
                       key={row.lot.id}
                       row={row}
@@ -822,6 +820,7 @@ export default function MobileExploreSearch({
                     />
                   ))}
                 </div>
+                {renderShowMore(listings.length)}
               </section>
             ) : null}
 

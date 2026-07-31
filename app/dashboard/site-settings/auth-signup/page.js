@@ -7,6 +7,7 @@ import { API_ENDPOINTS } from "@/app/config/api";
 import { PHONE_COUNTRIES, DEFAULT_AUTH_SIGNUP_CONFIG } from "@/app/config/phoneCountries";
 import { authFetch } from "@/app/utils/authHeaders";
 import { showToast } from "@/app/utils/toast";
+import { Bone } from "@/app/components/ui/Skeleton";
 
 export default function AuthSignupSettingsPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
@@ -89,8 +90,8 @@ export default function AuthSignupSettingsPage() {
 
   if (authLoading || !allowed) {
     return (
-      <div className={`${dash.page} animate-pulse`}>
-        <div className="h-8 w-48 rounded bg-slate-200" />
+      <div className={dash.page}>
+        <Bone className="h-8 w-48" rounded="rounded-lg" />
       </div>
     );
   }
@@ -116,9 +117,9 @@ export default function AuthSignupSettingsPage() {
       </div>
 
       {loading ? (
-        <div className="animate-pulse space-y-3">
-          <div className="h-24 rounded-xl bg-slate-100" />
-          <div className="h-64 rounded-xl bg-slate-100" />
+        <div className="flex flex-col gap-3">
+          <Bone className="h-24 w-full" rounded="rounded-xl" />
+          <Bone className="h-64 w-full" rounded="rounded-xl" />
         </div>
       ) : (
         <div className="space-y-5">

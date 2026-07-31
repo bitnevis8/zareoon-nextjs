@@ -37,11 +37,21 @@ function LotListRow({
             {available.toLocaleString("fa-IR")} {lot.unit}
             {farmerName ? ` · ${farmerName}` : ""}
             {" · "}
-            {lot.tieredPricing?.length > 0
-              ? t("lot.tiered")
-              : lot.price
-                ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency, tShared)
-                : "—"}
+            {lot.priceFromSchedule && (lot.effectivePrice != null || lot.price)
+              ? formatPriceWithCurrency(
+                  lot.effectivePrice ?? lot.price,
+                  lot.priceCurrency || lot.price_currency,
+                  tShared
+                )
+              : lot.tieredPricing?.length > 0
+                ? t("lot.tiered")
+                : lot.effectivePrice != null || lot.price
+                  ? formatPriceWithCurrency(
+                      lot.effectivePrice ?? lot.price,
+                      lot.priceCurrency || lot.price_currency,
+                      tShared
+                    )
+                  : "—"}
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-1.5 sm:items-end">

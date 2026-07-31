@@ -9,6 +9,7 @@ import { useDashboardPersona } from "@/app/context/DashboardPersonaContext";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { DASHBOARD_PERSONAS } from "@/app/utils/dashboardPersona";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
+import { Bone } from "@/app/components/ui/Skeleton";
 
 function SubmitRequestInner() {
   const t = useTranslations("applicant");
@@ -49,7 +50,14 @@ function SubmitRequestInner() {
 
 function SubmitRequestFallback() {
   const tCommon = useTranslations("common");
-  return <div className={`${dash.page} animate-pulse`}>{tCommon("loading")}</div>;
+  return (
+    <div className={`${dash.page} flex flex-col gap-4`} aria-busy="true" aria-label={tCommon("loading")}>
+      <Bone className="h-8 w-48" rounded="rounded-lg" />
+      <Bone className="h-4 w-72 max-w-full" rounded="rounded-md" />
+      <Bone className="h-40 w-full" rounded="rounded-xl" />
+      <Bone className="h-40 w-full" rounded="rounded-xl" />
+    </div>
+  );
 }
 
 export default function SubmitRequestPage() {

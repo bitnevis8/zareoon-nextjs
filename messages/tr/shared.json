@@ -1,4 +1,4 @@
-{
+﻿{
   "roles": {
     "super_admin": "",
     "admin": "",
@@ -262,7 +262,9 @@
     "calendarHijri": "Hicri",
     "calendarShamsi": "Şemsi",
     "calendarClickHint": "{full} — eşdeğerleri görmek için tıklayın",
+    "calendarClickHintAll": "Click to see all calendars",
     "calendarAria": "Takvim {label}",
+    "calendarAriaAll": "Date in multiple calendars",
     "calendarEquivalentsTitle": "Eşdeğer tarihler",
     "regionAria": "Günün döviz kurları",
     "loadingRates": "Kurlar yükleniyor…",

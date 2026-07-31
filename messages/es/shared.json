@@ -1,4 +1,4 @@
-{
+﻿{
   "roles": {
     "super_admin": "",
     "admin": "",
@@ -262,7 +262,9 @@
     "calendarHijri": "Hégira",
     "calendarShamsi": "Solar",
     "calendarClickHint": "{full} — clic para ver equivalentes",
+    "calendarClickHintAll": "Click to see all calendars",
     "calendarAria": "Calendario {label}",
+    "calendarAriaAll": "Date in multiple calendars",
     "calendarEquivalentsTitle": "Fechas equivalentes",
     "regionAria": "Tipos de cambio del día",
     "loadingRates": "Cargando tipos…",

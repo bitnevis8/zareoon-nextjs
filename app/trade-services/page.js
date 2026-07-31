@@ -12,6 +12,7 @@ import TradeServicesSectionHeader from "@/app/components/TradeServicesSectionHea
 import ZareoonEscrowFeature from "@/app/components/ZareoonEscrowFeature";
 import TradeServicesCategoryPager from "@/app/components/TradeServicesCategoryPager";
 import AuthRequiredButton from "@/app/components/ui/AuthRequiredButton";
+import DaisyBreadcrumbs from "@/app/components/ui/DaisyBreadcrumbs";
 import { isPlatformExclusiveCategory } from "@/app/utils/platformExclusiveCategories";
 
 const ICON_PATHS = {
@@ -145,6 +146,13 @@ export default function TradeServicesHubPage() {
 
   return (
     <main className="page-shell section-stack py-6 text-start sm:py-8 lg:py-10" dir={dir}>
+      <DaisyBreadcrumbs
+        className="mb-4 px-1"
+        items={[
+          { href: "/", label: t("mainPage") || "خانه" },
+          { label: content.title },
+        ]}
+      />
       <div className="overflow-hidden rounded-2xl border border-emerald-200/70 bg-white shadow-[0_16px_48px_-28px_rgba(6,78,59,0.2)] sm:rounded-[1.75rem]">
         <TradeServicesSectionHeader
           eyebrow={content.eyebrow}

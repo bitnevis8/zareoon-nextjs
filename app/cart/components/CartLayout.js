@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from "@/app/config/siteContact";
 import { toPersianDigits } from "@/app/utils/persianNumberUtils";
+import DaisyBreadcrumbs from "@/app/components/ui/DaisyBreadcrumbs";
 
 const SUPPORT_PHONE = SITE_PHONE_DISPLAY;
 const SUPPORT_PHONE_TEL = SITE_PHONE_TEL;
@@ -15,13 +16,13 @@ export function CartPageNav() {
 
   return (
     <header className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
-      <nav className="flex flex-wrap items-center gap-1 text-xs text-slate-500 sm:text-sm" aria-label={t("breadcrumbAria")}>
-        <Link href="/" className="transition-colors hover:text-emerald-700">
-          {t("home")}
-        </Link>
-        <span className="text-slate-300">/</span>
-        <span className="font-semibold text-slate-800">{t("title")}</span>
-      </nav>
+      <DaisyBreadcrumbs
+        items={[
+          { href: "/", label: t("home") },
+          { label: t("title") },
+        ]}
+        ariaLabel={t("breadcrumbAria")}
+      />
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href="/"

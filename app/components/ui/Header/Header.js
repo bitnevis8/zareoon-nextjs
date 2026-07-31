@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -20,8 +20,6 @@ import BreakpointBadge from '../../BreakpointBadge';
 const headerIconBtnClass =
   'inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:text-emerald-700 hover:bg-gray-50 transition-colors';
 
-const AYAH_HOVER_DELAY_MS = 1000;
-
 function CartIcon() {
   return (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
@@ -34,37 +32,13 @@ function CartIcon() {
 
 export default function Header() {
   const { user, loading } = useAuth() || { user: null, loading: true };
-  const { t, isRTL, isHydrated, language } = useLanguage();
+  const { t, isRTL, isHydrated } = useLanguage();
   const pathname = usePathname();
   const showUser = isHydrated && !loading ? user : null;
   const layoutRtl = !isHydrated || isRTL;
   const [showHeaderSearch, setShowHeaderSearch] = useState(false);
-  const [ayahOpen, setAyahOpen] = useState(false);
-  const ayahTimerRef = useRef(null);
 
   const brandName = layoutRtl ? t('siteName') : 'Zareoon';
-
-  const clearAyahTimer = () => {
-    if (ayahTimerRef.current) {
-      clearTimeout(ayahTimerRef.current);
-      ayahTimerRef.current = null;
-    }
-  };
-
-  const openAyahAfterDelay = () => {
-    clearAyahTimer();
-    ayahTimerRef.current = setTimeout(() => {
-      setAyahOpen(true);
-      ayahTimerRef.current = null;
-    }, AYAH_HOVER_DELAY_MS);
-  };
-
-  const closeAyah = () => {
-    clearAyahTimer();
-    setAyahOpen(false);
-  };
-
-  useEffect(() => () => clearAyahTimer(), []);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -152,55 +126,12 @@ export default function Header() {
     />
   );
 
-  const ayahText = t('headerAyahText');
-  const ayahRef = t('headerAyahRef');
-  const ayahIsArabicScript = language === 'ar';
-  const ayahDir = ayahIsArabicScript || isRTL ? 'rtl' : 'ltr';
-
-  const ayahTooltip = isHydrated ? (
-    <div
-      id="header-ayah-tooltip"
-      className={`pointer-events-none absolute top-full z-[10050] mt-2 w-[min(22rem,calc(100vw-1.5rem))] rounded-xl border border-emerald-100 bg-white px-3.5 py-3 text-start shadow-lg shadow-slate-900/10 ring-1 ring-slate-900/5 transition-[opacity,transform] duration-200 ease-out ${
-        layoutRtl ? 'end-0' : 'start-0'
-      } ${
-        ayahOpen
-          ? 'translate-y-0 opacity-100'
-          : 'pointer-events-none -translate-y-1 opacity-0'
-      }`}
-      role="tooltip"
-      aria-hidden={!ayahOpen}
-    >
-      <p
-        className={`whitespace-normal break-words text-[13px] font-medium leading-7 text-slate-800 sm:text-[14px] sm:leading-7 ${
-          ayahIsArabicScript ? 'font-quran text-[15px] leading-8 text-slate-900 sm:text-[16px]' : ''
-        }`}
-        dir={ayahDir}
-        lang={language || undefined}
-      >
-        {ayahText}
-      </p>
-      <p
-        className="mt-1.5 font-sans text-[11px] font-normal tracking-normal text-slate-500 sm:text-[12px]"
-        dir={ayahDir}
-      >
-        {ayahRef}
-      </p>
-    </div>
-  ) : null;
-
   const titleBlock = (
-    <div
-      className={`relative min-w-0 leading-tight ${layoutRtl ? 'text-right' : 'text-left'}`}
-      onMouseEnter={openAyahAfterDelay}
-      onMouseLeave={closeAyah}
-      onFocus={openAyahAfterDelay}
-      onBlur={closeAyah}
-    >
+    <div className={`relative min-w-0 leading-tight ${layoutRtl ? 'text-right' : 'text-left'}`}>
       <Link
         href="/"
         className="group/brand block min-w-0 rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400/50"
         prefetch={true}
-        aria-describedby={isHydrated ? 'header-ayah-tooltip' : undefined}
       >
         <div
           className={`flex items-baseline gap-1 sm:gap-1.5 md:gap-2 ${
@@ -218,7 +149,6 @@ export default function Header() {
           </p>
         </div>
       </Link>
-      {ayahTooltip}
     </div>
   );
 
@@ -266,7 +196,7 @@ export default function Header() {
       <CartIcon />
     </Link>
   ) : (
-    <LoginRequiredMessage key="cart">
+    <LoginRequiredMessage key="cart" returnUrl="/cart" intent="cart">
       <button type="button" className={headerIconBtnClass} aria-label={t('cart')} title={t('cart')}>
         <CartIcon />
       </button>

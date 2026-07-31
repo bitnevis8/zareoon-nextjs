@@ -1,52 +1,40 @@
+import { AvatarRowSkeleton, Bone } from "@/app/components/ui/Skeleton";
+
 export default function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Loading */}
-        <div className="mb-8">
-          <div className="animate-pulse">
-            <div className="h-10 bg-gray-300 rounded-lg mb-4 w-1/3"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-          </div>
+    <div className="min-h-dvh bg-base-200/40 py-8" aria-busy="true" aria-label="Loading">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-3">
+          <Bone className="h-10 w-1/3 max-w-xs" rounded="rounded-lg" />
+          <Bone className="h-5 w-1/2 max-w-md" rounded="rounded-md" />
         </div>
 
-        {/* Stats Cards Loading */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-              <div className="flex items-center justify-between">
-                <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-                <div className="h-8 w-8 bg-blue-300 rounded"></div>
+            <div key={index} className="rounded-2xl border border-base-200 bg-base-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <Bone className="h-7 w-1/2" rounded="rounded-md" />
+                <Bone className="h-8 w-8" rounded="rounded-lg" />
               </div>
-              <div className="h-6 bg-gray-200 rounded w-1/3 mt-4"></div>
+              <Bone className="mt-4 h-5 w-1/3" rounded="rounded-md" />
             </div>
           ))}
         </div>
 
-        {/* Content Cards Loading */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Articles */}
-          <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-            <div className="h-6 bg-gray-300 rounded w-1/3 mb-6"></div>
-            <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="rounded-2xl border border-base-200 bg-base-100 p-5 shadow-sm">
+            <Bone className="mb-5 h-5 w-1/3" rounded="rounded-md" />
+            <div className="flex flex-col gap-4">
               {[...Array(5)].map((_, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <div className="h-12 w-12 bg-gray-200 rounded"></div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
+                <AvatarRowSkeleton key={index} />
               ))}
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-            <div className="h-6 bg-gray-300 rounded w-1/3 mb-6"></div>
-            <div className="space-y-4">
+          <div className="rounded-2xl border border-base-200 bg-base-100 p-5 shadow-sm">
+            <Bone className="mb-5 h-5 w-1/3" rounded="rounded-md" />
+            <div className="flex flex-col gap-3">
               {[...Array(4)].map((_, index) => (
-                <div key={index} className="h-12 bg-gray-200 rounded"></div>
+                <Bone key={index} className="h-12 w-full" rounded="rounded-xl" />
               ))}
             </div>
           </div>
@@ -54,4 +42,4 @@ export default function DashboardLoading() {
       </div>
     </div>
   );
-} 
+}

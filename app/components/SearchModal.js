@@ -9,6 +9,7 @@ import { resolveMediaUrl } from "../utils/mediaUrl";
 import { catalogProductPath } from "../utils/catalogProductPath";
 import { useLanguage } from "../context/LanguageContext";
 import { useTranslations } from "next-intl";
+import { ListRowSkeleton } from "./ui/Skeleton";
 
 export default function SearchModal({
   isOpen,
@@ -186,13 +187,7 @@ export default function SearchModal({
               {searching ? (
                 <div className="space-y-2">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 animate-pulse bg-gray-50 rounded-lg">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-                      <div className="flex-1">
-                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </div>
-                    </div>
+                    <ListRowSkeleton key={index} className="rounded-lg bg-base-200/50 px-3" />
                   ))}
                 </div>
               ) : searchResults.length > 0 ? (

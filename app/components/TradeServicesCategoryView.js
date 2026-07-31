@@ -20,6 +20,7 @@ import {
 import { isPlatformExclusiveCategory } from "@/app/utils/platformExclusiveCategories";
 import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { getSubcategoryIconPath } from "@/app/utils/tradeServiceIcons";
+import DaisyBreadcrumbs from "@/app/components/ui/DaisyBreadcrumbs";
 
 function SubserviceIcon({ subcategoryId, className = "h-5 w-5" }) {
   const d = getSubcategoryIconPath(subcategoryId);
@@ -206,8 +207,16 @@ function VipFeaturedProviderCard({ provider, t, locale, vipMessage }) {
 function SkeletonCard({ featured = false }) {
   return (
     <div
-      className={`animate-pulse rounded-2xl bg-slate-200/70 ${featured ? "col-span-full h-64" : "h-60"}`}
-    />
+      className={`flex flex-col gap-3 overflow-hidden rounded-2xl border border-base-200 bg-base-100 p-3 ${
+        featured ? "col-span-full" : ""
+      }`}
+      aria-hidden
+    >
+      <div className={`skeleton w-full rounded-xl ${featured ? "h-40" : "h-32"}`} />
+      <div className="skeleton h-4 w-2/3 rounded-md" />
+      <div className="skeleton h-3 w-full rounded-md" />
+      <div className="skeleton h-3 w-1/2 rounded-md" />
+    </div>
   );
 }
 
@@ -222,8 +231,19 @@ export default function TradeServicesCategoryView({ categoryId }) {
   const locale = language === "en" ? "en-US" : language === "ru" ? "ru-RU" : "fa-IR";
 
   useEffect(() => {
-    setSelectedSubId("all");
-  }, [categoryId]);
+    const children = category?.children || [];
+    let sub = null;
+    try {
+      sub = new URLSearchParams(window.location.search).get("sub");
+    } catch {
+      sub = null;
+    }
+    if (sub && children.some((c) => c.id === sub)) {
+      setSelectedSubId(sub);
+    } else {
+      setSelectedSubId("all");
+    }
+  }, [categoryId, category?.children]);
 
   useEffect(() => {
     let cancelled = false;
@@ -316,17 +336,14 @@ export default function TradeServicesCategoryView({ categoryId }) {
         />
 
         <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-          <nav className="mb-4 text-xs text-emerald-100/90 sm:text-sm">
-            <Link href="/" className="hover:text-white">
-              {t("mainPage")}
-            </Link>
-            <span className="mx-2 opacity-50">/</span>
-            <Link href="/trade-services" className="hover:text-white">
-              {section.title}
-            </Link>
-            <span className="mx-2 opacity-50">/</span>
-            <span className="text-white">{category.title}</span>
-          </nav>
+          <DaisyBreadcrumbs
+            className="mb-4 text-emerald-100/90 [&_a]:text-emerald-100 [&_a:hover]:text-white [&_.font-semibold]:!text-white"
+            items={[
+              { href: "/", label: t("mainPage") },
+              { href: "/trade-services", label: section.title },
+              { label: category.title },
+            ]}
+          />
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">

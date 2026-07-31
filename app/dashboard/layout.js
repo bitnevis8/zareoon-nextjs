@@ -160,7 +160,7 @@ function DashboardLayoutContent({ children }) {
     ) : null;
 
   const breadcrumb = (
-    <Suspense fallback={<div className="mb-2 h-5 animate-pulse rounded bg-slate-200 md:mb-4" />}>
+    <Suspense fallback={<div className="mb-2 skeleton h-5 rounded md:mb-4" />}>
       <DashboardBreadcrumb />
     </Suspense>
   );

@@ -257,7 +257,7 @@ export default function SidebarWorkspaceSwitcher({
         </div>
 
         {loading && !workspace ? (
-          <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
+          <div className="h-24 skeleton rounded-xl" />
         ) : list.length === 0 ? (
           <Link
             href="/dashboard/workspace"

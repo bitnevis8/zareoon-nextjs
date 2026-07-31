@@ -12,6 +12,7 @@ import {
   isCategoryNode,
   isSelectableProductNode,
 } from "./productCatalogUtils";
+import DaisyBreadcrumbs from "@/app/components/ui/DaisyBreadcrumbs";
 
 function ModeTab({ active, children, onClick }) {
   return (
@@ -197,7 +198,7 @@ export default function ProductCatalogPicker({
         ) : catalogLoading ? (
           <div className="space-y-1.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-9 animate-pulse rounded-lg bg-slate-100" />
+              <div key={i} className="h-9 skeleton rounded-lg" />
             ))}
           </div>
         ) : catalogError ? (
@@ -226,27 +227,15 @@ export default function ProductCatalogPicker({
                   {t("catalog.back")}
                 </button>
               ) : null}
-              <nav
-                className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5 text-[11px] text-slate-500"
-                aria-label={t("catalog.breadcrumbAria")}
-              >
-                {path.map((crumb, index) => (
-                  <span key={`${crumb.id}-${index}`} className="inline-flex min-w-0 items-center gap-0.5">
-                    {index > 0 ? <span className="text-slate-300">›</span> : null}
-                    <button
-                      type="button"
-                      onClick={() => goToCrumb(index)}
-                      className={`max-w-[8rem] truncate rounded px-1 py-0.5 transition sm:max-w-none ${
-                        index === path.length - 1
-                          ? "font-bold text-emerald-800"
-                          : "hover:bg-slate-100 hover:text-slate-800"
-                      }`}
-                    >
-                      {crumbLabel(crumb, index)}
-                    </button>
-                  </span>
-                ))}
-              </nav>
+              <DaisyBreadcrumbs
+                showHomeIcon={false}
+                className="min-w-0 flex-1 text-[11px]"
+                ariaLabel={t("catalog.breadcrumbAria")}
+                items={path.map((crumb, index) => ({
+                  label: crumbLabel(crumb, index),
+                  onClick: index === path.length - 1 ? undefined : () => goToCrumb(index),
+                }))}
+              />
             </div>
 
             <div className="max-h-[min(18rem,50vh)] space-y-3 overflow-y-auto overscroll-contain sm:max-h-[min(20rem,55vh)]">

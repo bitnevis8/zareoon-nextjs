@@ -19,12 +19,21 @@ import SidebarIdentityCard from '@/app/components/ui/SidebarIdentityCard';
 import { VerificationLevelBadge } from '@/app/components/verification/VerificationLevelIcon';
 import { SidebarIcon } from '@/app/components/ui/SidebarIcons';
 import { useWorkspace } from '@/app/context/WorkspaceContext';
+import {
+  PLATFORM_ROLE_ICONS,
+  ACTIVITY_ROLE_ICONS,
+  SIDEBAR_ROLE_ICONS,
+} from '@/app/config/dashboardRoleIcons';
 
 function useSidebarMenus() {
   const t = useTranslations('nav');
 
   return useMemo(
     () => ({
+      /** آیکون همه نقش‌ها — مرجع واحد با باکس پروفایل */
+      roleIcons: SIDEBAR_ROLE_ICONS,
+      platformRoleIcons: PLATFORM_ROLE_ICONS,
+      activityRoleIcons: ACTIVITY_ROLE_ICONS,
       adminMenuSections: [
         {
           id: 'users',

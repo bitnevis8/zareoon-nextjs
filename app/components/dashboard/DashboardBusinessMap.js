@@ -6,7 +6,7 @@ import { parseLatLng } from "@/app/utils/businessHours";
 
 const Map = dynamic(() => import("@/app/components/ui/Map/Map"), {
   ssr: false,
-  loading: () => <div className="h-44 animate-pulse rounded-xl bg-slate-100" />,
+  loading: () => <div className="h-44 skeleton rounded-xl" />,
 });
 
 /**

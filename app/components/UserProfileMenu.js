@@ -120,19 +120,6 @@ export default function UserProfileMenu({ onClose, onLogout }) {
         }
       />
 
-      <MenuRow
-        href="/dashboard/escrow"
-        onClick={onClose}
-        isRTL={isRTL}
-        icon={
-          <MenuIcon tone="amber">
-            <SvgIcon d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-          </MenuIcon>
-        }
-        label={t("accountMenuEscrow") || "حساب امانی زارعون"}
-        hint={t("accountMenuEscrowHint") || "تضمین معاملات و توافق‌ها"}
-      />
-
       <MenuDivider />
 
       <MenuRow
@@ -157,6 +144,23 @@ export default function UserProfileMenu({ onClose, onLogout }) {
           </MenuIcon>
         }
         label={t("accountMenuOrders") || t("myOrders") || "سفارشات من"}
+      />
+
+      <MenuRow
+        href="/dashboard/trade-assurance"
+        onClick={onClose}
+        isRTL={isRTL}
+        icon={
+          <MenuIcon tone="amber">
+            <SvgIcon d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+          </MenuIcon>
+        }
+        label={t("accountMenuTradeAssurance") || t("accountMenuEscrow") || "حساب امانی و LC"}
+        hint={
+          t("accountMenuTradeAssuranceHint") ||
+          t("accountMenuEscrowHint") ||
+          "انتخاب حساب امانی یا اعتبار اسنادی"
+        }
       />
 
       <MenuDivider />

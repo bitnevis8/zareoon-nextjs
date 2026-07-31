@@ -196,7 +196,7 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-40 w-[min(42vw,9.5rem)] shrink-0 animate-pulse rounded-xl bg-slate-200/70 md:h-44 md:w-auto"
+              className="h-40 w-[min(42vw,9.5rem)] shrink-0 skeleton rounded-xl md:h-44 md:w-auto"
             />
           ))}
         </div>
@@ -351,6 +351,58 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
   );
 }
 
+function RoleAvatarFab({ roles, ariaLabel = "نقش‌ها", tone = "violet" }) {
+  if (!roles?.length) return null;
+  const primary = roles[0];
+  const dialRoles = roles.slice(0, 5);
+  const mainBtn =
+    tone === "emerald"
+      ? "btn btn-circle btn-sm border-0 bg-emerald-600 text-white shadow-md hover:bg-emerald-700"
+      : "btn btn-circle btn-sm border-0 bg-violet-600 text-white shadow-md hover:bg-violet-700";
+  const dialBtn =
+    tone === "emerald"
+      ? "btn btn-circle btn-sm border border-emerald-100 bg-white text-emerald-700 shadow-md"
+      : "btn btn-circle btn-sm border border-violet-100 bg-white text-violet-700 shadow-md";
+  const labelCls =
+    tone === "emerald"
+      ? "rounded-lg bg-white/95 px-1.5 py-0.5 text-[10px] font-bold text-emerald-900 shadow-sm ring-1 ring-emerald-100"
+      : "rounded-lg bg-white/95 px-1.5 py-0.5 text-[10px] font-bold text-violet-900 shadow-sm ring-1 ring-violet-100";
+
+  return (
+    <div className="avatar-role-fab fab fab-flower" aria-label={ariaLabel}>
+      <div tabIndex={0} role="button" className={mainBtn} aria-label={ariaLabel}>
+        <SidebarIcon name={primary.icon} className="h-4 w-4" />
+      </div>
+      {dialRoles.map((role) => (
+        <div key={role.slug} className="pointer-events-auto">
+          <span className={labelCls}>{role.label}</span>
+          <button type="button" className={dialBtn} title={role.label} aria-label={role.label}>
+            <SidebarIcon name={role.icon} className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ActivityRoleBadges({ roles }) {
+  if (!roles?.length) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {roles.map((role) => (
+        <span
+          key={role.slug}
+          title={role.label}
+          className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-900"
+        >
+          <SidebarIcon name={role.icon} className="h-3.5 w-3.5 text-emerald-700" />
+          {role.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function MobileDashboardHome() {
   const { user } = useAuth();
   const { language, isRTL } = useLanguage();
@@ -395,10 +447,12 @@ export default function MobileDashboardHome() {
     (pageKind === "services" ? "/dashboard/service-provider-profile" : "/dashboard/supplier-profile");
 
   const phone = user?.mobile || user?.phone || "";
-  const { management: managementRoles } = useMemo(
+  const { management: managementRoles, activity: activityRoles } = useMemo(
     () => splitUserRoles(user, tShared),
     [user, tShared]
   );
+
+  const avatarFabRoles = managementRoles.length ? managementRoles : activityRoles;
 
   const avatarUrl = resolveMediaUrl(user?.avatar);
   const initial = (displayName?.[0] || "؟").toUpperCase();
@@ -661,20 +715,37 @@ export default function MobileDashboardHome() {
     <div className="w-full" dir={isRTL ? "rtl" : "ltr"}>
       <section className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
         <ProfileHeaderMetrics showFollowStats={false} showContentStats={false} afterProfile={null}>
-          <div className="flex items-start gap-3 sm:gap-4">
-          <Link
-            href="/dashboard/account"
-              className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 sm:h-[4.5rem] sm:w-[4.5rem]"
-            aria-label={t("editProfile")}
-          >
-            {avatarUrl ? (
-                <Image src={avatarUrl} alt="" fill unoptimized className="object-cover" sizes="72px" />
-            ) : (
-                <span className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-500">
-                {initial}
-              </span>
-            )}
-          </Link>
+          <div className="flex items-start gap-3 sm:gap-4 lg:gap-5">
+            <div className="relative shrink-0 pb-1 pe-1">
+              <Link
+                href="/dashboard/account"
+                className="relative block h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 sm:h-[4.5rem] sm:w-[4.5rem] lg:h-[5.4rem] lg:w-[5.4rem]"
+                aria-label={t("editProfile")}
+              >
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt=""
+                    fill
+                    unoptimized
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 86px, 72px"
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-500 lg:text-xl">
+                    {initial}
+                  </span>
+                )}
+              </Link>
+
+              {avatarFabRoles.length ? (
+                <RoleAvatarFab
+                  roles={avatarFabRoles}
+                  tone={managementRoles.length ? "violet" : "emerald"}
+                  ariaLabel={managementRoles.length ? "نقش‌های مدیریتی" : "نقش‌های کاربری"}
+                />
+              ) : null}
+            </div>
 
             <div className="min-w-0 flex-1 pt-0.5 text-start">
               <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -686,38 +757,35 @@ export default function MobileDashboardHome() {
                 ) : null}
               </div>
 
-          {phone ? (
+              {phone ? (
                 <p className="mt-0.5 text-start text-sm leading-5 text-slate-500">
                   <span className="inline-block tabular-nums" dir="ltr">
-              {formatLocalizedDigits(phone, language)}
+                    {formatLocalizedDigits(phone, language)}
                   </span>
-            </p>
-          ) : !managementRoles.length ? (
+                </p>
+              ) : !managementRoles.length && !activityRoles.length ? (
                 <p className="mt-1 text-sm text-slate-500">{t("bioEmpty")}</p>
-          ) : null}
+              ) : null}
 
-              {/* فقط نقش‌های مدیریتی سامانه — فروشنده/خدمات‌دهنده متعلق به کسب‌وکار است */}
               {managementRoles.length ? (
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[10px] font-bold text-violet-500">مدیریت سامانه:</span>
-                  {managementRoles.map((label) => (
-                    <span
-                      key={label}
-                      className="inline-flex rounded-lg bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-800 ring-1 ring-violet-100"
-                    >
-                      {label}
-                    </span>
-                  ))}
+                <p className="mt-1.5 text-[10px] font-bold text-violet-500">
+                  مدیریت سامانه — برای دیدن نقش‌ها روی آیکن گوشه عکس بزنید
+                </p>
+              ) : null}
+
+              {activityRoles.length ? (
+                <div className="mt-2">
+                  <ActivityRoleBadges roles={activityRoles} />
                 </div>
               ) : null}
 
               <Link
                 href="/dashboard/verification"
-                className="mt-2.5 block max-w-md transition hover:opacity-90"
+                className="mt-3 block max-w-lg rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2.5 transition hover:border-emerald-200 hover:bg-emerald-50/50"
                 title="تکمیل پروفایل و احراز هویت"
               >
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-bold text-slate-400">تکمیل پروفایل</span>
+                <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
+                  <span className="text-[10px] font-bold text-slate-500">تکمیل پروفایل</span>
                   <span className="text-[10px] font-semibold tabular-nums text-slate-500">
                     {personLevelDone} از {PERSON_PATH.length}
                   </span>
@@ -731,14 +799,14 @@ export default function MobileDashboardHome() {
                   showLabels
                 />
               </Link>
-        </div>
+            </div>
 
-        <Link
-          href="/dashboard/account"
+            <Link
+              href="/dashboard/account"
               className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-        >
-          {t("editProfile")}
-        </Link>
+            >
+              {t("editProfile")}
+            </Link>
           </div>
         </ProfileHeaderMetrics>
       </section>
@@ -848,7 +916,7 @@ export default function MobileDashboardHome() {
               ) : null}
               <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4">
                 {postsLoading ? (
-                  <div className="h-20 animate-pulse rounded-lg bg-slate-100" />
+                  <div className="h-20 skeleton rounded-lg" />
                 ) : myPosts.length === 0 ? (
                   <p className="py-6 text-center text-sm text-slate-500">{t("postsEmpty")}</p>
                 ) : (
@@ -909,7 +977,7 @@ export default function MobileDashboardHome() {
 
         {showServicesPanel ? (
           providerLoading ? (
-            <div className="h-24 animate-pulse rounded-xl bg-slate-200/70" />
+            <div className="h-24 skeleton rounded-xl" />
           ) : hasProvider ? (
             <div>
               <HorizontalMenu

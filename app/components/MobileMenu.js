@@ -58,7 +58,10 @@ export default function MobileMenu() {
             {menuItems.map((item) => (
               <div key={item.titleKey}>
                 {item.protected && !user ? (
-                  <LoginRequiredMessage>
+                  <LoginRequiredMessage
+                    returnUrl={item.href}
+                    intent={item.titleKey === "cart" ? "cart" : "generic"}
+                  >
                     <div className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 bg-gray-100 cursor-pointer">
                       {t(item.titleKey)}
                     </div>

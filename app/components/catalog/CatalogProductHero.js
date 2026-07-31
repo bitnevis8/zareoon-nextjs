@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ProductCardMedia from "../ui/ProductCardMedia";
+import ProductPageQrCode from "../ui/ProductPageQrCode";
 import { getLocalizedText, localizeUnit } from "../../utils/localize";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { catalogBadge, catalogSurface, catalogText } from "./catalogTheme";
@@ -18,6 +19,7 @@ export default function CatalogProductHero({
   cartUnit = "",
   hideMediaOnMobile = false,
   hideMedia = false,
+  productSharePath = "",
 }) {
   const t = useTranslations("catalog");
   const title = getLocalizedText(item, language) || "";
@@ -77,14 +79,30 @@ export default function CatalogProductHero({
       </div>
     ) : null;
 
+  const qrBlock =
+    item?.isOrderable && productSharePath ? (
+      <ProductPageQrCode
+        pathOrUrl={productSharePath}
+        title={title || t("product")}
+        heading="کیو آر کد"
+        scanHint="اسکن کنید تا صفحه محصول در زارعون باز شود"
+        slugHint={item.slug || item.id || "product"}
+        compact
+        className="w-full max-w-[9.5rem] shrink-0"
+      />
+    ) : null;
+
   const titleBlock = (
-    <div className="space-y-3">
-      <h1 className={`text-xl font-bold leading-snug tracking-tight sm:text-2xl ${catalogText.heading}`}>{title}</h1>
-      <div className="flex flex-wrap items-center gap-2">
-        {orderableBadge}
-        {listingBadge}
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="min-w-0 flex-1 space-y-3">
+        <h1 className={`text-xl font-bold leading-snug tracking-tight sm:text-2xl ${catalogText.heading}`}>{title}</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          {orderableBadge}
+          {listingBadge}
+        </div>
+        {cartNotice}
       </div>
-      {cartNotice}
+      {qrBlock ? <div className="mx-auto sm:mx-0">{qrBlock}</div> : null}
     </div>
   );
 
@@ -94,7 +112,6 @@ export default function CatalogProductHero({
 
   return (
     <>
-      {/* موبایل: تصویر تمام‌عرض، عنوان زیر آن */}
       <section className="space-y-3 lg:hidden">
         <div className="-mx-3 overflow-hidden border-y border-slate-200 bg-slate-100 sm:mx-0 sm:rounded-2xl sm:border">
           <CatalogMediaSlider
@@ -107,7 +124,6 @@ export default function CatalogProductHero({
         <div className="px-0.5">{titleBlock}</div>
       </section>
 
-      {/* دسکتاپ: تصویر + متن کنار هم */}
       <section className={`hidden overflow-hidden lg:block ${catalogSurface.card}`}>
         <div className="grid grid-cols-[minmax(280px,40%)_1fr] items-stretch">
           <div className="relative min-h-[300px] overflow-hidden bg-slate-100">
@@ -123,7 +139,7 @@ export default function CatalogProductHero({
             ) : (
               <button
                 type="button"
-                className="block h-full w-full min-h-[300px]"
+                className="block h-full min-h-[300px] w-full"
                 onClick={() => openAt(0)}
                 aria-label={t("viewGallery")}
               >

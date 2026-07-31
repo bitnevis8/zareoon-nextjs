@@ -12,7 +12,7 @@ import { useNavigationLoading } from "@/app/context/NavigationLoadingContext";
 
 function SheetIcon({ name }) {
   const props = {
-    className: "h-5 w-5",
+    className: "h-[18px] w-[18px]",
     fill: "none",
     stroke: "currentColor",
     strokeWidth: "1.75",
@@ -59,47 +59,47 @@ function SheetIcon({ name }) {
   );
 }
 
-function CloseIcon({ className = "h-5 w-5" }) {
+function Chevron({ isRTL }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <svg
+      className={`h-4 w-4 shrink-0 text-slate-400 ${isRTL ? "rotate-180" : ""}`}
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+        clipRule="evenodd"
+      />
     </svg>
   );
 }
 
-function ActionTile({ title, desc, tone, icon, onClick }) {
-  const tones = {
-    emerald: "border-emerald-200/80 from-emerald-50 to-white text-emerald-950 hover:border-emerald-300",
-    sky: "border-sky-200/80 from-sky-50 to-white text-sky-950 hover:border-sky-300",
-    amber: "border-amber-200/80 from-amber-50 to-white text-amber-950 hover:border-amber-300",
-    teal: "border-teal-200/80 from-teal-50 to-white text-teal-950 hover:border-teal-300",
-  };
-  const iconTone = {
-    emerald: "bg-emerald-600 text-white",
-    sky: "bg-sky-600 text-white",
-    amber: "bg-amber-600 text-white",
-    teal: "bg-teal-700 text-white",
-  };
-
+function ActionRow({ title, desc, icon, onClick, isRTL, disabled }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-start gap-3 rounded-2xl border bg-gradient-to-br px-3.5 py-3.5 text-start shadow-sm transition active:scale-[0.99] ${tones[tone]}`}
+      disabled={disabled}
+      className={`flex w-full items-center gap-3 px-3.5 py-3 text-start transition active:bg-slate-50 disabled:opacity-55 ${
+        isRTL ? "text-right" : "text-left"
+      }`}
     >
-      <span className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconTone[tone]}`}>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
         <SheetIcon name={icon} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[13px] font-extrabold leading-snug">{title}</span>
-        <span className="mt-1 block text-[11px] font-medium leading-5 opacity-80">{desc}</span>
+        <span className="block text-[13px] font-bold leading-snug text-slate-900">{title}</span>
+        <span className="mt-0.5 block text-[11px] leading-5 text-slate-500">{desc}</span>
       </span>
+      <Chevron isRTL={isRTL} />
     </button>
   );
 }
 
 /**
- * مودال تمام‌صفحه موبایل «درخواست»
+ * مودال موبایل «درخواست» — رسمی، خلوت، استاندارد
  */
 export default function MobileRequestSheet({ open, onClose }) {
   const { t, isRTL } = useLanguage();
@@ -178,82 +178,75 @@ export default function MobileRequestSheet({ open, onClose }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex flex-col bg-gradient-to-b from-emerald-50 via-white to-teal-50 lg:hidden"
+      className="fixed inset-0 z-[9999] flex flex-col bg-white lg:hidden"
       dir={isRTL ? "rtl" : "ltr"}
       role="dialog"
       aria-modal="true"
       aria-label={t("mobileSheetTitle")}
     >
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-emerald-100/90 bg-white/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
-        <div className="min-w-0">
-          <p className="text-[11px] font-bold tracking-wide text-emerald-800/80">{t("mobileSheetEyebrow")}</p>
-          <h2 className="truncate text-base font-black text-slate-900">{t("mobileSheetTitle")}</h2>
+      <header className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-sm font-bold text-slate-900">{t("mobileSheetTitle")}</h2>
+          <p className="mt-0.5 text-[11px] leading-4 text-slate-500">{t("mobileSheetSubtitle")}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm"
-          aria-label={t("close")}
+          className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
+          aria-label={t("close") || "بستن"}
         >
-          <CloseIcon className="h-4 w-4" />
-          <span>{t("close")}</span>
+          <span>{t("close") || "بستن"}</span>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <p className="mb-4 text-[12px] leading-5 text-slate-600">{t("mobileSheetSubtitle")}</p>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-slate-50/80 px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-3.5 py-2.5">
+            <p className="text-[11px] font-bold tracking-wide text-slate-500">{t("mobileSheetBuyHeading")}</p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            <ActionRow
+              icon="product"
+              title={t("mobileSheetRequestProduct")}
+              desc={t("mobileSheetRequestProductDesc")}
+              onClick={onBuyProduct}
+              isRTL={isRTL}
+            />
+            <ActionRow
+              icon="service"
+              title={t("mobileSheetRequestService")}
+              desc={t("mobileSheetRequestServiceDesc")}
+              onClick={onBuyService}
+              isRTL={isRTL}
+            />
+          </div>
+        </section>
 
-        <div className="space-y-4">
-          <section className="rounded-2xl border border-white/80 bg-white/80 p-3 shadow-sm">
-            <div className="mb-2.5 flex items-center gap-2">
-              <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-bold text-sky-900">
-                {t("mobileSheetBuyBadge")}
-              </span>
-              <p className="text-[12px] font-bold text-slate-700">{t("mobileSheetBuyHeading")}</p>
-            </div>
-            <div className="grid gap-2.5">
-              <ActionTile
-                tone="emerald"
-                icon="product"
-                title={t("mobileSheetRequestProduct")}
-                desc={t("mobileSheetRequestProductDesc")}
-                onClick={onBuyProduct}
-              />
-              <ActionTile
-                tone="sky"
-                icon="service"
-                title={t("mobileSheetRequestService")}
-                desc={t("mobileSheetRequestServiceDesc")}
-                onClick={onBuyService}
-              />
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-white/80 bg-white/80 p-3 shadow-sm">
-            <div className="mb-2.5 flex items-center gap-2">
-              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-950">
-                {t("mobileSheetSellBadge")}
-              </span>
-              <p className="text-[12px] font-bold text-slate-700">{t("mobileSheetSellHeading")}</p>
-            </div>
-            <div className="grid gap-2.5">
-              <ActionTile
-                tone="amber"
-                icon="sell"
-                title={sellProductTitle}
-                desc={sellProductDesc}
-                onClick={onSellProduct}
-              />
-              <ActionTile
-                tone="teal"
-                icon="service"
-                title={sellServiceTitle}
-                desc={sellServiceDesc}
-                onClick={onSellService}
-              />
-            </div>
-          </section>
-        </div>
+        <section className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-3.5 py-2.5">
+            <p className="text-[11px] font-bold tracking-wide text-slate-500">{t("mobileSheetSellHeading")}</p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            <ActionRow
+              icon="sell"
+              title={sellProductTitle}
+              desc={sellProductDesc}
+              onClick={onSellProduct}
+              isRTL={isRTL}
+            />
+            <ActionRow
+              icon="service"
+              title={sellServiceTitle}
+              desc={sellServiceDesc}
+              onClick={onSellService}
+              isRTL={isRTL}
+              disabled={!!user && providerLoading}
+            />
+          </div>
+        </section>
       </div>
     </div>,
     document.body

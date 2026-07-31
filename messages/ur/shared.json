@@ -1,4 +1,4 @@
-{
+﻿{
   "roles": {
     "super_admin": "",
     "admin": "",
@@ -262,7 +262,9 @@
     "calendarHijri": "ہجری",
     "calendarShamsi": "شمسی",
     "calendarClickHint": "{full} — مساوی تاریخیں دیکھنے کے لیے کلک کریں",
+    "calendarClickHintAll": "Click to see all calendars",
     "calendarAria": "کیلنڈر {label}",
+    "calendarAriaAll": "Date in multiple calendars",
     "calendarEquivalentsTitle": "مساوی تاریخیں",
     "regionAria": "آج کی زر مبادلہ شرحیں",
     "loadingRates": "شرحیں لوڈ ہو رہی ہیں…",

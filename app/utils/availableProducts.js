@@ -80,8 +80,10 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
     const reserved = parseFloat(lot.reservedQuantity || 0);
     const availableQty = total - reserved;
     const isInquiryOnly =
+      (lot.effectivePrice == null || lot.effectivePrice === "") &&
       (lot.price == null || lot.price === "") &&
-      !(Array.isArray(lot.tieredPricing) && lot.tieredPricing.length);
+      !(Array.isArray(lot.tieredPricing) && lot.tieredPricing.length) &&
+      !(Array.isArray(lot.dailyPrices) && lot.dailyPrices.length);
     // استعلامی‌ها حتی با موجودی صفر در ویترین می‌مانند
     if ((!Number.isFinite(availableQty) || availableQty <= 0) && !isInquiryOnly) continue;
 
@@ -102,8 +104,10 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
       qualityGrade: lot.qualityGrade || i18nData.noGrade,
       availableQty: Math.max(0, availableQty),
       unit: lot.unit || "kg",
-      price: lot.price,
+      price: lot.effectivePrice != null ? lot.effectivePrice : lot.price,
       priceCurrency: lot.priceCurrency || "TOMAN",
+      priceFromSchedule: Boolean(lot.priceFromSchedule),
+      dailyPrices: Array.isArray(lot.dailyPrices) ? lot.dailyPrices : [],
       locationLabel: lot.locationLabel || null,
       filterValues: lot.filterValues || null,
       supplyCountry: lot.supplyCountry || lot.filterValues?.originCountry || null,

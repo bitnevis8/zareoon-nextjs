@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { formatCalendar, formatFetchedAt, CALENDAR_MODES, getDefaultCalendarMode } from "@/app/utils/calendars";
 import { getCurrencyDefinition } from "@/app/utils/priceCurrencies";
 import { useLanguage } from "@/app/context/LanguageContext";
+import DaisyBreadcrumbs from "@/app/components/ui/DaisyBreadcrumbs";
 
 function formatPrice(value, maximumFractionDigits = 0) {
   if (value == null || !Number.isFinite(value)) return "—";
@@ -242,13 +242,13 @@ export default function ExchangeRatesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-        <nav className="mb-6 text-sm text-slate-500">
-          <Link href="/" className="hover:text-emerald-700">
-            {t("nav.home")}
-          </Link>
-          <span className="mx-2 text-slate-300">/</span>
-          <span className="font-medium text-slate-800">{t("nav.current")}</span>
-        </nav>
+        <DaisyBreadcrumbs
+          className="mb-6"
+          items={[
+            { href: "/", label: t("nav.home") },
+            { label: t("nav.current") },
+          ]}
+        />
 
         <header className="mb-8 rounded-2xl border border-emerald-100 bg-gradient-to-l from-emerald-50 to-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

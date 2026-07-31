@@ -35,18 +35,12 @@ function buildArcOrder(availableCodes) {
   return order;
 }
 
-function buildPolygonPoints(count) {
-  return Array.from({ length: count }, (_, index) => {
-    const deg = -90 + (index / Math.max(count - 1, 1)) * 180;
-    const rad = (deg * Math.PI) / 180;
-    const x = 100 + 100 * Math.sin(rad);
-    const y = 100 - 100 * Math.cos(rad);
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
-  }).join(" ");
-}
+/** نیم‌دایره واقعی (نه وترهای چندضلعی) — از چپ به راست */
+const ARC_PATH = "M 0 100 A 100 100 0 0 1 200 100";
+const ARC_PATH_LEN = 314; // ≈ π × 100
 
 /**
- * لوگو وسط · چندضلعی با رأس روی هر زبان · نور لودینگ روی اضلاع
+ * لوگو وسط · پرچم‌ها روی قوس دایره‌ای · نور لودینگ روی قوس
  */
 export default function HomeLanguageLogo() {
   const { language, setLanguage, t, availableLanguages } = useLanguage();
@@ -57,23 +51,23 @@ export default function HomeLanguageLogo() {
       .filter(Boolean);
   }, [availableLanguages]);
   const count = arcItems.length;
-  // موبایل: شعاع کمتر تا پرچم بالا زیر هدر نرود
-  const radius = "clamp(7rem, 36vw, 13.5rem)";
-  const polyPoints = buildPolygonPoints(count);
+  // شعاع قوس زبان — متناسب با لوگو
+  const radius = "clamp(6.16rem, 33.5vw, 12.3rem)";
 
   return (
     <div
-      className="relative mx-auto mt-2 flex w-full max-w-3xl justify-center overflow-visible px-2 pb-1 pt-[4.75rem] sm:mt-9 sm:pb-1 sm:pt-16"
+      className="home-language-logo relative mx-auto mt-16 flex w-full max-w-2xl justify-center overflow-visible px-2 pb-0 pt-[4.5rem] sm:mt-20 sm:pt-16 md:mt-24 lg:mt-28"
       style={{ ["--arc-r"]: radius }}
     >
-      <div className="relative inline-block overflow-visible">
+      <div className="home-language-logo-inner relative mb-6 inline-block translate-y-6 overflow-visible sm:mb-8 sm:translate-y-8 md:mb-10 md:translate-y-10">
         <Image
           src="/images/logo.png"
           alt={t("siteName")}
-          width={800}
-          height={800}
-          className="relative z-[1] mx-auto h-auto w-40 object-contain sm:w-56 md:w-64 lg:w-72"
+          width={208}
+          height={208}
+          className="home-language-logo-img relative z-[1] mx-auto !h-[7.78rem] !w-[7.78rem] object-contain sm:!h-[9.07rem] sm:!w-[9.07rem] md:!h-[10.37rem] md:!w-[10.37rem]"
           priority
+          sizes="166px"
         />
 
         <div
@@ -92,40 +86,36 @@ export default function HomeLanguageLogo() {
             fill="none"
             aria-hidden
           >
-            <polyline
+            <path
               className="home-lang-arc-glass"
-              points={polyPoints}
-              pathLength={314}
+              d={ARC_PATH}
+              pathLength={ARC_PATH_LEN}
               strokeWidth="2"
               strokeLinecap="round"
-              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
             />
-            <polyline
+            <path
               className="home-lang-arc-base"
-              points={polyPoints}
-              pathLength={314}
+              d={ARC_PATH}
+              pathLength={ARC_PATH_LEN}
               strokeWidth="1.15"
               strokeLinecap="round"
-              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
             />
-            <polyline
+            <path
               className="home-lang-arc-flow"
-              points={polyPoints}
-              pathLength={314}
+              d={ARC_PATH}
+              pathLength={ARC_PATH_LEN}
               strokeWidth="1.25"
               strokeLinecap="round"
-              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
             />
-            <polyline
+            <path
               className="home-lang-arc-flash"
-              points={polyPoints}
-              pathLength={314}
+              d={ARC_PATH}
+              pathLength={ARC_PATH_LEN}
               strokeWidth="1"
               strokeLinecap="round"
-              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
             />
           </svg>
@@ -133,18 +123,13 @@ export default function HomeLanguageLogo() {
           {arcItems.map((option, index) => {
             const isActive = language === option.code;
             const deg = -90 + (index / Math.max(count - 1, 1)) * 180;
-            const flagOnly = Boolean(option.flagOnly);
 
             return (
               <button
                 key={option.code}
                 type="button"
                 onClick={() => setLanguage(option.code)}
-                className={`pointer-events-auto absolute left-0 top-0 flex items-center justify-center border text-[9px] font-semibold leading-none shadow-sm transition ${
-                  flagOnly
-                    ? "min-h-0 min-w-[2.75rem] overflow-hidden rounded-xl p-0 sm:min-w-[2.75rem]"
-                    : "min-h-[2.75rem] min-w-[2.75rem] flex-col gap-0.5 rounded-xl px-1.5 py-1 sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1 sm:rounded-full sm:px-2 sm:py-1.5 sm:text-xs"
-                } ${
+                className={`pointer-events-auto absolute left-0 top-0 flex min-h-[2.75rem] min-w-[2.75rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-1 text-[9px] font-semibold leading-none shadow-sm transition sm:min-h-0 sm:min-w-0 sm:flex-row sm:gap-1 sm:rounded-full sm:px-2 sm:py-1.5 sm:text-xs ${
                   isActive
                     ? "border-2 border-emerald-300 bg-white text-emerald-700"
                     : "border border-slate-200 bg-white/95 text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -159,13 +144,9 @@ export default function HomeLanguageLogo() {
                 <LanguageFlag
                   countryCode={option.countryCode}
                   flagGlyph={option.flagGlyph}
-                  className={
-                    flagOnly
-                      ? "!h-7 !w-full !rounded-none !border-0 sm:!h-8"
-                      : "h-[1.1rem] w-[1.55rem] sm:h-3.5 sm:w-5"
-                  }
+                  className="h-[1.1rem] w-[1.55rem] sm:h-3.5 sm:w-5"
                 />
-                {!flagOnly ? <span className="tracking-wide">{option.shortLabel}</span> : null}
+                <span className="tracking-wide">{option.shortLabel}</span>
               </button>
             );
           })}

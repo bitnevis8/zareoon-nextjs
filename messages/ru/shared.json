@@ -1,4 +1,4 @@
-{
+﻿{
   "roles": {
     "super_admin": "",
     "admin": "",
@@ -262,7 +262,9 @@
     "calendarHijri": "Хиджра",
     "calendarShamsi": "Солнечная хиджра",
     "calendarClickHint": "{full} — нажмите, чтобы увидеть эквиваленты",
+    "calendarClickHintAll": "Click to see all calendars",
     "calendarAria": "Календарь {label}",
+    "calendarAriaAll": "Date in multiple calendars",
     "calendarEquivalentsTitle": "Эквивалентные даты",
     "regionAria": "Курсы валют на сегодня",
     "loadingRates": "Загрузка курсов…",

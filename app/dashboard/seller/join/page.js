@@ -268,7 +268,7 @@ export default function SellerJoinPage() {
               </span>
             </label>
             {slugLoading ? (
-              <div className="h-20 animate-pulse rounded-xl bg-slate-100" />
+              <div className="h-20 skeleton rounded-xl" />
             ) : hasSlug ? (
               <ExistingPublicPageNotice slug={existingSlug} />
             ) : (

@@ -13,26 +13,20 @@ function MenuIcon() {
   );
 }
 
-function ChevronLeftIcon({ className = "h-3.5 w-3.5" }) {
+/** جمع کردن سایدبار (به حالت آیکن) — جهت برای سایدبار راست */
+function CollapseIcon({ className = "h-4 w-4" }) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-      <path
-        fillRule="evenodd"
-        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-        clipRule="evenodd"
-      />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12l-7.5 7.5M3 12h18" />
     </svg>
   );
 }
 
-function ChevronRightIcon({ className = "h-3.5 w-3.5" }) {
+/** باز کردن سایدبار از حالت آیکن */
+function ExpandIcon({ className = "h-4 w-4" }) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-      <path
-        fillRule="evenodd"
-        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-        clipRule="evenodd"
-      />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12l7.5-7.5M21 12H3" />
     </svg>
   );
 }
@@ -40,69 +34,7 @@ function ChevronRightIcon({ className = "h-3.5 w-3.5" }) {
 const MODE_WIDTH = {
   [DESKTOP_SIDEBAR_MODES.EXPANDED]: "w-[19rem]",
   [DESKTOP_SIDEBAR_MODES.ICONS]: "w-[4.75rem]",
-  [DESKTOP_SIDEBAR_MODES.COLLAPSED]: "w-0",
 };
-
-function SidebarEdgeControls({
-  collapsed = false,
-  canExpand,
-  canCollapse,
-  onExpand,
-  onCollapse,
-  expandLabel,
-  collapseLabel,
-}) {
-  const btnSize = collapsed ? "h-12 w-10" : "h-9 w-7";
-  const iconClass = collapsed ? "h-5 w-5" : "h-3.5 w-3.5";
-
-  return (
-    <div
-      className={`pointer-events-auto absolute top-1/2 left-0 z-[60] hidden -translate-y-1/2 md:flex ${
-        collapsed ? "-translate-x-full" : "-translate-x-1/2"
-      }`}
-      role="group"
-      aria-label="کنترل سایدبار"
-    >
-      <div
-        className={`flex flex-col border bg-white ring-1 ring-slate-900/5 ${
-          collapsed
-            ? "rounded-l-xl border-slate-300 shadow-[0_8px_28px_-8px_rgba(15,23,42,0.45)]"
-            : "rounded-lg border-slate-200/90 shadow-[0_4px_18px_-6px_rgba(15,23,42,0.35)]"
-        }`}
-      >
-        <button
-          type="button"
-          onClick={onExpand}
-          disabled={!canExpand}
-          title={expandLabel}
-          aria-label={expandLabel}
-          className={`flex items-center justify-center transition ${btnSize} ${
-            canExpand
-              ? "text-slate-700 hover:bg-emerald-50 hover:text-emerald-800"
-              : "cursor-default text-slate-300"
-          }`}
-        >
-          <ChevronLeftIcon className={iconClass} />
-        </button>
-        <span className="h-px w-full bg-slate-200" aria-hidden />
-        <button
-          type="button"
-          onClick={onCollapse}
-          disabled={!canCollapse}
-          title={collapseLabel}
-          aria-label={collapseLabel}
-          className={`flex items-center justify-center transition ${btnSize} ${
-            canCollapse
-              ? "text-slate-700 hover:bg-emerald-50 hover:text-emerald-800"
-              : "cursor-default text-slate-300"
-          }`}
-        >
-          <ChevronRightIcon className={iconClass} />
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function DashboardShell({ breadcrumb, alert, children }) {
   const t = useTranslations("dashboard");
@@ -113,39 +45,46 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
   const {
     openSidebar,
     desktopSidebarMode,
-    expandDesktopSidebar,
-    collapseDesktopSidebar,
-    canExpandDesktopSidebar,
-    canCollapseDesktopSidebar,
+    toggleDesktopSidebar,
     desktopModeHydrated,
+    isDesktopSidebarIcons,
   } = useSidebar();
 
   const mode = desktopModeHydrated ? desktopSidebarMode : DESKTOP_SIDEBAR_MODES.EXPANDED;
-  const collapsed = mode === DESKTOP_SIDEBAR_MODES.COLLAPSED;
-  const iconsOnly = mode === DESKTOP_SIDEBAR_MODES.ICONS;
+  const iconsOnly = mode === DESKTOP_SIDEBAR_MODES.ICONS || isDesktopSidebarIcons;
+  const toggleLabel = iconsOnly
+    ? t("shell.expandSidebar") || "باز کردن منو"
+    : t("shell.collapseSidebar") || "جمع کردن منو";
 
   return (
     <div className="dashboard-scroll relative flex h-full min-h-0 max-h-full flex-1 overflow-hidden bg-slate-100">
       <aside
-        className={`relative z-40 hidden h-full min-h-0 shrink-0 self-stretch border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:flex md:flex-col ${MODE_WIDTH[mode]} ${
-          collapsed ? "border-l-0" : ""
-        }`}
+        className={`relative z-40 hidden h-full min-h-0 shrink-0 self-stretch border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:flex md:flex-col ${MODE_WIDTH[mode]}`}
       >
-        {!collapsed ? (
-          <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <Sidebar onLinkClick={() => {}} compact={iconsOnly} />
-          </div>
-        ) : null}
+        {/* هدر استاندارد سایدبار — یک دکمه تاگل */}
+        <div
+          className={`flex h-12 shrink-0 items-center border-b border-slate-200 ${
+            iconsOnly ? "justify-center px-1.5" : "justify-between gap-2 px-3"
+          }`}
+        >
+          {!iconsOnly ? (
+            <p className="truncate text-sm font-bold text-slate-800">{t("shell.menuLabel") || "منو"}</p>
+          ) : null}
+          <button
+            type="button"
+            onClick={toggleDesktopSidebar}
+            title={toggleLabel}
+            aria-label={toggleLabel}
+            aria-expanded={!iconsOnly}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800"
+          >
+            {iconsOnly ? <ExpandIcon /> : <CollapseIcon />}
+          </button>
+        </div>
 
-        <SidebarEdgeControls
-          collapsed={collapsed}
-          canExpand={canExpandDesktopSidebar}
-          canCollapse={canCollapseDesktopSidebar}
-          onExpand={expandDesktopSidebar}
-          onCollapse={collapseDesktopSidebar}
-          expandLabel={t("shell.expandSidebar") || "باز کردن منو"}
-          collapseLabel={t("shell.collapseSidebar") || "جمع کردن منو"}
-        />
+        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <Sidebar onLinkClick={() => {}} compact={iconsOnly} />
+        </div>
       </aside>
 
       <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">

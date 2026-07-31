@@ -1,4 +1,4 @@
-{
+﻿{
   "roles": {
     "super_admin": "",
     "admin": "",
@@ -262,9 +262,11 @@
     "calendarHijri": "هجري",
     "calendarShamsi": "شمسي",
     "calendarClickHint": "{full} — انقر لعرض المكافئات",
+    "calendarClickHintAll": "انقر لعرض جميع أنظمة التقويم",
     "calendarAria": "التقويم {label}",
+    "calendarAriaAll": "التاريخ في تقويمات متعددة",
     "calendarEquivalentsTitle": "ما يعادل التاريخ في التقويمات",
-    "regionAria": "أسعار صرف اليوم",
+    "regionAria": "شريط الأسعار وقوائم المنتجات والخدمات",
     "loadingRates": "جاري تحميل الأسعار…",
     "ratesUnavailable": "الأسعار غير متاحة",
     "viewRates": "عرض أسعار الصرف",

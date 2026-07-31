@@ -54,13 +54,29 @@ export default function InventoryViewModal({ lot, productName, farmerName, onClo
             <Row
               label={t("lot.price")}
               value={
-                lot.tieredPricing?.length > 0
-                  ? t("lot.tieredPrice")
-                  : lot.price
-                    ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency, tShared)
-                    : "—"
+                lot.priceFromSchedule && (lot.effectivePrice != null || lot.price)
+                  ? formatPriceWithCurrency(
+                      lot.effectivePrice ?? lot.price,
+                      lot.priceCurrency || lot.price_currency,
+                      tShared
+                    )
+                  : lot.tieredPricing?.length > 0
+                    ? t("lot.tieredPrice")
+                    : lot.effectivePrice != null || lot.price
+                      ? formatPriceWithCurrency(
+                          lot.effectivePrice ?? lot.price,
+                          lot.priceCurrency || lot.price_currency,
+                          tShared
+                        )
+                      : "—"
               }
             />
+            {Array.isArray(lot.dailyPrices) && lot.dailyPrices.length > 0 ? (
+              <Row
+                label="قیمت روزانه"
+                value={`${lot.dailyPrices.length.toLocaleString("fa-IR")} روز برنامه‌ریزی‌شده`}
+              />
+            ) : null}
             <Row
               label={t("lot.minOrder")}
               value={lot.minimumOrderQuantity ? `${lot.minimumOrderQuantity} ${lot.unit}` : "—"}

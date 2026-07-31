@@ -1,3 +1,5 @@
+import { getRoleSidebarIcon } from "@/app/config/dashboardRoleIcons";
+
 /** نقش‌های سامانه — پلتفرم vs فعالیت vs Workspace */
 
 export const ROLE_SLUGS = {
@@ -59,16 +61,29 @@ export function splitUserRoles(user, t) {
   const roles = user?.roles || [];
   const management = [];
   const activity = [];
+  const seenMgmt = new Set();
+  const seenAct = new Set();
+
   for (const role of roles) {
+    const slug = normalizeRoleSlug(role);
     const label = getRoleLabel(role, t);
-    if (!label) continue;
-    if (isPlatformManagementRole(role)) management.push(label);
-    else activity.push(label);
+    if (!slug || !label) continue;
+    const item = {
+      slug,
+      label,
+      icon: getRoleSidebarIcon(slug),
+    };
+    if (isPlatformManagementRole(role)) {
+      if (seenMgmt.has(slug)) continue;
+      seenMgmt.add(slug);
+      management.push(item);
+    } else {
+      if (seenAct.has(slug)) continue;
+      seenAct.add(slug);
+      activity.push(item);
+    }
   }
-  return {
-    management: [...new Set(management)],
-    activity: [...new Set(activity)],
-  };
+  return { management, activity };
 }
 
 export function normalizeRoleSlug(role) {

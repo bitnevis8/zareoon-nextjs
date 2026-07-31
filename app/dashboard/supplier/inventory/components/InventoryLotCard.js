@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import { localizeStatus } from "@/app/utils/localize";
-import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { DashboardItemActions } from "@/app/components/dashboard/DashboardListToolbar";
+import ProductCardMedia from "@/app/components/ui/ProductCardMedia";
 import { inv, statusBadgeClass, gradeBadgeClass } from "../inventoryTheme";
 
 export default function InventoryLotCard({
@@ -23,30 +22,22 @@ export default function InventoryLotCard({
   const t = useTranslations("inventory");
   const tShared = useTranslations("shared");
   const available = Math.max(0, parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0));
-  const image =
-    resolveMediaUrl(lot.coverImageUrl) ||
-    resolveMediaUrl(lot.product?.imageUrl) ||
-    resolveMediaUrl(lot.Product?.imageUrl) ||
-    null;
 
   return (
     <article className={`${inv.card} overflow-hidden transition hover:shadow-md`}>
       <div className="flex gap-3 p-3 sm:p-3.5">
         <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-24 sm:w-24">
-          {image ? (
-            <Image src={image} alt="" fill unoptimized className="object-cover" sizes="96px" />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center text-slate-300">
-              <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                />
-              </svg>
-            </span>
-          )}
+          <ProductCardMedia
+            lots={[lot]}
+            imageUrl={
+              lot.coverImageUrl || lot.product?.imageUrl || lot.Product?.imageUrl || null
+            }
+            imageUrls={lot.previewImageUrls}
+            alt={productName || ""}
+            className="h-full w-full object-cover"
+            figureClassName="absolute inset-0"
+            showFlag={false}
+          />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -67,11 +58,21 @@ export default function InventoryLotCard({
             {available.toLocaleString("fa-IR")} {lot.unit}
             <span className="mx-1 font-normal text-slate-300">·</span>
             <span className="font-semibold text-slate-800">
-              {lot.tieredPricing?.length > 0
-                ? t("lot.tiered")
-                : lot.price
-                  ? formatPriceWithCurrency(lot.price, lot.priceCurrency || lot.price_currency, tShared)
-                  : "—"}
+              {lot.priceFromSchedule && (lot.effectivePrice != null || lot.price)
+                ? formatPriceWithCurrency(
+                    lot.effectivePrice ?? lot.price,
+                    lot.priceCurrency || lot.price_currency,
+                    tShared
+                  )
+                : lot.tieredPricing?.length > 0
+                  ? t("lot.tiered")
+                  : lot.effectivePrice != null || lot.price
+                    ? formatPriceWithCurrency(
+                        lot.effectivePrice ?? lot.price,
+                        lot.priceCurrency || lot.price_currency,
+                        tShared
+                      )
+                    : "—"}
             </span>
           </p>
         </div>

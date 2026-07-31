@@ -4,29 +4,19 @@ import { usePathname } from 'next/navigation';
 
 const SidebarContext = createContext();
 
+/** دو حالت استاندارد: باز (با متن) و جمع (فقط آیکن) */
 export const DESKTOP_SIDEBAR_MODES = {
   EXPANDED: 'expanded',
   ICONS: 'icons',
-  COLLAPSED: 'collapsed',
 };
 
-const DESKTOP_MODE_ORDER = [
-  DESKTOP_SIDEBAR_MODES.EXPANDED,
-  DESKTOP_SIDEBAR_MODES.ICONS,
-  DESKTOP_SIDEBAR_MODES.COLLAPSED,
-];
-
-const DESKTOP_MODE_STORAGE_KEY = 'zareoon_desktop_sidebar_mode_v2';
+const DESKTOP_MODE_STORAGE_KEY = 'zareoon_desktop_sidebar_mode_v3';
 
 function normalizeDesktopMode(value) {
-  if (DESKTOP_MODE_ORDER.includes(value)) return value;
+  if (value === DESKTOP_SIDEBAR_MODES.ICONS) return DESKTOP_SIDEBAR_MODES.ICONS;
+  // حالت قدیمی collapsed → آیکن‌ها
+  if (value === 'collapsed') return DESKTOP_SIDEBAR_MODES.ICONS;
   return DESKTOP_SIDEBAR_MODES.EXPANDED;
-}
-
-function stepDesktopMode(current, direction) {
-  const idx = DESKTOP_MODE_ORDER.indexOf(normalizeDesktopMode(current));
-  const nextIdx = Math.min(DESKTOP_MODE_ORDER.length - 1, Math.max(0, idx + direction));
-  return DESKTOP_MODE_ORDER[nextIdx];
 }
 
 export function SidebarProvider({ children }) {
@@ -46,8 +36,8 @@ export function SidebarProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem("openMobileSidebar") === "1") {
-      sessionStorage.removeItem("openMobileSidebar");
+    if (typeof window !== 'undefined' && sessionStorage.getItem('openMobileSidebar') === '1') {
+      sessionStorage.removeItem('openMobileSidebar');
       setIsSidebarOpen(true);
       return;
     }
@@ -64,21 +54,12 @@ export function SidebarProvider({ children }) {
     }
   }, []);
 
-  const expandDesktopSidebar = useCallback(() => {
+  const toggleDesktopSidebar = useCallback(() => {
     setDesktopSidebarModeState((prev) => {
-      const next = stepDesktopMode(prev, -1);
-      try {
-        localStorage.setItem(DESKTOP_MODE_STORAGE_KEY, next);
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
-  }, []);
-
-  const collapseDesktopSidebar = useCallback(() => {
-    setDesktopSidebarModeState((prev) => {
-      const next = stepDesktopMode(prev, +1);
+      const next =
+        normalizeDesktopMode(prev) === DESKTOP_SIDEBAR_MODES.EXPANDED
+          ? DESKTOP_SIDEBAR_MODES.ICONS
+          : DESKTOP_SIDEBAR_MODES.EXPANDED;
       try {
         localStorage.setItem(DESKTOP_MODE_STORAGE_KEY, next);
       } catch {
@@ -101,25 +82,31 @@ export function SidebarProvider({ children }) {
   }, []);
 
   const mode = normalizeDesktopMode(desktopSidebarMode);
+  const isDesktopSidebarExpanded = mode === DESKTOP_SIDEBAR_MODES.EXPANDED;
+  const isDesktopSidebarIcons = mode === DESKTOP_SIDEBAR_MODES.ICONS;
 
   return (
-    <SidebarContext.Provider value={{
-      isSidebarOpen,
-      setIsSidebarOpen,
-      toggleSidebar,
-      closeSidebar,
-      openSidebar,
-      desktopSidebarMode: mode,
-      setDesktopSidebarMode,
-      expandDesktopSidebar,
-      collapseDesktopSidebar,
-      desktopModeHydrated,
-      canExpandDesktopSidebar: mode !== DESKTOP_SIDEBAR_MODES.EXPANDED,
-      canCollapseDesktopSidebar: mode !== DESKTOP_SIDEBAR_MODES.COLLAPSED,
-      isDesktopSidebarExpanded: mode === DESKTOP_SIDEBAR_MODES.EXPANDED,
-      isDesktopSidebarIcons: mode === DESKTOP_SIDEBAR_MODES.ICONS,
-      isDesktopSidebarCollapsed: mode === DESKTOP_SIDEBAR_MODES.COLLAPSED,
-    }}>
+    <SidebarContext.Provider
+      value={{
+        isSidebarOpen,
+        setIsSidebarOpen,
+        toggleSidebar,
+        closeSidebar,
+        openSidebar,
+        desktopSidebarMode: mode,
+        setDesktopSidebarMode,
+        toggleDesktopSidebar,
+        /** سازگاری با کدهای قبلی */
+        expandDesktopSidebar: () => setDesktopSidebarMode(DESKTOP_SIDEBAR_MODES.EXPANDED),
+        collapseDesktopSidebar: () => setDesktopSidebarMode(DESKTOP_SIDEBAR_MODES.ICONS),
+        desktopModeHydrated,
+        canExpandDesktopSidebar: isDesktopSidebarIcons,
+        canCollapseDesktopSidebar: isDesktopSidebarExpanded,
+        isDesktopSidebarExpanded,
+        isDesktopSidebarIcons,
+        isDesktopSidebarCollapsed: false,
+      }}
+    >
       {children}
     </SidebarContext.Provider>
   );

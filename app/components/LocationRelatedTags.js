@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { BoneText } from './ui/Skeleton';
 
 const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, className = '' }) => {
   const t = useTranslations('location');
@@ -19,10 +20,8 @@ const LocationRelatedTags = ({ locationId, locationName, locationDisplayName, cl
 
   if (loading) {
     return (
-      <div className={`animate-pulse ${className}`}>
-        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded"></div>
+      <div className={className}>
+        <BoneText lines={3} />
       </div>
     );
   }

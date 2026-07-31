@@ -30,7 +30,6 @@ import { catalogProductPath, isNumericCatalogParam } from "@/app/utils/catalogPr
 import { shouldShowProLandingBanner } from "@/app/utils/productPublicHref";
 import { useProductLandingLinks } from "@/app/hooks/useProductLandingLinks";
 import Link from "next/link";
-import ProductPageQrCode from "@/app/components/ui/ProductPageQrCode";
 import {
   useCatalogChildren,
   useCatalogProduct,
@@ -402,21 +401,10 @@ export default function CatalogItemPage({ params }) {
         cartTotalQty={cartTotalQty}
         cartUnit={cartUnit}
         hideMedia={productLots.length > 0}
+        productSharePath={productSharePath}
       />
 
       {primarySellerLot ? <CatalogProductSellerActions lot={primarySellerLot} /> : null}
-
-      {item?.isOrderable ? (
-        <div className="mx-auto w-full max-w-xs sm:ms-auto sm:me-0 sm:max-w-[15rem]">
-          <ProductPageQrCode
-            pathOrUrl={productSharePath}
-            title={getLocalizedText(item, language) || t("product")}
-            heading="QR کد محصول"
-            scanHint="اسکن کنید تا صفحه محصول در زارعون باز شود"
-            slugHint={item.slug || item.id || "product"}
-          />
-        </div>
-      ) : null}
 
       {productLots.length > 0 && (
         <CatalogGradeOffers

@@ -136,7 +136,7 @@ function LoginForm() {
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
         <AuthIdentifierFields
           mode={mode}
           onModeChange={setMode}
@@ -152,12 +152,12 @@ function LoginForm() {
           error={error}
         />
 
-        <label className="flex items-start gap-2.5 rounded-xl bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-600">
+        <label className="flex items-start gap-2 rounded-lg bg-slate-50 px-2.5 py-2 text-[11px] leading-4 text-slate-600 sm:gap-2.5 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs sm:leading-5">
           <input
             type="checkbox"
             checked={acceptTerms}
             onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 sm:h-4 sm:w-4"
           />
           <span>{t("termsAcceptLabel")}</span>
         </label>

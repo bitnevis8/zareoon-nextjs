@@ -36,7 +36,7 @@ export default function MobileHeaderActions() {
           </Link>
         </>
       ) : (
-        <LoginRequiredMessage>
+        <LoginRequiredMessage returnUrl="/cart" intent="cart">
           <button type="button" className={iconBtnClass} aria-label={t("cart")} title={t("cart")}>
             <CartIcon />
           </button>

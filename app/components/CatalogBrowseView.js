@@ -12,6 +12,7 @@ import CatalogPdfDownload from "./catalog/CatalogPdfDownload";
 import { sortCatalogItems } from "../utils/productSort";
 import { getProductStockClass } from "../utils/stockUtils";
 import { catalogProductPath } from "../utils/catalogProductPath";
+import { Bone } from "./ui/Skeleton";
 
 export default function CatalogBrowseView() {
   const { t, language, isRTL } = useLanguage();
@@ -100,9 +101,9 @@ export default function CatalogBrowseView() {
                 <div className="p-4">
                   <div className="space-y-3">
                     {Array.from({ length: 3 }).map((_, index) => (
-                      <div key={index} className="flex items-center justify-between px-4 py-2 animate-pulse">
-                        <div className="h-4 bg-gray-300 rounded w-32"></div>
-                        <div className="h-5 bg-gray-300 rounded w-12"></div>
+                      <div key={index} className="flex items-center justify-between px-4 py-2">
+                        <Bone className="h-4 w-32" rounded="rounded-md" />
+                        <Bone className="h-5 w-12" rounded="rounded-md" />
                       </div>
                     ))}
                   </div>

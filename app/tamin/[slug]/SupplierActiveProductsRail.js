@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { resolveMediaUrl } from "@/app/utils/mediaUrl";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { authFetch } from "@/app/utils/authHeaders";
 import TradeServicesCategoryPager from "@/app/components/TradeServicesCategoryPager";
 import CardsPerRowSelect from "@/app/components/ui/CardsPerRowSelect";
+import ProductCardMedia from "@/app/components/ui/ProductCardMedia";
 import {
   DEFAULT_CARDS_PER_ROW,
   getCardsPerRowGridClass,
@@ -55,7 +54,6 @@ function ListIcon({ className = "h-4 w-4" }) {
 
 function ProductCard({ item }) {
   const t = useTranslations("supplier.activeProducts");
-  const image = resolveMediaUrl(item.coverImageUrl || item.imageUrl);
   const qty = availableQty(item);
   const name = resolveProductName(item, t("defaultProductName"));
   const priceLabel =
@@ -72,19 +70,17 @@ function ProductCard({ item }) {
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-emerald-200 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] bg-slate-100">
-        {image ? (
-          <Image
-            src={image}
-            alt=""
-            fill
-            unoptimized
-            className="object-cover transition group-hover:scale-[1.02]"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-2xl text-slate-300">📦</div>
-        )}
+        <ProductCardMedia
+          lots={[item]}
+          imageUrl={item.coverImageUrl || item.imageUrl}
+          imageUrls={item.previewImageUrls}
+          alt={name}
+          className="h-full w-full object-cover"
+          figureClassName="absolute inset-0"
+          showFlag={false}
+        />
         {item.qualityGrade ? (
-          <span className="absolute right-2 top-2 rounded-lg bg-white/95 px-2 py-0.5 text-[10px] font-bold text-slate-800 shadow-sm">
+          <span className="pointer-events-none absolute right-2 top-2 rounded-lg bg-white/95 px-2 py-0.5 text-[10px] font-bold text-slate-800 shadow-sm">
             {item.qualityGrade}
           </span>
         ) : null}
@@ -153,7 +149,6 @@ function IconAction({ href, onClick, title, tone = "slate", disabled, children }
 
 function ProductListRow({ item, isOwner, onDeleted, deleting }) {
   const t = useTranslations("supplier.activeProducts");
-  const image = resolveMediaUrl(item.coverImageUrl || item.imageUrl);
   const qty = availableQty(item);
   const name = resolveProductName(item, t("defaultProductName"));
   const viewHref = `/catalog/${item.productId}`;
@@ -168,11 +163,15 @@ function ProductListRow({ item, isOwner, onDeleted, deleting }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 sm:gap-4 sm:px-4">
       <Link href={viewHref} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-16 sm:w-16">
-        {image ? (
-          <Image src={image} alt="" fill unoptimized className="object-cover" sizes="64px" />
-        ) : (
-          <span className="flex h-full w-full items-center justify-center text-slate-300">📦</span>
-        )}
+        <ProductCardMedia
+          lots={[item]}
+          imageUrl={item.coverImageUrl || item.imageUrl}
+          imageUrls={item.previewImageUrls}
+          alt={name}
+          className="h-full w-full object-cover"
+          figureClassName="absolute inset-0"
+          showFlag={false}
+        />
       </Link>
       <div className="min-w-0 flex-1">
         <Link href={viewHref} className="line-clamp-1 text-sm font-bold text-slate-900 hover:text-emerald-800">

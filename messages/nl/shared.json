@@ -1,4 +1,4 @@
-{
+﻿{
   "roles": {
     "super_admin": "",
     "admin": "",
@@ -262,7 +262,9 @@
     "calendarHijri": "Hijri",
     "calendarShamsi": "Zonne-Hijri",
     "calendarClickHint": "{full} — klik voor equivalenten",
+    "calendarClickHintAll": "Click to see all calendars",
     "calendarAria": "Kalender {label}",
+    "calendarAriaAll": "Date in multiple calendars",
     "calendarEquivalentsTitle": "Equivalente datums",
     "regionAria": "Dagelijkse wisselkoersen",
     "loadingRates": "Koersen laden…",

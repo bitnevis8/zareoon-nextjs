@@ -8,32 +8,10 @@ import {
   resolveBusinessPathReached,
 } from "@/app/utils/verification";
 
-function TickIcon({ on, className = "h-4 w-4" }) {
-  if (on) {
-    return (
-      <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-      <path
-        fillRule="evenodd"
-        d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
 /**
- * مسیر احراز با تیک‌های کنارهم — خاکستری تا نرسیده، سبز وقتی رسیده
+ * مسیر احراز با daisyUI Steps
  * شخص: U0→U1→U2→U3 | کسب‌وکار: B0→B1→B2
+ * @see https://daisyui.com/components/steps/
  */
 export function VerificationLevelBars({
   kind = "person",
@@ -67,48 +45,40 @@ export function VerificationLevelBars({
       : null;
 
   return (
-    <div
-      className={className}
-      role="img"
-      aria-label={`سطح ${reached} از ${path.length}`}
-    >
-      <div className="flex items-start justify-between gap-1 sm:gap-1.5">
+    <div className={`w-full overflow-x-auto ${className}`} role="img" aria-label={`سطح ${reached} از ${path.length}`}>
+      <ul className="steps steps-horizontal w-full min-w-[14rem]">
         {path.map((step, i) => {
           const on = i < reached;
           const pendingHere = pendingId === step.id && !on;
+          const stepClass = on
+            ? "step step-success"
+            : pendingHere
+              ? "step step-warning"
+              : "step";
+          const dataContent = on ? "✓" : pendingHere ? "…" : String(i + 1);
           return (
-            <div key={step.id} className="flex min-w-0 flex-1 flex-col items-center">
-              <span
-                title={`${step.code} — ${step.titleFa}${
-                  on ? " ✓" : pendingHere ? " (در بررسی)" : ""
-                }`}
-                className={`inline-flex h-7 w-7 items-center justify-center rounded-full transition sm:h-8 sm:w-8 ${
-                  on
-                    ? "bg-emerald-100 text-emerald-600"
-                    : pendingHere
-                      ? "animate-pulse bg-amber-100 text-amber-600"
-                      : "bg-slate-100 text-slate-300"
-                }`}
-              >
-                <TickIcon on={on || pendingHere} className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
-              </span>
+            <li
+              key={step.id}
+              className={stepClass}
+              data-content={dataContent}
+              title={`${step.code} — ${step.titleFa}${on ? " ✓" : pendingHere ? " (در بررسی)" : ""}`}
+            >
               {showLabels ? (
-                <p
-                  className={`mt-1 truncate text-center text-[9px] font-bold sm:text-[10px] ${
-                    on
-                      ? "text-emerald-700"
-                      : pendingHere
-                        ? "text-amber-700"
-                        : "text-slate-400"
+                <span
+                  className={`text-[10px] font-bold leading-tight sm:text-[11px] ${
+                    on ? "text-success" : pendingHere ? "text-warning" : "text-base-content/45"
                   }`}
                 >
                   {step.code}
-                </p>
-              ) : null}
-            </div>
+                  <span className="mt-0.5 block font-semibold opacity-80">{step.titleFa}</span>
+                </span>
+              ) : (
+                step.code
+              )}
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

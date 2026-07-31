@@ -3,14 +3,15 @@
 import { useRequireAdmin } from "@/app/hooks/useDashboardRole";
 import { dash } from "@/app/components/dashboard/dashboardTheme";
 import BackupPanel from "@/app/components/dashboard/BackupPanel";
+import { Bone } from "@/app/components/ui/Skeleton";
 
 export default function SiteBackupPage() {
   const { allowed, loading: authLoading } = useRequireAdmin();
 
   if (authLoading || !allowed) {
     return (
-      <div className={`${dash.page} animate-pulse`}>
-        <div className="h-8 w-48 rounded bg-slate-200" />
+      <div className={dash.page}>
+        <Bone className="h-8 w-48" rounded="rounded-lg" />
       </div>
     );
   }

@@ -143,8 +143,8 @@ const ExchangeRateConverter = forwardRef(function ExchangeRateConverter(
   if (loading) {
     return (
       <div className={`space-y-3 ${className}`} aria-busy="true">
-        <div className="h-28 animate-pulse rounded-2xl bg-slate-100" />
-        <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
+        <div className="h-28 skeleton rounded-2xl" />
+        <div className="h-40 skeleton rounded-2xl" />
       </div>
     );
   }
