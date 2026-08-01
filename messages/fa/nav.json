@@ -36,6 +36,8 @@
     "siteSettings": "تنظیمات سایت",
     "siteLanguages": "زبان‌های سایت",
     "cacheRedis": "کش و Redis",
+    "uploadSettings": "تنظیمات آپلود تصویر",
+    "manualSubscriptions": "اختصاص دستی اشتراک",
     "blockedPageNames": "اسامی غیرمجاز صفحه",
     "slugAliases": "آدرس‌های رزرو",
     "publicPages": "صفحات عمومی سامانه"

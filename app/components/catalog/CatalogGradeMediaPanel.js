@@ -96,6 +96,7 @@ export default function CatalogGradeMediaPanel({
           onSlideTap={openAt}
           expandAriaLabel={t("viewGallery")}
           cornerTopStart={label ? <GradeMediaBadge>{label}</GradeMediaBadge> : null}
+          brandWatermark
         />
       ) : (
         <div className={`flex flex-col items-center justify-center bg-slate-50 px-4 py-10 ${aspectClass}`}>

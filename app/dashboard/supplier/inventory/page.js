@@ -68,7 +68,7 @@ export default function InventoryListPage() {
 
   const remove = async (id) => {
     if (!window.confirm(t("page.deleteConfirm"))) return;
-    await fetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
+    await authFetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
     reload();
   };
 
@@ -219,11 +219,10 @@ export default function InventoryListPage() {
         ...barterPayloadFromForm(editForm),
         ...displayFields,
       };
-      await fetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
+      await authFetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        credentials: "include",
       });
       if (editAttributeDefs.length > 0) {
         await saveLotAttributeValues(selectedLot.id, editAttributeDefs, editAttributeValues, selectedLot.attributes || []);

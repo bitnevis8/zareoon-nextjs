@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/config/api";
 import { useTranslations } from "next-intl";
+import { authFetch } from "@/app/utils/authHeaders";
 import InventoryStats from "./components/InventoryStats";
 import InventoryLotCard from "./components/InventoryLotCard";
 import InventoryLotTable from "./components/InventoryLotTable";
@@ -58,7 +59,7 @@ export default function InventoryListPage() {
 
   const remove = async (id) => {
     if (!window.confirm(t("page.deleteConfirm"))) return;
-    await fetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
+    await authFetch(API_ENDPOINTS.supplier.inventoryLots.delete(id), { method: "DELETE" });
     reload();
   };
 
@@ -120,11 +121,10 @@ export default function InventoryListPage() {
         longitude: editForm.longitude !== "" && editForm.longitude != null ? Number(editForm.longitude) : null,
         ...displayFields,
       };
-      await fetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
+      await authFetch(API_ENDPOINTS.supplier.inventoryLots.update(selectedLot.id), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        credentials: "include",
       });
       if (editAttributeDefs.length > 0) {
         await saveLotAttributeValues(selectedLot.id, editAttributeDefs, editAttributeValues, selectedLot.attributes || []);

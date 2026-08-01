@@ -90,7 +90,7 @@ export function ProductScrollSkeleton({ count = 6, className = "" }) {
           key={i}
           className="flex w-[7.75rem] shrink-0 flex-col gap-2 overflow-hidden rounded-xl border border-base-200 bg-base-100 p-0 sm:w-[8.75rem] md:w-[9.25rem]"
         >
-          <Bone className="aspect-[4/3] w-full" rounded="rounded-none" />
+          <Bone className="aspect-square w-full" rounded="rounded-none" />
           <div className="flex flex-col gap-2 p-2.5 pt-0">
             <Bone className="h-3 w-full" rounded="rounded-md" />
             <Bone className="h-3 w-2/3" rounded="rounded-md" />
@@ -140,7 +140,7 @@ export function CatalogHeroSkeleton() {
   return (
     <section className="overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm" aria-hidden>
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,320px)_1fr]">
-        <Bone className="aspect-[5/4] w-full lg:aspect-auto lg:min-h-[260px]" rounded="rounded-none" />
+        <Bone className="aspect-[4/3] w-full lg:aspect-auto lg:min-h-[260px]" rounded="rounded-none" />
         <div className="flex flex-col gap-4 border-t border-base-200 p-4 sm:p-6 lg:border-t-0 lg:border-s">
           <Bone className="h-7 w-3/4 sm:h-8" rounded="rounded-lg" />
           <Bone className="h-3.5 w-1/3" rounded="rounded-md" />

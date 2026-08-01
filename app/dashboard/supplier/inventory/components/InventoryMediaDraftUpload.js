@@ -85,18 +85,21 @@ function DropZone({ kind, accept, hint, files, onAdd, onRemove, icon, t }) {
 }
 
 function DraftPreview({ file, kind, onRemove, t }) {
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState(null);
 
   useEffect(() => {
     const objectUrl = URL.createObjectURL(file);
     setUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+      setUrl(null);
+    };
   }, [file]);
 
   if (kind === "video") {
     return (
       <div className="relative overflow-hidden rounded-lg border border-slate-200 bg-black">
-        <video src={url} className="aspect-video w-full object-cover" muted playsInline />
+        {url ? <video src={url} className="aspect-video w-full object-cover" muted playsInline /> : null}
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-4">
           <span className="truncate text-[10px] text-white">{file.name}</span>
           <button
@@ -113,8 +116,10 @@ function DraftPreview({ file, kind, onRemove, t }) {
 
   return (
     <div className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt={file.name} className="h-full w-full object-cover" />
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt={file.name} className="h-full w-full object-cover" />
+      ) : null}
       <button
         type="button"
         onClick={onRemove}

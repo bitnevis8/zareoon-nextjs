@@ -69,7 +69,7 @@ function ProductCard({ item }) {
       href={href}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-emerald-200 hover:shadow-md"
     >
-      <div className="relative aspect-[4/3] bg-slate-100">
+      <div className="relative aspect-square bg-slate-100">
         <ProductCardMedia
           lots={[item]}
           imageUrl={item.coverImageUrl || item.imageUrl}

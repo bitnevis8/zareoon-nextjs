@@ -87,7 +87,18 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
     // استعلامی‌ها حتی با موجودی صفر در ویترین می‌مانند
     if ((!Number.isFinite(availableQty) || availableQty <= 0) && !isInquiryOnly) continue;
 
-    const product = productById.get(lot.productId);
+    const catalogProduct = productById.get(lot.productId);
+    const nestedProduct = lot.product || lot.Product || null;
+    const product = catalogProduct
+      ? {
+          ...catalogProduct,
+          imageUrl:
+            catalogProduct.imageUrl ||
+            nestedProduct?.imageUrl ||
+            lot.coverImageUrl ||
+            null,
+        }
+      : nestedProduct;
     if (!product || !product.isOrderable) continue;
     if (scopeCategoryId != null && !isInCategorySubtree(product, scopeCategoryId, productById)) continue;
 
@@ -118,6 +129,13 @@ export function buildAvailableProducts(inventoryLots, productById, { scopeCatego
       updatedAt: lot.updatedAt || null,
       createdAt: lot.createdAt || null,
       inquiryOnly: isInquiryOnly,
+      coverImageUrl: lot.coverImageUrl || nestedProduct?.imageUrl || null,
+      previewImageUrls: Array.isArray(lot.previewImageUrls)
+        ? lot.previewImageUrls
+        : lot.coverImageUrl
+          ? [lot.coverImageUrl]
+          : [],
+      imageUrl: lot.coverImageUrl || lot.imageUrl || nestedProduct?.imageUrl || null,
     });
     if (!entry._primarySeller) {
       entry._primarySeller = lot.supplier || lot.farmer || null;

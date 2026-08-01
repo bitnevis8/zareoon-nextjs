@@ -109,6 +109,9 @@ export default function InventoryDisplayDetailsEditor({ value, onChange }) {
             placeholder={getDisplayTitlePlaceholder(activeLocale, t)}
             value={current.title}
             onChange={(e) => updateCurrent({ title: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
           />
         </Field>
 

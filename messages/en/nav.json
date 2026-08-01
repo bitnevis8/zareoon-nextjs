@@ -35,6 +35,8 @@
     "siteSettings": "Site settings",
     "siteLanguages": "Site languages",
     "cacheRedis": "Cache & Redis",
+    "uploadSettings": "Image upload settings",
+    "manualSubscriptions": "Manual plan assignment",
     "blockedPageNames": "Blocked page names",
     "slugAliases": "Reserved URLs",
     "publicPages": "Platform public pages"

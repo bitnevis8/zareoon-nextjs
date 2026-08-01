@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { API_ENDPOINTS } from "@/app/config/api";
+import { authFetch } from "@/app/utils/authHeaders";
 import { isAdmin, isSupplier } from "@/app/utils/roles";
 
 export function useInventoryLots(user, isOwnScope = false) {
@@ -14,8 +15,8 @@ export function useInventoryLots(user, isOwnScope = false) {
     setLoading(true);
     try {
       const [r1, r2] = await Promise.all([
-        fetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
-        fetch(API_ENDPOINTS.supplier.products.getAll + "?isOrderable=true", { cache: "no-store" }),
+        authFetch(API_ENDPOINTS.supplier.inventoryLots.getAll, { cache: "no-store" }),
+        authFetch(API_ENDPOINTS.supplier.products.getAll + "?isOrderable=true", { cache: "no-store" }),
       ]);
       const d1 = await r1.json();
       const d2 = await r2.json();
@@ -41,7 +42,7 @@ export function useInventoryLots(user, isOwnScope = false) {
         const results = await Promise.all(
           ids.map(async (uid) => {
             try {
-              const res = await fetch(API_ENDPOINTS.users.getById(uid), { cache: "no-store" });
+              const res = await authFetch(API_ENDPOINTS.users.getById(uid), { cache: "no-store" });
               const d = await res.json();
               const u = d?.data || d;
               const name = (`${u.firstName || ""} ${u.lastName || ""}`.trim()) || u.username || u.mobile || `#${uid}`;

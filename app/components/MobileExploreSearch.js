@@ -56,7 +56,7 @@ function ListingExploreTile({ row, language, t, productById }) {
   return (
     <Link
       href={catalogProductPath(product)}
-      className="group relative block aspect-[4/3] overflow-hidden rounded-xl bg-slate-200 sm:aspect-[5/4]"
+      className="group relative block aspect-square overflow-hidden rounded-xl bg-slate-200"
     >
       <ProductCardMedia
         product={product}
@@ -134,7 +134,7 @@ function ListingResultCard({ row, language, t, onNavigate, productById }) {
       onClick={() => onNavigate(catalogProductPath(product), title)}
       className="overflow-hidden rounded-xl border border-slate-100 bg-white text-start shadow-sm transition active:scale-[0.99] hover:border-emerald-200"
     >
-      <div className="relative aspect-[3/2] bg-slate-100">
+      <div className="relative aspect-square bg-slate-100">
         <ProductCardMedia
           product={product}
           lots={[lot]}
@@ -483,7 +483,7 @@ export default function MobileExploreSearch({
       return (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 lg:gap-2.5">
           {Array.from({ length: EXPLORE_PAGE_SIZE }).map((_, i) => (
-            <div key={i} className="skeleton aspect-[4/3] rounded-xl sm:aspect-[5/4]" />
+            <div key={i} className="skeleton aspect-square rounded-xl" />
           ))}
         </div>
       );

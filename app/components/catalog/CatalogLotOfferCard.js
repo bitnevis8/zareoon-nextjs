@@ -327,6 +327,7 @@ export default function CatalogLotOfferCard({
           onSlideTap={openAt}
           expandAriaLabel={t("viewGallery")}
           cornerTopStart={<GradeMediaBadge>{gradeLabel}</GradeMediaBadge>}
+          brandWatermark
         />
       ) : null}
       <div className="space-y-3 p-3 sm:p-4">

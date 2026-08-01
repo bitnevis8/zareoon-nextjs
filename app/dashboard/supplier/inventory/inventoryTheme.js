@@ -18,7 +18,8 @@ export const inv = {
     "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100",
   textareaCompact:
     "w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-100",
-  createPage: "mx-auto w-full max-w-2xl space-y-3 pb-4 sm:max-w-3xl sm:space-y-4 sm:pb-6",
+  createPage:
+    "mx-auto w-full max-w-2xl space-y-3 px-1 pb-24 sm:max-w-3xl sm:space-y-4 sm:px-0 sm:pb-8 lg:max-w-4xl xl:max-w-5xl",
   btnPrimary:
     "inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
   btnPrimaryBlock: "w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50",

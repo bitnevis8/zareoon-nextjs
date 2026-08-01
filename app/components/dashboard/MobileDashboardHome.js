@@ -261,9 +261,14 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
             {filtered.map((lot) => {
               const name = resolveLotDisplayName(lot, language, t("productFallback"));
               const product = lot.product || lot.Product || {};
-              const img = resolveMediaUrl(
-                lot.coverImageUrl || product.imageUrl || product.image || lot.imageUrl
-              );
+              const rawImg =
+                lot.coverImageUrl ||
+                (Array.isArray(lot.previewImageUrls) && lot.previewImageUrls[0]) ||
+                product.imageUrl ||
+                product.image ||
+                lot.imageUrl ||
+                null;
+              const img = resolveMediaUrl(rawImg);
               const available = Math.max(
                 0,
                 parseFloat(lot.totalQuantity || 0) - parseFloat(lot.reservedQuantity || 0)
@@ -273,16 +278,10 @@ function SellerProductsStrip({ lots, language, t, loading, onDeleted }) {
                   key={lot.id}
                   className="flex w-[min(42vw,9.75rem)] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:w-auto md:min-w-0"
                 >
-                  <div className="relative aspect-[4/3] bg-slate-100">
+                  <div className="relative aspect-square bg-slate-100">
                     {img ? (
-                      <Image
-                        src={img}
-                        alt=""
-                        fill
-                        unoptimized
-                        className="object-cover"
-                        sizes="(max-width: 768px) 42vw, 25vw"
-                      />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" />
                     ) : (
                       <span className="flex h-full w-full items-center justify-center text-slate-300">
                         <SidebarIcon name="products" className="h-6 w-6" />

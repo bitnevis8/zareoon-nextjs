@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ProductCardMedia from "../ui/ProductCardMedia";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
+import ZareoonImageWatermark from "../ui/ZareoonImageWatermark";
+import ZareoonMediaWatermark from "../ui/ZareoonMediaWatermark";
 
 function isVideoMime(mime = "") {
   return String(mime).startsWith("video/");
@@ -89,12 +91,13 @@ export default function CatalogMediaSlider({
   cornerTopStart = null,
   cornerTopBar = null,
   cornerBottomEnd = null,
-  aspectClass = "aspect-[5/4]",
+  aspectClass = "aspect-square",
   onSlideTap,
   expandAriaLabel = "",
   expandAtBottom = false,
   mediaCounter,
   className = "",
+  brandWatermark = false,
 }) {
   const scrollRef = useRef(null);
   const touchRef = useRef({ x: 0, y: 0, moved: false });
@@ -148,6 +151,7 @@ export default function CatalogMediaSlider({
             <button type="button" className="block h-full w-full" onClick={() => handleSlideTap(index, slide)}>
               <SlideContent slide={slide} alt={slide.alt} />
             </button>
+            {brandWatermark ? <ZareoonImageWatermark /> : null}
             {isVideoMime(slide.mimeType) ? (
               <span className="pointer-events-none absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-base text-white shadow-lg">
                 ▶

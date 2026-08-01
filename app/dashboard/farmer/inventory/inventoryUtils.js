@@ -1,4 +1,5 @@
 ﻿import { API_ENDPOINTS } from "@/app/config/api";
+import { authFetch } from "@/app/utils/authHeaders";
 
 export async function loadAttributeDefsForProduct(productId, products) {
   const selected = products.find((p) => p.id === Number(productId));
@@ -6,8 +7,10 @@ export async function loadAttributeDefsForProduct(productId, products) {
   if (!selected) return [];
   try {
     const [rCat, rProd] = await Promise.all([
-      categoryId ? fetch(API_ENDPOINTS.supplier.attributeDefinitions.getByCategoryId(categoryId), { cache: "no-store" }) : null,
-      fetch(API_ENDPOINTS.supplier.attributeDefinitions.getByProductId(selected.id), { cache: "no-store" }),
+      categoryId
+        ? authFetch(API_ENDPOINTS.supplier.attributeDefinitions.getByCategoryId(categoryId), { cache: "no-store" })
+        : null,
+      authFetch(API_ENDPOINTS.supplier.attributeDefinitions.getByProductId(selected.id), { cache: "no-store" }),
     ]);
     const dCat = rCat ? await rCat.json() : { data: [] };
     const dProd = rProd ? await rProd.json() : { data: [] };
@@ -30,13 +33,13 @@ export async function saveLotAttributeValues(lotId, defs, values, existingAttrs 
     const trimmed = val !== undefined && val !== null ? String(val).trim() : "";
     if (trimmed) {
       if (existing?.id) {
-        await fetch(API_ENDPOINTS.supplier.attributeValues.update(existing.id), {
+        await authFetch(API_ENDPOINTS.supplier.attributeValues.update(existing.id), {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ value: trimmed }),
         });
       } else {
-        await fetch(API_ENDPOINTS.supplier.attributeValues.create, {
+        await authFetch(API_ENDPOINTS.supplier.attributeValues.create, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -47,7 +50,7 @@ export async function saveLotAttributeValues(lotId, defs, values, existingAttrs 
         });
       }
     } else if (existing?.id) {
-      await fetch(API_ENDPOINTS.supplier.attributeValues.delete(existing.id), { method: "DELETE" });
+      await authFetch(API_ENDPOINTS.supplier.attributeValues.delete(existing.id), { method: "DELETE" });
     }
   }
 }

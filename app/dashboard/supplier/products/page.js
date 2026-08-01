@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getSupplyCountryOptions } from "@/app/utils/supplySource";
 import CatalogPdfDownload from "@/app/components/catalog/CatalogPdfDownload";
 import DataExportImportButtons from "@/app/components/dashboard/DataExportImportButtons";
+import { authFetch } from "@/app/utils/authHeaders";
 
 const emptyProductForm = {
   name: "",
@@ -109,10 +110,10 @@ export default function ProductsPage() {
   const create = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await fetch(API_ENDPOINTS.supplier.products.create, {
+    const res = await authFetch(API_ENDPOINTS.supplier.products.create, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      body: JSON.stringify({
         name: form.name,
         englishName: form.englishName || null,
         arabicName: form.arabicName || null,
@@ -124,13 +125,19 @@ export default function ProductsPage() {
         supplyCity: form.supplyCity?.trim() || null,
       }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data?.success === false) {
+      alert(data?.message || "ثبت محصول ممکن نشد");
+      setLoading(false);
+      return;
+    }
     setForm(emptyProductForm);
     setLoading(false);
     load();
   };
 
   const remove = async (id) => {
-    await fetch(API_ENDPOINTS.supplier.products.delete(id), { method: "DELETE" });
+    await authFetch(API_ENDPOINTS.supplier.products.delete(id), { method: "DELETE" });
     load();
   };
 

@@ -8,6 +8,7 @@ import ProductPageQrCode from "../ui/ProductPageQrCode";
 import { getLocalizedText, localizeUnit } from "../../utils/localize";
 import CatalogMediaSlider, { buildMediaSlides } from "./CatalogMediaSlider";
 import { catalogBadge, catalogSurface, catalogText } from "./catalogTheme";
+import ZareoonImageWatermark from "../ui/ZareoonImageWatermark";
 
 export default function CatalogProductHero({
   item,
@@ -119,6 +120,7 @@ export default function CatalogProductHero({
             aspectClass="aspect-[4/3]"
             onSlideTap={openAt}
             expandAriaLabel={t("viewGallery")}
+            brandWatermark
           />
         </div>
         <div className="px-0.5">{titleBlock}</div>
@@ -135,11 +137,12 @@ export default function CatalogProductHero({
                 expandAriaLabel={t("viewGallery")}
                 expandAtBottom
                 className="h-full"
+                brandWatermark
               />
             ) : (
               <button
                 type="button"
-                className="block h-full min-h-[300px] w-full"
+                className="relative block h-full min-h-[300px] w-full"
                 onClick={() => openAt(0)}
                 aria-label={t("viewGallery")}
               >
@@ -152,6 +155,7 @@ export default function CatalogProductHero({
                   figureClassName="h-full min-h-[300px]"
                   showFlag={false}
                 />
+                <ZareoonImageWatermark />
               </button>
             )}
           </div>

@@ -270,7 +270,7 @@ export default function AvailableProductCompactCard({
     >
       {showSellerHeader ? (
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-emerald-100/80 bg-gradient-to-l from-emerald-50/90 via-white to-slate-50/80 px-2.5">
-          <span className="relative flex h-[1.95rem] w-[3rem] shrink-0 items-center justify-center overflow-hidden sm:h-8 sm:w-[3.25rem]">
+          <span className="relative flex aspect-[3/2] h-8 w-12 shrink-0 items-center justify-center overflow-hidden sm:h-9 sm:w-[3.375rem]">
             {sellerAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -302,13 +302,13 @@ export default function AvailableProductCompactCard({
         </div>
       ) : null}
 
-      <figure className="relative aspect-[5/4] w-full shrink-0 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+      <figure className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
         <ProductCardMedia
           product={{ ...product, supplyCountry: countryCode }}
           lots={lots}
           alt={title}
-          width={200}
-          height={160}
+          width={400}
+          height={400}
           className="h-full w-full object-cover"
           showFlag={false}
         />

@@ -80,7 +80,7 @@ function MapPanel({
         )}
       </div>
 
-      <div className={compact ? "h-44 sm:h-52 md:h-56" : "min-h-0 flex-1"}>
+      <div className={compact ? "h-52 sm:h-56 md:h-64 lg:h-72" : "min-h-0 flex-1"}>
         <Map
           center={center}
           zoom={hasCoords ? 14 : 6}

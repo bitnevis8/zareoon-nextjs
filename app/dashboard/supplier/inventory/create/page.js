@@ -18,6 +18,7 @@ import { displayContentToApiPayload } from "../utils/inventoryDisplayLocales";
 import { uploadMediaFiles } from "@/app/utils/mediaUploadClient";
 import { canSellerListProduct } from "@/app/utils/productCatalogSchema";
 import { normalizeFxFieldsForCurrency } from "@/app/utils/fxRate";
+import { authFetch } from "@/app/utils/authHeaders";
 
 export default function InventoryCreatePage() {
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function InventoryCreatePage() {
   const loadProductOptions = async (inputValue) => {
     const q = (inputValue || "").trim();
     const url = `${API_ENDPOINTS.supplier.products.getAll}?isOrderable=true${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await authFetch(url, { cache: "no-store" });
     const d = await res.json();
     return (d?.data || []).map((p) => ({ value: p.id, label: p.name }));
   };
@@ -73,7 +74,7 @@ export default function InventoryCreatePage() {
   const loadFarmerOptions = async (inputValue) => {
     const q = (inputValue || "").trim();
     const url = `${API_ENDPOINTS.users.search}?limit=20&offset=0${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await authFetch(url, { cache: "no-store" });
     const data = await res.json();
     const rows = (data?.data?.rows || data?.data || []).filter(
       (u) => Array.isArray(u.userRoles) && u.userRoles.some((r) => ["supplier", "farmer"].includes(r.name))
@@ -110,7 +111,7 @@ export default function InventoryCreatePage() {
       const ownFarmer = isOwnScope || isSupplier(user);
       const displayFields = displayContentToApiPayload(form.displayContent);
       const fx = normalizeFxFieldsForCurrency(form.priceCurrency, form.fxRateSource, form.fxRateManual);
-      const lotRes = await fetch(API_ENDPOINTS.supplier.inventoryLots.create, {
+      const lotRes = await authFetch(API_ENDPOINTS.supplier.inventoryLots.create, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,7 +159,7 @@ export default function InventoryCreatePage() {
       if (lotId && attributeDefs.length > 0) {
         const entries = Object.entries(attributeValues).filter(([, v]) => v !== undefined && v != null && String(v).trim() !== "");
         for (const [defId, val] of entries) {
-          await fetch(API_ENDPOINTS.supplier.attributeValues.create, {
+          await authFetch(API_ENDPOINTS.supplier.attributeValues.create, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

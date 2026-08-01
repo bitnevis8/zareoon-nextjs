@@ -53,7 +53,7 @@ export default function ProductCardMedia({
   lots,
   alt = "",
   width = 400,
-  height = 300,
+  height = 400,
   className = "object-cover w-full h-full",
   figureClassName = "",
   showFlag = true,

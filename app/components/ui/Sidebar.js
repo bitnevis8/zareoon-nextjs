@@ -63,6 +63,8 @@ function useSidebarMenus() {
             { title: t('admin.siteLanguages'), path: '/dashboard/site-settings/languages', icon: 'language' },
             { title: 'ثبت‌نام ایمیل/موبایل', path: '/dashboard/site-settings/auth-signup', icon: 'phone' },
             { title: t('admin.cacheRedis'), path: '/dashboard/site-settings/cache-redis', icon: 'database' },
+            { title: t('admin.uploadSettings'), path: '/dashboard/site-settings/upload', icon: 'image' },
+            { title: t('admin.manualSubscriptions'), path: '/dashboard/site-settings/subscriptions', icon: 'star' },
             { title: t('admin.blockedPageNames'), path: '/dashboard/site-settings/blocked-page-names', icon: 'block' },
             { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'link' },
             { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'pages' },
