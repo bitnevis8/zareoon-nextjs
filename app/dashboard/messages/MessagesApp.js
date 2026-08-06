@@ -8,6 +8,18 @@ import { useLanguage } from "@/app/context/LanguageContext";
 import { authFetch } from "@/app/utils/authHeaders";
 
 const POLL_MS = 4000;
+const TRANSLATE_LANG_KEY = "zareoon_chat_target_lang";
+const TRANSLATE_MODEL_KEY = "zareoon_chat_translate_model";
+
+const FALLBACK_TRANSLATE_LANGS = [
+  { code: "en", labelFa: "انگلیسی", dir: "ltr" },
+  { code: "fa", labelFa: "فارسی", dir: "rtl" },
+  { code: "ar", labelFa: "عربی", dir: "rtl" },
+  { code: "ru", labelFa: "روسی", dir: "ltr" },
+  { code: "tr", labelFa: "ترکی", dir: "ltr" },
+  { code: "fi", labelFa: "فنلاندی", dir: "ltr" },
+  { code: "ur", labelFa: "اردو", dir: "rtl" },
+];
 
 function formatTime(iso) {
   if (!iso) return "";
@@ -87,6 +99,13 @@ function ChatMessageRow({ message, mine, peer, me, onOpenImage }) {
   const author = mine ? me : peer;
   const displayName = author?.displayName || author?.firstName || author?.username || "";
   const initial = (displayName?.[0] || "?").toUpperCase();
+  const hasTranslation =
+    message.translationStatus === "ok" &&
+    message.translatedBody &&
+    message.translatedBody !== message.body;
+  const primaryText = hasTranslation ? message.translatedBody : message.body;
+  const originalText = hasTranslation ? message.body : null;
+  const targetCode = message.targetLang ? String(message.targetLang).toUpperCase() : "";
 
   return (
     <div className={`chat ${mine ? "chat-start" : "chat-end"}`}>
@@ -127,8 +146,27 @@ function ChatMessageRow({ message, mine, peer, me, onOpenImage }) {
             />
           </button>
         ) : null}
-        {message.body ? (
-          <p className="whitespace-pre-wrap break-words text-[14px] leading-6">{message.body}</p>
+        {primaryText ? (
+          <p dir="auto" className="whitespace-pre-wrap break-words text-[14px] leading-6">
+            {primaryText}
+          </p>
+        ) : null}
+        {originalText ? (
+          <p
+            dir="auto"
+            className="mt-1.5 border-t border-black/10 pt-1.5 text-[11px] leading-5 opacity-70"
+            title="متن اصلی"
+          >
+            {originalText}
+          </p>
+        ) : null}
+        {hasTranslation && targetCode ? (
+          <p className="mt-1 text-[10px] font-medium opacity-60">
+            {mine ? `ترجمه ارسال‌شده · ${targetCode}` : `ترجمه · ${targetCode}`}
+          </p>
+        ) : null}
+        {message.translationStatus === "failed" && mine ? (
+          <p className="mt-1 text-[10px] opacity-70">ترجمه انجام نشد · متن اصلی ارسال شد</p>
         ) : null}
       </div>
 
@@ -211,17 +249,125 @@ export default function MessagesApp({
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [lightbox, setLightbox] = useState(null);
+  const [translateTarget, setTranslateTarget] = useState("");
+  const [translateEnabled, setTranslateEnabled] = useState(false);
+  const [translateLangs, setTranslateLangs] = useState(FALLBACK_TRANSLATE_LANGS);
+  const [translateModels, setTranslateModels] = useState([]);
+  const [translateModelId, setTranslateModelId] = useState("");
+  const [translateNotice, setTranslateNotice] = useState("");
+  const [sendHint, setSendHint] = useState("");
+  const [userQuery, setUserQuery] = useState("");
+  const [userResults, setUserResults] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+  const [bootError, setBootError] = useState("");
+  const [bootingPeer, setBootingPeer] = useState(false);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const pollRef = useRef(null);
   const messagesRef = useRef([]);
-  const startingUserRef = useRef(null);
-  const bootstrappedRef = useRef(false);
+  const bootstrapKeyRef = useRef("");
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(TRANSLATE_LANG_KEY) || "";
+      if (saved) setTranslateTarget(saved);
+      const savedModel = localStorage.getItem(TRANSLATE_MODEL_KEY) || "";
+      if (savedModel) setTranslateModelId(savedModel);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch("/api/messaging/translation-options", { cache: "no-store" });
+        const json = await res.json();
+        if (cancelled || !json?.success) return;
+        const data = json.data || {};
+        setTranslateEnabled(Boolean(data.enabled));
+        if (Array.isArray(data.languages) && data.languages.length) {
+          setTranslateLangs(data.languages);
+        }
+        const models = Array.isArray(data.models) ? data.models : [];
+        setTranslateModels(models);
+        setTranslateNotice(data.message || "");
+
+        const defaultId = data.defaultModelId || models[0]?.id || "";
+        setTranslateModelId((prev) => {
+          if (prev && models.some((m) => m.id === prev)) return prev;
+          if (defaultId) {
+            try {
+              localStorage.setItem(TRANSLATE_MODEL_KEY, defaultId);
+            } catch {
+              /* ignore */
+            }
+            return defaultId;
+          }
+          return prev || "";
+        });
+      } catch {
+        if (!cancelled) {
+          setTranslateEnabled(false);
+          setTranslateNotice("دستیار ترجمه فعلاً در دسترس نیست.");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const setTranslateTargetPersist = (code) => {
+    setTranslateTarget(code);
+    try {
+      if (code) localStorage.setItem(TRANSLATE_LANG_KEY, code);
+      else localStorage.removeItem(TRANSLATE_LANG_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const setTranslateModelPersist = (modelId) => {
+    setTranslateModelId(modelId);
+    try {
+      if (modelId) localStorage.setItem(TRANSLATE_MODEL_KEY, modelId);
+      else localStorage.removeItem(TRANSLATE_MODEL_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  useEffect(() => {
+    const q = userQuery.trim();
+    if (q.length < 2) {
+      setUserResults([]);
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setSearchingUsers(true);
+      try {
+        const res = await authFetch(`/api/messaging/users/search?q=${encodeURIComponent(q)}&limit=8`);
+        const json = await res.json();
+        if (!cancelled && json?.success) setUserResults(json.data || []);
+      } catch {
+        if (!cancelled) setUserResults([]);
+      } finally {
+        if (!cancelled) setSearchingUsers(false);
+      }
+    }, 280);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [userQuery]);
 
   useEffect(() => {
     if (!isModal) return undefined;
@@ -274,16 +420,34 @@ export default function MessagesApp({
 
   const startWithUser = useCallback(
     async (user) => {
-      if (!user?.id) return;
-      const res = await authFetch("/api/messaging/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientId: user.id }),
-      });
-      const json = await res.json();
-      if (json.success) {
+      const recipientId = Number(user?.id);
+      if (!Number.isFinite(recipientId) || recipientId <= 0) {
+        setBootError("شناسه کاربر برای گفتگو نامعتبر است");
+        return null;
+      }
+      setBootingPeer(true);
+      setBootError("");
+      setMobileShowChat(true);
+      try {
+        const res = await authFetch("/api/messaging/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recipientId }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json?.success || !json?.data?.id) {
+          setBootError(json?.message || "نتوانستیم گفتگو را باز کنیم");
+          return null;
+        }
+        setOtherUser(json.data.otherUser || null);
         await loadConversations();
-        openConversation(json.data.id);
+        await openConversation(json.data.id);
+        return json.data.id;
+      } catch {
+        setBootError("خطا در ارتباط با سرور برای باز کردن گفتگو");
+        return null;
+      } finally {
+        setBootingPeer(false);
       }
     },
     [loadConversations, openConversation]
@@ -294,24 +458,44 @@ export default function MessagesApp({
   }, [loadConversations]);
 
   useEffect(() => {
-    const fromUrlC = !isModal ? Number(searchParams.get("c")) : null;
-    const fromUrlU = !isModal ? Number(searchParams.get("u")) : null;
-    const c = initialConversationId || (Number.isFinite(fromUrlC) ? fromUrlC : null);
-    const u = initialUserId || (Number.isFinite(fromUrlU) ? fromUrlU : null);
+    const rawC = !isModal ? searchParams.get("c") : null;
+    const rawU = !isModal ? searchParams.get("u") : null;
+    const urlC = rawC != null && rawC !== "" ? Number(rawC) : NaN;
+    const urlU = rawU != null && rawU !== "" ? Number(rawU) : NaN;
+    const propC = initialConversationId != null ? Number(initialConversationId) : NaN;
+    const propU = initialUserId != null ? Number(initialUserId) : NaN;
 
-    if (c) {
-      if (bootstrappedRef.current && activeId === c) return;
-      bootstrappedRef.current = true;
-      openConversation(c);
+    const conversationId =
+      Number.isFinite(propC) && propC > 0
+        ? propC
+        : Number.isFinite(urlC) && urlC > 0
+          ? urlC
+          : null;
+    const peerUserId =
+      Number.isFinite(propU) && propU > 0
+        ? propU
+        : Number.isFinite(urlU) && urlU > 0
+          ? urlU
+          : null;
+
+    if (!conversationId && !peerUserId) return;
+
+    const bootKey = conversationId ? `c:${conversationId}` : `u:${peerUserId}`;
+    if (bootstrapKeyRef.current === bootKey) return;
+    bootstrapKeyRef.current = bootKey;
+
+    if (conversationId) {
+      openConversation(conversationId);
       return;
     }
-    if (u) {
-      if (startingUserRef.current === u) return;
-      startingUserRef.current = u;
-      bootstrappedRef.current = true;
-      startWithUser({ id: u });
-    }
-  }, [initialConversationId, initialUserId, searchParams, isModal, openConversation, startWithUser, activeId]);
+
+    startWithUser({ id: peerUserId }).then((id) => {
+      if (!id) {
+        // اجازه تلاش مجدد در رندر بعدی / کلیک دوباره
+        bootstrapKeyRef.current = "";
+      }
+    });
+  }, [initialConversationId, initialUserId, searchParams, isModal, openConversation, startWithUser]);
 
   useEffect(() => {
     if (!activeId) return undefined;
@@ -328,7 +512,7 @@ export default function MessagesApp({
       if (!changed) {
         for (const m of next) {
           const old = prevMap.get(m.id);
-          if (!old || old.readAt !== m.readAt || old.body !== m.body) {
+          if (!old || old.readAt !== m.readAt || old.body !== m.body || old.translatedBody !== m.translatedBody) {
             changed = true;
             break;
           }
@@ -352,15 +536,22 @@ export default function MessagesApp({
     if (!body || !activeId || sending) return;
     setSending(true);
     setText("");
+    setSendHint("");
     try {
+      const payload = { body };
+      if (translateTarget) {
+        payload.targetLang = translateTarget;
+        if (translateModelId) payload.modelId = translateModelId;
+      }
       const res = await authFetch(`/api/messaging/conversations/${activeId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.success) {
         setMessages((prev) => [...prev, json.data]);
+        if (json.translationWarning) setSendHint(json.translationWarning);
         await loadConversations();
         scrollToBottom();
       }
@@ -372,12 +563,17 @@ export default function MessagesApp({
   const sendImage = async (file) => {
     if (!file || !activeId || sending) return;
     setSending(true);
+    setSendHint("");
     try {
       const compressed = await compressImageClient(file);
       const fd = new FormData();
       fd.append("image", compressed);
       const caption = text.trim();
       if (caption) fd.append("body", caption);
+      if (caption && translateTarget) {
+        fd.append("targetLang", translateTarget);
+        if (translateModelId) fd.append("modelId", translateModelId);
+      }
       setText("");
       setPreviewImage(null);
 
@@ -388,6 +584,7 @@ export default function MessagesApp({
       const json = await res.json();
       if (json.success) {
         setMessages((prev) => [...prev, json.data]);
+        if (json.translationWarning) setSendHint(json.translationWarning);
         await loadConversations();
         scrollToBottom();
       }
@@ -440,6 +637,44 @@ export default function MessagesApp({
           </div>
         </div>
 
+        <div className="border-b border-slate-100 bg-white px-3 py-2.5">
+          <label className="block">
+            <span className="sr-only">{t("newConversation") || "جستجوی کاربر"}</span>
+            <input
+              type="search"
+              value={userQuery}
+              onChange={(e) => setUserQuery(e.target.value)}
+              placeholder={t("newConversation") || "جستجوی کاربر برای گفتگو…"}
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
+            />
+          </label>
+          {userQuery.trim().length >= 2 ? (
+            <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-slate-100 bg-white">
+              {searchingUsers ? (
+                <p className="px-3 py-2 text-xs text-slate-400">{t("loading") || "…"}</p>
+              ) : userResults.length === 0 ? (
+                <p className="px-3 py-2 text-xs text-slate-400">کاربری یافت نشد</p>
+              ) : (
+                userResults.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setUserQuery("");
+                      setUserResults([]);
+                      startWithUser(u);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm hover:bg-emerald-50"
+                  >
+                    <UserAvatar user={u} size="xs" />
+                    <span className="truncate font-medium text-slate-800">{u.displayName || u.username}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          ) : null}
+        </div>
+
         <div className="border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-[11px] leading-5 text-amber-950">
           {t("chatPolicyWarning")}
         </div>
@@ -452,12 +687,28 @@ export default function MessagesApp({
               ))}
             </div>
           ) : conversations.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+            <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
               <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
                 <PaperPlaneIcon className="h-7 w-7" />
               </span>
-              <p className="text-sm font-semibold text-slate-800">{t("noConversations")}</p>
-              <p className="text-xs leading-6 text-slate-500">{t("chatEmptyHint")}</p>
+              {bootingPeer ? (
+                <>
+                  <p className="text-sm font-semibold text-slate-800">در حال باز کردن گفتگو…</p>
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+                </>
+              ) : bootError ? (
+                <>
+                  <p className="text-sm font-semibold text-rose-700">گفتگو باز نشد</p>
+                  <p className="text-xs leading-6 text-slate-500">{bootError}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-slate-800">{t("noConversations")}</p>
+                  <p className="text-xs leading-6 text-slate-500">
+                    نام کاربر را بالا جستجو کنید تا گفتگو را همین‌جا شروع کنید.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             conversations.map((c) => {
@@ -499,15 +750,45 @@ export default function MessagesApp({
       </aside>
 
       {/* پنل چت */}
-      <section className={`flex min-w-0 flex-1 flex-col bg-[#efefef] ${!mobileShowChat ? "hidden md:flex" : "flex"}`}>
+      <section className={`flex min-w-0 flex-1 flex-col bg-[#efefef] ${!mobileShowChat && !bootingPeer && !activeId ? "hidden md:flex" : "flex"}`}>
         {!activeId ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-white p-8 text-center">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-900 text-slate-900">
-              <PaperPlaneIcon className="h-9 w-9" />
-            </span>
-            <p className="text-xl font-bold text-slate-900">{t("messages")}</p>
-            <p className="max-w-sm text-sm leading-7 text-slate-500">{t("selectConversation")}</p>
-            <p className="max-w-sm text-[11px] leading-5 text-amber-800">{t("chatPolicyWarning")}</p>
+            {bootingPeer ? (
+              <>
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+                <p className="text-base font-bold text-slate-900">در حال باز کردن گفتگو…</p>
+                <p className="max-w-sm text-sm text-slate-500">لطفاً چند لحظه صبر کنید</p>
+              </>
+            ) : bootError ? (
+              <>
+                <p className="text-base font-bold text-rose-700">گفتگو باز نشد</p>
+                <p className="max-w-sm text-sm leading-7 text-slate-600">{bootError}</p>
+                {initialUserId ? (
+                  <button
+                    type="button"
+                    className="mt-1 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white"
+                    onClick={() => {
+                      bootstrapKeyRef.current = "";
+                      setBootError("");
+                      startWithUser({ id: initialUserId });
+                    }}
+                  >
+                    تلاش دوباره
+                  </button>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-900 text-slate-900">
+                  <PaperPlaneIcon className="h-9 w-9" />
+                </span>
+                <p className="text-xl font-bold text-slate-900">{t("messages")}</p>
+                <p className="max-w-sm text-sm leading-7 text-slate-500">
+                  {t("selectConversation") || "یک گفتگو را از فهرست انتخاب کنید یا کاربر را جستجو کنید."}
+                </p>
+                <p className="max-w-sm text-[11px] leading-5 text-amber-800">{t("chatPolicyWarning")}</p>
+              </>
+            )}
           </div>
         ) : (
           <>
@@ -592,7 +873,77 @@ export default function MessagesApp({
             ) : null}
 
             <footer className="border-t border-slate-200 bg-white p-2.5 sm:p-3">
-              <div className="mx-auto flex max-w-2xl items-end gap-2">
+              <div className="mx-auto max-w-2xl space-y-2">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="me-1 text-[11px] font-semibold text-slate-500">ترجمه برای مخاطب:</span>
+                  <button
+                    type="button"
+                    onClick={() => setTranslateTargetPersist("")}
+                    className={[
+                      "rounded-full px-2.5 py-1 text-[11px] font-semibold transition",
+                      !translateTarget
+                        ? "bg-slate-800 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                    ].join(" ")}
+                  >
+                    بدون ترجمه
+                  </button>
+                  {translateLangs.map((lang) => {
+                    const active = translateTarget === lang.code;
+                    return (
+                      <button
+                        key={lang.code}
+                        type="button"
+                        title={
+                          translateEnabled
+                            ? `ارسال با ترجمه به ${lang.labelFa || lang.code}`
+                            : translateNotice || "دستیار ترجمه در دسترس نیست"
+                        }
+                        onClick={() => setTranslateTargetPersist(lang.code)}
+                        className={[
+                          "rounded-full px-2.5 py-1 text-[11px] font-semibold transition",
+                          active
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                          !translateEnabled ? "opacity-70" : "",
+                        ].join(" ")}
+                      >
+                        {lang.labelFa || lang.code}
+                      </button>
+                    );
+                  })}
+                </div>
+                {translateTarget ? (
+                  <div className="space-y-1.5">
+                    {translateEnabled && translateModels.length > 0 ? (
+                      <label className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+                        <span className="shrink-0 font-semibold text-slate-500">مدل ترجمه:</span>
+                        <select
+                          value={translateModelId}
+                          onChange={(e) => setTranslateModelPersist(e.target.value)}
+                          className="max-w-full min-w-[12rem] flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        >
+                          {translateModels.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.label || m.id}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : null}
+                    <p className="text-[10px] leading-4 text-slate-500">
+                      متن اصلی شما ذخیره می‌شود؛ مخاطب ترجمهٔ «
+                      {translateLangs.find((l) => l.code === translateTarget)?.labelFa || translateTarget}»
+                      را می‌بیند و اصل پیام را هم کوچک‌تر زیر آن.
+                      {!translateEnabled && translateNotice ? ` ${translateNotice}` : ""}
+                      {translateEnabled
+                        ? " اگر Gemma خطا داد، مدل دیگری (مثل Grok یا Qwen) انتخاب کنید."
+                        : ""}
+                    </p>
+                  </div>
+                ) : null}
+                {sendHint ? <p className="text-[11px] text-amber-700">{sendHint}</p> : null}
+                <div className="flex items-end gap-2">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -624,7 +975,13 @@ export default function MessagesApp({
                     }
                   }}
                   rows={1}
-                  placeholder={t("typeMessage")}
+                  placeholder={
+                    translateTarget
+                      ? `بنویسید… (ترجمه به ${
+                          translateLangs.find((l) => l.code === translateTarget)?.labelFa || translateTarget
+                        })`
+                      : t("typeMessage")
+                  }
                   className="max-h-32 min-h-[44px] flex-1 resize-none rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
                 />
                 <button
@@ -641,6 +998,7 @@ export default function MessagesApp({
                 >
                   {sending ? "…" : t("send")}
                 </button>
+                </div>
               </div>
             </footer>
           </>

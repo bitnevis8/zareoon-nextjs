@@ -231,6 +231,8 @@ export default function UnifiedProviderPageClient({ slug }) {
 
   const profile = shopData?.profile;
   const stats = shopData?.stats;
+  const chatOwnerId =
+    profile?.userId || profile?.id || service?.userId || null;
   const displayName =
     profile?.displayName || service?.name || slug;
   const headline = profile?.headline || service?.routes?.slice?.(0, 80) || "";
@@ -385,9 +387,9 @@ export default function UnifiedProviderPageClient({ slug }) {
                 >
                   {shopData?.isFollowing ? "دنبال می‌کنید" : "دنبال کردن"}
                 </button>
-                {profile?.id ? (
+                {chatOwnerId ? (
                   <OpenChatButton
-                    userId={profile.id}
+                    userId={chatOwnerId}
                     label={hasShop ? t("chatWithShop") || "گفتگو" : t("chatWithProvider") || "گفتگو"}
                     className="flex min-h-11 min-w-[7.5rem] flex-1 items-center justify-center gap-2 rounded-xl bg-white text-sm font-bold text-emerald-900"
                   />
@@ -455,12 +457,12 @@ export default function UnifiedProviderPageClient({ slug }) {
         </div>
       </div>
 
-      {!shopData?.isOwner && (profile?.id || phone) ? (
+      {!shopData?.isOwner && (chatOwnerId || phone) ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
           <div className="flex gap-2">
-            {profile?.id ? (
+            {chatOwnerId ? (
               <OpenChatButton
-                userId={profile.id}
+                userId={chatOwnerId}
                 label={hasShop ? t("chatWithShop") || "گفتگو" : t("chatWithProvider") || "گفتگو"}
                 className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-600/25"
               />

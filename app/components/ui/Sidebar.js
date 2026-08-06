@@ -69,6 +69,7 @@ function useSidebarMenus() {
             { title: t('admin.slugAliases'), path: '/dashboard/site-settings/slug-aliases', icon: 'link' },
             { title: t('admin.publicPages'), path: '/dashboard/public-pages', icon: 'pages' },
             { title: 'قالب‌های لندینگ', path: '/dashboard/site-settings/landing-templates', icon: 'layout' },
+            { title: 'خانواده‌های مسیر صادرات', path: '/dashboard/site-settings/export-pathway', icon: 'globe' },
             { title: t('admin.backupRestore'), path: '/dashboard/site-settings/backup', icon: 'backup' },
             { title: 'مدیریت احراز', path: '/dashboard/workspace/verification-admin', icon: 'shield' },
           ],
@@ -97,6 +98,7 @@ function useSidebarMenus() {
         { title: t('myProducts'), path: '/dashboard/supplier/inventory?scope=own', icon: 'inventory' },
         { title: t('newInventory'), path: '/dashboard/supplier/inventory/create?scope=own', icon: 'plus' },
         { title: 'لندینگ محصول', path: '/dashboard/supplier/landings?scope=own', icon: 'layout' },
+        { title: 'مسیر صادرات', path: '/dashboard/export-pathway?scope=own', icon: 'globe' },
         { title: t('customerOrders'), path: '/dashboard/supplier/orders?scope=own', icon: 'orders' },
         { title: t('shopSettings'), path: '/dashboard/supplier-profile', icon: 'store' },
         { title: 'مدیریت کسب‌وکار', path: '/dashboard/workspace', icon: 'users' },
@@ -309,9 +311,9 @@ function SidebarInner({ onLinkClick, compact = false, showMobileUserHeader = fal
   const dashboardHomeLabel = primaryLinks[0]?.title || "داشبورد";
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full max-h-full min-h-0 flex-col overflow-hidden">
       <div
-        className={`min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain touch-pan-y [scrollbar-gutter:stable] ${
+        className={`min-h-0 flex-1 basis-0 overflow-x-hidden overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable] ${
           compact ? "px-1.5" : "px-2"
         }`}
       >

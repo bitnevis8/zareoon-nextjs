@@ -196,6 +196,15 @@ export default function CatalogItemPage({ params }) {
     if (!productLots.length) return null;
     return productLots.find((l) => l.supplier?.id || l.farmer?.id) || productLots[0] || null;
   }, [productLots]);
+
+  const myExportLot = useMemo(() => {
+    const uid = user?.userId ?? user?.id;
+    if (!uid || !productLots.length) return null;
+    return (
+      productLots.find((l) => Number(l.farmerId) === Number(uid) || Number(l.supplier?.id) === Number(uid)) ||
+      null
+    );
+  }, [productLots, user]);
   const summary = useMemo(() => {
     let total = 0;
     let reserved = 0;
@@ -405,6 +414,18 @@ export default function CatalogItemPage({ params }) {
       />
 
       {primarySellerLot ? <CatalogProductSellerActions lot={primarySellerLot} /> : null}
+
+      {myExportLot ? (
+        <div className="mx-auto mt-4 w-full max-w-5xl px-4">
+          <Link
+            href={`/dashboard/export-pathway/create?scope=own&lotId=${myExportLot.id}`}
+            className="flex items-center justify-between gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-900 transition hover:bg-sky-100"
+          >
+            <span>ایجاد مسیر صادرات برای این موجودی</span>
+            <span aria-hidden>←</span>
+          </Link>
+        </div>
+      ) : null}
 
       {productLots.length > 0 && (
         <CatalogGradeOffers

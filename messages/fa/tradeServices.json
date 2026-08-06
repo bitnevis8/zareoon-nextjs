@@ -25,6 +25,7 @@
       "title": "بسته‌بندی و آماده‌سازی کالا",
       "description": "بسته‌بندی برای حمل داخلی و بین‌المللی، لیبل و چاپ تجاری، پالت‌بندی و استانداردسازی بسته‌بندی.",
       "children": [
+        { "id": "goods-preparation", "title": "آماده‌سازی کالا و مشخصات" },
         { "id": "export-packaging", "title": "بسته‌بندی داخلی و صادراتی" },
         { "id": "commercial-labeling", "title": "لیبل و چاپ تجاری" },
         { "id": "palletizing", "title": "پالت‌بندی" },
@@ -49,13 +50,15 @@
       "id": "intl-logistics",
       "icon": "intl-logistics",
       "title": "حمل‌ونقل و لجستیک بین‌المللی",
-      "description": "حمل دریایی، هوایی، زمینی، ریلی و ترکیبی؛ فورواردر، کریری، کانتینر و انبارداری.",
+      "description": "حمل دریایی، هوایی، زمینی، ریلی و ترکیبی؛ زنجیره سرد، کالای خطرناک، فورواردر، کریری، کانتینر و انبارداری.",
       "children": [
         { "id": "sea-freight", "title": "حمل دریایی" },
         { "id": "air-freight", "title": "حمل هوایی" },
         { "id": "road-freight", "title": "حمل زمینی" },
         { "id": "rail-freight", "title": "حمل ریلی" },
         { "id": "multimodal", "title": "حمل ترکیبی" },
+        { "id": "cold-chain", "title": "زنجیره سرد و حمل یخچالی" },
+        { "id": "dangerous-goods", "title": "حمل کالای خطرناک (DG)" },
         { "id": "forwarder-carrier", "title": "فورواردر و کریری" },
         { "id": "container-services", "title": "خدمات کانتینری" },
         { "id": "warehousing", "title": "انبارداری و نگهداری کالا" }

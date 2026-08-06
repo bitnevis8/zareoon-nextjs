@@ -359,6 +359,9 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
                 publicLandline: profile.publicLandline,
                 publicEmail: profile.publicEmail,
               }}
+              chatUserId={profile.userId || profile.id}
+              showInternalChat={!data?.isOwner}
+              chatLabel={tSite("chatWithShop") || t("profile.message") || "گفتگو"}
               profileSlug={profile.profileSlug}
               displayName={profile.displayName}
             />
@@ -374,6 +377,8 @@ export default function SupplierProfileClient({ slug, embedded = false, panelOnl
               longitude={profile.longitude}
               addressLabel={profile.addressLabel}
               title={t("profile.businessHours")}
+              chatUserId={!data?.isOwner ? profile.userId || profile.id : null}
+              chatLabel={tSite("chatWithShop") || "گفتگو با فروشگاه"}
             />
           </aside>
         </div>

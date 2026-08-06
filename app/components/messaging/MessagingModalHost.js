@@ -19,14 +19,21 @@ export default function MessagingModalHost() {
 
   if (!open) return null;
 
+  const peerKey = Number.isFinite(Number(userId)) && Number(userId) > 0 ? Number(userId) : 0;
+  const convKey =
+    Number.isFinite(Number(conversationId)) && Number(conversationId) > 0
+      ? Number(conversationId)
+      : 0;
+
   return (
     <div className="fixed inset-0 z-[10060] flex flex-col bg-slate-950/40" role="dialog" aria-modal="true" aria-label="پیام‌ها">
       <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-2xl">
         <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-500">…</div>}>
           <MessagesApp
+            key={`msg-${peerKey}-${convKey}`}
             mode="modal"
-            initialUserId={userId}
-            initialConversationId={conversationId}
+            initialUserId={peerKey || null}
+            initialConversationId={convKey || null}
             onClose={closeMessaging}
           />
         </Suspense>

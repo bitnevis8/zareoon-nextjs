@@ -48,7 +48,7 @@ function SiteChromeInner({ children }) {
       {!isPhonePreview ? <CatalogWarmupBoot /> : null}
       {!isPhonePreview ? <Header /> : null}
       {isDashboard ? (
-        <div className="flex h-[calc(100dvh-var(--site-top-chrome,0px))] min-h-0 flex-1 flex-col overflow-hidden max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
+        <div className="flex h-[calc(100dvh-var(--site-top-chrome,0px))] max-h-[calc(100dvh-var(--site-top-chrome,0px))] min-h-0 flex-1 flex-col overflow-hidden max-lg:pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
           {children}
         </div>
       ) : (

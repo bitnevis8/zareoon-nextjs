@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { DAY_LABELS_FA, WEEK_DAY_KEYS, parseLatLng } from "@/app/utils/businessHours";
+import OpenChatButton from "@/app/components/messaging/OpenChatButton";
 
 const Map = dynamic(() => import("@/app/components/ui/Map/Map"), { ssr: false });
 
@@ -32,6 +33,7 @@ function HoursTable({ hours }) {
 
 /**
  * نمایش عمومی: ساعات کاری → نقشه → آدرس ریز
+ * در صورت داشتن chatUserId، دکمه گفتگو با مالک کسب‌وکار نمایش داده می‌شود.
  */
 export default function PublicHoursAndMap({
   businessHours,
@@ -39,25 +41,46 @@ export default function PublicHoursAndMap({
   longitude,
   addressLabel,
   title = "ساعات کاری",
+  chatUserId = null,
+  chatLabel = "گفتگو با کسب‌وکار",
 }) {
   const point = parseLatLng(latitude, longitude);
   const hasHours = businessHours && typeof businessHours === "object";
   const address = String(addressLabel || "").trim();
+  const ownerId = Number(chatUserId);
+  const canChat = Number.isFinite(ownerId) && ownerId > 0;
 
-  if (!hasHours && !point && !address) return null;
+  if (!hasHours && !point && !address && !canChat) return null;
 
   return (
     <div className="space-y-3">
+      {canChat && !hasHours ? (
+        <OpenChatButton
+          userId={ownerId}
+          label={chatLabel}
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+        />
+      ) : null}
+
       {hasHours ? (
         <section className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm sm:p-4">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </span>
-            {title}
-          </h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+              {title}
+            </h2>
+            {canChat ? (
+              <OpenChatButton
+                userId={ownerId}
+                label={chatLabel}
+                className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100"
+              />
+            ) : null}
+          </div>
           <HoursTable hours={businessHours} />
         </section>
       ) : null}

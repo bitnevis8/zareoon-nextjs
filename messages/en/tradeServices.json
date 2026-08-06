@@ -44,20 +44,24 @@
       "description": "Export packaging, commercial labeling, palletizing, and packaging standards for international shipping.",
       "children": [
         {
+          "id": "goods-preparation",
+          "title": "Goods preparation & specifications"
+        },
+        {
           "id": "export-packaging",
-          "title": "بسته‌بندی صادراتی"
+          "title": "Export packaging"
         },
         {
           "id": "commercial-labeling",
-          "title": "لیبل و چاپ تجاری"
+          "title": "Commercial labeling"
         },
         {
           "id": "palletizing",
-          "title": "پالت‌بندی"
+          "title": "Palletizing"
         },
         {
           "id": "packaging-standards",
-          "title": "استانداردسازی بسته‌بندی"
+          "title": "Packaging standards"
         }
       ]
     },
@@ -118,6 +122,14 @@
         {
           "id": "multimodal",
           "title": "حمل ترکیبی"
+        },
+        {
+          "id": "cold-chain",
+          "title": "Cold chain & reefer transport"
+        },
+        {
+          "id": "dangerous-goods",
+          "title": "Dangerous goods (DG) transport"
         },
         {
           "id": "forwarder-carrier",

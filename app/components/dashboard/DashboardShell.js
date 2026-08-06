@@ -59,7 +59,7 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
   return (
     <div className="dashboard-scroll relative flex h-full min-h-0 max-h-full flex-1 overflow-hidden bg-slate-100">
       <aside
-        className={`relative z-40 hidden h-full min-h-0 shrink-0 self-stretch border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:flex md:flex-col ${MODE_WIDTH[mode]}`}
+        className={`sticky top-0 z-40 hidden h-full max-h-full min-h-0 w-auto shrink-0 overflow-hidden border-l border-slate-200 bg-white transition-[width] duration-300 ease-out md:flex md:h-[calc(100dvh-var(--site-top-chrome,0px))] md:max-h-[calc(100dvh-var(--site-top-chrome,0px))] md:flex-col ${MODE_WIDTH[mode]}`}
       >
         {/* هدر استاندارد سایدبار — یک دکمه تاگل */}
         <div
@@ -82,7 +82,7 @@ export default function DashboardShell({ breadcrumb, alert, children }) {
           </button>
         </div>
 
-        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden">
           <Sidebar onLinkClick={() => {}} compact={iconsOnly} />
         </div>
       </aside>

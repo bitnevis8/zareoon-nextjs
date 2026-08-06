@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { formatPriceWithCurrency } from "@/app/utils/priceCurrencies";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
@@ -117,16 +118,24 @@ export default function InventoryLotCard({
           deleteLabel={t("lot.delete")}
           compact
         />
-        {onCreateLanding ? (
-          <button
-            type="button"
-            disabled={landingBusy}
-            onClick={() => onCreateLanding(lot)}
-            className="mt-2 flex h-9 w-full items-center justify-center rounded-lg border border-emerald-200 bg-white text-xs font-bold text-emerald-800 transition hover:bg-emerald-50 disabled:opacity-60"
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {onCreateLanding ? (
+            <button
+              type="button"
+              disabled={landingBusy}
+              onClick={() => onCreateLanding(lot)}
+              className="flex h-9 w-full items-center justify-center rounded-lg border border-emerald-200 bg-white text-xs font-bold text-emerald-800 transition hover:bg-emerald-50 disabled:opacity-60"
+            >
+              {landingBusy ? "…" : "ساخت لندینگ محصول"}
+            </button>
+          ) : null}
+          <Link
+            href={`/dashboard/export-pathway/create?scope=own&lotId=${lot.id}`}
+            className="flex h-9 w-full items-center justify-center rounded-lg border border-sky-200 bg-white text-xs font-bold text-sky-800 transition hover:bg-sky-50"
           >
-            {landingBusy ? "…" : "ساخت لندینگ محصول"}
-          </button>
-        ) : null}
+            مسیر صادرات
+          </Link>
+        </div>
       </div>
     </article>
   );

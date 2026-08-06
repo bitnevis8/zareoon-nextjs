@@ -43,7 +43,7 @@ export default function GlobalSidebar() {
         aria-label={t('close')}
       />
       <aside
-        className={`fixed top-[var(--site-top-chrome)] bottom-[calc(3.75rem+env(safe-area-inset-bottom))] right-0 z-[10001] flex w-[min(21rem,92vw)] flex-col overflow-hidden border-l border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 right-0 z-[10001] flex h-[100dvh] max-h-[100dvh] w-[min(21rem,92vw)] flex-col overflow-hidden border-l border-slate-200 bg-white pb-[calc(3.75rem+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)] shadow-xl transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

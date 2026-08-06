@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useId, useImperativeHandle, useMemo, useState } from "react";
+import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   TRANSPORT_MODES,
@@ -321,11 +321,20 @@ function ResultTile({ label, value, unit, emphasize = false, icon = null }) {
 /**
  * ماشین‌حساب CBM، وزن و برآورد اولیه حمل
  */
-const CbmFreightCalculator = forwardRef(function CbmFreightCalculator({ embedded = false }, ref) {
+const CbmFreightCalculator = forwardRef(function CbmFreightCalculator(
+  {
+    embedded = false,
+    initialOrigin = "",
+    initialDestination = "",
+    initialTransportMode = "auto",
+    onResultChange = null,
+  },
+  ref
+) {
   const baseId = useId();
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
-  const [transportMode, setTransportMode] = useState("auto");
+  const [origin, setOrigin] = useState(initialOrigin || "");
+  const [destination, setDestination] = useState(initialDestination || "");
+  const [transportMode, setTransportMode] = useState(initialTransportMode || "auto");
   const [packages, setPackages] = useState(() => [emptyPackage("pkg-0")]);
   const [ratePerCbm, setRatePerCbm] = useState("");
   const [ratePerKg, setRatePerKg] = useState("");
@@ -343,6 +352,20 @@ const CbmFreightCalculator = forwardRef(function CbmFreightCalculator({ embedded
       }),
     [origin, destination, transportMode, packages, ratePerCbm, ratePerKg]
   );
+
+  useEffect(() => {
+    if (initialOrigin) setOrigin(initialOrigin);
+  }, [initialOrigin]);
+  useEffect(() => {
+    if (initialDestination) setDestination(initialDestination);
+  }, [initialDestination]);
+  useEffect(() => {
+    if (initialTransportMode) setTransportMode(initialTransportMode);
+  }, [initialTransportMode]);
+
+  useEffect(() => {
+    if (typeof onResultChange === "function") onResultChange(result);
+  }, [result, onResultChange]);
 
   const hasDims = packages.some(
     (p) => Number(p.lengthCm) > 0 && Number(p.widthCm) > 0 && Number(p.heightCm) > 0 && Number(p.packages) > 0
@@ -381,7 +404,7 @@ const CbmFreightCalculator = forwardRef(function CbmFreightCalculator({ embedded
     setShowRates(false);
   };
 
-  useImperativeHandle(ref, () => ({ clearForm }), []);
+  useImperativeHandle(ref, () => ({ clearForm, getResult: () => result }), [result]);
 
   return (
     <div className="space-y-5 sm:space-y-6">

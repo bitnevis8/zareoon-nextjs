@@ -8,13 +8,13 @@ import { useLanguage } from "@/app/context/LanguageContext";
 
 /**
  * نمایش عمومی تماس فروشگاه/خدمات + QR صفحه
- * دکمه گفتگو در هدر صفحه است؛ اینجا تکرار نمی‌شود.
+ * دکمه گفتگوی داخلی زارعون در صورت وجود مالک نمایش داده می‌شود.
  */
 export default function ShopPublicContacts({
   shopContacts,
   legacy = {},
   chatUserId = null,
-  showInternalChat = false,
+  showInternalChat = true,
   profileSlug = null,
   displayName = "",
   chatLabel,

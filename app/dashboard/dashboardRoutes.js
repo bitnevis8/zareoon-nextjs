@@ -71,6 +71,28 @@ export function buildDashboardBreadcrumbs(pathname, searchParams, options = {}) 
       trail: [{ labelKey: "supplierPanel" }, { labelFallback: "لندینگ محصول" }],
     },
     {
+      match: "/dashboard/export-pathway/create",
+      trail: [
+        { href: "/dashboard/export-pathway?scope=own", labelFallback: "مسیر صادرات" },
+        { labelFallback: "ایجاد پروژه" },
+      ],
+    },
+    {
+      match: /^\/dashboard\/export-pathway\/\d+/,
+      trail: [
+        { href: "/dashboard/export-pathway?scope=own", labelFallback: "مسیر صادرات" },
+        { labelFallback: "جزئیات پروژه" },
+      ],
+    },
+    {
+      match: "/dashboard/export-pathway",
+      trail: [{ labelKey: "supplierPanel" }, { labelFallback: "مسیر صادرات" }],
+    },
+    {
+      match: "/dashboard/site-settings/export-pathway",
+      trail: [{ labelKey: "siteSettings", labelFallback: "تنظیمات سایت" }, { labelFallback: "خانواده‌های مسیر صادرات" }],
+    },
+    {
       match: "/dashboard/supplier/orders",
       trail: scopeOwn
         ? [{ labelKey: "supplierPanel" }, { labelKey: "customerOrders" }]

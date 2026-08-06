@@ -321,6 +321,8 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
             longitude={provider.longitude}
             addressLabel={provider.addressLabel}
             title="ساعات کاری و موقعیت"
+            chatUserId={!isOwnerPreview ? provider.userId : null}
+            chatLabel={t("chatWithProvider") || "گفتگو با خدمات‌دهنده"}
           />
         </div>
 
@@ -335,6 +337,13 @@ export default function TradeProviderProfileView({ providerId, embedded = false,
 
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="mb-4 text-sm font-bold text-slate-900">{t("tradeProviderProfileContactBox")}</h2>
+            {provider.userId && !isOwnerPreview ? (
+              <OpenChatButton
+                userId={provider.userId}
+                label={t("chatWithProvider") || "گفتگو با خدمات‌دهنده این سرویس"}
+                className="mb-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+              />
+            ) : null}
             <dl className="space-y-3 text-sm">
               {provider.contactName ? (
                 <div>

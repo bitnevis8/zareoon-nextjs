@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import TieredPricingDisplay from "@/app/components/ui/TieredPricingDisplay";
 import { localizeStatus } from "@/app/utils/localize";
@@ -77,6 +78,12 @@ function LotListRow({
               {landingBusy ? "…" : "لندینگ"}
             </button>
           ) : null}
+          <Link
+            href={`/dashboard/export-pathway/create?scope=own&lotId=${lot.id}`}
+            className="inline-flex h-8 items-center rounded-lg border border-sky-200 bg-white px-2.5 text-[11px] font-bold text-sky-800 hover:bg-sky-50"
+          >
+            صادرات
+          </Link>
         </div>
       </div>
     </li>
@@ -181,16 +188,24 @@ export default function InventoryLotTable({
                         deleteLabel={t("lot.delete")}
                         compact
                       />
-                      {onCreateLanding ? (
-                        <button
-                          type="button"
-                          disabled={landingBusyId === x.id}
-                          onClick={() => onCreateLanding(x)}
-                          className="h-8 rounded-lg border border-emerald-200 bg-white px-2.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50 disabled:opacity-60"
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        {onCreateLanding ? (
+                          <button
+                            type="button"
+                            disabled={landingBusyId === x.id}
+                            onClick={() => onCreateLanding(x)}
+                            className="h-8 rounded-lg border border-emerald-200 bg-white px-2.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50 disabled:opacity-60"
+                          >
+                            {landingBusyId === x.id ? "…" : "لندینگ"}
+                          </button>
+                        ) : null}
+                        <Link
+                          href={`/dashboard/export-pathway/create?scope=own&lotId=${x.id}`}
+                          className="inline-flex h-8 items-center rounded-lg border border-sky-200 bg-white px-2.5 text-[11px] font-bold text-sky-800 hover:bg-sky-50"
                         >
-                          {landingBusyId === x.id ? "…" : "لندینگ"}
-                        </button>
-                      ) : null}
+                          صادرات
+                        </Link>
+                      </div>
                     </div>
                   </td>
                 </tr>
